@@ -20,7 +20,7 @@ const taFieldSchema = yup.mixed().when('ta_informed', {
   is: (val) => {
     return val.id == TA_IS_INFORMED.id
   },
-  then: yup.mixed().notOneOf([{}], "Please select a TA" )
+  then: yup.mixed().notOneOf([TA_EMPTY], "Please select a TA" )
 })
 
 const SlipSchema = {

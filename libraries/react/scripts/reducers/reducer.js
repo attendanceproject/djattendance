@@ -119,7 +119,7 @@ function form(state=initialState.form, action) {
           leaveSlip: {
             comment: "",
             slipType: {},
-            ta: TA,
+            ta: TA_EMPTY,
             ta_informed: TA_EMPTY,
             location: "",
             hostPhone: "",
@@ -136,7 +136,7 @@ function form(state=initialState.form, action) {
         groupSlip: {
           comment: "",
           slipType: {},
-          ta: TA,
+          ta: TA_EMPTY,
           ta_informed: TA_EMPTY,
           trainees: []
         }

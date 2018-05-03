@@ -18,10 +18,10 @@ class TestimonyForm(GenericModelForm):
   class Meta(GenericModelForm.Meta):
     model = Testimony
     widgets = {
-      'top_experience': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'char_count'}),
-      'encouragement': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'char_count'}),
-      'overarching_burden': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'char_count'}),
-      'highlights': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'char_count'})
+      'top_experience': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'word_count 300'}),
+      'encouragement': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'word_count 300'}),
+      'overarching_burden': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'word_count 250'}),
+      'highlights': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'word_count 150'})
     }
 
 
@@ -33,6 +33,8 @@ class ConsiderationForm(GenericModelForm):
   class Meta(GenericModelForm.Meta):
     model = Consideration
     widgets = {
+      'attend_XB': forms.RadioSelect,
+      'fellowshipped': forms.RadioSelect,
       'consideration_plan': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'char_count'}),
       'comments': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'char_count'}),
     }

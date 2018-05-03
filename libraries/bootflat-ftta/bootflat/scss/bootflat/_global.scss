@@ -45,6 +45,17 @@ $navbar-height: 40px;
   }
 }
 
+// We use this to set leaveslip borders for attendance react page
+@mixin event_border($color, $width: 7px) {
+  border-right: $width solid $color;
+  border-left: $width solid $color;
+}
+
+// We use this to add diagnol select lines when we select an event in attendance
+@mixin event_select_gradient($color1, $color2) {
+  background: repeating-linear-gradient(135deg, $color1, $color2 3px, black 1px, gray 4px)
+}
+
 // We use this to do set opacity
 @mixin opacity($opacity:50, $filter: true) {
   opacity: $opacity / 100;

@@ -1,16 +1,11 @@
 {% load staticfiles %}
 
-{% block styles %}
-<link rel="stylesheet" href="{% static 'services/css/restroom.css' %}" />
-{% endblock %}
-
-
-{% block content %}
+<link rel="stylesheet" href="{% static 'services/css/signin.css' %}" />
 
 {% for gen in restroom %}
 
 <div id="header">
-  <h1>{% if gen.0.service_slot.gender == 'B' %}Brothers{% elif gen.0.service_slot.gender == 'S' %}Sisters{% endif %}
+  <h1>{% if gen.0.service_slot.gender == 'B' %}Brothers'{% elif gen.0.service_slot.gender == 'S' %}Sisters'{% endif %}
   Restroom Cleaning Sign-In</h1>
   As of {{wkstart}}
 </div>
@@ -18,11 +13,9 @@
 <table>
   {% regroup gen by service as gen_bydays %}
   {% for day in gen_bydays %}
-
   <tr>
     <td><b>{{day.0}}</b></td>
   </tr>
-
 
   <tr class="header">
     <td><b>{{day.grouper.calculated_date}}</b></td>
@@ -37,8 +30,8 @@
   <tr class="empty"><td>&nbsp;</td></tr>
   {% endfor %}
 </table>
+{% if not forloop.last %}
+  <footer></footer>
+{% endif %}
 
-<footer></footer>
 {% endfor %}
-
-{% endblock %}

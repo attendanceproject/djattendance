@@ -29,10 +29,11 @@ def add_permissions(group, app_label_list):
 
 APPS = list(settings.APPS)
 GROUP_PERMISSIONS = [
+    ('regular_training_assistant', []),
     ('training_assistant', APPS),
-    ('saturday_training_assistant', APPS),
+    ('saturday_training_assistant', []),
     ('absent_trainee_roster', ['absent_trainee_roster']),
-    ('attendance_monitors', ['attendance', 'seating', 'schedules', 'leaveslips', 'teams', 'aputils', 'houses']),
+    ('attendance_monitors', ['attendance', 'seating', 'leaveslips', 'teams', 'aputils', 'houses']),
     ('av', ['audio']),
     ('dev', APPS),
     ('networks', []),
@@ -53,7 +54,8 @@ GROUP_PERMISSIONS = [
     ('office_support', []),
     ('badges', ['badges']),
     ('health_office', []),
-    ('kitchen', ['meal_seating'])
+    ('kitchen', ['meal_seating']),
+    ('PSRP_facilitator', []),
 ]
 
 

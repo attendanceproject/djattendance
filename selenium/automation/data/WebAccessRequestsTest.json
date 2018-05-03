@@ -1,0 +1,61 @@
+{
+  "main_menu": "Requests",
+  "sub_menu": "Web Access Requests",
+  "logout_toggle": ".nav.navbar-nav.navbar-right",
+  "logout_button": "//*[@class='dropdown-menu']//*[text()='Logout']",
+  "guess_access_title": "Guest Web Access",
+  "msg_popup": "alert.alert-success.alert-dismissable",
+  "default_page": {
+    "title": "Web requests",
+    "create_web": "Create new web request",
+    "create_esh": "Create e-shepherding request"
+  },
+  "request_page": {
+    "reason_id": "id_reason",
+    "reason": ["Gospel", "Service", "Graduate Application", "Fellowship", "Other"],
+    "reason_val": ["Go", "Sr", "GA", "Fs", "Ot"],
+    "minutes_id": "id_minutes",
+    "minutes": ["15", "30", "45", "60", "90"],
+    "expire_id": "id_date_expire",
+    "comment_id": "id_comments",
+    "comment": ["gospel trip", "service usage", "graduation application", "fellowship with elders", "checking emails"],
+    "urgent_id": "id_urgent"
+  },
+  "response_page": {
+    "heading": "Submitted on",
+    "status_org": "Pending",
+    "status_title": ["Approve", "Deny", "Mark for Fellowship", "Comment", "Approve"],
+    "status_res": ["Approved", "Denied", "Marked for Fellowship", "Pending", "Approved"],
+    "ta_comment_org": "None",
+    "ta_comment_tag": "TA_comments",
+    "ta_comment_res": "Commenting on the web access request from TA brother",
+    "request_dict": { "Status:": "", "Reason:": "", "Minutes:": "", "Expires on:": "", "Comments:": "", "TA comments:": "" },
+    "res_clsname": ["panel panel-success", "panel panel-danger", "panel panel-info", "panel panel-default", "panel panel-success"],
+    "approved_title": "Start internet access",
+    "web_granted_msg": "Web accesss granted",
+    "demo_website": "http://www.ftta.org/"
+  },
+  "direct_access": {
+    "title": "Grant temporary web access by MAC address",
+    "mag_id": "id_mac_address",
+    "mag_value": "00:CD:FE:CE:91:1D",
+    "time_id": "id_minutes",
+    "time_value": "45",
+    "allow_button": "Allow Internet Access",
+    "granted_msg": "Internet access started for 00:CD:FE:CE:91:1D!"
+  },
+  "e-shepherding": {
+    "title": "Create e-shepherding request",
+    "companion_id": "select2-id_companion-container",
+    "companion": "AP Dev",
+    "submit_id": "submit",
+    "granted_msg": ["E-Shepherding Request approved, Your internet should work now for the next thirty minutes.", "Internet access started for"],
+    "demo_website": "www.gmail.com",
+    "demo_button": "Sign In",
+    "demo_tagvalue": "Next"
+  },
+  "delete": {
+    "delete_xpath": "//*[@title='Delete']",
+    "delete_confirm": "//*[@type='submit' and @value='Delete']"
+  }
+}

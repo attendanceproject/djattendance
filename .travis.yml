@@ -6,10 +6,11 @@ python:
 - 2.7
 addons:
   postgresql: '9.6'
+  sauce_connect: true
 env:
   - DJANGO_SETTINGS_MODULE=ap.settings.travis
 install:
-  - pip install -r requirements/dev.txt
+  - pip install -r requirements/test.txt
   - npm install
 before_script:
   - psql -c 'create database djattendance;' -U postgres
@@ -21,7 +22,9 @@ script:
 notifications:
   email:
     recipients:
-    - attendanceproj@gmail.com
+      - attendanceproj@gmail.com
+after_success:
+  - sh selenium_automation.sh
 deploy:
   provider: heroku
   api_key:

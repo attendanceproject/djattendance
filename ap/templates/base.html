@@ -22,30 +22,9 @@
   {% render_bundle 'main' 'js' %}
   {% block references %}
   <!-- additional css/refs here -->
-  <style type="text/css">
-    .ajax-status{
-      display: none;
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      margin-left: -85px;
-      width: 170px;
-      z-index: 9999;
-      text-align: center;
-      padding: 5px;
-    }
-  </style>
   {% endblock references %}
   {% block scripts %}
   <!-- additional js here -->
-  <script type="text/javascript">
-    function flashAjaxStatus(status="saved") {
-      var bar = $('#flash_' + status);
-      bar.show();
-      bar.fadeOut(3500);
-    }
-  </script>
-
   {% endblock scripts %}
   {% endblock %}
 </head>
@@ -117,12 +96,15 @@
 
     {% block post_container %}
     <!-- CONTENT OF POPUPs, STATUS UPDATES go here -->
-    <div id="flash_saved" class="ajax-status alert alert-success">Saved</div>
-    <div id="flash_finalized" class="ajax-status alert alert-success">Finalized</div>
-    <div id="flash_deleted" class="ajax-status alert alert-danger">Deleted</div>
-    <div id="flash_people_limit" class="ajax-status alert alert-success">Not enough people</div>
     {% endblock %}
     {% include "popups/in_class_popup.html" %}
-
+    <div id="notification_success" class="notification alert alert-success">
+      <span class="notification-content"></span>
+      <span class="notification-dismiss">✕</span>
+    </div>
+    <div id="notification_error" class="notification alert alert-danger">
+      <span class="notification-content"></span>
+      <span class="notification-dismiss">✕</span>
+    </div>
   </body>
 </html>

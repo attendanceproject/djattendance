@@ -150,7 +150,8 @@ class RequestList(generic.ListView):
   def get_queryset(self):
     user_has_service = self.request.user.groups.filter(name__in=['facility_maintenance', 'linens', 'frames']).exists()
     if is_TA(self.request.user) or user_has_service:
-      return self.model.objects.filter(status='P').order_by('date_requested')
+      qs = self.model.objects.filter(status='P') | self.model.objects.filter(status='F')
+      return qs.order_by('date_requested')
     else:
       trainee = self.request.user
       return self.model.objects.filter(trainee_author=trainee).order_by('status')

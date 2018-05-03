@@ -3,9 +3,32 @@
 
 {% block title %}Leave Slips{% endblock %}
 
-{% block scripts%}
+{% block scripts %}
 <script type="text/javascript">
-  $(function (){
+  var TYPESTRINGS = {"A": "approved", "D": "denied", "S": "TA sister approved"};
+
+  var bulkSelect = {};
+
+  function select(slipRow, dict) {
+    var id = slipRow[0].id.split("-")[0];
+    var type = slipRow[0].id.split("-")[1];
+    slipRow.addClass("selected");
+    dict[id] = type;
+    if (Object.keys(dict).length > 1) {
+      $(".bulk-actions").show();
+    }
+  }
+
+  function deselect(slipRow, dict) {
+    var id = slipRow[0].id.split("-")[0];
+    slipRow.removeClass("selected");
+    delete dict[id];
+    if (Object.keys(dict).length <= 1) {
+      $(".bulk-actions").hide();
+    }
+  }
+
+  $(function() {
     table = $("#display_leaveslips").DataTable({
       "aaSorting": [],
       "aLengthMenu": [
@@ -14,63 +37,173 @@
       ],
       iDisplayLength: 50,
     });
+    $('#leaveslip_trainee_list').select2();
 
-    $('#display_leaveslips tbody').on('click', 'tr', function () {
-      if($(this).prop("type") == "button"){
-        return;
-      }
-      if ($(this).hasClass('selected') ) {
-        $(this).removeClass('selected');
-        $(this).find("input.leaveslip_selected").prop('checked', false);
+    $('#display_leaveslips tbody').on('click', 'tr', function() {
+      if ($(this).hasClass('selected')) {
+        deselect($(this), bulkSelect);
       }
       else {
-        $(this).addClass('selected');
-        $(this).find("input.leaveslip_selected").prop('checked', true);
+        select($(this), bulkSelect);
       }
     });
-    $("#leaveslip_ta_list").on('change', function(){
+
+    $('#display_leaveslips tbody tr').on('click', 'button', function(e) {
+      e.stopPropagation();
+    });
+
+    $("#leaveslip_ta_list").on('change', function() {
       $(this).closest("form").submit();
     });
+
+    $("#leaveslip_trainee_list").on('change', function(){
+      $(this).closest("form").submit();
+    });
+
     $("#leaveslip_status").on('change', function(){
       $(this).closest("form").submit();
     });
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    ajaxify($('.modify-status'), function(element, data) {
+      new Notification(Notification.SUCCESS, $(data).find('.announce__title').html()).show();
+      var row = $(element).parentsUntil("tbody")
+      var id = row[row.length-1].id.split("-")[0]
+      row.fadeOut(1000, function() {
+        delete bulkSelect[id]
+        if (Object.keys(bulkSelect).length <= 1) {
+          $(".bulk-actions").hide();
+        }
+      });
+    });
+
+    $("#checkall").click(function () {
+        if ($("#checkall").is(':checked')) {
+          $("#display_leaveslips .leaveslip-row").each(function () {
+            select($(this), bulkSelect);
+          });
+        } else {
+          $("#display_leaveslips .leaveslip-row").each(function () {
+            deselect($(this), bulkSelect);
+          });
+          $(".bulk-actions").hide();
+        }
+      });
+
+    function bulkAction(type, slips) {
+      $.ajax({
+        url: "leaveslips/bulk/update/" + type,
+        method: "POST",
+        data: slips,
+        success: function (data, textStatus, xhr) {
+          var keys = Object.keys(slips);
+          for (var key in slips) {
+            var id = "#" + key + "-" + slips[key];
+            $(id).fadeOut(1000);
+          }
+          $(".bulk-actions").hide();
+
+          new Notification(Notification.SUCCESS, $(data).find('.announce__title').html()).show();
+          bulkSelect = {};
+        },
+        error: function(xhr, textStatus, errorThrown) {
+          alert(errorThrown);
+        }
+      })
+    }
+
+    $("#bulk-approve").click(function () {
+      {% if request.user.gender == "S" %}
+        bulkAction("S", bulkSelect);
+      {% else %}
+        bulkAction("A", bulkSelect);
+      {% endif %}
+    });
+
+    $("#bulk-deny").click(function () {
+      bulkAction("D", bulkSelect);
+    });
+
   });
-
-  $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-  })
-
-
 </script>
 {% endblock %}
-
 {% block references %}
-  <link rel="stylesheet" href="{% static 'seating/css/seating.css' %}" />
+  <link rel="stylesheet" href="{% static 'seating/css/seating.css' %}"/>
+  <style type="text/css">
+    .bulk-actions {
+      float: left;
+      position: fixed;
+      left: 0;
+      bottom: 50%;
+      display: none;
+    }
+    input[type=checkbox] {
+      margin-left: 10px;
+      transform: scale(2);
+      -ms-transform: scale(2);
+      -webkit-transform: scale(2);
+      padding-bottom: 10px;
+    }
+    #display_leaveslips_wrapper {
+      margin-top: 10px;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
 
 <h1>TA Leave Slips List</h1>
-
+<a id="ajax-redirect" href="{% url 'leaveslips:ta-leaveslip-list' %}"></a>
 <!-- Select box for view leave slips for TA -->
 <div class="row">
   <div class="col-md-12">
     <form method="post">
       {% csrf_token %}
-      View leave slips for:
-      <select id="leaveslip_ta_list" name="leaveslip_ta_list">
-        <option {% if ta == None %}selected="selected"{% endif %} value="-1">All TA's</option>
-        {% for ta in TA_list %}
-          <option {% if ta == selected_ta %}selected="selected"{% endif %} value="{{ta.id}}">{{ta.full_name}}</option>
-        {% endfor %}
-      </select>
-      Filter by status:
-      <select id="leaveslip_status" name="leaveslip_status">
-        <option {% if selected_status == -1 %}selected="selected"{% endif %} value="-1">All</option>
-        {% for choice in status_list %}
-          <option {% if selected_status == choice.0 %}selected="selected"{% endif %} value="{{choice.0}}">{{choice.1}}</option>
-        {% endfor %}
-      </select>
+      <div class="row">
+        <div class="col-md-2">
+          View leave slips for:
+        </div>
+        <div class="col-md-10">
+          <select id="leaveslip_ta_list" name="leaveslip_ta_list">
+            <option {% if selected_ta == None %}selected="selected"{% endif %} value="-1">All TA's</option>
+            {% for ta in TA_list %}
+              <option {% if ta == selected_ta %}selected="selected"{% endif %} value="{{ta.id}}">{{ta.full_name}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-2">
+          <span>Filter by status: </span>
+        </div>
+
+        <div class="col-md-10">
+          <select id="leaveslip_status" name="leaveslip_status" style="margin-right: 10px;">
+            <option {% if selected_status == -1 %}selected="selected"{% endif %} value="-1">All</option>
+            {% for choice in status_list %}
+              <option {% if selected_status == choice.0 %}selected="selected"{% endif %} value="{{choice.0}}">{{choice.1}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="col-md-2">
+          <span>Filter by trainee: </span>
+        </div>
+
+        <div class="col-md-10">
+          <select id="leaveslip_trainee_list" name="leaveslip_trainee_list">
+            <option {% if selected_trainee == None %}selected="selected"{% endif %} value="-1">All</option>
+            {% for choice in trainee_list %}
+              <option {% if selected_trainee.id == choice.id %}selected="selected"{% endif %} value="{{choice.id}}">{{choice.full_name}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+      <span>Select all: </span><input id="checkall" type="checkbox">
     </form>
   </div>
 </div>
@@ -79,6 +212,7 @@
     <table id="display_leaveslips" class="table table-condensed table-hover table-bordered table-striped">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Name(s)</th>
           <th>Reason</th>
           <th>Date</th>
@@ -91,14 +225,17 @@
       </thead>
       <tbody>
         {% for leaveslip in leaveslips %}
-          <tr>
             {% if leaveslip.classname == "individual" %}
-              <td>{{leaveslip.trainee.full_name}}</td>
+              <tr id="{{leaveslip.id}}-individual" class="leaveslip-row">
+                <td>{{leaveslip.id}}</td>
+                <td>{{leaveslip.trainee.full_name}}</td>
             {% else %}
-              <td>
-                <i title="Group leave slip" class="fa fa-users fa-lg" aria-hidden="true"></i>&nbsp;
-                {{ leaveslip.trainees.all|join:", " }}
-              </td>
+              <tr id="{{leaveslip.id}}-group" class="leaveslip-row">
+                <td>{{leaveslip.id}}</td>
+                <td>
+                  <i title="Group leave slip" class="fa fa-users fa-lg" aria-hidden="true"></i>&nbsp;
+                  {{ leaveslip.trainees.all|join:", " }}
+                </td>
             {% endif %}
             <td><a href="#" data-toggle="tooltip" data-placement="left" title="{{leaveslip.get_type_display}}">{{leaveslip.type}}</a></td>
             <!-- <td>{{leaveslip.rolls.first.date|date:"N d"}}</td> -->
@@ -112,21 +249,7 @@
             <td>{{leaveslip.description|truncatechars:100}}</td>
             <td>{{leaveslip.get_status_display}}</td>
             <td>
-              {% if leaveslip.status == 'S'%}
-                <span class="label label-info">{{leaveslip.get_status_display}}</span>
-              {% endif %}
-              {% if leaveslip.status == 'F'%}
-                <span class="label label-warning">{{leaveslip.get_status_display}}</span>
-              {% endif %}
-              {% if leaveslip.texted %}
-                <span class="label label-primary">Texted Attendance Number</span>
-              {% endif %}
-              {% if leaveslip.informed %}
-                <span class="label label-default">Informed TA</span>
-              {% endif %}
-              {% if leaveslip.late == True %}
-                <span class="label label-danger">Submitted Late</span>
-              {% endif %}
+              {% include "leaveslips/_ta_labels.html" %}
             </td>
             <td>
               {% include 'leaveslips/_ta_actions.html' %}
@@ -138,6 +261,18 @@
         {% endfor %}
       </tbody>
     </table>
+  </div>
+</div>
+<div class="bulk-actions">
+  <div>
+    <button type="button" title="Approve" class="btn btn-success" id="bulk-approve">
+      <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+    </button>
+  </div>
+  <div>
+    <button type="button" title="Deny" class="btn btn-danger" id="bulk-deny">
+      <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </button>
   </div>
 </div>
 

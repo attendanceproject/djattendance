@@ -1,7 +1,7 @@
 import {format, isWithinRange} from 'date-fns'
 
 import { getDateDetails } from './selectors/selectors'
-import { taInformedToServerFormat } from './constants'
+import { taInformedToServerFormat, TA_EMPTY } from './constants'
 
 export const TOGGLE_LEGEND = 'TOGGLE_LEGEND'
 export const toggleLegend = () => {
@@ -61,7 +61,7 @@ export const finalizeRoll = () => {
       data: JSON.stringify(dateDetails),
       success: function(data, status, jqXHR) {
         dispatch(submitRoll(data.rolls))
-        flashAjaxStatus('finalized');
+        new Notification(Notification.SUCCESS, 'Finalized').show();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         console.log('Roll post error!');
@@ -84,8 +84,6 @@ export const postRollSlip = (rollSlip, selectedEvents, slipId) => {
     return function(dispatch) {
       dispatch(postRoll(rollSlip, selectedEvents, slipId, true));
     }
-  } else {
-    // dispatch(receiveResponse('Error no data for roll or slips'));
   }
 }
 
@@ -131,18 +129,11 @@ export const postRoll = (values) => {
     "date": null
   }
   let selectedEvents = values.selectedEvents;
-  if (selectedEvents.length == 0) {
-    //need to create an error action
-    return function(dispatch) {
-      // dispatch(receiveResponse('error no events selected'));
-    }
-  } else {
-    for (var i = 0; i < selectedEvents.length; i++) {
-      rolls.push(Object.assign({}, roll, {
-        event: selectedEvents[i].id,
-        date: format(selectedEvents[i].start_datetime, 'YYYY-MM-DD')
-      }));
-    }
+  for (var i = 0; i < selectedEvents.length; i++) {
+    rolls.push(Object.assign({}, roll, {
+      event: selectedEvents[i].id,
+      date: format(selectedEvents[i].start_datetime, 'YYYY-MM-DD')
+    }));
   }
   return function(dispatch) {
     var data = null;
@@ -160,7 +151,7 @@ export const postRoll = (values) => {
       success: function(data, status, jqXHR) {
         dispatch(submitRoll(rolls));
         dispatch(resetRollForm());
-        flashAjaxStatus('saved');
+        new Notification(Notification.SUCCESS, 'Saved').show();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         console.log('Roll post error!');
@@ -241,8 +232,21 @@ export const changeTraineeView = (trainee) => {
   }
 }
 
+export const duplicateSlip = (values) => {
+  let type = CHANGE_LEAVESLIP_FORM
+  if (values.classname == 'group') {
+    type = CHANGE_GROUPSLIP_FORM
+  }
+  return {
+    type: type,
+    values: {
+      ...values,
+      id: undefined,
+    }
+  }
+}
+
 export const CHANGE_LEAVESLIP_FORM = 'CHANGE_LEAVESLIP_FORM'
-  //values here is all the values of the form
 export const changeLeaveSlipForm = (values) => {
   return {
     type: CHANGE_LEAVESLIP_FORM,
@@ -274,10 +278,11 @@ export const postLeaveSlip = (values) => {
     name: e.name,
     code: e.code,
   }))
+  let TA_informed = values.ta.id == TA_EMPTY.id ? undefined : values.ta.id;
   var slip = {
     "type": values.slipType.id,
     "status": "P",
-    "TA_informed": values.ta.id,
+    "TA_informed": TA_informed,
     "TA": values.traineeView.TA,
     "trainee": values.traineeView.id,
     "submitted": Date.now(),
@@ -305,7 +310,7 @@ export const postLeaveSlip = (values) => {
         console.log("returned data", data, status, jqXHR);
         dispatch(submitLeaveSlip(data));
         dispatch(resetLeaveslipForm());
-        flashAjaxStatus('saved');
+        new Notification(Notification.SUCCESS, 'Saved').show();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         console.log('Slip post error!');
@@ -373,12 +378,13 @@ export const editGroupLeaveSlip = (slip) => {
 
 export const deleteLeaveSlip = (slip) => {
   return function(dispatch) {
+    dispatch(showCalendar(0));
     dispatch(destroyLeaveSlip(slip));
     return $.ajax({
       url: '/api/individualslips/' + slip.id.toString(),
       type: 'DELETE',
       success: function(data, status, jqXHR) {
-        // dispatch(receiveResponse(status));
+        new Notification(Notification.SUCCESS, "Leave slip deleted!").show();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         console.log('Slip delete error!');
@@ -409,6 +415,7 @@ export const postGroupSlip = (gSlip) => {
       gSlip.end = event.end_datetime;
     }
   }
+  let TA_informed = gSlip.ta.id == TA_EMPTY.id ? undefined : gSlip.ta.id;
   var slip = {
     "type": gSlip.slipType.id,
     "status": "P",
@@ -420,7 +427,7 @@ export const postGroupSlip = (gSlip) => {
     "start": gSlip.start,
     "end": gSlip.end,
     "TA": gSlip.traineeView.TA,
-    "TA_informed": gSlip.ta.id,
+    "TA_informed": TA_informed,
     "trainee": gSlip.traineeView.id,
     "trainees": gSlip.trainees.map(t => t.id),
     ...taInformedToServerFormat(gSlip.ta_informed),
@@ -439,9 +446,8 @@ export const postGroupSlip = (gSlip) => {
         if (slip.trainees.indexOf(getState().form.traineeView.id) >= 0) {
           dispatch(submitGroupSlip(data));
         }
-        // dispatch(receiveResponse(status));
         dispatch(resetGroupslipForm());
-        flashAjaxStatus('saved');
+        new Notification(Notification.SUCCESS, 'Saved').show();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         console.log('Slip post error!');
@@ -461,12 +467,13 @@ export const destroyGroupSlip = (slip) => {
 
 export const deleteGroupSlip = (slip) => {
   return function(dispatch) {
+    dispatch(showCalendar(0));
     dispatch(destroyGroupSlip(slip));
     return $.ajax({
       url: '/api/groupslips/' + slip.id.toString(),
       type: 'DELETE',
       success: function(data, status, jqXHR) {
-        // dispatch(receiveResponse(status));
+        new Notification(Notification.SUCCESS, "Group slip deleted!").show();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         console.log('Slip delete error!');

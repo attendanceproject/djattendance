@@ -1,57 +1,20 @@
 {% load staticfiles %}
 
-{% block styles %}
 <link rel="stylesheet" href="{% static 'services/css/two_column.css' %}" />
 <link rel="stylesheet" href="{% static 'services/css/two_column_header.css' %}" />
 <link rel="stylesheet" href="{% static 'services/css/signin.css' %}" />
-{% endblock %}
 
-
-{% block content %}
-
-<div id="header">
-  <h1>Kitchen Teams Sign-In</h1>
-  As of {{wkstart}}
-
-  <div id="instructions">
-    <p>A substitute is a trainee substituting for another trainee based off of a previous conversation or arrangement. If you are a substitute, (1) cross off the name of the originally scheduled trainee, (2) write your name beside it, and (3) check the box.</p>
-
-    <p>A volunteer is a trainee volunteering to meet a need for a service, but not for a specific trainee. If you are a volunteer, write your name on one of the volunteer lines. If a volunteer line is not available, write your name on the side and mark yourself as a volunteer.</p>
+{% for a, b, c, d in kitchen %}
+  <div class="header header-two-column">
+    <h1>Kitchen Teams Sign-In</h1>
+    <p class="week-start">As of {{wkstart}}</p>
+    {% include "services/_instructions.html" %}
   </div>
-</div>
-
-
-<div id="content">
-  {% for a in kitchen %}
-
-  <table class="shift">
-    <tr>
-      <td><b>{{a.0.service}}</b></td>
-    </tr>
-    <tr>
-      <td><b>{{a.0.service.calculated_date}}</b></td>
-      <td class="listings"><b>Substitute</b></td>
-    </tr>
-
-    {% for assign in a %}
-      {% include 'services/_signin.html' with a=assign num_blanks=1 %}
-    {% endfor %}
-
-    <tr>
-      <td>Volunteer 1</td>
-      <td>____________</td>
-    </tr>
-    <tr>
-      <td>Volunteer 2</td>
-      <td>____________</td>
-    </tr>
-    <tr>
-      <td>Volunteer 3</td>
-      <td>____________</td>
-    </tr>
-  </table>
-
-
-  {% endfor %}
-</div>
-{% endblock %}
+  <div class="content">
+    {% include "services/_signinsheetsk.html" with a=a %}
+    {% include "services/_signinsheetsk.html" with a=b %}
+    {% include "services/_signinsheetsk.html" with a=c %}
+    {% include "services/_signinsheetsk.html" with a=d %}
+  </div>
+  <footer></footer>
+{% endfor %}

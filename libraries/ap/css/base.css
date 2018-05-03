@@ -68,16 +68,23 @@ li.dropdown.open .triangle-up {
 	margin: 5px 0px;
 }
 
-.alert.ajax-status {
+.notification {
   display: none;
   position: fixed;
   top: 20px;
   left: 50%;
-  margin-left: -85px;
-  width: 170px;
+  margin-left: -100px;
+  width: 200px;
   z-index: 9999;
   text-align: center;
-  padding: 5px;
+  padding: 15px;
+}
+
+.notification-dismiss {
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 5px;
 }
 
 #ajaxStatus {

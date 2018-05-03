@@ -1,11 +1,11 @@
 const get_section_data = (elem) => {
-  elem = $(elem)
+  elem = $(elem);
   // Extract instructions and section type
-  const instructions = elem.find("[name='section_instructions']").val()
-  const section_id = elem.find("input[name=section_id]").val()
-  const section_type = elem.find("select[name=section_type]").val()
-
-  let questions = []
+  const instructions = elem.find("[name='section_instructions']").val();
+  const section_id = elem.find("input[name=section_id]").val();
+  const section_type = elem.find("select[name=section_type]").val();
+  const required_number_to_submit = elem.find("[name=required_number_to_submit]").val();
+  let questions = [];
   $.each(elem.find(".exam_question"), (e, v) => {
     questions.push(get_question_data(v, section_type));
   });
@@ -13,9 +13,10 @@ const get_section_data = (elem) => {
     instructions,
     section_id,
     section_type,
+    required_number_to_submit,
     questions,
-  }
-}
+  };
+};
 
 const get_question_data = (elem, section_type) => {
   let obj = {};
@@ -32,7 +33,7 @@ const get_question_data = (elem, section_type) => {
     obj["answer"] = elem.find("label.active input").val();
   }
   return obj;
-}
+};
 
 $(() => {
   $("#exam-submit").click(e => {
@@ -67,11 +68,11 @@ $(() => {
         if (data.ok) {
           window.location = SUCCESS_URL || window.location;
         } else {
-          alert('Error saving exam');
+          alert('Error saving exam: ' + data.msg);
         }
       },
       error: function (jqXHR, textStatus, errorThrown ) {
-        alert('Error saving exam');
+        alert('Error saving exam!');
       }
     });
   });

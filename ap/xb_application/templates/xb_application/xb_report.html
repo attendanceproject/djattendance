@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% bootstrap_messages %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#graduation").DataTable({
+      select: true,
+      info: false,
+      paging: false,
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      buttons: [
+      {
+        extend: 'print',
+        text: 'Print',
+        autoPrint: true,
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'csvHtml5',
+        text: 'CSV',
+        exportOptions: {
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'pdf',
+        text: 'PDF',
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'collection',
+        buttons: 'columnsVisibility',
+        text: 'Show/Hide Columns',
+        columns: ':gt(1)',
+      },
+      ],
+
+    });
+
+
+  });
+  
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>{{page_title}}</h1>
+
+<div class="data-table-container">
+  <table id="graduation" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Firstname</th>
+        <th>Lastname</th>
+        <th>Gender</th>
+        <th>Citizenship</th>
+        <th>Last Updated</th>
+        <th>Submitted</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in trainees %}
+      <tr>
+        <td>{{obj.trainee.firstname}}</td>
+        <td>{{obj.trainee.lastname}}</td>
+        <td>{{obj.trainee.get_gender_display}}</td>
+        <td>{{obj.get_citizenship_display}}</td>
+        <td>{{obj.last_updated}}</td>
+        <td>{{obj.submitted}}</td>
+        <td><a href="{% url 'xb:xb-application-view' pk=obj.pk %}">Details</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

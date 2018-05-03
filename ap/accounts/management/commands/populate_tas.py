@@ -20,23 +20,25 @@ class Command(BaseCommand):
     tas = ['Andrew Li', 'Jerome Keh', 'Joseph Bang', 'Paul Deng', 'Walt Hale', 'Joe Prim', 'Oscar Tuktarov', 'Doug Gedeon', 'Dennis Higashi']
     sister_tas = ['Nikki Miao', 'Hannah Chumreonlert', 'Raizel Macaranas', 'Ann Buntain', 'Annie Uy']
     perm = Group.objects.get(name='training_assistant')
+    rperm = Group.objects.get(name='regular_training_assistant')
 
     for ta in tas:
       u = self._create_ta(ta)
       u.gender = 'B'
+      rperm.user_set.add(u)
       perm.user_set.add(u)
       u.save()
 
     for ta in sister_tas:
       u = self._create_ta(ta)
       u.gender = 'S'
+      rperm.user_set.add(u)
       perm.user_set.add(u)
       u.save()
 
     user = User(is_active=True, email='ap@gmail.com', firstname='AP', lastname='DEV', is_staff=True, is_admin=True, is_superuser=True)
     user.set_password('ap')
     user.save()
-
 
   def handle(self, *args, **options):
     User.objects.all().delete()

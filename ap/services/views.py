@@ -27,13 +27,13 @@ from dateutil import parser
 from graph import DirectedFlowGraph
 
 from sets import Set
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import random
 import json
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.urlresolvers import reverse_lazy
 from django.db.models import Count, F
 from django.contrib import messages
 
@@ -45,10 +45,11 @@ from rest_framework.renderers import JSONRenderer
 
 from .serializers import UpdateWorkerSerializer, ServiceSlotWorkloadSerializer,\
     ServiceActiveSerializer, WorkerIDSerializer, WorkerAssignmentSerializer, \
-    AssignmentPinSerializer, ServiceCalendarSerializer, ServiceTimeSerializer
+    AssignmentPinSerializer, ServiceCalendarSerializer, ServiceTimeSerializer, ExceptionActiveSerializer
 
 from aputils.trainee_utils import trainee_from_user
 from aputils.utils import timeit, timeit_inline, memoize
+from aputils.decorators import group_required
 
 from leaveslips.models import GroupSlip
 from accounts.models import Trainee
@@ -242,8 +243,8 @@ def assign(cws):
   print "Fetching exceptions"
   ac = {}
   ec = {}
-  exceptions = ServiceException.objects.filter(active=True, start__lte=week_start)\
-      .filter(Q(end__isnull=True) | Q(end__gte=week_end))\
+  exceptions = ServiceException.objects.filter(active=True, start__lte=week_end)\
+      .filter(Q(end__isnull=True) | Q(end__gte=week_start))\
       .filter(Q(schedule=None) | Q(schedule__active=True))\
       .distinct()
   assignments_count_list = Assignment.objects.filter(week_schedule=cws).values('workers').annotate(count=Sum('workload'))
@@ -476,42 +477,13 @@ def build_graph(services, assignments_count={}, exceptions_count={}):
 
       min_cost_flow.add_or_set_arc(w, sink, capacity=1, cost=cost, stage=4, key=x)
   t.end()
+  # print(min_cost_flow.stages)
 
   print '### total flow ###', total_flow
 
   min_cost_flow.set_total_flow(total_flow)
 
   return min_cost_flow
-
-
-def services_assign(request):
-  user = request.user
-  trainee = trainee_from_user(user)
-  if request.GET.get('week_schedule'):
-    current_week = request.GET.get('week_schedule')
-    current_week = int(current_week)
-    current_week = current_week if current_week < LAST_WEEK else LAST_WEEK
-    current_week = current_week if current_week > FIRST_WEEK else FIRST_WEEK
-    cws = WeekSchedule.get_or_create_week_schedule(trainee, current_week)
-  else:
-    ct = Term.current_term()
-    current_week = ct.term_week_of_date(date.today())
-    cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
-  status, soln, services = assign(cws)
-  print 'solution:', status, soln
-  # status, soln = 'OPTIMAL', [(1, 2), (3, 4)]
-
-  workers = Worker.objects.select_related('trainee').all()
-
-  if status == 'OPTIMAL':
-    ctx = {
-        'assignments': soln,
-        'workers': workers,
-        'graph': services,
-    }
-    return render(request, 'services/services_view.html', ctx)
-  else:
-    return HttpResponseBadRequest('Status calculated: %s' % status)
 
 
 # Save all designated services as pinned assignments
@@ -526,19 +498,20 @@ def save_designated_assignments(cws):
   '''
   bulk_service_assignments = []
   bulk_assignment_workers = []
-  services = Service.objects.filter(designated=True, schedule__active=True).prefetch_related('worker_groups')
+  services = Service.objects.filter(designated=True, active=True).prefetch_related('worker_groups').distinct()
   # Delete all outdated Assignments for designated services
   Assignment.objects.filter(service__in=services, week_schedule=cws).delete()
   for service in services:
     for slot in service.serviceslot_set.all():
       a = Assignment(service=service, service_slot=slot, week_schedule=cws, workload=slot.workload, pin=True)
+      slot.save()
       bulk_service_assignments.append(a)
   Assignment.objects.bulk_create(bulk_service_assignments)
 
   ThroughModel = Assignment.workers.through
   assignments = Assignment.objects.filter(week_schedule=cws, pin=True, service__in=services).prefetch_related('service_slot', 'service_slot__worker_group', 'service_slot__worker_group__workers')
   for a in assignments:
-    workers = set(a.service_slot.worker_group.workers.all())
+    workers = set(a.service_slot.worker_group.get_workers.all())
     for worker in workers:
       bulk_assignment_workers.append(ThroughModel(assignment_id=a.id, worker_id=worker.id))
   ThroughModel.objects.bulk_create(bulk_assignment_workers)
@@ -636,6 +609,7 @@ def json_to_graph(json_graph, workers):
 
 
 @timeit
+@group_required(['training_assistant', 'service_schedulers'])
 def services_view(request, run_assign=False, generate_leaveslips=False):
   # status, soln = 'OPTIMAL', [(1, 2), (3, 4)]
   user = request.user
@@ -679,7 +653,7 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
     gj.save()
 
     # Redirect so page can't be accidentally refreshed upon.
-    return HttpResponseRedirect(reverse_lazy('services:services_view'))
+    return HttpResponseRedirect(reverse_lazy('services:services_view') + '?week_schedule=' + str(current_week))
 
   else:
     status, soln = None, None
@@ -720,7 +694,7 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
                                                                                           queryset=Assignment.objects.filter(week_schedule=cws).select_related('service', 'service_slot', 'service__category').order_by('service__weekday'),
                                                                                           to_attr='week_assignments'))
 
-  exceptions = ServiceException.objects.all().prefetch_related('workers', 'services')
+  exceptions = ServiceException.objects.all().prefetch_related('workers', 'services').select_related('schedule')
 
   # Getting all services to be displayed for calendar
   services = Service.objects.filter(active=True).prefetch_related('serviceslot_set', 'worker_groups').order_by('start', 'end')
@@ -761,12 +735,33 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
 def generate_report(request, house=False):
   user = request.user
   trainee = trainee_from_user(user)
-  cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
+  current_week = request.GET.get('week_schedule', None)
+  if current_week:
+    current_week = int(current_week)
+    cws = WeekSchedule.get_or_create_week_schedule(trainee, current_week)
+  else:
+    cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
   week_start, week_end = cws.week_range
 
+  order = [
+      'Breakfast Prep',
+      'Breakfast Cleanup',
+      'Lunch Prep',
+      'Lunch Cleanup',
+      'Sack Lunch',
+      'Supper Prep',
+      'Supper Cleanup',
+      'Supper Delivery',
+      'Dust Mopping',
+      'Restroom Cleaning',
+      'Space Cleaning',
+      'Chairs',
+  ]
+  ordering = dict([reversed(o) for o in enumerate(order)])
   categories = Category.objects.filter(~Q(name='Designated Services')).prefetch_related(
       Prefetch('services', queryset=Service.objects.order_by('weekday'))
   ).distinct()
+  categories = sorted(categories, key=lambda c: ordering.get(c.name, float('inf')))
 
   worker_assignments = Worker.objects.select_related('trainee').prefetch_related(
       Prefetch('assignments', queryset=Assignment.objects.filter(week_schedule=cws).select_related('service', 'service_slot', 'service__category').order_by('service__weekday'), to_attr='week_assignments'))\
@@ -807,7 +802,6 @@ def generate_report(request, house=False):
     return render(request, 'services/services_report_house.html', ctx)
 
   if request.POST.get('encouragement') is not None:
-    cws = WeekSchedule.current_week_schedule()
     if cws is None:
       print "no current week schedule"
     else:
@@ -843,7 +837,12 @@ def merge_assigns(assigns):
 def generate_signin(request, k=False, r=False, o=False):
   user = request.user
   trainee = trainee_from_user(user)
-  cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
+  current_week = request.GET.get('week_schedule', None)
+  if current_week:
+    current_week = int(current_week)
+    cws = WeekSchedule.get_or_create_week_schedule(trainee, current_week)
+  else:
+    cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
   week_start, week_end = cws.week_range
   # cws_assign = Assignment.objects.filter(week_schedule=cws).order_by('service__weekday', 'service__start')
 
@@ -863,6 +862,7 @@ def generate_signin(request, k=False, r=False, o=False):
     for s in cws_assign.filter(id__in=assignments).values('service'):
       assigns = sorted(cws_assign.filter(service__pk=s['service']), key=lambda a: a.service_slot.role)
       kitchen.append(merge_assigns(assigns))
+    kitchen = zip(kitchen[::4], kitchen[1::4], kitchen[2::4], kitchen[3::4])
     ctx['kitchen'] = kitchen
     return render(request, 'services/signinsheetsk.html', ctx)
 
@@ -878,12 +878,24 @@ def generate_signin(request, k=False, r=False, o=False):
 
   # All other sign-in reports
   elif o:
+    cws_assign = cws_assign.filter(service__designated=False)
     # delivery = cws_assign.filter(service__name__contains='Delivery')
-    chairs = cws_assign.filter(service__name__contains='Chairs (')
+    chairs = cws_assign.filter(service__name__contains='Chairs')
     dust = cws_assign.filter(service__name__contains='Dust')
     lunch = cws_assign.filter(service__name__contains='Sack')
+    space = cws_assign.filter(service__name__contains='Space Cleaning')
+    supper = cws_assign.filter(service__name__contains='Supper Delivery')
+    others = [chairs, dust, space, supper]
 
-    ctx['others'] = [chairs, dust, lunch]
+    lunches = defaultdict(list)
+    for l in lunch:
+      lunches[l.service.weekday].append(l)
+    # get day, assignments pairs sorted by monday last
+    items = sorted(lunches.items(), key=lambda i: (i[0] + 6) % 7)
+    for i, item in enumerate(items[::2]):
+      index = i * 2
+      others.append(items[index][1] + items[index + 1][1] if index + 1 < len(items) else [])
+    ctx['others'] = others
     return render(request, 'services/signinsheetso.html', ctx)
 
 
@@ -935,6 +947,11 @@ class AssignmentPinViewSet(BulkModelViewSet):
 
   def allow_bulk_destroy(self, qs, filtered):
     return filtered
+
+
+class ExceptionActiveViewSet(BulkModelViewSet):
+  queryset = ServiceException.objects.all()
+  serializer_class = ExceptionActiveSerializer
 
 
 class ServiceHours(GroupRequiredMixin, UpdateView):
@@ -1006,7 +1023,7 @@ class ServiceHours(GroupRequiredMixin, UpdateView):
     return ctx
 
 
-class ServiceHoursTAView(TemplateView, GroupRequiredMixin):
+class ServiceHoursTAView(GroupRequiredMixin, TemplateView):
   template_name = 'services/service_hours_ta_view.html'
   group_required = ['training_assistant']
 
@@ -1047,7 +1064,7 @@ class ServiceHoursTAView(TemplateView, GroupRequiredMixin):
     return services
 
 
-class DesignatedServiceViewer(TemplateView, GroupRequiredMixin):
+class DesignatedServiceViewer(GroupRequiredMixin, TemplateView):
   template_name = 'services/designated_services_viewer.html'
   group_required = ['training_assistant', 'service_schedulers']
 
@@ -1070,11 +1087,12 @@ class DesignatedServiceViewer(TemplateView, GroupRequiredMixin):
     return context
 
 
-class ExceptionView(FormView):
+class ExceptionView(GroupRequiredMixin, FormView):
   model = ServiceException
   template_name = 'services/services_add_exception.html'
   form_class = AddExceptionForm
   success_url = reverse_lazy('services:services_view')
+  group_required = ['service_schedulers']
 
   def form_valid(self, form):
     trainees = form.cleaned_data.get('workers')
@@ -1089,7 +1107,7 @@ class ExceptionView(FormView):
     return HttpResponseRedirect(self.success_url)
 
 
-class AddExceptionView(CreateView, ExceptionView):
+class AddExceptionView(ExceptionView, CreateView):
   def get_context_data(self, **kwargs):
     ctx = super(AddExceptionView, self).get_context_data(**kwargs)
     ctx['exceptions'] = ServiceException.objects.all()
@@ -1097,7 +1115,7 @@ class AddExceptionView(CreateView, ExceptionView):
     return ctx
 
 
-class UpdateExceptionView(UpdateView, ExceptionView):
+class UpdateExceptionView(ExceptionView, UpdateView):
   def get_context_data(self, **kwargs):
     ctx = super(UpdateExceptionView, self).get_context_data(**kwargs)
     ctx['exceptions'] = ServiceException.objects.exclude(id=self.object.id)

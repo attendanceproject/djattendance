@@ -1,14 +1,10 @@
 <h1 id="title">
-  {% if h %}
-    {{ h }}
-  {% else %}
-    {{ page_title }}
-  {% endif %}
+  {{ page_title }}{% if h %} for {{ h }}{% endif %}
   <div class="cws"></div>
 </h1>
 
 <br><br>
-<h3>General Notes:</h3>
+<h3>General Notes</h3>
   <table id="weekdate_match">
     <tr>
       {% for day in 1|get_weekday_codes %}
@@ -18,33 +14,14 @@
     <tr class="this_week">
     </tr>
   </table>
-<br><br>
-<ul>
-  <li>If you have a pre-approved leave of absence, please bring a note to {{schedulers}} or the service schedule mailbox by <div class="notice_date"></div>.</li>
-  <li>{{encouragement}}</li>
-  <li>If you have a conflict with a service, or will be absent from the Training for seven days or less, you are responsible for finding a substitute for your service.</li>
-  <li>Services may never be switched with a trainee of the opposite gender, unless fellowshipped beforehand with a Training assistant or sister Ann Stevens.</li>
-  <li>Returning trainees may not switch services with first-term trainees. Trainees with cars must switch only with other trainees with cars, unless transportation for the service is not required.</li>
-  <li>Trainees with an unexcused missed service are responsible to complete one regular Life-study summary and one make-up service. Make-up services should be noted on the missed service make-up list by the kitchen. Trainees who do not make up services will be assigned Monday Life-study summaries and be volunteered for additional services.</li>
-</ul>
-<h3>Service Notes:</h3>
-<ol>
-  <li>Breakfast prep begins at 6:30am Tuesday through Saturday and 6:45am on Lord's Day; Breakfast is served at 7:30am Tuesday through Saturday and 7:45am on Lord's Day; Breakfast cleanup begins at 7:50am Tuesday through Saturday and at 8:05am on Lord's Day. Please report to the prep or cleanup star in the kitchen and check off your name on the kitchen teams sign-in sheet</li>
-  <li>Lunch prep begins at 9:00am. Lunch is served at 11:45am. Lunch cleanup begins at 12:05pm. Please report to the prep or cleanup star in the kitchen and check off your name on the kitchen sign-in sheet.</li>
-  <li>Sack lunch begins at 6:10pm Monday through Thursday. Please report to the sack lunch star in the sack lunch area and check off your name on the sack lunch sign-in sheet.</li>
-  <li>Supper prep begins at 3:00pm Tuesday through Thursday; 10:15am on Saturday; 3:30pm on Monday. Supper is served at 5:45pm. Supper cleanup begins at 6:05pm. Please report to the prep or cleanup star in the kitchen and check off your name on the kitchen teams sign-in sheet.</li>
-  <li>Supper delivery begins at 6:10pm. Please report to the sack lunch area for the meal bins and check off your name on the supper delivery sign-in sheet.</li>
-  <li>Dust mopping begins at 12:10pm. Please report to the dust mopping stars by the east lobby cleaning closet and check off your name on the dust mopping sign-in sheet. Dust mopping is responsible for the main and cafeteria floors.</li>
-  <li>Restroom cleaning begins at 6:10pm. Please report to the restroom cleaning stars by the east lobby cleaning closet and check off your name on the restroom cleaning sign-in sheet.</li>
-  <li>Space cleaning begins at 6:10pm. Please report to the space cleaning stars by the east lobby cleaning closet and check off your name on the space cleaning sign-in sheet.</li>
-  <li>Chairs begins at 6:10pm on Wednesday and Monday. Please report to the chairs stars in room NE 3, the second-year classroom, and on Monday and in the main classroom on Wednesday.</li>
-</ol>
+<br>
+{{encouragement|safe}}
 
 <table>
   <thead>
     <tr>
       <th>Name</th>
-      {% for category in categories|dictsort:"description" %}
+      {% for category in categories %}
       <th>{{ category.name }}</th>
       {% endfor %}
       <th>Designated Services</th>
@@ -71,7 +48,7 @@
         <td class="name">
           {{ worker.trainee.full_name2 }}
         </td>
-        {% for category in categories|dictsort:"description"%}
+        {% for category in categories %}
           {% if category in worker.services %}
           <td >
             {% with services=worker.services|get_item:category %}

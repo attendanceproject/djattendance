@@ -1,0 +1,90 @@
+{% extends "exams/base_exams.html" %}
+
+{% load staticfiles %}
+{% load exam_extras %}
+{% load exam_filters %}
+{% load common_tags %}
+
+{% block title %}Exam{% endblock %}
+
+{% block content %}
+  <div class="panel panel-default">
+    <div class="panel-heading exam-panel-heading">
+      <div class="btn-group pull-right">
+        <a href="{% url 'exams:manage' %}">
+          <button type="button" class="btn btn-default">Back</button>
+        </a>
+      </div>
+      <h3 class="panel-title exam-panel-title">
+        {% if role == 'Grade' %}
+          {{ examinee.full_name }} -
+        {% endif %}
+        {{ exam }}
+      </h3>
+    </div>
+    <div class="panel-body">
+        <form id="exam_form" action="" method="post">
+          {% csrf_token %}
+          <ol id="question-list">
+            {% for section, response, score, comments in data %}
+              <h4> {{ section.section_type }} section </h4>
+              Instructions: {{ section.instructions }}
+              </br>
+              You must answer at least {{ section.required_number_to_submit }} questions for this section in order to submit the exam.
+              </br>
+              {% if section.section_type == 'Matching' %}
+                Matching Options:
+                <ol type="A">
+                {% for matching_answer in section.questions|get_matching_answers %}
+                  <li> {{ matching_answer }} </li>
+                {% endfor %}
+                </ol>
+              {% endif %}
+              </br>
+              <input type="hidden" value="{{ section.id }}" name="section_id">
+              <input type="hidden" value="{{ section.type }}" name="section_type">
+              {% for question in section.questions %}
+                {% include section.template %}
+              {% endfor %}
+            {% empty %}
+              <i>No exam questions to view.</i><br />
+            {% endfor %}
+          </ol>
+          <div class="pull-right">
+            <button id="save_button" name="Save" class="btn btn-success">Save</button>
+            <button id="finalize_button" name="Submit" class="btn btn-primary">
+              Finalize
+            </button>
+          </div>
+        </form>
+    </div>
+  </div>
+{% endblock %}
+
+
+{% block scripts %}
+  <script>
+  const SUCCESS_URL = "{{view.get_success_url}}";
+
+  function updateCountdown() {
+    display = $(this).parent().children(".char_count");
+    var char_count = 0
+    if ($(this).val()){
+      char_count = $(this).val().split(" ").length;
+    }    
+    jQuery(display).text(char_count + ' words.');
+  }
+
+  $(document).ready(function(e) {
+
+    $('textarea').each(updateCountdown);
+    $('textarea').change(updateCountdown);
+    $('textarea').keyup(updateCountdown);
+
+    $("#exam_form").on("click", '#save_button, #finalize_button', e => {
+      e.preventDefault();
+      return;
+    });
+  });
+  </script>
+{% endblock %}

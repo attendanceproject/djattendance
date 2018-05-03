@@ -1,23 +1,22 @@
 {% load staticfiles %}
 
-{% block styles %}
 <link rel="stylesheet" href="{% static 'services/css/two_column.css' %}" />
 <link rel="stylesheet" href="{% static 'services/css/signin.css' %}" />
-{% endblock %}
+<link rel="stylesheet" href="{% static 'services/css/two_column_header.css' %}" />
 
+{% for cats in others %}
 
-{% block content %}
-
-{% for cats in others%}
-
-<div id="header">
+<div class="header {% if 'Sack' in cats.0.service.category.name %}header-two-column{% endif %}">
   <h1> {{cats.0.service.category}} Sign-In</h1>
   As of {{wkstart}}
+  {% if 'Sack' in cats.0.service.category.name %}
+    {% include "services/_instructions.html" %}
+  {% endif %}
 </div>
 
 {% regroup cats by service as cats_bydays %}
 
-<div id="content">
+<div class="content">
   {% for day in cats_bydays %}
   <table class="shift">
     <tr>
@@ -25,12 +24,18 @@
     </tr>
     <tr>
       <td><b>{{day.grouper.calculated_date}}</b></td>
-      <td class="listings"><b>Substitute</b></td>
+      {% if not 'Supper Delivery' in day.grouper.category.name %}
+        <td class="listings"><b>Substitute</b></td>
+      {% endif %}
     </tr>
 
-  {% for a in day.1|dictsort:"service_slot.role"|merge_assigns %}
-    {% include 'services/_signin.html' with num_blanks=1 %}
-  {% endfor %}
+    {% for a in day.1|dictsort:"service_slot.role"|merge_assigns %}
+      {% if 'Supper Delivery' in day.grouper.category.name %}
+        {% include 'services/_signin.html' with num_blanks=0 %}
+      {% else %}
+        {% include 'services/_signin.html' with num_blanks=1 %}
+      {% endif %}
+    {% endfor %}
   </table>
   {% endfor %}
 </div>
@@ -38,4 +43,3 @@
 
 <footer></footer>
 {% endfor %}
-{% endblock %}

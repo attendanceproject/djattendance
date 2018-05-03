@@ -42,7 +42,7 @@ $(document).ready(function() {
         state: state_tobe,
         csrfmiddlewaretoken: '{{ csrf_token }}'},
         success: function(response){
-          flashAjaxStatus()
+          new Notification(Notification.SUCCESS, 'Saved').show();
         },
       })
   });

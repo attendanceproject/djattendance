@@ -87,7 +87,7 @@
           m += "<div class='radio'><label><input type='radio' name='events' value='"+event.id+"'/> "+event.name + " ("+event.start+")</label></div>";
         })
         content.html(m);
-        flashAjaxStatus();
+        new Notification(Notification.SUCCESS, 'Saved').show();
       }
     });
   };

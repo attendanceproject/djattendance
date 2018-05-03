@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% bootstrap_messages %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#graduation").DataTable({
+      info: false,
+      paging: false,
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      buttons: [
+      {
+        extend: 'print',
+        text: 'Print',
+        autoPrint: true,
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'csvHtml5',
+        text: 'CSV',
+        exportOptions: {
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'pdf',
+        text: 'PDF',
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'collection',
+        buttons: 'columnsVisibility',
+        text: 'Show/Hide Columns',
+        columns: ':gt(1)',
+      },
+      ],
+
+    });
+
+
+  });
+  
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>{{title}}</h1>
+
+<div class="data-table-container">
+  <table id="graduation" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Firstname</th>
+        <th>Lastname</th>
+        <th>Remembrance Text</th>
+        <th>Remembrance Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in data %}
+      <tr>
+        <td>{{m.trainee.firstname}}</td>
+        <td>{{m.trainee.lastname}}</td>
+        <td>{{m.remembrance_text}}</td>
+        <td>{{m.remembrance_reference}}</td>        
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

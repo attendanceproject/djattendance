@@ -126,7 +126,7 @@ label.btn-primary.active:visited {
 
   /****** METHODS FOR DAILY BIBLE READING ******/
   /****** METHODS FOR FIRST AND SECOND YEAR BIBLE READING ******/
-  function changeWeek(){
+  function changeWeek() {
     var weekid = $("#select_menu").find('option:selected').attr('id');
     var userId = $("input#userId").val();
     var url = '/bible_tracker/?week=' + weekid
@@ -138,7 +138,7 @@ label.btn-primary.active:visited {
       url: change_week_url,
       dataType: 'json',
       data: {
-        'week':weekid,
+        'week': weekid,
         csrfmiddlewaretoken:'{{ csrf_token }}',
         'userId': userId,
         'forced': forced,
@@ -164,18 +164,17 @@ label.btn-primary.active:visited {
           $("#unfinalize").prop('disabled', true);
         }
 
-        if ((finalized == 'N') && forced && (current_week == Number(weekid) + 1)){
+        if (forced == "True") {
           $("#finalize").prop('disabled', false);
         }
       },
     });
   }
 
-  function updateStatus(finalize){
+  function getStatus() {
     var weekly_status = ''
     for (i = 0; i < 7; i++) {
       day_status = $('#status-day-'+ i +' label.active input').val();
-
       if (day_status == null){
         weekly_status += '_';
       }
@@ -183,6 +182,11 @@ label.btn-primary.active:visited {
         weekly_status += day_status;
       }
     }
+    return weekly_status;
+  }
+
+  function updateStatus(finalize){
+    var weekly_status = getStatus();
     var week_id =  $('#select_menu').find(":selected").attr('id');
     var userId = $("input#userId").val();
     $.ajax({
@@ -194,11 +198,11 @@ label.btn-primary.active:visited {
         csrfmiddlewaretoken: '{{ csrf_token }}',
         'userId':userId,
       },
-      success: function(data){
-        flashAjaxStatus('saved');
-        if (finalize){
+      success: function(data) {
+        if (finalize) {
           finalizeStatus();
         }
+        new Notification(Notification.SUCCESS, 'Saved').show();
       },
     });
   }
@@ -219,7 +223,7 @@ label.btn-primary.active:visited {
           'forced': forced,
         },
         success: function(data){
-          flashAjaxStatus('finalized');
+          new Notification(Notification.SUCCESS, 'Finalized').show();
           disableButtons();
           $("#unfinalize").prop('disabled', false);
         },
@@ -270,7 +274,8 @@ label.btn-primary.active:visited {
         'userId': userId,
       },
       success: function(data){
-        flashAjaxStatus(checked ? 'saved' : 'deleted');
+        let text = checked ? 'Saved' : 'Deleted';
+        new Notification(Notification.SUCCESS, text).show();
         if(year==1) {
           updateProgressBar('#first-year-prog', data);
         } else if(year==2) {
@@ -280,7 +285,17 @@ label.btn-primary.active:visited {
     });
   }
 
-  $( document ).ready(function() {
+  $(document).ready(function() {
+    $('body').on('click', '.btn-group .btn[disabled="disabled"]', function(event) {
+      return false;
+    });
+    $('body').on('click', '.btn-group .btn.active', function(e) {
+       e.preventDefault();
+       e.stopImmediatePropagation();
+       $(this).find('input').removeAttr('checked');
+       $(this).removeClass('active');
+    });
+
     var currentTrainee = "{{trainee.full_name}}";
     $("input#userName").val("{{trainee.full_name}}").trigger("change");
     $('#userId').val({{trainee.id}});
@@ -310,20 +325,19 @@ label.btn-primary.active:visited {
       modify_boxes("second-year"+second_year_checked_list[i]);
     }
 
-    $(document).on('change','#select_menu',function(){
-      changeWeek();
+    $(document).on('change','#select_menu', changeWeek);
+    $('#save').click(function() {
+      updateStatus(false);
     });
 
-    $('#save').click(function(){
-      updateStatus();
-    });
+    $('#unfinalize').click(unfinalizeStatus);
 
     $('#finalize').click(function(){
+      if (getStatus().indexOf('_') >= 0) {
+        new Notification(Notification.ERROR, "Please fill out this week completely before finalizing.").show();
+        return;
+      }
       updateStatus(true);
-    });
-
-    $('#unfinalize').click(function(){
-      unfinalizeStatus();
     });
 
     $('#first-year-bible-reading :checkbox').change(function() {
@@ -344,13 +358,14 @@ label.btn-primary.active:visited {
     }
 
     //if url parameter for week is added(i.e. ?week=13), opens to that week
-    var week = location.href.substring(location.href.indexOf('=') + 1, location.href.indexOf('#') );
+    var week = new URL(window.location.href).searchParams.get('week') || current_week;
+    $("#select_menu option:selected").removeAttr("selected");
     $("#select_menu option[id='" + week + "']").attr("selected", "selected");
     setDatesforWeek(week);
     changeWeek();
 
     if (forced == "True") {
-      alert('Please fill out and finalize the Bible Reading Tracker for the past weeks before moving on to other tasks. Thanks!');
+      new Notification(Notification.ERROR, 'Please fill out and finalize the Bible Reading Tracker for week ' + week + ' before moving on to other tasks. Thanks!').show();
     }
 
   });

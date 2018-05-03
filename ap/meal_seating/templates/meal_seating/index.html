@@ -30,7 +30,7 @@ function updateExclusions() {
       'to': trainees
     },
     success: function(data){
-      flashAjaxStatus();
+      new Notification(Notification.SUCCESS, 'Saved').show();
     }
   });
 }
@@ -79,7 +79,6 @@ $( document ).ready(function() {
           </label>
         </div>
         <div class="col-md-12">
-
           <label class="control-label" for="enddate">End Date</label>
           <input type="text" name="enddate" class="datepicker">
         </label>

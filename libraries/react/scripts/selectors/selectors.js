@@ -7,7 +7,7 @@ import { startOfWeek, endOfWeek, differenceInWeeks, addDays, getDay }from 'date-
 //set manipulations used to do array computations quickly & easily from https://www.npmjs.com/package/set-manipulator
 import { union, intersection, difference, complement, equals } from 'set-manipulator';
 
-import { getDateWithoutOffset, lastLeaveslip, compareEvents, categorizeEventStatus, getPeriodFromDate } from '../constants'
+import { lastLeaveslip, compareEvents, categorizeEventStatus, getPeriodFromDate } from '../constants'
 
 //defining base states
 const form = (state) => state.form
@@ -80,9 +80,9 @@ export const getEventsforPeriod = createSelector(
     }
     let t = events.filter((o) => {
       //deal with timezone hours offset when creating date.
-      let start = getDateWithoutOffset(new Date(o.start_datetime))
-      let end = getDateWithoutOffset(new Date(o.end_datetime))
-      return (getDateWithoutOffset(dates.firstStart) < start && getDateWithoutOffset(dates.secondEnd) > end)
+      let start = new Date(o.start_datetime)
+      let end = new Date(o.end_datetime)
+      return (dates.firstStart < start && dates.secondEnd > end)
     });
     return t;
   }
@@ -172,8 +172,8 @@ export const getLeaveSlipsforPeriod = createSelector(
   (ls, dates) => {
     return ls.filter(slip => {
         return slip.events.some(ev =>
-            dates.firstStart <= getDateWithoutOffset(new Date(ev.date)) &&
-            dates.secondEnd >= getDateWithoutOffset(new Date(ev.date)))
+            dates.firstStart <= new Date(ev.date) &&
+            dates.secondEnd >= new Date(ev.date))
     })
   }
 )

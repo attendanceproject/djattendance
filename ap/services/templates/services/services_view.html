@@ -143,9 +143,12 @@ Service Scheduling
   <!-- Assign Tab -->
     <div role="tabpanel" class="tab-pane active" id="assign">
       {% if status == 'INFEASIBLE' %}
-      <br/>
         <div class="alert alert-danger" role="alert">
           Parameters are too constrained to solve assignment problem. Please give workers <a class="fake-tab-link" href ="#workers">more capacity</a> or <a class="fake-tab-link" href="#services">lower workers required</a> for services. You can also take a look at the <a class="fake-tab-link" href="#graph">graph</a> to see if there are too many exceptions blocking out workers from services. Finally, you have the option of going into <a href="#" class="manual-mode">Manual Mode</a>.
+        </div>
+      {% else %}
+        <div class="alert alert-info" role="alert">
+          <a href="#" class="manual-mode">Go into Manual Mode</a>.
         </div>
       {% endif %}
       {% for category in categories %}
@@ -177,8 +180,8 @@ Service Scheduling
                     {% for a in slot.assignments.all %}
                       <td>
                         <div class="worker-text" data-workers="{{ a.workers.all|input_workerID_list }}" data-max="{{ slot.workers_required }}">
-                        {% for w in a.workers.all %}
-                          <span class="{% if w.trainee.gender == 'B' %}text-brothers{% else %}text-sisters{% endif %}">{{ w.trainee.full_name }}</span>,
+                        {% for w in a.workers.all|dictsort:"trainee.lastname" %}
+                          <span class="{% if w.trainee.gender == 'B' %}text-brothers{% else %}text-sisters{% endif %}">{{ w.trainee.full_name2 }}</span>,
                         {% endfor %}
                         </div>
                         <div class="worker-input no-show">
@@ -308,7 +311,7 @@ Service Scheduling
     {% endfor %}
     <hr class="col-xs-12 clearfix" />
     <div class="col-xs-12 clearfix">
-      <a href="#" class="btn btn-success" id="save-workloads">Save Service Workloads</a>
+      <a href="#" class="btn btn-success save-workloads">Save Service Workloads</a>
     </div>
   </div>
   <!-- End Services Tab -->
@@ -340,7 +343,7 @@ Service Scheduling
         {% for exception in exceptions %}
           <tr>
             <td class="active-input">
-              <input type="checkbox" class="service-active-input" data-id="{{ exception.id }}" {% if exception.active %}checked{% endif %} />
+              <input type="checkbox" class="exception-active-input" data-id="{{ exception.id }}" {% if exception.active %}checked{% endif %} />
             </td>
             <td>{{exception.name}}</td>
             <td>{{exception.tag}}</td>
@@ -479,6 +482,9 @@ Service Scheduling
       </table>
     {% endfor %}
     <hr class="col-xs-12 clearfix" />
+    <div class="col-xs-12 clearfix">
+      <a href="#" class="btn btn-success save-workloads">Save Designated Service Workloads</a>
+    </div>
   </div>
   <!-- End Assignments Tab -->
 
@@ -487,7 +493,7 @@ Service Scheduling
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12">
-          Line for this week:<br>
+          Service Notes for this week:<br>
           <textarea id=encouragement rows="4" cols="60" placeholder="insert encouragement">{{cws.encouragement}}</textarea>
           <br>
           <button type="button" class="btn btn-primary" id="save_encouragement">Save</button>
@@ -496,27 +502,27 @@ Service Scheduling
       <br>
       <div class="row">
         <div class="col-sm-3">
-          <a href="{% url 'services:services_schedule'%}" target="_blank" class="btn btn-primary">all trainees</a>
+          <a href="{% url 'services:services_schedule'%}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">all trainees</a>
         </div>
       </div>
       <div class="row">
         <div class="col-sm-3">
-          <a href="{% url 'services:services_schedule_house'%}" target="_blank" class="btn btn-primary">by house</a>
+          <a href="{% url 'services:services_schedule_house'%}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">by house</a>
         </div>
       </div>
       <div class="row">
         <div class="col-sm-3">
-          <a href="{% url 'services:kservices_signin' %}" target="_blank" class="btn btn-primary">kitchen sign-in sheets</a>
+          <a href="{% url 'services:kservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">kitchen sign-in sheets</a>
         </div>
       </div>
       <div class="row">
         <div class="col-sm-3">
-          <a href="{% url 'services:rservices_signin' %}" target="_blank" class="btn btn-primary">restroom sign-in sheets</a>
+          <a href="{% url 'services:rservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">restroom sign-in sheets</a>
         </div>
       </div>
       <div class="row">
         <div class="col-sm-3">
-          <a href="{% url 'services:oservices_signin' %}" target="_blank" class="btn btn-primary">all other sign-in sheets</a>
+          <a href="{% url 'services:oservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">all other sign-in sheets</a>
         </div>
       </div>
     </div>
@@ -530,6 +536,7 @@ Service Scheduling
   var services_update_time_url = "/api/update-time-services/";
   var assignment_workers_url = "/api/service-assignments/";
   var assignment_pin_url = "/api/service-assignments-pin/";
+  var exception_active_url = "/api/update-exception-active/";
   var services_admin_url = "{% url 'admin:services_service_changelist' %}";
 
   var week_schedule_id = {{ cws.id }};
@@ -543,7 +550,7 @@ Service Scheduling
       data: JSON.stringify(data),
       success: function(response) {
         console.log(response);
-        flashAjaxStatus();
+        new Notification(Notification.SUCCESS, 'Saved').show();
       }
     })
   }
@@ -693,7 +700,7 @@ Service Scheduling
 
           toggleEditWorkers(elem, true);
 
-          flashAjaxStatus();
+          new Notification(Notification.SUCCESS, 'Saved').show();
         }
       })
 
@@ -768,6 +775,14 @@ Service Scheduling
       sendBulkAjax(assignment_pin_url, data);
     });
 
+    $('.exception-active-input').click((e) => {
+      let data = {
+        id: $(e.currentTarget).data('id'),
+        active: e.currentTarget.checked,
+      };
+      sendBulkAjax(exception_active_url, [data]);
+    });
+
     /////////////////// Workers Cap + Health ///////////////////
 
     $('#save-workers').click(function(e) {
@@ -796,7 +811,7 @@ Service Scheduling
 
     /////////////////// Service Workloads ///////////////////
 
-    $('#save-workloads').click(function(e) {
+    $('.save-workloads').click(function(e) {
       var data = [];
       var inputgroups = $('.serviceslot-input');
 
@@ -814,7 +829,7 @@ Service Scheduling
 
       sendBulkAjax(slots_update_url, data);
 
-      var data = []
+      data = [];
 
       var checkboxgroups = $('.service-active-input');
       var id, ig, val
@@ -919,12 +934,12 @@ Service Scheduling
       var encour = $("#encouragement").val();
       $.ajax({
         type: "POST",
-        url: "{% url 'services:services_schedule' %}",
+        url: "{% url 'services:services_schedule' %}?week_schedule={{current_week}}",
         data: {
           encouragement: encour
         },
         success: function(response) {
-          flashAjaxStatus();
+          new Notification(Notification.SUCCESS, 'Saved').show();
         },
       });
     });
@@ -954,29 +969,6 @@ Service Scheduling
 
 
   $(document).ready(function() {
-
-   $('#makepdf').click(function(){
-    var qtyhouse = $('#house').val()
-    var qtycc = $('#candc').val()
-    var qtyall = $('#all').val()
-    var instruc = $('#instruction_line').val()
-
-    $.ajax({
-      type: "GET",
-      url: "{% url 'services:services_schedule' %}",
-      data:{
-        csrfmiddlewaretoken: '{{ csrf_token }}'},
-        house: qtyhouse,
-        cc: qtycc,
-        all: qtyall,
-        line: instruc,
-      success: function(response){
-
-      },
-    })
-
-
-   })
 
    $('.quantity-right-plus').click(function(e){
 

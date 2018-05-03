@@ -17,12 +17,6 @@
   {% if SelectedEvents %}
     let SelectedEvents = {{ SelectedEvents|safe }};
   {% endif %}
-  let TA = {};
-  for (let ta of TAs) {
-    if (Trainee.TA == ta.id) {
-      TA = ta;
-    }
-  }
   {% if actual_user %}
     let User = {{ actual_user | safe }};
   {% else %}

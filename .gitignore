@@ -17,3 +17,4 @@ ap/services/debug/data.js
 ap/static/bundles/
 webpack-stats.json
 import.log*
+selenium/automation/reports/

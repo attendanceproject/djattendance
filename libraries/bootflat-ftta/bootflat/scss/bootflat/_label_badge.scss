@@ -7,7 +7,7 @@ $label-success:                 $blue !default;
 $label-danger:                  $red !default;
 $label-warning:                 $tan !default;
 $label-info:                    $tan-light !default;
-
+$label-text:  $black;
 $label-default-font-color:      $blue !default;
 
 // Exports
@@ -57,7 +57,8 @@ $label-default-font-color:      $blue !default;
 
   .label-info,
   .badge-info {
-    border-color: $label-info;
+    color: $label-text;
+    border: 1px solid $label-text;
     background-color: $label-info;
   }
 }

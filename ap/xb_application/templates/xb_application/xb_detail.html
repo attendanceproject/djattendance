@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+
+{% block references %}
+<style type="text/css">
+  dt, dd, label, p, span {
+    font-size: 20px;
+  }
+
+  .dl-horizontal dt {
+    width: 180px;
+  }
+
+  .dl-horizontal dd {
+    margin-left: 200px;
+  }
+</style>
+{% endblock %}
+
+<h2>Application for the Boston Extension Training ({{term}})</h2>
+<h3>Applicant Full Name: {{trainee}}</h3>
+
+
+<dl class="dl-horizontal">
+  <dt>Gender</dt>
+  <dd>{{trainee.get_gender_display}}</dd>
+  <dt>Birthdate</dt>
+  <dd>{{trainee.date_of_birth}} (Age: {{object.age}})</dd>
+  <dt>Email</dt>
+  <dd>{{object.email}}</dd>
+  <dt>Sent from</dt>
+  <dd>{{object.sending_locality}}</dd>
+  <dt>Serving on</dt>
+  <dd>{{trainee.team}}</dd>
+  <dt>Training Services</dt>
+  <dd>{{object.ftta_service}}</dd>
+</dl>
+
+<dl class="dl-horizontal">
+  <dt>Student Loans</dt>
+  {% if objects.loan %}
+    <dd>Yes</dd>
+  {% else %}
+    <dd>No</dd>
+  {% endif %}
+  <dt>Bringing a vehicle</dt> 
+  {% if objects.automobile is None %}
+    <dd>No</dd>
+  {% else %}
+    <dd>{{object.automobile}} with {{object.seats}} seats</dd>
+  {% endif %}
+  <dt>Citizenship</dt>
+  <dd>
+    {% if object.citizenship == "C" %} 
+      Citizen
+    {% elif object.citizenship == "R" %}
+      Permanent Resident
+    {% else %}
+      Other: 
+    {% endif %}
+    {% if object.citizenship_other is not None %}
+      {{object.citizenship_other}}
+    {% endif %}
+  </dd>
+
+
+</dl>
+
+<dl class="dl-horizontal">
+  <dt>Home Address</dt>
+  <dd>{{object.address}}, {{object.city}} {{object.state}}, {{object.zip_code}}</dd>
+  <dt>Cell Phone</dt>
+  <dd>{{object.cell_phone}}</dd>
+  <dt>Home Phone</dt>
+  <dd>{{object.home_phone}}</dd>
+</dl>
+
+<dl class="dl-horizontal">
+  <dt>Education</dt>
+  <dd>Obtained a {{object.degree1}} degree majoring in {{object.major1}} at {{object.college1}}</dd>
+  <dt></dt>
+  {% if object.degree2 is not None %}
+    <dd>Obtained a {{object.degree2}} degree majoring in {{object.major2}} at {{object.college2}}</dd>
+  {% endif %}
+</dl>
+
+<dl class="dl-horizontal">
+  <dt>Salvation</dt>
+  <dd>Saved on {{object.date_saved}} and baptized on {{object.date_baptized}}</dd>
+  <dt>Church Life</dt>
+  <dd>Entered into the church life in {{object.first_church}} on {{object.first_church_date}}</dd>
+  {% if object.ftt_location is not None %}
+    <dt>Previously Attended</dt>
+    <dd>{{object.ftt_location}} and graduated on {{object.grad_date}}</dd>
+  {% endif %}
+  </dd>
+</dl>
+
+<dl class="dl-horizontal">
+  <dt>Marital Status</dt>
+  <dd>
+    {% if object.marital == "S" %}
+      Single
+    {% elif object.marital == "M" %}
+      Married
+    {% elif object.marital == "E" %}
+      Engaged
+    {% elif object.marital == "D" %}
+      Divorced/Separated
+    {% endif %}
+  </dd>
+
+  {% if object.marital == "M" or object.marital == "E" %}
+    <dt>Spouse Name</dt>
+    <dd>{{object.spouse_name}} (Age {{object.spouse_age}})</dd>
+    <dt>Spouse Occupation</dt>
+    <dd>{{object.spouse_occupation}}</dd>
+    <dt>Date of Marriage</dt>
+    <dd>{{object.date_mariage}} with {{object.dependents}} dependents</dd>
+    <dt>Spouse's Attitude</dt>
+    <dd>
+      {% if object.spouse_attitude == "A" %}
+        Agree
+      {% elif object.spouse_attitude == "D" %}
+        Disagree
+      {% elif object.spouse_attitude == "B" %}
+        Also Burdened
+      {% endif %}
+    </dd>
+  {% endif %}
+</dl>
+
+<dl class="dl-horizontal">
+  <dt>Financial Support</dt>
+  <dd> 
+    {% if object.support_yourself %}
+      Myself, 
+    {% endif %}
+    {% if object.support_church %}
+      Church, 
+    {% endif %}
+    {% if object.support_family %}
+      Family,
+    {% endif %}
+    {% if object.support_other %}
+      Other: {{object.support_other_explain}}
+    {% endif %}
+  </dd>
+  {% if object.pertinent_info != "" and object.pertinent_info is not None %}
+    <dt>Other Pertinent Info</dt>
+    <dd>{{object.pertinent_info}}</dd>
+  {% endif %}
+</dl>
+
+<label>Personal Statement</label><br>
+<p>{{object.narrative}}</p>
+
+<label>Word Count</label>
+<span>{{narrative_wc}}</span>
+
+{% endblock %}

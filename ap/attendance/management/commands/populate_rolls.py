@@ -1,11 +1,13 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group
-from attendance.models import Roll
-from schedules.models import Event
-from accounts.models import Trainee
+from attendance.models import *
+from schedules.models import *
+from accounts.models import *
 from terms.models import Term
-from datetime import date
+from leaveslips.models import *
+from datetime import *
 import random
+import pickle
 
 def new_roll(trainees=[], am=[]):
     events = Event.objects.filter(type="C")
@@ -40,6 +42,7 @@ class Command(BaseCommand):
           bro.groups.add(am_group)
           sis.groups.add(am_group)
         new_roll(trainees, am)
+
 
     def handle(self, *args, **options):
         print('* Populating rolls...')

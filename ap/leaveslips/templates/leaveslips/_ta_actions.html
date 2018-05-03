@@ -1,27 +1,21 @@
 {% if request.user.gender == "S" %}
-  <a href="{% url 'leaveslips:modify-status' leaveslip.classname 'S' leaveslip.id %}">
+  <a href="{% url 'leaveslips:modify-status' leaveslip.classname 'S' leaveslip.id %}" class="modify-status">
 {% else %}
-  <a href="{% url 'leaveslips:modify-status' leaveslip.classname 'A' leaveslip.id %}">
+  <a href="{% url 'leaveslips:modify-status' leaveslip.classname 'A' leaveslip.id %}" class="modify-status">
 {% endif %}
-  <button type="button" title="Approve" class="btn btn-success">
+  <button type="button" title="Approve" class="btn-lg btn-success">
     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
   </button>
 </a>
-<a href="{% url 'leaveslips:modify-status' leaveslip.classname 'D' leaveslip.id %}">
-  <button type="button" title="Deny" class="btn btn-danger">
+<a href="{% url 'leaveslips:modify-status' leaveslip.classname 'D' leaveslip.id %}" class="modify-status">
+  <button type="button" title="Deny" class="btn-lg btn-danger">
     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
   </button>
 </a>
 {% if leaveslip.status != 'F'%}
-  <a href="{% url 'leaveslips:modify-status' leaveslip.classname 'F' leaveslip.id %}">
-    <button type="button" title="Mark for fellowship" class="btn btn-warning">
+  <a href="{% url 'leaveslips:modify-status' leaveslip.classname 'F' leaveslip.id %}" class="modify-status">
+    <button type="button" title="Mark for fellowship" class="btn-lg btn-warning">
       <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-    </button>
-  </a>
-{% else %}
-  <a href="{% url 'leaveslips:modify-status' leaveslip.classname 'P' leaveslip.id %}">
-    <button type="button" title="Remove Mark for fellowship" class="btn btn-default">
-      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
     </button>
   </a>
 {% endif %}

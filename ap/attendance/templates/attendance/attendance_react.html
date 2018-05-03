@@ -7,6 +7,7 @@
 
 {% block references %}
   {% render_bundle 'attendance' 'css' %}
+  {{ trainee_select_form.media }}
 {% endblock %}
 
 {% block scripts %}
@@ -19,6 +20,7 @@
 {% endblock %}
 
 {% block content %}
+{% include "popups/trainee_select_modal.html" %}
 <div id="react-attendance-root"></div>
   {% render_bundle 'attendance' 'js' %}
 {% endblock %}

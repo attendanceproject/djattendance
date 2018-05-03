@@ -2,7 +2,9 @@ from django.core.management.base import BaseCommand
 from schedules.models import Event, Schedule
 from accounts.models import Trainee
 from terms.models import Term
+from attendance.models import Roll
 from django.db.models import Q
+from datetime import *
 
 
 from datetime import time
@@ -57,8 +59,35 @@ class Command(BaseCommand):
     campus_generic.trainees = Trainee.objects.filter(team__type='CAMPUS')
     campus_generic.save()
 
+  def _check_schedules(self):
+    ghost_sch = Schedule.objects.filter(trainees__isnull=True).exclude(comments__isnull=True)
+    for sch in ghost_sch: 
+        print "Schedule ID", sch
+        for e in sch.events.all():
+            print "Event ID", e
+            attached = [r.id for r in Roll.objects.filter(event=e)]
+            if attached:
+                print "Attached Roll IDs", attached
+        print 
+
+
+  def _check_events(self):
+    all_events = list(Event.objects.all())
+    for sch in Schedule.objects.all():
+        for e in sch.events.all():
+            if e in all_events:
+                all_events.remove(e)
+
+    print "Events not attached to any schedule and does not have a description"
+    for ev in all_events:
+        
+        if not ev.description:
+            print "Event ID", ev.id, ev   
 
   def handle(self, *args, **options):
-    Schedule.objects.all().delete()
-    print("* Populating schedules...")
-    self._create_schedule()
+    #print("* Populating schedules...")
+    #self._create_schedule()
+    print ("* Looking through schedules... ")
+    self._check_schedules()
+    # self._check_events()
+    print 'pulled on', datetime.now()

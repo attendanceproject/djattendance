@@ -43,7 +43,10 @@
 {% endblock %}
 
 {% block content %}
-<h2>Graduation Invites & DVDs</h2>
+<h2>{{ page_title }}</h2>
+{% if object.due_date %}
+  <h3>Due: {{ object.due_date }}</h3>
+{% endif %}
 <form id="id_grad_form" action="" method="post">
   {% csrf_token %}
   <div class="row"><div class="col-xs-12"><div class="panel">    

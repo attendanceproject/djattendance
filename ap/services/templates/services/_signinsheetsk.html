@@ -1,0 +1,20 @@
+<table class="shift">
+  <tr>
+    <td><b>{{a.0.service}}</b></td>
+  </tr>
+  <tr>
+    <td><b>{{a.0.service.calculated_date}}</b></td>
+    <td class="listings"><b>Substitute</b></td>
+  </tr>
+
+  {% for assign in a %}
+    {% include 'services/_signin.html' with a=assign num_blanks=1 %}
+  {% endfor %}
+
+  {% for i in 3|get_range %}
+  <tr>
+    <td>Volunteer {{i|add:"1"}}</td>
+    <td>{% include "services/_blanks.html" %}</td>
+  </tr>
+  {% endfor %}
+</table>

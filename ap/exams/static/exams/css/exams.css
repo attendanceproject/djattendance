@@ -60,11 +60,20 @@ div.question {
     overflow:auto;
 }
 
-.MCCheckboxes li,
+.MCCheckboxes li {
+  display: block;
+  width: 100%;
+  padding-left: 1%;
+}
+
 .fitb_answer_div li {
-    display: block;
-    float: left;
-    width: 20%;
+  display: block;
+  float: left;
+  width: 100%;
+}
+
+.OptionMC {
+  display:block;
 }
 
 span.select2-container {

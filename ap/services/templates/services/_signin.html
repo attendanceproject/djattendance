@@ -3,7 +3,7 @@
     <tr>
       <td>&#x2610; {{w.trainee.full_name2}}*</td>
       {% for i in num_blanks|get_range %}
-        <td>_______________</td>
+        <td>{% include "services/_blanks.html" %}</td>
       {% endfor %}
     </tr>
   {% endfor %}
@@ -12,7 +12,7 @@
     <tr>
       <td>&#x2610; {{w.trainee.full_name2}}</td>
       {% for i in num_blanks|get_range %}
-        <td>_______________</td>
+        <td>{% include "services/_blanks.html" %}</td>
       {% endfor %}
     </tr>
   {% endfor %}

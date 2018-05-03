@@ -13,7 +13,7 @@
         c: comment,
       },
       success: function(response){
-        flashAjaxStatus();
+        new Notification(Notification.SUCCESS, 'Saved').show();
         if (bt == 'Delete'){
           req.row($("#"+pk).parent('tr')).remove().draw();
         } else if (bt == 'Work Order Created'){

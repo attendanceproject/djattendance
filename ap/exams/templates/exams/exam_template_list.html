@@ -3,6 +3,25 @@
 {% load exam_filters %}
 {% load common_tags %}
 
+{% block scripts %}
+<script>
+function filterTermClass() {
+  var term = document.getElementById("term").value;
+  var cls = document.getElementById("class").value;
+  $("div.exam-panel").each((i, e) => {
+    const elem = $(e);
+    elem.show();
+    if (term != "Choose term" && elem.attr('data-term') != term) {
+      elem.hide();
+    }
+    if (cls != "Choose class" && elem.attr('data-class') != cls) {
+      elem.hide();
+    }
+  });
+}
+</script>
+{% endblock %}
+
 {% block title %}Exams{% endblock %}
 
 {% block content %}
@@ -15,23 +34,6 @@
     </div>
     {% endif %}
   </h1>
-
-  <script>
-  function filterTermClass() {
-    var term = document.getElementById("term").value;
-    var cls = document.getElementById("class").value;
-    $("div.exam-panel").each((i, e) => {
-      const elem = $(e);
-      elem.show();
-      if (term != "Choose term" && elem.attr('data-term') != term) {
-        elem.hide();
-      }
-      if (cls != "Choose class" && elem.attr('data-class') != cls) {
-        elem.hide();
-      }
-    });
-  }
-  </script>
 
   {% if exam_service %}
     <select id="term" onchange="filterTermClass()"> Term
@@ -61,15 +63,13 @@
             {% if user|is_trainee %}
               {% if exam.visible and not exam_service and not exam.completed %}
                 <a href="{% url 'exams:take' exam.id %}" class="btn btn-success">Take exam</a>
-              {% elif not exam.graded and not exam_service %}
-                <a href="{% url 'exams:graded' exam.id %}" class="btn btn-success">View graded responses</a>
-              {% elif exam.graded and not exam_service %}
+              {% elif exam.graded and exam.is_open and not exam_service %}
                 <a href="{% url 'exams:graded' exam.id %}" class="btn btn-success">View graded exam</a>
               {% endif %}
             {% endif %}
-
             {% if exam_service %}
               <a href="{% url 'exams:edit' exam.id %}" class="btn btn-default">Edit exam</a>
+              <a href = "{% url 'exams:preview' exam.id %}" class="btn btn-default"> Preview exam </a>
               <a href="{% url 'exams:grades' exam.id %}" class="btn btn-default">Enter scores</a>
               <a href="{% url 'exams:overview' exam.id %}" class="btn btn-default">View statistics</a>
               <a href="{% url 'exams:delete' exam.id %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>

@@ -1,4 +1,4 @@
-from .models import Worker, ServiceSlot, Service, Assignment
+from .models import Worker, ServiceSlot, Service, Assignment, ServiceException
 from rest_framework import serializers
 from rest_framework_bulk import (
     BulkListSerializer,
@@ -34,6 +34,13 @@ class ServiceTimeSerializer(BulkSerializerMixin, ModelSerializer):
     model = Service
     list_serializer_class = BulkListSerializer
     fields = ['id', 'name', 'weekday', 'start', 'end']
+
+
+class ExceptionActiveSerializer(BulkSerializerMixin, ModelSerializer):
+  class Meta(object):
+    model = ServiceException
+    list_serializer_class = BulkListSerializer
+    fields = ['id', 'active']
 
 
 class WorkerIDSerializer(BulkSerializerMixin, ModelSerializer):

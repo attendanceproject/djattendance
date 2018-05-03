@@ -20,7 +20,7 @@ class Command(BaseCommand):
         ta_obj = User.objects.get(firstname=firstname, lastname=lastname)
         print 'added ', ta_obj
         sta_perm.user_set.add(ta_obj)
-        ta_perm.user_set.remove(ta_obj)
+        ta_perm.user_set.add(ta_obj)
       except ObjectDoesNotExist:
         print ta, 'does not exist'
 

@@ -5,14 +5,16 @@
 {% bootstrap_messages %}
 
 {% block title %}
-  {{ view.model|model_verbose_name|capfirst }}s
+  {{ view.model|model_verbose_name|title }}s
 {% endblock %}
 
 {% block content %}
 
 <h1>{{ view.model|model_verbose_name|title }}s</h1>
 
-<div><a href="{{ view.model.get_create_url }}">Create new {{ view.model|model_verbose_name }}</a></div>
+{% if view.request.user|is_trainee or view.request.user|is_TA and not "audio" in view.model|model_verbose_name and not "web" in view.model|model_verbose_name %}
+  <div><a href="{{ view.model.get_create_url }}">Create new {{ view.model|model_verbose_name }}</a></div>
+{% endif %}
 
 {% block extra_links %}{% endblock %}
 

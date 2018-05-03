@@ -2,15 +2,63 @@
 
 {% block title %}Exam Overview{% endblock %}
 
+{% block scripts %}
+  <script type="text/javascript">
+  $(document).ready(function() {
+    $("#exam-overview").DataTable({
+      info: false,
+      paging: false,
+      autoWidth: true,
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      fixedHeader: {
+        header: true
+      },
+      buttons: [
+      {
+        extend: 'print',
+        text: 'Print',
+        autoPrint: true,
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'csvHtml5',
+        text: 'CSV',
+        exportOptions: {
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'pdf',
+        text: 'PDF',
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'collection',
+        buttons: 'columnsVisibility',
+        text: 'Show/Hide Columns',
+        columns: ':gt(1)',
+      },
+      ],
+    });
+  });
+  </script>
+{% endblock %}
+
 {% block content %}
   <h1>Exam Overview</h1>
 
   <div class="panel panel-default">
     <div class="panel-heading exam-panel-heading">
       <div class="btn-group pull-right">
-        <a href="{% url 'exams:makeups' %}" class="btn btn-default">
+        <!-- <a href="{% url 'exams:makeups' %}" class="btn btn-default">
           Generate Makeup PDF
-        </a>
+        </a> -->
         <a href="{% url 'exams:manage' %}">
           <button type="button" class="btn btn-default">Back</button>
         </a>
@@ -18,28 +66,37 @@
       <h3 class="panel-title exam-panel-title">{{ exam }}</h3>
     </div>
     <div class="panel-body">
-      <h4>General</h4>
-      <table class="table table-condensed statistics">
-        <tr><td>Average score </td><td>{{ average }}</td></tr>
-        <tr><td>Maximum score </td><td>{{ maximum }}</td></tr>
-        <tr><td>Minimum score </td><td>{{ minimum }}</td></tr>
+      <h4>General</h4> 
+      (Note: this shows the stats only for the aggregate of graded tests)
+      </br>
+      </br>
+      <table id="stats" class="table table-condensed statistics">
+        <tr><td>Average score </td><td>{{ average }} / {{ exam.total_score }}</td></tr>
+        <tr><td>Maximum score </td><td>{{ maximum }} / {{ exam.total_score }}</td></tr>
+        <tr><td>Minimum score </td><td>{{ minimum }} / {{ exam.total_score }}</td></tr>
       </table>
 
-      <table class="table table-striped">
-        <th>Trainee</th>
-        <th>Exam Grade</th>
-        {% for session in sessions %}
-          {% if exam.cutoff > session.grade %}
-            <tr class="danger">
-          {% else %}
-            <tr>
-          {% endif %}
-            <td>{{ session.trainee.full_name2 }}</td>
-            <td>{{ session.grade }}</td>
+      <table id="exam-overview" class="table table-striped">
+        <thead>
+          <tr>
+            <th>Trainee</th>
+            <th>Exam Grade</th>
           </tr>
-        {% empty %}
-          <i>No exam grades to view.</i>
-        {% endfor %}
+        </thead>
+        <tbody>
+          {% for session in sessions %}
+            {% if exam.cutoff > session.grade %}
+              <tr class="danger">
+            {% else %}
+              <tr>
+            {% endif %}
+              <td>{{ session.trainee.full_name2 }}</td>
+              <td>{{ session.grade }} / {{ session.exam.total_score }}</td>
+            </tr>
+          {% empty %}
+            <i>No exam grades to view.</i>
+          {% endfor %}
+        </tbody>
       </table>
     </div>
   </div>

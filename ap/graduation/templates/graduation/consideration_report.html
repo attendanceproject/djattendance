@@ -56,7 +56,6 @@
 
 {% block content %}
 <h1>{{title}}</h1>
-
 <div class="data-table-container">
   <table id="graduation" class="table table-striped table-bordered">
     <thead>
@@ -65,21 +64,19 @@
         <th>Lastname</th>
         <th>Attending XB</th>
         <th>Fellowshipped</th>
-        <th>Financial</th>
-        <th>Consideration Plan</th>
+        <th>Other Considerations</th>
         <th>Comments</th>
       </tr>
     </thead>
     <tbody>
       {% for c in data %}
       <tr>
-        <td>{{m.trainee.firstname}}</td>
-        <td>{{m.trainee.lastname}}</td>
-        <td>{{m.attend_XB}}</td>
-        <td>{{m.fellowshipped}}</td>
-        <td>{{m.financial}}</td>
-        <td>{{m.consideration_plan}}</td>
-        <td>{{m.comments}}</td>
+        <td>{{c.trainee.firstname}}</td>
+        <td>{{c.trainee.lastname}}</td>
+        <td>{{c.attend_XB}}</td>
+        <td>{{c.fellowshipped}}</td>
+        <td>{{c.consideration_plan}}</td>
+        <td>{{c.comments}}</td>
       </tr>
       {% endfor %}
     </tbody>

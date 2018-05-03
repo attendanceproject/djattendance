@@ -17,7 +17,7 @@ from terms.models import Term
 from datetime import datetime
 
 
-class HCSurveyAdminCreate(CreateView, GroupRequiredMixin):
+class HCSurveyAdminCreate(GroupRequiredMixin, CreateView):
   model = HCSurveyAdmin
   template_name = 'hc_admin/hc_admin.html'
   form_class = HCSurveyAdminForm
@@ -235,7 +235,7 @@ class HCRecommendationUpdate(HCRecommendationCreate, UpdateView):
     return ctx
 
 
-class HCSurveyTAView(TemplateView, GroupRequiredMixin):
+class HCSurveyTAView(GroupRequiredMixin, TemplateView):
   template_name = 'ta/hc_survey_ta_view.html'
   group_required = ['training_assistant']
 
@@ -254,7 +254,7 @@ class HCSurveyTAView(TemplateView, GroupRequiredMixin):
     return context
 
 
-class HCRecommendationTAView(TemplateView, GroupRequiredMixin):
+class HCRecommendationTAView(GroupRequiredMixin, TemplateView):
   template_name = 'ta/hc_recommendation_ta_view.html'
   group_required = ['training_assistant']
 

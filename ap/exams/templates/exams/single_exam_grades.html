@@ -8,6 +8,51 @@
 
 {% block scripts %}
   <script src="{% static 'exams/js/local-post.js' %}"></script>
+  <script type="text/javascript">
+  $(document).ready(function() {
+    $("#exam-grades-table").DataTable({
+      info: false,
+      paging: false,
+      autoWidth: true,
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      fixedHeader: {
+        header: true
+      },
+      buttons: [
+      {
+        extend: 'print',
+        text: 'Print',
+        autoPrint: true,
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'csvHtml5',
+        text: 'CSV',
+        exportOptions: {
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'pdf',
+        text: 'PDF',
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'collection',
+        buttons: 'columnsVisibility',
+        text: 'Show/Hide Columns',
+        columns: ':gt(1)',
+      },
+      ],
+    });
+  });
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -29,10 +74,15 @@
         <h3 class="panel-title exam-panel-title">Entering grades for {{ exam }}</h3>
       </div>
     </div>
-  <table class="grades-table table-striped table table-condensed">
-    <th>Trainee</th>
-    <th>Responses</th>
-    <th>Available Actions</th>
+  <table id="exam-grades-table" class="grades-table table-striped table table-condensed">
+    <thead>
+      <tr>
+        <th>Trainee</th>
+        <th>Responses</th>
+        <th>Available Actions</th>
+      </tr>
+    </thead>
+    <tbody>
     {% for trainee in data %}
       {% with trainee.current_sessions as sessions %}
       <tr>
@@ -47,8 +97,9 @@
         {% for session in sessions %}
           <td>
             {% if session.is_graded %}
-              {{ session.grade }}
+              {{ session.grade }} / {{ session.exam.total_score }}
             {% elif session.is_submitted_online %}
+              {{ session.grade }}
               <a href="{% url 'exams:grade' session.id %}">Grade Exam</a>
             {% else %}
               <input type="hidden" name="session-id" value="{{ session.id }}" />
@@ -77,9 +128,10 @@
     {% empty %}
       <i>No exam grades to view.</i>
     {% endfor %}
+    </tbody>
   </table>
   <br/>
-  <button type="submit" value="Save" class="btn btn-success">Save</button>
+  <button type="submit" value="Save" class="btn btn-success">Save grades</button>
   </form>
 
   <!-- hidden form for delete, unfinalize, and makeup -->

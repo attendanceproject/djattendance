@@ -3,16 +3,58 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 {% load render_bundle from webpack_loader %}
-
 {% block title %}Update Leave Slip{% endblock %}
 
 {% block scripts %}
+  {{ block.super }}
   {% include 'attendance/_attendance_data.html' %}
-  <script>
+<script type="text/javascript">
   $(document).ready(() => {
+    const action_description = $('#action_description');
+    $("#id_TA").val({{default_transfer_ta.id}});
+
     $('.hidden-input').hide();
+
+    let href = '';
+    $('.modify-status').click((e) => {
+      e.preventDefault();
+      href = e.currentTarget.href;
+      $('form').submit();
+    });
+    $('.btn-save').click((e) => {
+      href = '';
+    });
+    $('form').on('submit', (e) => {
+      {% block onsubmit %}{% endblock %}
+      e.preventDefault();
+      let form = $(e.currentTarget);
+      $.ajax({
+        url: form.attr('action'),
+        type: "POST",
+        data: form.serialize(),
+        success: (data) => {
+          if (!href) {
+            new Notification(Notification.SUCCESS, 'Saved').show();
+            return;
+          }
+          $.ajax({
+            url: href,
+            type: "GET",
+            success: (data) => {
+              let page = $(data);
+              let redirect = page.find('#ajax-redirect').attr('href');
+              new Notification(Notification.SUCCESS, page.find('.announce__title').html()).show();
+              window.location.href = redirect;
+            }
+          });
+        },
+        error: (jXHR, textStatus, errorThrown) => {
+          alert(errorThrown);
+        }
+      });
+    });
   });
-  </script>
+</script>
 {% endblock %}
 
 {% block references %}
@@ -21,13 +63,15 @@
 
 {% block content %}
   <h2>TA {{leaveslip.classname|title}} Slip View</h2>
-  <form action="{{leaveslip.get_ta_update_url}}" method="post" {%block onsubmit %}{% endblock %}>
+  <p>Leaveslip ID: <a id="ajax-redirect" {% block ls-link %}{% endblock %}>{{leaveslip.id}}</a></p>
+  {% include "leaveslips/_ta_labels.html" %}
+  <form action="{{leaveslip.get_ta_update_url}}" method="post">
     {% csrf_token %}
     <div class="row">
       <div class="col-md-5 col-xs-12">
         {% bootstrap_form form %}
         {% include 'leaveslips/_ta_actions.html' with selected_ta=view.request.user %}
-        <button type="submit" class="btn btn-primary btn-save">Save</button>
+        <button type="submit" class="btn-lg btn-primary btn-save">Save</button>
       </div>
       <div class="col-md-7 col-xs-12">
         <div id="react-calendar-root"></div>

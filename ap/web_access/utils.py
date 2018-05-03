@@ -4,6 +4,7 @@ import socket
 import subprocess
 
 from django.contrib import messages
+from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 
 from netaddr import EUI, IPAddress, mac_unix, AddrFormatError
@@ -89,7 +90,7 @@ def startAccess(request, id):
     message = "Web accesss granted for %s minutes." % minutes
     messages.add_message(request, messages.SUCCESS, message)
   # Redirect to original page. This request is sent from login and trainee web access list pages
-  return redirect(request.META['HTTP_REFERER'])
+  return redirect(request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
 def startAccessFromMacAddress(request, minutes, mac_address):

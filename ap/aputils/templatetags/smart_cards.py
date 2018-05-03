@@ -60,7 +60,7 @@ def generate_cards(context):
 
     cards.append(TA_requests)
 
-    ls_p = IndividualSlip.objects.filter(status='P', TA=user).count() + GroupSlip.objects.filter(status='P', TA=user).count()
+    ls_p = IndividualSlip.objects.filter(status__in=['P', 'S'], TA=user).count() + GroupSlip.objects.filter(status__in=['P', 'S'], TA=user).count()
     ls_f = IndividualSlip.objects.filter(status='F', TA=user).count() + GroupSlip.objects.filter(status='F', TA=user).count()
 
     TA_leaveslips = Card(
@@ -76,7 +76,7 @@ def generate_cards(context):
     all_summ = Summary.objects.filter(approved=False)
     summ_count = 0
     for s in all_summ:
-      if s.discipline.trainee in my_trainees:
+      if s.discipline and s.discipline.trainee in my_trainees:
         summ_count = summ_count + 1
 
     cn = Classnotes.objects.filter(status='P', trainee__in=my_trainees).count()
@@ -98,7 +98,7 @@ def generate_cards(context):
             CardLink(title="HC Forms", url=reverse('hc:hc-admin')),
             CardLink(title="Graduation", url=reverse('graduation:grad-admin')),
             CardLink(title="Trainee Information", url=reverse('trainee_information')),
-            CardLink(title="Desginated Services Viewer", url=reverse('services:designated_services_viewer')),
+            CardLink(title="Designated Services Viewer", url=reverse('services:designated_services_viewer')),
         ]
     )
 
@@ -131,7 +131,7 @@ def generate_cards(context):
         card_links=[
             CardLink(title="Service Portal", url=reverse('services:services_view')),
             CardLink(title="Service Admin", url='admin/services/'),
-            CardLink(title="Desginated Services Viewer", url=reverse('services:designated_services_viewer')),
+            CardLink(title="Designated Services Viewer", url=reverse('services:designated_services_viewer')),
         ]
     )
     cards.append(service_card)
@@ -154,8 +154,9 @@ def generate_cards(context):
     schedules_card = Card(
         header_title='Admin',
         card_links=[
-            CardLink(title="Events", url='admin/schedules/event/'),
-            CardLink(title="Schedules", url='admin/schedules/schedule/'),
+# Revoking the permissions just for the short term to stop AM's from changing schedules "benfin"
+#           CardLink(title="Events", url='admin/schedules/event/'),
+#           CardLink(title="Schedules", url='admin/schedules/schedule/'),
             CardLink(title="Roll", url='admin/attendance/roll/'),
         ]
     )

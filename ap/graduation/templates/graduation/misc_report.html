@@ -63,19 +63,15 @@
       <tr>
         <th>Firstname</th>
         <th>Lastname</th>
-        <th>Remembrance Text</th>
-        <th>Remembrance Reference</th>
         <th>Graduation Invitations</th>
         <th>Graduation Dvds</th>
       </tr>
     </thead>
     <tbody>
-      {% for m in list %}
+      {% for m in data %}
       <tr>
         <td>{{m.trainee.firstname}}</td>
         <td>{{m.trainee.lastname}}</td>
-        <td>{{m.remembrance_text}}</td>
-        <td>{{m.remembrance_reference}}</td>
         <td>{{m.grad_invitations}}</td>
         <td>{{m.grad_dvd}}</td>
       </tr>

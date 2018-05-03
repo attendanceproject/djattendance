@@ -33,24 +33,25 @@ class AudioPlayer {
     })[0];
     this.audioElement = elem;
 
-    if ($(this.audioElement).find('source').length === 0) {
-      this.hide();
+    if ($(this.audioElement).find('source').length != 0) {
+      this.show();
     }
   }
 
   playAudio(src) {
-    this.audioElement.setSrc(src);
+    let audio = $(this.audioElement);
+    audio.attr('src', src);
     this.audioElement.load();
+    this.audioElement.play();
   }
 
-  hide() {
-    $('.audio-player').css({'display': 'none'});
+  show() {
+    $('.audio-player').css({'display': 'auto'});
   }
 }
 
 $(document).ready(() => {
   let player = new AudioPlayer($('#player'));
-  player.audioElement.pause();
 });
 </script>
 </head>
@@ -58,7 +59,7 @@ $(document).ready(() => {
 <div class="audio-player">
   <audio id="player" controls autoplay>
     {% for audio in object_list %}
-      <source src="{{ audio.audio_file.url }}" title="{{ audio.event.name }}" type="audio/mp3">
+      <source src="{{ audio.audio_file.url }}" title="{{ audio.event.name }}" type="audio/mp3"></source>
     {% endfor %}
   </audio>
 </div>

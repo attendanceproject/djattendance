@@ -88,12 +88,12 @@ class Survey(models.Model):
   trainee = models.ForeignKey(Trainee, null=True, on_delete=models.SET_NULL)
 
   @property
-  def name(self):
+  def name_of_model(self):
     return self.__class__.__name__
 
   @property
   def due_date(self):
-    d = self.grad_admin.get_due_date_of(self.name)
+    d = self.grad_admin.get_due_date_of(self.name_of_model)
     if d:
       return d
     else:
@@ -101,10 +101,10 @@ class Survey(models.Model):
 
   @property
   def show_status(self):
-    return self.grad_admin.get_show_status_of(self.name)
+    return self.grad_admin.get_show_status_of(self.name_of_model)
 
   def get_absolute_url(self):
-    rev_url = 'graduation:' + self.name.lower() + '-view'
+    rev_url = 'graduation:' + self.name_of_model.lower() + '-view'
     return reverse(rev_url)
 
   @classmethod
@@ -113,7 +113,10 @@ class Survey(models.Model):
     return len(filter(lambda o: o.responded, qset))
 
   def __unicode__(self):
-    return "[%s] %s - %s" % (self.name, self.due_date, self.show_status)
+    return "[%s] %s - %s" % (self.name_of_model, self.due_date, self.show_status)
+
+  def menu_title(self):
+    return self.name_of_model.title()
 
   class Meta:
     abstract = True
@@ -121,10 +124,10 @@ class Survey(models.Model):
 
 class Testimony(Survey):
 
-  top_experience = models.TextField(null=True, max_length=300)
-  encouragement = models.TextField(null=True, max_length=300)
-  overarching_burden = models.TextField(null=True, max_length=250)
-  highlights = models.TextField(null=True, max_length=150)
+  top_experience = models.TextField(null=True)
+  encouragement = models.TextField(null=True)
+  overarching_burden = models.TextField(null=True)
+  highlights = models.TextField(null=True)
 
   @property
   def responded(self):
@@ -146,9 +149,9 @@ class Consideration(Survey):
   attend_XB = models.CharField(max_length=5, choices=XB_CHOICES, null=True)
 
   FELLOWSHIP_CHOICES = (
-      ('YES', 'YES'),
-      ('NO', 'NO'),
-      ('OTHER', 'OTHER')
+      ('YES', 'Yes'),
+      ('NO', 'No'),
+      ('OTHER', 'Other')
   )
 
   fellowshipped = models.CharField(max_length=5, choices=FELLOWSHIP_CHOICES, null=True)
@@ -244,7 +247,6 @@ class Remembrance(Survey):
 class Misc(Survey):
 
   grad_invitations = models.SmallIntegerField(blank=True, null=True)
-
   grad_dvd = models.SmallIntegerField(blank=True, null=True)
 
   @property
@@ -253,3 +255,6 @@ class Misc(Survey):
       return True
     else:
       return False
+
+  def menu_title(self):
+    return "Invites & DVDs"

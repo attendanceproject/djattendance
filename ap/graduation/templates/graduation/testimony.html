@@ -9,11 +9,21 @@
 {{ form.media }}
 
 <script type="text/javascript">
-  function updateCountdown() {
-    // form_id = $(this).attr('id')
-    display = $(this).parent().children(".remaining_chars")
-    var char_count = $(this).val().length;
-    jQuery(display).text(char_count + ' characters.');
+  function updateCountdown_limitCount() {
+    display = $(this).parent().children(".remaining_words")
+    var word_count = 0
+
+    if ($(this).val().trim()) {
+      word_count = $(this).val().trim().split(" ").length;
+    }
+    $(display).text(word_count + ' words.');
+
+    word_limit = parseInt($(this).prop('class').split(" ")[1])
+    if (word_count > word_limit) {
+      alert("You've hit the word limit!")
+      $(this).val($(this).val().split(" ", word_limit).join(" ") + " ")
+    }
+
   }
 
   $( document ).ready(() => {
@@ -21,9 +31,9 @@
     $('#id_grad_form *').attr("disabled", true);
     {% endif %}
 
-    $('.char_count').each(updateCountdown);
-    $('.char_count').change(updateCountdown);
-    $('.char_count').keyup(updateCountdown);
+    $('.word_count').each(updateCountdown_limitCount);
+    $('.word_count').change(updateCountdown_limitCount);
+    $('.word_count').keyup(updateCountdown_limitCount);
 
   });
 </script>
@@ -32,7 +42,7 @@
 
 {% block references %}
 <style type="text/css">
-  .remaining_chars{
+  .remaining_words{
     display: inline;
   }
 </style>
@@ -57,28 +67,28 @@
       <li>An area of your being the Lord touched</li>
       <li>The overall benefit of the Training</li></ul>
       <div class="row"><div class="col-xs-12">
-        {{form.top_experience}} <div class="remaining_chars"></div> 300 maximum.
+        {{form.top_experience}} <div class="remaining_words 300"></div> 300 maximum.
       </div></div>
   </div></div></div>
 
   <div class="row"><div class="col-xs-12"><div class="panel">
     <p>2. What fellowship would you like to pass on to subsequent terms for their encouragement</p>
       <div class="row"><div class="col-xs-12">
-        {{form.encouragement}} <div class="remaining_chars">/</div> 300 maximum.
+        {{form.encouragement}} <div class="remaining_words 300"></div> 300 maximum.
       </div></div>
   </div></div></div>
-  
+
   <div class="row"><div class="col-xs-12"><div class="panel">
     <p>3. What were some of the overarching burdens expressed in the brothers' speaking throughout your training? </p>
       <div class="row"><div class="col-xs-12">
-        {{form.overarching_burden}} <div class="remaining_chars"></div> 300 maximum.
+        {{form.overarching_burden}} <div class="remaining_words 250"></div> 250 maximum.
       </div></div>
   </div></div></div>
 
   <div class="row"><div class="col-xs-12"><div class="panel">
     <p>4. What were some major events, memorable moments, and/or highlights from your four terms of training?</p>
       <div class="row"><div class="col-xs-12">
-        {{form.highlights}} <div class="remaining_chars"></div> 300 maximum.
+        {{form.highlights}} <div class="remaining_words 150"></div> 150 maximum.
       </div></div>
   </div></div></div>
 

@@ -76,7 +76,7 @@ class Command(BaseCommand):
     groups.append('HC')
 
     while(len(groups) > 0):
-      g = Group.objects.get(name=groups.pop())
+      g, created = Group.objects.get_or_create(name=groups.pop())
       for trainee in groups.pop():
         lname, fname = trainee.split(', ', 1)
         g.user_set.add(User.objects.get(firstname=fname, lastname=lname))

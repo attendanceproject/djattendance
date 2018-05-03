@@ -1,5 +1,5 @@
 from django import forms
-from .models import XBApplication
+from .models import XBApplication, XBAdmin
 from aputils.widgets import DatePicker
 
 
@@ -25,13 +25,6 @@ class XBApplicationForm(forms.ModelForm):
     self.fields['support_family'].label = "Family/Friends"
     self.fields['support_other'].label = "Other"
 
-  SUPPORT_CHOICES = (
-      ('Y', 'Yourself'),
-      ('C', 'Church'),
-      ('F', 'Family'),
-      ('O', 'Other'),
-  )
-
   class Meta:
     model = XBApplication
     exclude = ['trainee', 'submitted', 'date_submitted', 'last_updated']
@@ -54,4 +47,16 @@ class XBApplicationForm(forms.ModelForm):
       "support_other": forms.CheckboxInput,
       'ftta_service': forms.TextInput(attrs={'rows': 1, 'size': '60vh'}),
       'pertinent_info': forms.Textarea(attrs={'rows': 4, 'cols': '100'}),
+    }
+
+
+class XBAdminForm(forms.ModelForm):  # used in grad.views
+  def __init__(self, *args, **kwargs):
+    super(XBAdminForm, self).__init__(*args, **kwargs)
+
+  class Meta:
+    model = XBAdmin
+    exclude = ['term', ]
+    widgets = {
+        'due_date': DatePicker(),
     }

@@ -20,6 +20,7 @@ from .models import fs, valid_audiofile_name
 from terms.models import Term
 from aputils.trainee_utils import trainee_from_user
 from aputils.utils import modify_model_status
+from itertools import chain
 
 
 def import_audiofiles():
@@ -64,8 +65,8 @@ class AudioHome(generic.ListView):
     return super(AudioHome, self).dispatch(request, *args, **kwargs)
 
   def get_queryset(self):
-    files = AudioFile.objects.filter_week(self.week)
     trainee = trainee_from_user(self.request.user)
+    files = AudioFile.objects.filter_list(self.week, trainee)
     for f in files:
       # replace methods with computed values because trainee can't be passed in template
       f.classnotes = f.classnotes(trainee)
@@ -77,10 +78,20 @@ class AudioHome(generic.ListView):
 
 class TAAudioHome(generic.ListView):
   model = AudioRequest
-  template_name = 'requests/request_list.html'
+  template_name = 'audio/audio_request_list.html'
 
   def get_queryset(self):
-    return AudioRequest.objects.filter_term(Term.current_term())
+    qs = AudioRequest.objects.filter_term(Term.current_term())
+    qs = qs.filter(status='P') | qs.filter(status='F')
+    return qs.order_by('date_requested')
+
+  def get_context_data(self, **kwargs):
+    context = super(TAAudioHome, self).get_context_data(**kwargs)
+    wars = AudioRequest.objects.none()
+    for status in ['P', 'F', 'A', 'D']:
+      wars = chain(wars, AudioRequest.objects.filter_term(Term.current_term()).filter(status=status).order_by('date_requested'))
+    context['wars'] = wars
+    return context
 
 
 class TAComment(GroupRequiredMixin, generic.UpdateView):

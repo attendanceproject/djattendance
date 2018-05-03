@@ -1,4 +1,9 @@
 {% extends "leaveslips/leaveslip_update.html" %}
+{% load common_tags %}
+
+{% block ls-link %}
+href="{% url 'leaveslips:individual-update' leaveslip.id %}"
+{% endblock %}
 
 {% block leaveslip_script %}
 <script>
@@ -12,6 +17,7 @@ let populate_events = () => {
   var input = $("<input>")
      .attr("type", "hidden")
      .attr("name", "events").val(JSON.stringify(events));
+  $('input[name=events]').remove();
   $('form').append($(input));
 };
 
@@ -28,6 +34,16 @@ function extraFields() {
     $('.night-out').parent().hide();
     $('.meal-out').parent().hide();
   }
+
+  if (reason == "NIGHT" || reason == "MEAL") {
+    let type = $('#id_type option:selected').text().toLowerCase();
+    {% if last_date %}
+    let msg = "<p>Last approved " + type + " slip: {{last_date}} ({{days_since}} days before).";
+    $("label[for='id_type']").next().after(msg);
+    {% else %}
+    $("label[for='id_type']").next().after("No previous " + type + " slip this term.");
+    {% endif %}
+  }
 }
 
 $(document).ready(extraFields());
@@ -39,5 +55,5 @@ $('#id_type').change(function() {
 {% endblock %}
 
 {% block onsubmit %}
-onsubmit="populate_events()"
+populate_events();
 {% endblock %}

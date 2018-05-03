@@ -1,6 +1,6 @@
-from .utils import bible_reading_finalized
+from .utils import unfinalized_week
 
 
 def bible_tracker_forced(request):
-    forced = not bible_reading_finalized(request.user)  # forced if bible reading not finalized
-    return {'bible_tracker_forced': forced}
+  forced = True if unfinalized_week(request.user) else False  # forced if bible reading not finalized
+  return {'bible_tracker_forced': forced}

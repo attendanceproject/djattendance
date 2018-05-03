@@ -6,7 +6,7 @@
 {% block scripts %}
 {{ block.super }}
 <script type="text/javascript">
- 
+
   function editvalue(update, email, field){
     $.ajax({
       async: false,
@@ -17,8 +17,8 @@
         pk: email,
         f: field
       },
-      success: function(response){
-        flashAjaxStatus()
+      success: function(response) {
+        new Notification(Notification.SUCCESS, 'Saved').show();
       },
     });
   };
@@ -45,8 +45,8 @@
         value: $this.text(),
         type: 'text',
         blur: function() {
-          $this.text(this.value);           
-          if (this.value != $orig){ 
+          $this.text(this.value);
+          if (this.value != $orig){
             editvalue(this.value, $this.parent().children(".pk").text(), $header)
           }
         },
@@ -146,7 +146,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for t in list_of_trainees%}
+      {% for t in list_of_trainees.iterator %}
       <tr id="{{t.pk}}">
         <td>{{t.firstname}}</td>
         <td>{{t.lastname}}</td>

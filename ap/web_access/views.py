@@ -51,7 +51,8 @@ class WebRequestList(generic.ListView):
 
   def get_queryset(self):
     if is_TA(self.request.user):
-      return WebRequest.objects.filter(status='P').order_by('date_assigned')
+      qs = WebRequest.objects.filter(status='P') | WebRequest.objects.filter(status='F')
+      return qs.order_by('date_assigned')
     else:
       trainee = trainee_from_user(self.request.user)
       qset = WebRequest.objects.filter(trainee=trainee).order_by('status')

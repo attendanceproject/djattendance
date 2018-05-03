@@ -32,8 +32,17 @@ class Qualification(models.Model):
   def __unicode__(self):
     return self.name
 
+
+class WorkerManager(models.Manager):
+  def get_queryset(self, *args, **kwargs):
+    return super(WorkerManager, self).get_queryset(*args, **kwargs).select_related('trainee')
+
+
 # Has exceptions
 class Worker(models.Model):
+
+  objects = WorkerManager()
+
   # Field put here so if trainee deleted will auto-delete worker model
   trainee = models.OneToOneField('accounts.Trainee')
   qualifications = models.ManyToManyField('Qualification', blank=True, related_name='workers')
@@ -77,7 +86,7 @@ class Worker(models.Model):
 
     return self._services_freq
 
-  # This is very inefficient. ... 
+  # This is very inefficient. ...
   @property
   def services_count(self):
     # cache results

@@ -10,7 +10,7 @@ from rest_framework import viewsets, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import *
+from .models import Trainee, User, TrainingAssistant, UserMeta
 from .forms import UserForm, EmailForm, SwitchUserForm
 from .serializers import UserSerializer, TraineeSerializer, TrainingAssistantSerializer
 
@@ -97,7 +97,7 @@ class AllTrainees(ListView):
         t.save()
 
     context = super(AllTrainees, self).get_context_data(**kwargs)
-    context['list_of_trainees'] = Trainee.objects.filter(is_active=True).prefetch_related('locality', 'house')
+    context['list_of_trainees'] = Trainee.objects.filter(is_active=True).select_related('team', 'locality', 'house')
     return context
 
 

@@ -27,14 +27,16 @@
         $("#id_marital_1").prop('checked', true)
       }else if (load_val == 'M'){
         $("#id_marital_2").prop('checked', true)
+        $("#spouse_question").show() //on load
       }else if (load_val == 'E'){
         $("#id_marital_3").prop('checked', true)
+        $("#spouse_question").show() // on load
       }else if (load_val == 'D'){
         $("#id_marital_4").prop('checked', true)
       }
 
       $("#id_marital_1").change(function(){
-        $("#spouse_question").toggle()
+        $("#spouse_question").hide()
       })
 
       $("#id_marital_2").change(function(){
@@ -113,7 +115,7 @@
     }
 
     function narrative_wordcount(){
-      $("form").submit(function () {
+      $("button[name='submit']").click(function () {
         word_count = $("#id_narrative").val().split(" ").length;
         if (word_count < 501){
           $('#id_narrative').fadeIn().html('').css("border","1px solid red");
@@ -133,7 +135,7 @@
     $( document ).ready(() => {
       // hide optional sections and uncheck all radio buttons
       $(".hide_initial").hide()
-      $(":radio").prop('checked', false)
+      //$(":radio").prop('checked', false) // commenting out because it erases already entered data.
 
       automobile()
       citizenship()
@@ -153,12 +155,15 @@
       $('#id_narrative').change(updateCountdown);
       $('#id_narrative').keyup(updateCountdown);
 
-      narrative_wordcount()      
+      narrative_wordcount()
+
+      {% if read_only %}
+        $('#id_xb_form *').prop("disabled", true);
+      {% endif %}
       
     });
   </script>
 
-  </script>
 {% endblock %}
 
 {% block references %}
@@ -174,18 +179,33 @@
 {% endblock %}
 
 {% block content %}
+{% if form.errors %}
+<!-- Error messaging -->
+  <div id="errors">
+    <div class="inner">
+      <p>There were some errors in the information you entered. Please correct the following:</p>
+      {{ form.non_field_errors }}
+      <ul>
+        {% for field in form %}
+          {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+<!-- /Error messaging -->
+{% endif %}
 <div class="text-center">
 <h2>APPLICATION FOR THE FTTA EXTENSION IN BOSTON</h2>
-<h3 style="font-size: 22px;">For Fall 2018</h3>
+<h3 style="font-size: 22px;">For {{term}}</h3>
 <h4 style="font-size: 18px;">STATEMENT OF PURPOSE</h4>
 </div>
 
-<p>FTTA-Extension in Boston (FTTA-XB) is a one-year program that supplements and extends training provided by the Full-time Training in Anaheim (FTTA). The burden of FTTA-XB is to produce full-time serving ones who are equipped to serve the Lord for an extended period of time. The primary aspects of this training are the learning of the basic lessons in service and the deeper development of the necessary experiences of life. A secondary but very important aspect of FTTA-XB is to train the young saints to study the truth and read te Bible properly to enable them to apprehend the depths of God’s revelation progressively over the full course of their serving life.</p>
+<p>FTTA-Extension in Boston (FTTA-XB) is a one-year program that supplements and extends training provided by the Full-time Training in Anaheim (FTTA). The burden of FTTA-XB is to produce full-time serving ones who are equipped to serve the Lord for an extend ed period of time. The primary aspects of this training are the learning of the basic lessons in service and the deeper development of the necessary experiences of life. A secondary but very important aspect of FTTA-XB is to train the young saints to study the truth and read te Bible properly to enable them to apprehend the depths of God’s revelation progressively over the full course of their serving life.</p>
 
 <p>Graduates of FTTA-XB are currently laboring on college campuses in the United States and Europe, and both destinations are critical for the Lord's present move.</p>
 
 <div class="text-center">
-<h3 style="margin-top: 15px; margin-bottom: 5px;">Application Deadline: <strong>May 1, 2018</strong></h3>
+<h3 style="margin-top: 15px; margin-bottom: 5px;">Application Deadline: <strong>{{due_date}}</strong></h3>
 <p >
   {% if submitted %}
     (application submitted)

@@ -129,6 +129,9 @@ class Section(models.Model):
   # Instructions
   instructions = models.TextField(null=True, blank=True)
 
+  # Required number of questions needed to submit exam
+  required_number_to_submit = models.IntegerField(default=0)
+
   # First section in exam has a section_index of 0
   section_index = models.IntegerField(default=0)
 
@@ -144,11 +147,11 @@ class Section(models.Model):
       responses = response.responses
       score_for_section = 0
       for i in range(1, self.question_count + 1):
-        question_data = ast.literal_eval(self.questions[str(i - 1)])
+        question_data = ast.literal_eval(self.questions[str(i)])
         # see if response of trainee equals answer; if it does assign point
         if self.section_type == 'FB':
-          responses_to_blanks = responses[str(i)].replace('\"', '').lower().split(';')
-          answers_to_blanks = str(question_data["answer"]).lower().split(';')
+          responses_to_blanks = responses[str(i)].replace('\"', '').lower().split('$')
+          answers_to_blanks = str(question_data["answer"]).lower().split('$')
           total_blanks = len(responses_to_blanks)
           number_correct = 0
           for i in range(0, total_blanks):
@@ -158,7 +161,7 @@ class Section(models.Model):
             except IndexError:
               continue
           # TODO: convert to decimal
-          blank_weight = int(question_data["points"]) / float(total_blanks)
+          blank_weight = float(question_data["points"]) / float(total_blanks)
           score_for_section += (number_correct * blank_weight)
         # Everything else other than FB and Essay can be automatically graded with this
         elif (responses[str(i)].replace('\"', '').lower() == str(question_data["answer"]).lower()):

@@ -20,7 +20,7 @@ const EventView = ({ event, status, onClick, selected }) => {
     height: Math.max(differenceInMinutes(event.end_datetime, event.start_datetime) * PIXELS_PER_MINUTE, MIN_HEIGHT),
     opacity: selected ? 0.5 : 1,
   };
-  
+
   let formatDate = date => new Date(date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
   let formatText = text => text.charAt(0).toUpperCase() + text.slice(1);
 
@@ -32,7 +32,7 @@ const EventView = ({ event, status, onClick, selected }) => {
   var timePopover = formatDate(event.start_datetime) + ' - ' + formatDate(event.end_datetime);
   var namePopover = event.name;
   var faClasses = "fa fa-" + FA_ICON_LOOKUP[status.slip]
-  var rollClasses = joinValidClasses([status.roll + (selected ? '-selected' : ''), todayClass, 'cal-day__event'])
+  var rollClasses = joinValidClasses([status.slip , status.roll, (selected ? 'selected' : ''), todayClass, 'cal-day__event'])
 
   let eventView = (
     <div className={rollClasses} style={divStyle} onClick={onClick}>

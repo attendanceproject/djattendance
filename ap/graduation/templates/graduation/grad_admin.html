@@ -9,7 +9,7 @@
 {{block.super}}
   <script type="text/javascript">
 
-    var fields = ['testimony', 'consideration', 'website', 'outline', 'misc', 'remembrance'];
+    var fields = ['testimony', 'consideration', 'website', 'outline', 'misc', 'remembrance', 'xb'];
 
     function hide_field(field){
       $('label[for="id_' + field + '_due_date"]').hide();
@@ -60,6 +60,16 @@
 
       hide_or_show_all();
       $( "select" ).change((e) => hide_or_show_element(e.target));
+
+      $('#id_xb_due_date').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        changeYear: true,
+        dateFormat: "yy-mm-dd",
+      });
+
+
+
     });
   </script>
 {% endblock %}
@@ -75,6 +85,21 @@
 {% endblock %}
 
 {% block content %}
+{% if form.errors %}
+  <!-- Error messaging -->
+    <div id="errors">
+      <div class="inner">
+        <p>There were some errors in the information you entered. Please correct the following:</p>
+        {{ form.non_field_errors }}
+        <ul>
+          {% for field in form %}
+            {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  <!-- /Error messaging -->
+{% endif %}
   <h2>{{ page_title }}</h2>
 
   <p>Stats</p>
@@ -99,7 +124,7 @@
             <th>{{form.consideration_due_date}}</th>
           </tr>
            <tr> 
-            <th><label for="{{form.website_show_status.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Report"><a href="{% url 'graduation:website-report' % ">{{form.website_show_status.label}}</a></label></th>
+            <th><label for="{{form.website_show_status.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Report"><a href="{% url 'graduation:website-report' %}">{{form.website_show_status.label}}</a></label></th>
             <th>{{form.website_show_status}}</th>  
             <th><label for="{{form.website_due_date.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Trainee View"><a href="{% url 'graduation:website-view' %}">{{form.website_due_date.label}}</a></label></th> 
             <th>{{form.website_due_date}}</th> 
@@ -111,7 +136,7 @@
             <th>{{form.outline_due_date}}</th>
           </tr>
           <tr>
-            <th><label for="{{form.remembrance_show_status.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Report"><a href="{% url 'graduation:misc-report' %}">{{form.remembrance_show_status.label}}</a></label></th>
+            <th><label for="{{form.remembrance_show_status.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Report"><a href="{% url 'graduation:rem-report' %}">{{form.remembrance_show_status.label}}</a></label></th>
             <th>{{form.remembrance_show_status}}</th>
             <th><label for="{{form.remembrance_due_date.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Trainee View"><a href="{% url 'graduation:remembrance-view' %}">{{form.remembrance_due_date.label}}</a></label></th>
             <th>{{form.remembrance_due_date}}</th>
@@ -121,6 +146,12 @@
             <th>{{form.misc_show_status}}</th>
             <th><label for="{{form.misc_due_date.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Trainee View"><a href="{% url 'graduation:misc-view' %}">{{form.misc_due_date.label}}</a></label></th>
             <th>{{form.misc_due_date}}</th>
+          </tr>
+          <tr>
+            <th><label for="{{xb_form.xb_show_status.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Report"><a href="{% url 'xb:xb-report' %}">{{xb_form.xb_show_status.label}}</a></label></th>
+            <th>{{xb_form.xb_show_status}}</th>
+            <th><label for="{{xb_form.xb_due_date.id_for_label}}" data-toggle="tooltip" data-placement="right" title="Trainee View"><a href="{% url 'xb:xb-application' %}">{{xb_form.xb_due_date.label}}</a></label></th>
+            <th>{{xb_form.xb_due_date}}</th>
           </tr>
         </table>
       </div>

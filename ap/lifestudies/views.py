@@ -146,7 +146,7 @@ class DisciplineDetailView(DetailView):
     if 'increase_penalty' in request.POST:
       self.get_object().increase_penalty()
       messages.success(request, "Increased Summary by 1")
-    return HttpResponseRedirect('')
+    return HttpResponseRedirect(reverse_lazy('lifestudies:discipline_list'))
 
 
 class SummaryCreateView(SuccessMessageMixin, CreateView):
@@ -204,7 +204,7 @@ class SummaryApproveView(DetailView):
   def post(self, request, *args, **kwargs):
     summary = self.get_object()
     post_summary(summary, request)
-    return HttpResponseRedirect('')
+    return HttpResponseRedirect(reverse_lazy('lifestudies:discipline_list'))
 
 
 class SummaryUpdateView(SuccessMessageMixin, UpdateView):

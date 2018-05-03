@@ -36,7 +36,19 @@
           {% csrf_token %}
           <ol id="question-list">
             {% for section, response, score, comments in data %}
-              <h4> {{ section.instructions }} </h4>
+              <h4> {{ section.section_type }} section </h4>
+              Instructions: {{ section.instructions }}
+              </br>
+              You must answer at least {{ section.required_number_to_submit }} questions for this section in order to submit the exam.
+              </br>
+              {% if section.section_type == 'Matching' %}
+                Matching Options:
+                <ol type="A">
+                {% for matching_answer in section.questions|get_matching_answers %}
+                  <li> {{ matching_answer }} </li>
+                {% endfor %}
+                </ol>
+              {% endif %}
               <input type="hidden" value="{{ section.id }}" name="section_id">
               <input type="hidden" value="{{ section.type }}" name="section_type">
               {% for question in section.questions %}
@@ -66,27 +78,27 @@
   <script>
   const SUCCESS_URL = "{{view.get_success_url}}";
 
-  function attach_counter(textarea, index) {
-    Countable.live(textarea, function(counter){
-      var span = $('#count-' + index);
-      span.html(counter.words);
-    });
+  function updateCountdown() {
+    display = $(this).parent().children(".char_count");
+    var char_count = 0
+    if ($(this).val()){
+      char_count = $(this).val().split(" ").length;
+    }    
+    jQuery(display).text(char_count + ' words.');
   }
 
   $(document).ready(function(e) {
     // Attach Countable to essay questions
-    var textareas = $('.exam-response');
-    for (var i = 0; i < textareas.length; i++) {
-      var textarea = textareas[i];
-      var index = $(textarea).attr('id').split('-')[1];
-      attach_counter(textarea, index);
-    }
+    $('textarea').each(updateCountdown);
+    $('textarea').change(updateCountdown);
+    $('textarea').keyup(updateCountdown);
 
     $("#exam_form").on("click", '#save_button, #finalize_button', e => {
       e.preventDefault();
 
       const form_data = $('#exam_form').serializeArray();
       //rtn_data = {SECTION_ID: {1:ANSWER1,2:ANSWER2,3:ANSWER3,...}, SECTION_ID: ...}
+      console.log(form_data);
       let rtn_data = {};
       let current_ques_index = 1;
       let current_section_type = '';
@@ -96,6 +108,8 @@
       let number_regex = /\d+/;
       let index = 0;
       let fitb_index = 0;
+      let current_mc_letter = '';
+      let current_mc_index = 0;
       // Iterate through each input in form
       // Each time we hit a new section_id, we start a new section
       // The next input will be section_type.
@@ -122,7 +136,7 @@
               current_ques_index++;
               break;
             case "MC":
-              index = v.name;
+              index = parseInt(v.name);
               break;
             case "FB":
               /* fitb index is the integer x in 'fitb-textarea-x', if x is less than current_fitb_index then it indicates
@@ -136,7 +150,7 @@
               break;
           }
           if (current_section[index] != undefined) {
-            current_section[index] = current_section[index].concat(';').concat(v.value);
+            current_section[index] = current_section[index].concat('##').concat(v.value);
           } else {
             current_section[index] = v.value;
           }
@@ -159,7 +173,7 @@
               location.reload();
             }
           } else {
-            alert('Error saving exam');
+            alert('Error saving exam: ' + data.msg);
           }
         },
         error: function (jqXHR, textStatus, errorThrown ) {

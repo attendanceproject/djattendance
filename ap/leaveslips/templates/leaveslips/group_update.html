@@ -1,5 +1,9 @@
 {% extends "leaveslips/leaveslip_update.html" %}
 
+{% block ls-link %}
+href="{% url 'leaveslips:group-update' leaveslip.id %}"
+{% endblock %}
+
 {% block leaveslip_script %}
   <script>
     $(document).ready(() => {

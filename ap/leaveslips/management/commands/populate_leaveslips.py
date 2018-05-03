@@ -42,6 +42,13 @@ class Command(BaseCommand):
               gls.trainees.add(th)
             gls.save()
 
+  # def _update_leaveslips(self):
+  #   all_IS = IndividualSlip.objects.all()
+  #   for IS in all_IS:
+  #     for r in IS.rolls.all():
+
   def handle(self, *args, **options):
     print("* Populating leave slips...")
     self._create_leaveslips()
+    # print ('* Updating Leavslips ')
+    # self._update_leaveslips()

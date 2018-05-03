@@ -61,7 +61,7 @@ $(document).ready(() => {
     s = $("#id_designated_service").find(":selected").attr('value')
     if (s){
       window.location.replace("{% url 'services:designated_service_hours' %}/"+s+"/"+w)
-    }  
+    }
   });
 
   $("#id_week").on("change", function(e) {
@@ -70,11 +70,11 @@ $(document).ready(() => {
     if (s){
       window.location.replace("{% url 'services:designated_service_hours' %}/"+s+"/"+w)
     }
-    
+
   });
 
   $("#id_service_hours_form").submit(function(e) {
-    flashAjaxStatus()
+    new Notification(Notification.SUCCESS, 'Saved').show();
   });
 
 });

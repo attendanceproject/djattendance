@@ -7,6 +7,12 @@ from rest_framework_bulk import (
     BulkSerializerMixin,
 )
 
+from pytz import timezone
+from tzlocal import get_localzone
+
+
+local_tz = get_localzone()
+
 
 class EventSerializer(BulkSerializerMixin, ModelSerializer):
   class Meta:
@@ -22,10 +28,10 @@ class EventWithDateSerializer(BulkSerializerMixin, ModelSerializer):
   end_datetime = serializers.SerializerMethodField()
 
   def get_start_datetime(self, obj):
-    return obj.start_datetime
+    return localized_time_iso(obj.start_datetime)
 
   def get_end_datetime(self, obj):
-    return obj.end_datetime
+    return localized_time_iso(obj.end_datetime)
 
   class Meta:
     model = Event
@@ -33,9 +39,19 @@ class EventWithDateSerializer(BulkSerializerMixin, ModelSerializer):
     fields = ['id', 'date', 'code', 'name', 'start_datetime', 'end_datetime']
 
 
+def localized_time_iso(t):
+  return timezone(str(local_tz)).localize(t).isoformat()
+
+
 class AttendanceEventWithDateSerializer(BulkSerializerMixin, ModelSerializer):
-  start_datetime = serializers.DateTimeField(read_only=True)
-  end_datetime = serializers.DateTimeField(read_only=True)
+  start_datetime = serializers.SerializerMethodField()
+  end_datetime = serializers.SerializerMethodField()
+
+  def get_start_datetime(self, obj):
+    return localized_time_iso(obj.start_datetime)
+
+  def get_end_datetime(self, obj):
+    return localized_time_iso(obj.end_datetime)
 
   class Meta:
     model = Event

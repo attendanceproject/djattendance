@@ -26,7 +26,14 @@ textarea {
   div {
     font-size: 11px;
     text-align: center;
-    padding: 0;
+    padding: 1px;
+    margin-left: 1%;
+    margin-bottom: 1%;
+    width: 32.3%;
+  }
+
+  & .pending {
+      background-color: $grey-light;
   }
 }
 
@@ -129,12 +136,22 @@ textarea {
     border: solid thin #ccc;
     margin:0;
     margin-top:-1px;
+    &__trainee-group {
+      margin-bottom: 10px;
+    }
     &__trainee-select {
       margin-bottom: 10px;
     }
     &__title {
       font-size: 17px;
       margin-bottom: 20px;
+      &__close {
+        cursor: pointer;
+      }
+      &__button {
+        margin-top: -7px;
+        margin-right: 10px;
+      }
     }
     &__entries {
       padding: 10px 15px 10px;
@@ -255,7 +272,7 @@ textarea {
     }
     &__event {
       position:absolute;
-      width:100%;
+      width: 97%;
       font-size: 10px;
       color: #000000;
       background-color: $grey-light;
@@ -271,11 +288,12 @@ textarea {
 
 .slip {
   position: absolute;
+  visibility: hidden;
   right: 0;
   bottom: 0;
   padding: 0 3px;
   line-height: normal;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .schedule-header {
@@ -295,30 +313,114 @@ textarea {
   font-size: 12px;
 }
 
+.excused {
+  background-color: $blue-light;
+}
+
 .absent {
   background-color: $red;
 
-  &-selected {
-    background: repeating-linear-gradient(135deg, $red, $red 3px, black 1px, gray 4px)
+  &.selected {
+    @include event_select_gradient($red, $red)
+  }
+}
+
+.present {
+
+  &.selected {
+    @include event_select_gradient($grey-light, $grey-light)
   }
 }
 
 .tardy {
   background-color: $yellow;
 
-  &-selected {
-    background: repeating-linear-gradient(135deg, $yellow, $yellow 3px, black 1px, gray 4px)
+  &.selected {
+    @include event_select_gradient($yellow, $yellow)
   }
 }
 
-.excused {
+.approved {
   background-color: $blue-light;
 
-  &-selected {
-    background: repeating-linear-gradient(135deg, $blue-light, $blue-light 3px, black 1px, gray 4px)
+  &.tardy {
+    @include event_border($yellow);
+
+    &.selected {
+      @include event_select_gradient($blue-light, $blue-light)
+    }
+  }
+  &.absent {
+    @include event_border($red);
+
+    &.selected {
+      @include event_select_gradient($blue-light, $blue-light)
+    }
+  }
+  &.present {
+    &.selected {
+      @include event_select_gradient($blue-light, $blue-light)
+    }
+  }
+  &.selected {
+    @include event_select_gradient($blue-light, $blue-light)
   }
 }
 
-.undefined-selected {
-  background: repeating-linear-gradient(135deg, $grey-light, $grey-light 3px, black 1px, gray 4px)
+.pending {
+  @include event_border($blue-light);
+
+  &.tardy {
+    background: $yellow;
+
+    &.selected {
+      @include event_select_gradient($yellow, $yellow)
+    }
+  }
+  &.absent {
+    background: $red;
+
+    &.selected {
+      @include event_select_gradient($red, $red)
+    }
+  }
+  &.present {
+    &.selected {
+      @include event_select_gradient($grey-light, $grey-light)
+    }
+  }
+  &.selected{
+    @include event_select_gradient($grey-light, $grey-light)
+  }
+}
+
+.fellowship {
+  @include event_border($blue-light);
+
+  &.tardy {
+    background: $yellow;
+
+    &.selected {
+      @include event_select_gradient($yellow, $yellow)
+    }
+  }
+  &.absent {
+    background: $red;
+
+    &.selected {
+      @include event_select_gradient($red, $red)
+    }
+  }
+  &.present {
+    &.selected {
+        @include event_select_gradient($grey-light, $grey-light)
+    }
+  }
+  &.selected{
+    @include event_select_gradient($grey-light, $grey-light)
+  }
+}
+
+.undefined.selected {
+  @include event_select_gradient($grey-light, $grey-light)
 }

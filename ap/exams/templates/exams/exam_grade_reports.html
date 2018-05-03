@@ -87,7 +87,7 @@
           {% endif %}
             <td>{{ session.trainee.full_name2 }}</td>
             <td>{{ session.exam }}</td>
-            <td>{{ session.grade }}</td>
+            <td>{{ session.grade|calculate_percentage:session.exam.total_score }}%</td>
           </tr>
         {% empty %}
           <tr><td colspan=100%><i>No exam grades to view.</i></td></tr>

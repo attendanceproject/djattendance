@@ -1,15 +1,16 @@
 <div class="form-horizontal exam_question">
   <li>{{ question.prompt }}<b> (Points: {{ question.points }})</b></li>
-  <div class="form-group right-push col-xs-6 col-sm-6 col-md-6 col-lg-6 MCCheckboxes">
-  {% for option in question.options|split_string_list %}
-  {% with count=forloop.counter|stringformat:"s" %}
-    <li>
-      <input type="checkbox" value="{{ forloop.counter }}"
-      {% if count in response|get_item:forloop.parentloop.counter0 %}checked{% endif %}
-      name="{{ forloop.parentloop.counter }}">{{ option }}
+  <div class="form-group right-push col-md-12 MCCheckboxes">
+  {% if question.options %}
+  {% for option in question.options|get_letter_ordered_options %}
+    <li class="OptionMC">
+      <label>
+      <input type="checkbox" name="{{ question.question_number }}" {% if option in response|get_item:question.question_number %}checked{% endif %} value="{{ option }}">
+      {{ forloop.counter|get_letter_for_multiple_choice_index }}. {{ option|get_multiple_choice_option }}
+      </label>
     </li>
-  {% endwith %}
   {% endfor %}
+  {% endif %}
   </div>
 </div>
 <div class="clearfix"></div>

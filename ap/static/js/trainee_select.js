@@ -1,4 +1,15 @@
-$(document).ready(function(){
+// data: array of trainee ids to be added into the Trainee field
+// function selects trainees in Trainee Select2 field.
+window.addTrainees = (trainee_ids) => {
+  var curr = ($('#id_trainees').val());
+  if (curr) {
+    trainee_ids = [...new Set([...curr, ...trainee_ids])];
+  }
+  $('#id_trainees').val(trainee_ids).trigger('change');
+  return;
+}
+
+$(document).ready(function() {
   $('body').append(TRAINEE_SELECT_MODAL_HTML);
   $('#id_team').djangoSelect2({width: '100%'});
   $('#id_house').djangoSelect2({width: '100%'});
@@ -7,15 +18,17 @@ $(document).ready(function(){
   var base_url = window.location.protocol + '//' + window.location.host;
   var api_base = '/api'
 
+
   function getTrainees(data) {
-    var trainee_groups = {'terms': [],
-                'gender': [],
-                'hc': [],
-                'team_types': [],
-                'teams': [],
-                'houses': [],
-                'localities': []
-               }
+    var trainee_groups = {
+      'terms': [],
+      'gender': [],
+      'hc': [],
+      'team_types': [],
+      'teams': [],
+      'houses': [],
+      'localities': []
+    };
 
     var deferreds = []; // all ajax deferred objects get pushed into here
 
@@ -129,7 +142,7 @@ $(document).ready(function(){
         }
       }
       if (intersect.length!==0) {
-        addTrainees(intersect.reduce((arr1,arr2) => arr1.filter(x => new Set(arr2).has(x))));
+        window.addTrainees(intersect.reduce((arr1,arr2) => arr1.filter(x => new Set(arr2).has(x))));
       }
     });
 
@@ -143,17 +156,6 @@ $(document).ready(function(){
       trainee_ids[trainee_ids.length] = data[i]['id'];
     };
     return trainee_ids;
-  }
-
-  // data: array of trainee ids to be added into the Trainee field
-  // function selects trainees in Trainee Select2 field.
-  function addTrainees(trainee_ids) {
-    var curr = ($('#id_trainees').val())
-    if (curr) {
-      trainee_ids = [...new Set([...curr, ...trainee_ids])]
-    }
-    $('#id_trainees').val(trainee_ids).trigger('change');
-    return;
   }
 
   $('#add_trainees').click(function(event) {
@@ -170,7 +172,7 @@ $(document).ready(function(){
     getTrainees(form_data);
     clearForm();
     $('#trainee_select').modal('hide');
-  })
+  });
 
   function getValues(object) {
     var values = [];
@@ -187,4 +189,4 @@ $(document).ready(function(){
     $('#id_house').select2().val(null).trigger('change');
     $('#id_locality').select2() .val(null).trigger('change');
   }
-})
+});

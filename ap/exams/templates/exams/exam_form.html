@@ -34,7 +34,7 @@
     var container = $(e.target).closest('.question').find(".MCCheckboxes");
     var inputs = container.find('input');
     var id = inputs.length + 1;
-    list_node = '<li><input type="checkbox" name="' + id + '" value=""> <textarea name="question-option-' + id + '" class="question form-control" placeholder="Enter choice"></textarea></li>'
+    list_node = '<li class="OptionMC"><label><input type="checkbox" name="' + String.fromCharCode(id + 64) + '" value="">' + String.fromCharCode(id + 64) + '.</label><textarea name="question-option-' + String.fromCharCode(id + 64) + '" class="question form-control" placeholder="Enter choice"></textarea></li>'
     container.append(list_node);
   }
 
@@ -95,6 +95,15 @@
     {% bootstrap_field form.term label_class="col-md-2" field_class="col-md-4" %}
     {% bootstrap_field form.description label_class="col-md-2" field_class="col-md-4" %}
 
+    <div class="form-group">
+      <label class="col-md-2 control-label" for="points">Total Exam Points</label>
+      <div class="col-md-4">
+        <div class="input-group">
+         <input type="number" name="exam-total-point" class="question form-control" value="{{ total_score }}" required/>
+        </div>
+      </div>
+    </div>
+
     <!-- Is the exam open -->
     <div class="form-group">
       <label class="col-md-2 control-label" for="is_open">Is Open</label>
@@ -107,6 +116,7 @@
             <input type="radio" autocomplete="off" name="is_open" value="False" {% if not is_open %}checked{% endif %}> No
           </label>
         </div>
+        (Note: after training office has finalized the grades for every trainee, toggle this option back to 'Yes' for the trainees to see their graded exams.)
       </div>
     </div>
 
@@ -151,13 +161,14 @@
 
 
   <!-- Create Exam Button -->
- <button id="exam-submit" name="" class="btn btn-success">
+  <button id="exam-submit" name="" class="btn btn-success">
     {% if exam_edit %}
       Save Exam
     {% else %}
       Create Exam
     {% endif %}
   </button>
+
 </form>
 
 {% endblock %}

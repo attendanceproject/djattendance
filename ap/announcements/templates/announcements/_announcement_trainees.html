@@ -5,4 +5,9 @@
     {{ trainee }}
     {% if not forloop.last %}, {% endif %}
   {% endfor %}
+
+  {% for trainee in announcement.trainees_read.all %}
+    <i> {{ trainee }} </i>
+    {% if not forloop.last %}, {% endif %}
+  {% endfor %}
 {% endif %}

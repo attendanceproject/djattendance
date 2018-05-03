@@ -26,9 +26,6 @@ $(document).ready(() => {
     $(panel).removeClass('panel-default');
     $(panel).addClass('panel-primary');
   });
-  if (audioList.audioItems.length > 0) {
-    audioList.audioItems[0].click();
-  }
 
   $('.download-button').click((e) => {
     $(e.target).parent().parent().parent().parent().find('.panel-body').toggle();

@@ -1,0 +1,36 @@
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{page_title}}</title>
+  <style>
+  body, html {
+    height: 100%;
+    margin: 0;
+  }
+
+  .error-bg {
+      /* The image used */
+      background-image: url("{% static image_path %}");
+
+      /* Full height */
+      height: 100%; 
+
+      /* Center and scale the image nicely */
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+  }
+  </style>
+</head>
+<body>
+<a href="{% url 'home' %}">
+  <div class="error-bg"></div>
+</a>
+</body>
+</html>

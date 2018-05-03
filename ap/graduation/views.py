@@ -3,18 +3,17 @@ from __future__ import unicode_literals
 
 from django.views.generic.edit import UpdateView
 from django.views.generic import ListView
-from django.db.models import Sum
 from django.template.defaultfilters import title
 
 from terms.models import Term
 from graduation.models import *
 from graduation.forms import *
+from xb_application.forms import XBAdminForm
+from xb_application.models import XBAdmin
 
 from braces.views import GroupRequiredMixin
 
 from datetime import datetime
-from itertools import chain
-from operator import attrgetter
 from collections import OrderedDict
 
 MODELS = [Testimony, Consideration, Website, Outline, Remembrance, Misc]
@@ -44,7 +43,7 @@ class CreateUpdateView(UpdateView):
     today = datetime.now().date()
     if self.object.show_status == 'SHOW' or today > self.object.due_date:
       ctx['read_only'] = True
-    ctx['page_title'] = self.object.name
+    ctx['page_title'] = self.object.name_of_model
     ctx['button_label'] = 'Save'
     return ctx
 
@@ -83,8 +82,14 @@ class MiscView(CreateUpdateView):
   form_class = MiscForm
   template_name = 'graduation/misc.html'
 
+  def get_context_data(self, **kwargs):
+    ctx = super(MiscView, self).get_context_data(**kwargs)
+    ctx['page_title'] = 'Grad Invites & DVDs'
 
-class GradAdminView(UpdateView, GroupRequiredMixin):
+    return ctx
+
+
+class GradAdminView(GroupRequiredMixin, UpdateView):
   model = GradAdmin
   form_class = GradAdminForm
   template_name = 'graduation/grad_admin.html'
@@ -100,7 +105,20 @@ class GradAdminView(UpdateView, GroupRequiredMixin):
 
   def post(self, request, *args, **kwargs):
     self.object = self.get_object()
+
+    if all(x in request.POST for x in ['xb_show_status', 'xb_due_date']):
+      self.xb_form_valid(request.POST)
+
     return super(GradAdminView, self).post(request, *args, **kwargs)
+
+  def xb_form_valid(self, data):
+    term = Term.current_term()
+    print term
+    xb, created = XBAdmin.objects.get_or_create(term=term)
+    print xb
+    form = XBAdminForm(data, instance=xb)
+    print form
+    form.save()
 
   def form_valid(self, form):
     return super(GradAdminView, self).form_valid(form)
@@ -115,19 +133,25 @@ class GradAdminView(UpdateView, GroupRequiredMixin):
     ctx['page_title'] = "Grad Admin"
     ctx['button_label'] = 'Save'
     ctx['4th_count'] = Misc.objects.filter(grad_admin=GradAdmin.objects.get(term=Term.objects.filter(current=True).first()), trainee__in=Trainee.objects.filter(current_term=4)).count()
+    # xb form
+    term = Term.current_term()
+    xba = XBAdmin.objects.filter(term=term)
+    if xba:
+      ctx['xb_form'] = XBAdminForm(instance=xba.first())
+    else:
+      ctx['xb_form'] = XBAdminForm()
     return ctx
 
 
-class ReportView(ListView):
+class ReportView(GroupRequiredMixin, ListView):
+  group_required = ['training_assistant', 'grad_committee']
 
   def get_context_data(self, **kwargs):
     context = super(ReportView, self).get_context_data(**kwargs)
+    context['data'] = self.model.objects.filter(trainee__current_term=4)
+    context['title'] = title(self.model._meta.verbose_name + ' Report')
 
-    o = self.model.objects.all()
-    context.update({
-        'data': o,
-        'title': title(self.model._meta.verbose_name + ' Report'),
-    })
+    return context
 
 
 class TestimonyReport(ReportView):
@@ -150,26 +174,11 @@ class OutlineReport(ReportView):
   template_name = 'graduation/outline_report.html'
 
 
-class MiscReport(ListView):
+class MiscReport(ReportView):
   model = Misc
   template_name = 'graduation/misc_report.html'
 
-  def get_context_data(self, **kwargs):
-    context = super(MiscReport, self).get_context_data(**kwargs)
 
-    ct = Term.objects.filter(current=True).first()
-    ga = GradAdmin.objects.get(term=ct)
-    misc = Misc.objects.filter(grad_admin=ga, trainee__in=Trainee.objects.filter(current_term=4))
-    rem = Remembrance.objects.filter(grad_admin=ga, trainee__in=Trainee.objects.filter(current_term=4))
-    m = [i for i in misc if i.responded]
-    r = [i for i in rem if i.responded]
-
-    result_list = sorted(chain(m, r), key=attrgetter('trainee'))
-
-    context.update({
-      'invite_count': misc.aggregate(Sum('grad_invitations')),
-      'dvd_count': misc.aggregate(Sum('grad_dvd')),
-      'list': result_list,
-      'title': 'Graduation Statistics'
-    })
-    return context
+class RemembranceReport(ReportView):
+  model = Remembrance
+  template_name = 'graduation/rem_report.html'

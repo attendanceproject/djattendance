@@ -1,4 +1,6 @@
 python-dateutil==2.6.0
+pytz==2018.3
+tzlocal==1.5.1
 
 Django==1.11.2
 psycopg2==2.7

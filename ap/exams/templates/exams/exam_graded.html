@@ -8,6 +8,7 @@
 {% block title %}Exam{% endblock %}
 
 {% block content %}
+  {% if is_graded and role != 'Grade' and exam_available %}
   <div class="panel-heading exam-panel-heading">
     <div class="btn-group pull-right">
       <a href="{% url 'exams:manage' %}">
@@ -23,5 +24,6 @@
   </div>
 
   {% include "exams/exam_grade.html" %}
+  {% endif %}
 
 {% endblock %}

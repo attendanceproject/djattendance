@@ -1,7 +1,8 @@
 from django import forms
 
 from aputils.trainee_utils import is_TA
-from .models import AudioRequest
+from terms.models import Term
+from .models import AudioRequest, AudioFile, order_audio_files
 
 
 class AudioRequestForm(forms.ModelForm):
@@ -21,7 +22,9 @@ class AudioRequestForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     self.user = kwargs.pop('user')
     super(AudioRequestForm, self).__init__(*args, **kwargs)
-    self.fields['audio_requested'].label_from_instance = lambda obj: "%s" % obj.get_full_name()
+    sorted_files = order_audio_files(AudioFile.objects.filter_term(Term.current_term()))
+    choices = [(a.id, a.get_full_name()) for a in sorted_files]
+    self.fields['audio_requested'].choices = choices
     if not is_TA(self.user):
       self.fields['TA_comments'].disabled = True
 

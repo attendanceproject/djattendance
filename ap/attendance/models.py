@@ -59,6 +59,28 @@ class Roll(models.Model):
   class Meta:
     ordering = ['-last_modified']
 
+  # only second year trainees have the possibility of duplicate rolls for the purpose of audit
+  # if only one roll exists for this event for this trainee on date, then this is the main roll
+  # else if there are two rolls for the same trainee, same event and on the same date
+  # if the trainee is on self_attenance, return true if the trainee and submitted_by are the same person
+  # else if the trainee is not on self attendance, return true if the roll is a present with a leaveslip attached
+  # else if the status is not present, return true if the submitted_by and the trainee are not the same
+  @property
+  def is_main_roll(self):  # this is what shows up on the personal attendance record
+    dup_rolls = Roll.objects.filter(trainee=self.trainee, event=self.event, date=self.date)
+    if dup_rolls.count() == 1:
+      # includes if present roll w/ leave slip by non self-att -- b/c dup_rolls.count = 1
+      if self.trainee.self_attendance:
+          return True if self.submitted_by == self.trainee else False
+      return True
+
+    elif self.trainee.self_attendance:  # main roll if submitted by roll's trainee
+      return True if self.submitted_by == self.trainee else False
+    # Not on self-attendance
+    else:  # main roll if submitted by other trainee
+      # includes if present roll w/ leave slip by non self-att -- b/c another trainee submits att
+      return False if self.submitted_by == self.trainee else True
+
   @staticmethod
   def update_or_create(validated_data):
     '''

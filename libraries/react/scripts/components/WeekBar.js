@@ -20,17 +20,14 @@ const WeekBar = ({isFirst, firstStart, firstEnd, secondStart, secondEnd, period,
                 WEEK {period * 2 + (isFirst ? 0 : 1)}&nbsp;
                 PERIOD <Select className="weekbar__period" clearable={false} options={periodChoices} value={selectedPeriod} onChange={selectPeriod}/>
               </div>
-              <div className="legend col-md-7">
-                <div className="row">
+              <div className="col-md-7">
+                <div className="legend row">
                   <div className="tardy legend__tardy col-xs-4">Tardy</div>
                   <div className="absent legend__absent col-xs-4">Absent</div>
                   <div className="excused legend__excused col-xs-4">Excused</div>
-                </div>
-                <div className="row">
-                  <div className="col-xs-3">Pending&nbsp;<SlipStatusIcon status='P' /></div>
-                  <div className="col-xs-3">Approved&nbsp;<SlipStatusIcon status='A' /></div>
-                  <div className="col-xs-3">Denied&nbsp;<SlipStatusIcon status='D' /></div>
-                  <div className="col-xs-3">Fellowship&nbsp;<SlipStatusIcon status='F' /></div>
+                  <div className="approved tardy legend__approved col-xs-4">Excused Tardy</div>
+                  <div className="approved absent legend__absent col-xs-4">Excused Absence</div>
+                  <div className="pending legend__tardy col-xs-4">Pending</div>
                 </div>
               </div>
             </div>

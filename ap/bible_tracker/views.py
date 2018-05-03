@@ -247,7 +247,7 @@ def finalizeStatus(request):
   if request.is_ajax():
     action = request.POST['action']
     week_id = request.POST['week_id']
-    forced = request.POST['forced']
+    forced = request.POST.get('forced', False)
 
     current_term = Term.current_term()
     term_id = current_term.id
