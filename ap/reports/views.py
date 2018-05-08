@@ -51,7 +51,9 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
   def post(self, request, *args, **kwargs):
     data = dict(request.POST.iterlists())
-    # print str(data)
+    #print str(data)
+    final_data_locality = dict() #{LOCALITY_NAME: {TRAINEE_NAME: {% Unex. Abs.: 10, % Sickness: 5, ...}, TRAINEE_NAME: ...}, LOCALITY_NAME: ...}
+    final_data_team = dict()
     rtn_data = dict()  # {TRAINEE_NAME: {% Unex. Abs.: 10, % Sickness: 5, ...}, TRAINEE_NAME: ...}
     date_data = dict()
     date_from = datetime.strptime(data['date_from'][0], '%m/%d/%Y')
@@ -61,7 +63,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     delta = date_to - date_from
 
     #filtered_trainees = Trainee.objects.filter(current_term__in=[1, 2, 3, 4])
-    filtered_trainees = Trainee.objects.filter(current_term__in=[4])
+    filtered_trainees = Trainee.objects.filter(current_term__in=[1])
 
     #averages of fields
     average_unexcused_absences_percentage = float(0)
@@ -89,8 +91,15 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     qs_group_slips = GroupSlip.objects.all()
     qs_group_slips.query = pickled_group_slips_query
 
-    localities = Locality.objects.all()
-    teams = Team.objects.all()
+    if 'sending-locality' in data['report_by']:
+      localities = Locality.objects.all()
+      for locality in localities:
+        final_data_locality[locality.city.name] = {}
+
+    if 'team' in data['report_by']:
+      teams = Team.objects.all()
+      for team in teams:
+        final_data_team[team.name] = {}
 
     for trainee in filtered_trainees:
       if trainee.full_name not in rtn_data:
@@ -99,7 +108,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       if trainee.locality is not None:
         rtn_data[trainee.full_name]["Sending Locality"] = trainee.locality.city.name
       else:
-        print "trainee " + trainee.full_name + " has no locality..."
+        #print "trainee " + trainee.full_name + " has no locality..."
         rtn_data[trainee.full_name]["Sending Locality"] = 'N/A'
       rtn_data[trainee.full_name]["team"] = trainee.team.name
       rtn_data[trainee.full_name]["ta"] = trainee.TA.full_name
@@ -123,7 +132,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       trainee_class_events = qs_trainee_rolls.query.filter(event__in=class_events)
       trainee_missed_classes = trainee_class_events.filter(status='A')
 
-      print("trainee is: " + trainee.full_name)
+      #print("trainee is: " + trainee.full_name)
       #print ("missed classes: " + str(trainee_missed_classes.count()))
       #print ("class events: " + str(trainee_class_events.count()))
 
@@ -164,9 +173,9 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
       #get total unexcused absences
       unexcused_absences = qs_trainee_rolls.query.filter(status='A').count() - absent_rolls_covered_in_group_slips.count() - absent_rolls_covered_by_indv_leaveslips.count()
-      print "all absences: " + str(qs_trainee_rolls.query.filter(status='A').count())
-      print "absent rolls in group slips: " + str(absent_rolls_covered_in_group_slips.count())
-      print "absent rolls in indv slips: " + str(absent_rolls_covered_by_indv_leaveslips.count())
+      #print "all absences: " + str(qs_trainee_rolls.query.filter(status='A').count())
+      #print "absent rolls in group slips: " + str(absent_rolls_covered_in_group_slips.count())
+      #print "absent rolls in indv slips: " + str(absent_rolls_covered_by_indv_leaveslips.count())
       try:
         rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(trainee_all_rolls.count()) * 100, 2)) + "%"
         average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
@@ -184,8 +193,13 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       rtn_data[trainee.full_name]["Average % Classes Missed"] = str(average_classes_missed_percentage) + "%"
       rtn_data[trainee.full_name]["Average % Sickness"] = str(average_sickness_percentage) + "%"
       rtn_data[trainee.full_name]["Average % Unex. Abs."] = str(average_unexcused_absences_percentage) + "%"
+      if 'sending-locality' in data['report_by']:
+        final_data_locality[rtn_data[trainee.full_name]["Sending Locality"]][trainee.full_name] = rtn_data[trainee.full_name]
+      if 'team' in data['report_by']:
+        final_data_team[rtn_data[trainee.full_name]["team"]][trainee.full_name] = rtn_data[trainee.full_name]
     
-    print str(rtn_data)
+    print str(final_data_locality)
+    print str(final_data_team)
 
     context = {
       'data': rtn_data,
