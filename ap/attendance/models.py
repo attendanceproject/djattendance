@@ -3,6 +3,7 @@ from datetime import date, datetime
 from django.db import models
 from schedules.models import Event
 from accounts.models import Trainee, User
+from django.core.urlresolvers import reverse
 
 """ attendance models.py
 The attendance module takes care of data and logic directly related
@@ -53,8 +54,11 @@ class Roll(models.Model):
   date = models.DateField()
 
   def __unicode__(self):
-    # return status, trainee name, and event
-    return "[%s] %s @ [%s] %s" % (self.date, self.event, self.status, self.trainee)
+    try:
+      # return status, trainee name, and event
+      return "[%s] %s @ [%s] %s" % (self.date, self.event, self.status, self.trainee)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   class Meta:
     ordering = ['-last_modified']
@@ -101,3 +105,9 @@ class Roll(models.Model):
     newroll, created = Roll.objects.update_or_create(**validated_data)
 
     return newroll
+
+  def get_absolute_url(self):
+    return reverse('attendance:admin-roll', kwargs={'pk': self.id})
+
+  def get_delete_url(self):
+    return reverse('attendance:admin-roll-delete', kwargs={'pk': self.id})

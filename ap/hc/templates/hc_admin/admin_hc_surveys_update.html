@@ -33,6 +33,7 @@
     </tbody>
     </table>
 </div>
+<h3>HC Survey #{{hcsa_form.instance.index}}</h3>
 
 <form id='id_hcsa_form' action="" method="post">
   {% csrf_token %}
@@ -42,6 +43,10 @@
   {% bootstrap_field hcsa_form.open_survey %}
 
   <button name="hcsa_form" value="hcsa_form" type="submit" class="btn btn-primary btn-save" id="submit">{{button_label1|safe}}</button>
+</form>
+<form action = "{{form.instance.get_delete_url}}" method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger btn-delete" name="delete">Delete</button>
 </form>
 
 {% endblock %}

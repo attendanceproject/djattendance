@@ -39,7 +39,7 @@ class HCRecommendationAdmin(models.Model):
 
 class HCSurvey(models.Model):
 
-  survey_admin = models.ForeignKey(HCSurveyAdmin, null=True, blank=True, on_delete=models.SET_NULL)
+  survey_admin = models.ForeignKey(HCSurveyAdmin, null=True, blank=True, on_delete=models.CASCADE)
 
   # many-to-one: The house (has many surveys) this survey concerns
   house = models.ForeignKey(House, null=True, on_delete=models.SET_NULL)
@@ -56,8 +56,13 @@ class HCSurvey(models.Model):
   # general comments concerning the house
   comment = models.TextField(blank=True, null=True)
 
+  submitted = models.BooleanField(default=False)
+
   def __unicode__(self):
-    return "House Survey: " + self.house.name
+    try:
+      return "House Survey: " + self.house.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class HCTraineeComment(models.Model):
@@ -72,7 +77,10 @@ class HCTraineeComment(models.Model):
   assessment = models.TextField(blank=True, null=True)
 
   def __unicode__(self):
-    return "Trainee Comment: " + self.trainee.full_name
+    try:
+      return "Trainee Comment: " + self.trainee.full_name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class HCRecommendation(models.Model):
@@ -99,4 +107,7 @@ class HCRecommendation(models.Model):
     return reverse('hc:hc-recommendation-update', kwargs={'pk': self.id})
 
   def __unicode__(self):
-    return "HC Rec.: " + self.house.name
+    try:
+      return "HC Rec.: " + self.house.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

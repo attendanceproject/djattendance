@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+  #submit{
+    display: inline-block;
+    float: left;
+  }
+
+  #delete_row{
+    display: inline-block;
+    float: right;
+  }
+
+  #add_row{
+    display: inline-block;
+    float: right;
+  }
+
+  .readonly{
+    background-color: #DEDEDE;
+  }
+
+</style>
+
+<script type="text/javascript">
+
+function date_formater(dt) {
+  date = dt.toLocaleDateString('en-US', options)
+  mon = date.slice(0, 2)
+  dat = date.slice(3, 5)
+  yer = date.slice(6, 10)
+  return yer + "-" + mon + "-" + dat
+}
+
+var dt_options = {
+  timepicker: false,
+  format: 'Y-m-d',
+  formatDate: 'Y-m-d',
+  defaultSelect: true,
+};
+var options = {year: 'numeric', month: '2-digit', day: '2-digit' };
+
+$(document).ready(() => {
+
+  var interim_start = "{{interim_start|date:'Y-m-d'}}";
+  
+  show_hide_post_interim();
+
+  $('.datepicker').datetimepicker(dt_options);
+
+  $("#add_row").click(add_row);
+
+  $("#delete_row").click(delete_row);
+
+  $('input[type=radio][name=intent]').change(show_hide_post_interim);
+
+  if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
+    $("#id_start").val(interim_start);
+    let dt = new Date(interim_start);
+    dt.setDate(dt.getDate() + 1);
+    $("#id_end").val(date_formater(dt));
+  }
+  $("[name='start']").prop( "readonly", true );
+  $("[name='start']").addClass('readonly');
+
+});
+
+function show_hide_post_interim(){
+    if($('#id_intent_1').is(':checked')) {
+      $("#id_post_intent_comments").show()
+      $('label[for=id_post_intent_comments]').show();
+      $("#id_post_training_intentions").show()
+      $('label[for=id_post_training_intentions]').show();
+    } else {
+      $("#id_post_intent_comments").hide()
+      $('label[for=id_post_intent_comments]').hide();
+      $("#id_post_training_intentions").hide()
+      $('label[for=id_post_training_intentions]').hide();
+    }
+  }
+
+  function add_row(){
+    let val = parseInt($("#id_itinerary_table tr:last").attr('id').split("_").pop());
+    dt_val = $("#id_itinerary_table tr:last #id_end").val()
+
+    if (dt_val != 0) {  //TODO: validate, i.e proper format, valid date range
+      let dt = new Date(dt_val);
+      $("#id_itinerary_table tr:last").clone().appendTo("#id_itinerary_table")
+      val++;
+      $("#id_itinerary_table tr:last").attr("id","row_" + val);
+      dt.setDate(dt.getDate() + 1);
+      $("#id_itinerary_table tr:last #id_start").val(date_formater(dt));
+      dt.setDate(dt.getDate() + 1);
+      $("#id_itinerary_table tr:last #id_end").val(date_formater(dt));
+      $($("#id_itinerary_table tr:last > td > input")[1]).datetimepicker(dt_options)
+
+    } else {
+      new Notification(Notification.SUCCESS, 'Please fill out an end time before adding another row.').show();
+    }
+  }
+
+  function delete_row(){
+    let val = parseInt($("#id_itinerary_table tr:last").attr('id').split("_").pop());
+    if (val != 0){
+      $("#id_itinerary_table tr:last").remove();
+    }
+  }
+
+
+
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+
+{% if form.errors %}
+<!-- Error messaging -->
+  <div id="errors">
+    <div class="inner">
+      <p>There were some errors in the information you entered. Please correct the following:</p>
+      {{ form.non_field_errors }}
+      <ul>
+        {% for field in form %}
+          {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+<!-- /Error messaging -->
+{% endif %}
+
+<form id="id_interim_intentions_form" method="post" action="">
+  {% csrf_token %}
+  <div class="panel">
+    <h4>Contact Information:</h4>
+    <p>Please verify that your contact information is up to date.</p><br>
+
+    <div class="row">
+      <div class="col-md-2">
+        First Name:
+      </div>
+      <div class="col-md-4">
+        <strong>{{request.user.firstname}}</strong>
+      </div>
+      <div class="col-md-2">
+        Last Name:
+      </div>
+      <div class="col-md-4">
+        <strong>{{request.user.lastname}}</strong>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        {{form.cell_phone.label}}:
+      </div>
+      <div class="col-md-4">
+        {{form.cell_phone}}
+      </div>
+      <div class="col-md-2">
+        {{form.home_phone.label}}:
+      </div>
+      <div class="col-md-4">
+        {{form.home_phone}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        {{form.email.label}}:
+      </div>
+      <div class="col-md-4">
+        {{form.email}}
+      </div>
+      <div class="col-md-2">
+        {{form.home_locality.label}}:
+      </div>
+      <div class="col-md-4">
+        {{form.home_locality}}
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-2">
+        {{form.home_address.label}}:
+      </div>
+      <div class="col-md-10">
+        {{form.home_address}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        {{form.home_city.label}}:
+      </div>
+      <div class="col-md-2">
+        {{form.home_city}}
+      </div>
+      <div class="col-md-2">
+        {{form.home_state.label}}:
+      </div>
+      <div class="col-md-2">
+        {{form.home_state}}
+      </div>
+      <div class="col-md-2">
+        {{form.home_zip.label}}:
+      </div>
+      <div class="col-md-2">
+        {{form.home_zip}}
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <h4>Interim Itinerary:</h2>
+    <p>Please be thorough in filling out the schedule below and include brief descriptions, locations with pertinent addresses, phone numbers, etc. for our ease in contacting you. The following return dates have been set to help you have a smooth transition into the next term, to give you additional time to unpack and settle into your house before pre-training, and to prepare your house for incoming trainees.<br/>
+
+    Second year trainees return by <strong>{{admin.date_2yr_return|date:'l, F d'}} at {{admin.date_2yr_return|date:'g:i a'}}</strong><br/>
+    First year trainees return by <strong>{{admin.date_1yr_return|date:'l, F d'}} at {{admin.date_1yr_return|date:'g:i a'}}</strong><br/></p>
+
+    <p>You may arrive as early as <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> but not later than the date and time above. Those who arrive before <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> must be available to serve. The next term of the Training begins on <strong>{{admin.term_begin_date|date:'l, F d'}}</strong>.</p>
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table table-bordered" id="id_itinerary_table">
+          <tr>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Notes/Comments</th>
+          </tr>
+          {% for itin_form in itinerary_forms %}
+          <tr id="row_{{forloop.counter0}}">
+            <td>{{itin_form.start}}</td>
+            <td>{{itin_form.end}}</td>
+            <td>{{itin_form.comments}}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div class="col-md-12">
+        <button type="button" class="btn btn-primary" id="delete_row">Delete</button>
+        <button type="button" class="btn btn-primary" id="add_row">Add</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <h4>{{form.intent.label}}:</h4>
+    <div class="row">
+      <div class="col-md-12">
+        {% for c in form.intent %}
+          {{c}}&nbsp;
+        {% endfor %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        {{form.post_training_intentions.label_tag}}:
+      </div>
+      <div class="col-md-2">
+        {{form.post_training_intentions}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        {{form.post_intent_comments.label_tag}}
+      </div>
+      <div class="col-md-2">
+        {{form.post_intent_comments}}
+      </div>
+    </div>
+  </div>
+    <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
+  </form>
+{% endblock %}

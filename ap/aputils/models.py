@@ -1,7 +1,6 @@
 from django.db import models
 
 from django_countries.fields import CountryField
-from django_countries.conf import settings
 
 from localflavor.us.models import USStateField
 
@@ -33,13 +32,16 @@ class City(models.Model):
   ordering = ('country', 'state', 'name', )
 
   def __unicode__(self):
-    city_str = self.name
+    try:
+      city_str = self.name
 
-    if self.state:
-      city_str = city_str + ", " + str(self.state)
-
-    city_str = city_str + ", " + str(self.country)
-    return city_str
+      if self.country == 'US':
+        city_str = city_str + ", " + str(self.state)
+      else:
+        city_str = city_str + ", " + str(self.country)
+      return city_str
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   class Meta:
     verbose_name_plural = "cities"
@@ -72,11 +74,14 @@ class Address(models.Model):
   details = models.CharField(max_length=150, null=True, blank=True)
 
   def __unicode__(self):
-    return '%s, %s %s' % (
-      (self.address1 + ", " + self.address2) if self.address2 else self.address1,
-      self.city,
-      self.zip_code
-    )
+    try:
+      return '%s, %s %s' % (
+        (self.address1 + ", " + self.address2) if self.address2 else self.address1,
+        self.city,
+        self.zip_code
+      )
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   class Meta:
     verbose_name_plural = "addresses"
@@ -107,7 +112,10 @@ class Vehicle(models.Model):
   user = models.ForeignKey('accounts.User', related_name='vehicles', blank=True, null=True, on_delete=models.SET_NULL)
 
   def __unicode__(self):
-    return ('%s %s %s') % (self.color, self.make, self.model)
+    try:
+      return ('%s %s %s') % (self.color, self.make, self.model)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class EmergencyInfo(models.Model):
@@ -126,7 +134,10 @@ class EmergencyInfo(models.Model):
   trainee = models.OneToOneField('accounts.Trainee', blank=True, null=True)
 
   def __unicode__(self):
-    return self.name + '(' + self.relation + ')'
+    try:
+      return self.name + '(' + self.relation + ')'
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class QueryFilter(models.Model):
@@ -137,6 +148,9 @@ class QueryFilter(models.Model):
   query = models.TextField()
 
   def __unicode__(self):
-    return self.name
-    q = eval(self.query)
-    return '%s - %s' % (self.name, '(' + ','.join(['%s=%s' % (k, v) for k, v in q.items()]) + ')')
+    try:
+      return self.name
+      # q = eval(self.query)
+      # return '%s - %s' % (self.name, '(' + ','.join(['%s=%s' % (k, v) for k, v in q.items()]) + ')')
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

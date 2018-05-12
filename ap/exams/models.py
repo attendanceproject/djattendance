@@ -49,7 +49,10 @@ class Exam(models.Model):
   # passing_percentage = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])
 
   def __unicode__(self):
-    return "%s [%s] - %s" % (self.get_category_display(), self.term, self.training_class.name)
+    try:
+      return "%s [%s] - %s" % (self.get_category_display(), self.term, self.training_class.name)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   # an exam is available to a particular trainee if the trainee is registered
   # for the class related to the exam and either the exam is (open and not
@@ -140,7 +143,10 @@ class Section(models.Model):
   questions = HStoreField(null=True)
 
   def __unicode__(self):
-    return "Section %s [%s] for %s" % (self.section_index, self.get_section_type_display(), self.exam)
+    try:
+      return "Section %s [%s] for %s" % (self.section_index, self.get_section_type_display(), self.exam)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   def autograde(self, response):
     if self.section_type != 'E':
@@ -188,7 +194,10 @@ class Session(models.Model):
   grade = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
   def __unicode__(self):
-    return "%s for %s" % (self.exam, self.trainee)
+    try:
+      return "%s for %s" % (self.exam, self.trainee)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Responses(models.Model):

@@ -61,7 +61,10 @@ class House(models.Model):
     return Bunk.objects.filter(room__house=self,position__in=position_list).exclude(trainee__active=True).count()
 
   def __unicode__(self):
-    return u'%s' % (self.name.strip(' '))
+    try:
+      return u'%s' % (self.name.strip(' '))
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Room(models.Model):
@@ -108,7 +111,10 @@ class Room(models.Model):
   floor = models.SmallIntegerField(default=1)
 
   def __unicode__(self):
-    return self.house.name + " " + self.get_type_display()
+    try:
+      return self.house.name + " " + self.get_type_display()
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Bunk(models.Model):
@@ -165,4 +171,7 @@ class Bunk(models.Model):
   notes = models.TextField(blank=True, null=True)
 
   def __unicode__(self):
-    return self.room.house.name + " Bunk " + str(self.number)
+    try:
+      return self.room.house.name + " Bunk " + str(self.number)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

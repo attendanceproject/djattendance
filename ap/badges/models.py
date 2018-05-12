@@ -65,14 +65,21 @@ class Badge(models.Model):
     super(Badge, self).save(*args, **kwargs)
 
   def __unicode__(self):
-    return u"[%s] %s" % (self.type, self.original.name)
+    try:
+      return u"[%s] %s" % (self.type, self.original.name)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
+
 
 # singleton object to hold badge color settings
 class BadgePrintSettings(SingletonModel):
   banner_color = ColorPickerField(blank=True, null=True)
 
   def __unicode__(self):
-    return u"Badge Printing Configuration"
+    try:
+      return u"Badge Printing Configuration"
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   class Meta:
     verbose_name = "Badge Printing Configuration"

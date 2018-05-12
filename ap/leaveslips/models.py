@@ -8,6 +8,7 @@ from terms.models import Term
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from aputils.utils import RequestMixin
+from schedules.models import Schedule
 
 
 """ leave slips models.py
@@ -118,7 +119,10 @@ class LeaveSlip(models.Model, RequestMixin):
       Roll.objects.filter(id=roll.id).delete()
 
   def __unicode__(self):
-    return "[%s] %s - %s" % (self.submitted.strftime('%m/%d'), self.type, self.trainee)
+    try:
+      return "[%s] %s - %s" % (self.submitted.strftime('%m/%d'), self.type, self.trainee)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class IndividualSlipManager(models.Manager):
@@ -197,6 +201,12 @@ class IndividualSlip(LeaveSlip):
   def get_update_url(self):
     return reverse('leaveslips:individual-update', kwargs={'pk': self.id})
 
+  def get_admin_url(self):
+    return reverse('leaveslips:admin-islip', kwargs={'pk': self.id})
+
+  def get_delete_url(self):
+    return reverse('leaveslips:admin-islip-delete', kwargs={'pk': self.id})
+
 
 class GroupSlipManager(models.Manager):
 
@@ -232,9 +242,11 @@ class GroupSlip(LeaveSlip):
   def get_date(self):
     return self.start.date()
 
+# checks for events in generic group calendar
   @property
   def events(self):
-    return self.get_trainee_requester().events_in_date_range(self.start, self.end)
+    return self.get_trainee_requester().events_in_date_range(self.start, self.end, 
+                                                             listOfSchedules=Schedule.objects.filter(trainee_select="GP"))
 
   @property
   def periods(self):
@@ -257,3 +269,9 @@ class GroupSlip(LeaveSlip):
 
   def get_absolute_url(self):
     return reverse('leaveslips:group-update', kwargs={'pk': self.id})
+
+  def get_admin_url(self):
+    return reverse('leaveslips:admin-gslip', kwargs={'pk': self.id})
+
+  def get_delete_url(self):
+    return reverse('leaveslips:admin-gslip-delete', kwargs={'pk': self.id})

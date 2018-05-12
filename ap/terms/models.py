@@ -26,8 +26,8 @@ LAST_WEEK = 19
 SPRING = 'Spring'
 FALL = 'Fall'
 
-class Term(models.Model):
 
+class Term(models.Model):
   class Meta:
     ordering = ['year', '-season']
 
@@ -222,4 +222,7 @@ class Term(models.Model):
       return False
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

@@ -1,16 +1,16 @@
 from collections import namedtuple
+
+from accounts.models import *
+from announcements.models import Announcement
+from audio.models import AudioRequest
+from classnotes.models import Classnotes
 from django import template
 from django.core.urlresolvers import reverse
-
-from web_access.models import WebRequest
-from announcements.models import Announcement
-from accounts.models import *
-from audio.models import AudioRequest
 from house_requests.models import *
-from room_reservations.models import RoomReservation
-from leaveslips.models import IndividualSlip, GroupSlip
+from leaveslips.models import GroupSlip, IndividualSlip
 from lifestudies.models import Summary
-from classnotes.models import Classnotes
+from room_reservations.models import RoomReservation
+from web_access.models import WebRequest
 
 
 def CardLink(title, url='#', number=None, ta_number=None):
@@ -38,23 +38,29 @@ def generate_cards(context):
     # filter for trainees assigned to current TA and cross it with existing web requests
     my_trainees = Trainee.objects.filter(TA=user)
 
-    web_access_count = WebRequest.objects.filter(status='P').count()
-    web_access_ta_count = WebRequest.objects.filter(status='P', trainee__in=my_trainees).count()
-    av_count = AudioRequest.objects.filter(status='P').count()
-    av_ta_count = AudioRequest.objects.filter(status='P', trainee_author__in=my_trainees).count()
+    web_access = WebRequest.objects.filter(status='P')
+    web_access_count = web_access.count()
+    web_access_ta_count = web_access.filter(trainee__in=my_trainees).count()
 
-    my_trainees = User.objects.filter(TA=user)
-    room_reservation_count = RoomReservation.objects.filter(status='P').count()
+    av = AudioRequest.objects.filter(status='P')
+    av_count = av.count()
+    av_ta_count = av.filter(trainee_author__in=my_trainees).count()
 
-    announce_count = Announcement.objects.filter(status='P').count()
+    room_res = RoomReservation.objects.filter(status='P')
+    room_reservation_count = room_res.count()
+    room_reservations_ta_count = room_res.filter(requester__in=my_trainees).count()
+
+    ann = Announcement.objects.filter(status='P')
+    announce_count = ann.count()
+    announce_ta_count = ann.filter(author__in=my_trainees).count()
 
     TA_requests = Card(
         header_title="Requests",
         card_links=[
             CardLink(title="Web Access", url=reverse('web_access:web_access-list'), number=web_access_count, ta_number=web_access_ta_count),
             CardLink(title="AV", url=reverse('audio:ta-audio-home'), number=av_count, ta_number=av_ta_count),
-            CardLink(title="Room Reservation", url=reverse('room_reservations:ta-room-reservation-list'),number=room_reservation_count),
-            CardLink(title="Announcements", url=reverse('announcements:announcement-request-list'), number=announce_count)
+            CardLink(title="Room Reservation", url=reverse('room_reservations:ta-room-reservation-list'), number=room_reservation_count, ta_number=room_reservations_ta_count),
+            CardLink(title="Announcements", url=reverse('announcements:announcement-request-list'), number=announce_count, ta_number=announce_ta_count)
         ]
     )
 
@@ -74,18 +80,18 @@ def generate_cards(context):
     cards.append(TA_leaveslips)
 
     all_summ = Summary.objects.filter(approved=False)
-    summ_count = 0
-    for s in all_summ:
-      if s.discipline and s.discipline.trainee in my_trainees:
-        summ_count = summ_count + 1
+    summ_count = all_summ.count()
+    summ_ta_count = all_summ.filter(discipline__trainee__in=my_trainees).count()
 
-    cn = Classnotes.objects.filter(status='P', trainee__in=my_trainees).count()
+    cn = Classnotes.objects.filter(status='P')
+    cn_count = cn.count()
+    cn_ta_count = cn.filter(trainee__in=my_trainees).count()
 
     TA_disciplines = Card(
         header_title="Discipline",
         card_links=[
-            CardLink(title="Life Study Summaries", url=reverse('lifestudies:discipline_list'), number=summ_count),
-            CardLink(title="Class Notes", url=reverse('classnotes:classnotes_list'), number=cn),
+            CardLink(title="Life Study Summaries", url=reverse('lifestudies:discipline_list'), number=summ_count, ta_number=summ_ta_count),
+            CardLink(title="Class Notes", url=reverse('classnotes:classnotes_list'), number=cn_count, ta_number=cn_ta_count),
         ]
     )
 
@@ -98,7 +104,9 @@ def generate_cards(context):
             CardLink(title="HC Forms", url=reverse('hc:hc-admin')),
             CardLink(title="Graduation", url=reverse('graduation:grad-admin')),
             CardLink(title="Trainee Information", url=reverse('trainee_information')),
-            CardLink(title="Designated Services Viewer", url=reverse('services:designated_services_viewer')),
+            CardLink(title="Designated Services Trainees", url=reverse('services:designated_services_viewer')),
+            CardLink(title="Designated Services Hours", url=reverse('services:service_hours_ta_view')),
+            CardLink(title="Interim Intentions", url=reverse('interim:interim_intentions_admin')),
         ]
     )
 
@@ -124,6 +132,15 @@ def generate_cards(context):
         ]
     )
     cards.append(badge_card)
+
+  if user.has_group(['av']):
+    audio_card = Card(
+        header_title='A/V',
+        card_links=[
+            CardLink(title="Audio Files Admin", url='admin/audio/audiofile'),
+        ]
+    )
+    cards.append(audio_card)
 
   if user.has_group(['service_schedulers']):
     service_card = Card(
@@ -154,9 +171,6 @@ def generate_cards(context):
     schedules_card = Card(
         header_title='Admin',
         card_links=[
-# Revoking the permissions just for the short term to stop AM's from changing schedules "benfin"
-#           CardLink(title="Events", url='admin/schedules/event/'),
-#           CardLink(title="Schedules", url='admin/schedules/schedule/'),
             CardLink(title="Roll", url='admin/attendance/roll/'),
         ]
     )

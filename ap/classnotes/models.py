@@ -122,9 +122,12 @@ class Classnotes(models.Model):
     return Classnotes.objects.filter(date_submitted__lt=self.date_submitted, trainee=self.trainee).order_by('-date_submitted').first()
 
   def __unicode__(self):
-    return "{name}'s class note for {classname} assigned on {date_assigned} Status: {status}".format(
-        name=self.trainee.full_name,
-        classname=self.event.name,
-        date_assigned=timezone('US/Pacific').localize(self.date_assigned),
-        status=self.status,
-    )
+    try:
+      return "{name}'s class note for {classname} assigned on {date_assigned} Status: {status}".format(
+          name=self.trainee.full_name,
+          classname=self.event.name,
+          date_assigned=timezone('US/Pacific').localize(self.date_assigned),
+          status=self.status,
+      )
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

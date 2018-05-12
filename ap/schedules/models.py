@@ -14,6 +14,7 @@ from aputils.utils import comma_separated_field_is_in_regex
 from aputils.eventutils import EventUtils
 
 from schedules.constants import WEEKDAYS
+from django.core.urlresolvers import reverse
 
 """ SCHEDULES models.py
 This schedules module is for representing weekly trainee schedules.
@@ -120,11 +121,20 @@ class Event(models.Model):
     return (self.end > event.start) and (event.end > self.start)
 
   def __unicode__(self):
-    if self.day:
-      date = self.day
-    else:
-      date = self.get_weekday_display()
-    return "%s %s [%s - %s] %s" % (date, self.weekday, self.start.strftime('%H:%M'), self.end.strftime('%H:%M'), self.name)
+    try:
+      if self.day:
+        date = self.day
+      else:
+        date = self.get_weekday_display()
+      return "%s %s [%s - %s] %s" % (date, self.weekday, self.start.strftime('%H:%M'), self.end.strftime('%H:%M'), self.name)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
+
+  def get_absolute_url(self):
+    return reverse('schedules:admin-event', kwargs={'pk': self.id})
+
+  def get_delete_url(self):
+    return reverse('schedules:admin-event-delete', kwargs={'pk': self.id})
 
 
 class ScheduleManager(models.Manager):
@@ -276,7 +286,10 @@ class Schedule(models.Model):
     ordering = ('priority', 'season')
 
   def __unicode__(self):
-    return '[%s] %s - %s schedule' % (self.priority, self.name, self.season)
+    try:
+      return '[%s] %s - %s schedule' % (self.priority, self.name, self.season)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   @staticmethod
   def current_term_schedules():
@@ -365,6 +378,15 @@ class Schedule(models.Model):
     trainees = self.__get_qf_trainees()
     if trainees:
       self.trainees.set(trainees)
+
+  def get_absolute_url(self):
+    return reverse('schedules:admin-schedule', kwargs={'pk': self.id})
+
+  def get_delete_url(self):
+    return reverse('schedules:admin-event-delete', kwargs={'pk': self.id})
+
+  def get_split__partial_url(self):
+    return '/schedules/admin/schedules/split/%s/' % str(self.id)
 
   # TODO: Hailey will write a wiki to explain this function.
   def assign_trainees_to_schedule(self):

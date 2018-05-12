@@ -122,12 +122,15 @@ class WebRequest(models.Model, RequestMixin):
     return past_expiration_date or used_up
 
   def __unicode__(self):
-    if self.trainee is None:
-      fullname = self.guest_name
-    else:
-      fullname = self.trainee.full_name
-    return '[{reason}] {name}. Duration: {duration}'.format(
-        name=fullname,
-        reason=self.reason,
-        duration=self.minutes
-    )
+    try:
+      if self.trainee is None:
+        fullname = self.guest_name
+      else:
+        fullname = self.trainee.full_name
+      return '[{reason}] {name}. Duration: {duration}'.format(
+          name=fullname,
+          reason=self.reason,
+          duration=self.minutes
+      )
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

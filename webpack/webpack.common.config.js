@@ -32,7 +32,21 @@ module.exports = {
         exclude: [/node_modules/],
         use: [{
           loader: 'babel-loader',
-          query: { 'plugins': ['react-hot-loader/babel'], 'presets': ['react', ['env', {'modules': false}], 'stage-2'] },
+          options: {
+            'plugins': ['react-hot-loader/babel'],
+            'presets': [
+              ['@babel/preset-env', {
+                'targets': {
+                  "browsers": [
+                    "safari >= 7"
+                  ]
+                },
+                'modules': false
+              }],
+              '@babel/preset-react',
+              ["@babel/preset-stage-2", { "decoratorsLegacy": true }]
+            ]
+          },
         }],
       }, {
         test: /\.woff2?$|\.ttf$|\.eot$|\.svg$|\.png$|\.gif$/,

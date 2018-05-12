@@ -20,7 +20,10 @@ class XBAdmin(models.Model):
   xb_due_date = models.DateField(blank=True, null=True)
 
   def __unicode__(self):
-    return "[XB Applications] %s" % (self.term)
+    try:
+      return "[XB Applications] %s" % (self.term)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   def get_absolute_url(self):
     return reverse('xb:xb-admin')
@@ -119,13 +122,13 @@ class XBApplication(models.Model):
 
   degree2 = models.CharField(max_length=100, null=True, blank=True)
 
-  date_saved = models.DateField(null=True, blank=True)
+  date_saved = models.CharField(max_length=10, null=True, blank=True)
 
-  date_baptized = models.DateField(null=True, blank=True)
+  date_baptized = models.CharField(max_length=10, null=True, blank=True)
 
   first_church = models.CharField(max_length=150, null=True, blank=True)
 
-  first_church_date = models.DateField(null=True, blank=True)
+  first_church_date = models.CharField(max_length=10, null=True, blank=True)
 
   ftta_service = models.CharField(max_length=300, null=True, blank=True)
 
@@ -168,10 +171,13 @@ class XBApplication(models.Model):
   last_updated = models.DateTimeField(null=True, blank=True)
 
   def __unicode__(self):
-    if self.trainee:
-      return "[%s] - [Submitted: %s]" % (self.trainee, self.submitted)
-    else:
-      return "[None] - [Submitted: %s]" % (self.submitted)
+    try:
+      if self.trainee:
+        return "[%s] - [Submitted: %s]" % (self.trainee, self.submitted)
+      else:
+        return "[None] - [Submitted: %s]" % (self.submitted)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   def get_absolute_url(self):
     return reverse('xb:xb-application')

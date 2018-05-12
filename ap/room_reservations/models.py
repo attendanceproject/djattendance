@@ -83,7 +83,10 @@ class RoomReservation(models.Model, RequestMixin):
     self.old_status = self.status
 
   def __unicode__(self):
-    return "[%s] %s - %s" % (self.submitted.strftime('%m/%d'), self.room, self.requester)
+    try:
+      return "[%s] %s - %s" % (self.submitted.strftime('%m/%d'), self.room, self.requester)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   def get_absolute_url(self):
     return reverse('room_reservations:room-reservation-update', kwargs={'pk': self.id})

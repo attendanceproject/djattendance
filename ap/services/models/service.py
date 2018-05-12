@@ -16,7 +16,10 @@ class Category(models.Model):
   description = models.TextField(blank=True, null=True)
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 # Should be able to define number and type of workers needed.
 # Also allow volunteers, extras to be added
@@ -110,7 +113,10 @@ class Service(models.Model):
     return (self.end >= service.start) and (service.end >= self.start)
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 '''
@@ -150,9 +156,12 @@ class ServiceSlot(models.Model):
     super(ServiceSlot, self).save(*args, **kwargs)
 
   def __unicode__(self):
-    return '%s, %s : %d x %s:%s (workload: %d)' % (
-      self.service, self.worker_group, self.workers_required, self.role, self.gender, self.workload
-    )
+    try:
+      return '%s, %s : %d x %s:%s (workload: %d)' % (
+        self.service, self.worker_group, self.workers_required, self.role, self.gender, self.workload
+      )
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   class Meta:
     ordering = ['name']

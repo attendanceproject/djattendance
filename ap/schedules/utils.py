@@ -1,11 +1,11 @@
-import datetime
-
+from datetime import timedelta
+from collections import namedtuple
 # from schedules.models import Schedule
 
 
 def next_dow(d, day):
   while d.weekday() != day:
-    d += datetime.timedelta(1)
+    d += timedelta(1)
   return d
 
 
@@ -40,6 +40,7 @@ def should_split_schedule(schedule, week):
 
 
 def split_schedule(schedule, week):
+  from schedules.models import Schedule
   """ If the schedule needs to split, returns a tuple of schedules--the parent schedule
     (which may or may not be the schedule that was passed in), the earlier split of the
     schedule, and the later split of the schedule.  Both of the splits will contain
@@ -59,12 +60,12 @@ def split_schedule(schedule, week):
       return schedule, None, schedule
 
   # clone
-  schedule_copy = Schedule.objects.get(pk=schedule.id)
+  schedule_copy = Schedule.objects.get(id=schedule.id)
   s1 = schedule_copy
   s1.pk = None
   s1.save()
 
-  schedule_copy = Schedule.objects.get(pk=schedule.id)
+  schedule_copy = Schedule.objects.get(id=schedule.id)
   s2 = schedule_copy
   s2.pk = None
   s2.save()
@@ -114,3 +115,14 @@ def split_schedule(schedule, week):
     return schedule.parent_schedule, s1, s2
   else:
     return schedule, s1, s2
+
+
+def time_overlap(start1, end1, start2, end2):
+  Range = namedtuple('Range', ['start', 'end'])
+  r1 = Range(start=start1, end=end1)
+  r2 = Range(start=start2, end=end2)
+  latest_start = max(r1.start, r2.start)
+  earliest_end = min(r1.end, r2.end)
+  delta = (earliest_end - latest_start).days + 1
+  overlap = max(0, delta)
+  return overlap

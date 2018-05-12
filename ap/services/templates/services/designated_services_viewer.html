@@ -9,6 +9,28 @@
 {{ block.super }}
 <script type="text/javascript">
   $(document).ready(() => {
+
+    $.fn.dataTable.ext.buttons.ds = {
+      text: 'Has a Designated Service',
+      action: function(){
+
+        if (this.active()){
+          $('#id_service_viewer_table').DataTable().column(4).search("^$", true, false).draw()
+          this.active("false");
+        } else {
+          $('#id_service_viewer_table').DataTable().column(4).search("^.+$", true, false).draw()          
+          this.active("true");
+        }
+      }
+    };
+
+    $.fn.dataTable.ext.buttons.show_all = {
+      text: 'Show All',
+      action: function(){
+        $('#id_service_viewer_table').DataTable().column(4).search("", true, false).draw()
+      }
+    };
+
     $("#id_service_viewer_table").DataTable({
       info: false,
       paging: false,
@@ -25,31 +47,56 @@
           columns: ':visible'
         },
       },
+      {
+        extend: 'csvHtml5',
+        text: 'CSV',
+        exportOptions: {
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'pdf',
+        text: 'PDF',
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      "ds",
+      "show_all"
       ],
+      search: {
+        regex: true
+      },
+
     });
   });
 </script>
 {% endblock %}
 
 {% block content %}
+
+<h1>{{page_title}}</h1>
+
 <div class="data-table-container">
   <table id="id_service_viewer_table" class="table table-striped table-bordered">
     <thead>
       <tr>
         <th>Name</th>
+        <th>Gender</th>
         <th>Term</th>
+        <th>Team type</th>
         <th>Service</th>
       </tr>
     </thead>
     <tbody>
       {% for service in designated_services %}
-        {% for worker in service.workers %}
         <tr>
-          <td>{{worker.full_name}}</td>
-          <td>{{worker.trainee.current_term}}</td>
-          <td>{{service.name}}</td>
+          <td>{{service.worker.trainee__lastname}}, {{service.worker.trainee__firstname}}</td>
+          <td>{{service.worker.trainee__gender}}</td>
+          <td>{{service.worker.trainee__current_term}}</td>
+          <td>{{service.worker.trainee__team__type}}</td>          
+          <td>{{service.service_name}}</td>
         </tr>
-        {% endfor %}
       {% endfor %}
     </tbody>
   </table>

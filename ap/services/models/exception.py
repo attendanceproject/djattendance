@@ -67,7 +67,10 @@ class ServiceException(models.Model):
       return True
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   def get_update_url(self):
     return reverse('services:services-exception-update', kwargs={'pk': self.id})

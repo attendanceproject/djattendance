@@ -1,26 +1,22 @@
-from datetime import date
 import json
 import os
-from django.http import JsonResponse, HttpResponseBadRequest
-from django.views import generic
-from django.core.urlresolvers import reverse_lazy
-from django.core.files import File
-from django.conf import settings
-from django.forms import ValidationError
-
-from braces.views import GroupRequiredMixin
-from rest_framework_bulk import (
-    BulkModelViewSet,
-)
-
-from .models import AudioFile, AudioRequest
-from .serializers import AudioRequestSerializer
-from .forms import AudioRequestForm, AudioRequestTACommentForm
-from .models import fs, valid_audiofile_name
-from terms.models import Term
-from aputils.trainee_utils import trainee_from_user
-from aputils.utils import modify_model_status
+from datetime import date
 from itertools import chain
+
+from aputils.trainee_utils import trainee_from_user, is_trainee
+from aputils.utils import modify_model_status
+from braces.views import GroupRequiredMixin
+from django.conf import settings
+from django.core.urlresolvers import reverse_lazy
+from django.forms import ValidationError
+from django.http import HttpResponseBadRequest, JsonResponse
+from django.views import generic
+from rest_framework_bulk import BulkModelViewSet
+from terms.models import Term
+
+from .forms import AudioRequestForm, AudioRequestTACommentForm
+from .models import AudioFile, AudioRequest, fs, valid_audiofile_name
+from .serializers import AudioRequestSerializer
 
 
 def import_audiofiles():
@@ -36,7 +32,7 @@ def import_audiofiles():
     try:
       audio.audio_file.name = fs.get_valid_name(f)
       audio.save()
-    except ValidationError, e:
+    except ValidationError:
       pass
 
 
@@ -75,6 +71,13 @@ class AudioHome(generic.ListView):
       f.has_leaveslip = f.has_leaveslip(trainee)
     return files
 
+  def get_context_data(self, **kwargs):
+    context = super(AudioHome, self).get_context_data(**kwargs)
+    trainee = trainee_from_user(self.request.user)
+    reqs = AudioRequest.objects.filter_term(Term.current_term()).filter(trainee_author=trainee).order_by('-status', 'date_requested')
+    context['trainee_audio_requests'] = reqs
+    return context
+
 
 class TAAudioHome(generic.ListView):
   model = AudioRequest
@@ -87,10 +90,11 @@ class TAAudioHome(generic.ListView):
 
   def get_context_data(self, **kwargs):
     context = super(TAAudioHome, self).get_context_data(**kwargs)
-    wars = AudioRequest.objects.none()
+    audio_requests = AudioRequest.objects.none()
+    reqs = AudioRequest.objects.filter_term(Term.current_term()).order_by('date_requested')
     for status in ['P', 'F', 'A', 'D']:
-      wars = chain(wars, AudioRequest.objects.filter_term(Term.current_term()).filter(status=status).order_by('date_requested'))
-    context['wars'] = wars
+      audio_requests = chain(audio_requests, reqs.filter(status=status))
+    context['audio_requests'] = audio_requests
     return context
 
 
@@ -146,7 +150,12 @@ class AudioCreate(generic.CreateView):
 
 
 class AudioRequestUpdate(AudioRequestCreate, generic.UpdateView):
-  pass
+  def get_context_data(self, **kwargs):
+    context = super(AudioRequestUpdate, self).get_context_data(**kwargs)
+    if is_trainee(self.request.user):
+      if context['form'].instance.status in ['D', 'A']:
+        context['read_only'] = True
+    return context
 
 
 class AudioRequestViewSet(BulkModelViewSet):

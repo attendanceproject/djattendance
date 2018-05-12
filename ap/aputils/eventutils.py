@@ -90,7 +90,11 @@ class EventUtils:
               day_evnts[day_evnt] -= t_intersect
 
           # Add new ev to day with t_intersect trainees inside
-          day_evnts[ev] = t_intersect.copy()
+          # if ev already exist, add trainess onto that event
+          if ev not in day_evnts:
+            day_evnts[ev] = t_intersect.copy()
+          else:
+            day_evnts[ev] |= t_intersect.copy()
 
     return w_tb
 

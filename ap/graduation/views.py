@@ -178,6 +178,13 @@ class MiscReport(ReportView):
   model = Misc
   template_name = 'graduation/misc_report.html'
 
+  def get_context_data(self, **kwargs):
+    context = super(MiscReport, self).get_context_data(**kwargs)
+    context['dvd_totals'] = sum(filter(None, (o.grad_dvd for o in context['data'])))
+    context['invite_totals'] = sum(filter(None, (o.grad_invitations for o in context['data'])))
+
+    return context
+
 
 class RemembranceReport(ReportView):
   model = Remembrance

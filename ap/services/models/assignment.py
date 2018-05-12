@@ -40,7 +40,10 @@ class Assignment(models.Model):
   last_modified = models.DateTimeField(auto_now=True)
 
   def __unicode__(self):
-    return '%s assignment for %s' % (self.service, self.week_schedule)
+    try:
+      return '%s assignment for %s' % (self.service, self.week_schedule)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   @staticmethod
   def get_assignments_to_worker(worker):

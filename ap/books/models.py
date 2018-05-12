@@ -24,7 +24,10 @@ class Collection(models.Model):
   code = models.CharField(max_length=10)
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Publisher(models.Model):
@@ -36,7 +39,10 @@ class Publisher(models.Model):
   code = models.CharField(max_length=20)
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Author(models.Model):
@@ -50,7 +56,10 @@ class Author(models.Model):
   code = models.CharField(max_length=5)
 
   def __unicode__(self):
-    return u'%s %s' % (self.first_name, self.last_name)
+    try:
+      return u'%s %s' % (self.first_name, self.last_name)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Book(models.Model):
@@ -77,4 +86,7 @@ class Book(models.Model):
   publisher = models.ForeignKey(Publisher, null=True, on_delete=models.SET_NULL)
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

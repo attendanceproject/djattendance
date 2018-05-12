@@ -190,7 +190,9 @@
         <div class="body">
           <div class="name">
             <b class="name-text">{{badge.firstname}} {{badge.lastname}}</b> <br>
-            {{badge.locality}}
+            {% if badge.locality %}
+              {{badge.locality}}
+            {% endif %}
           </div>
           <img class="badge-pic" src="/media/{{badge.original}}">
         </div>

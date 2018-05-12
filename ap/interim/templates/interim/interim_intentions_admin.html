@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block references %}
+<style type="text/css">
+  div.row{
+    width: 80%;
+  }
+  label{
+    text-align: center;
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $(document).ready(() => {
+    console.log("{{form.date_1yr_return.value}}")
+
+    $('.datetimepicker').datetimepicker({
+      format:'m/d/Y g:i A',
+      formatTime: 'g:i A',
+      ampm: true,
+      step: 30,
+      defaulSelect: false,
+      inline: true
+
+
+    });
+    $('.datepicker').datetimepicker({
+      format: 'm/d/Y',
+      timepicker: false,
+      defaulSelect: false,
+      inline: true,
+      minView: 2,
+
+    });
+  });
+</script>
+{% endblock %}
+
+-{% if form.errors %} 
+-<!-- Error messaging --> 
+<div id="errors">  
+  <div class="inner">  
+    <p>There were some errors in the information you entered. Please correct the following:</p>  
+    {{ form.non_field_errors }}  
+    <ul> 
+      {% for field in form %}  
+        {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %} 
+      {% endfor %} 
+    </ul>  
+  </div> 
+</div> 
+-<!-- /Error messaging -->  
+-{% endif %}  
+
+
+{% block content %}
+
+<h2>{{page_title}}</h2>
+
+<form id='id_interim_admin_form' action="" method="post">
+  {% csrf_token %}
+<div class="text-center">
+  <div class="row">
+    <div class="col-md-6">
+      <h3>{{form.open_time.label_tag}}</h3>
+    </div>
+    <div class="col-md-6">
+      <h3>{{form.close_time.label_tag}}</h3>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <input class="datetimepicker" id="id_open_time" name="open_time" value="{{form.open_time.value}}">
+    </div>
+    <div class="col-md-6">
+      <input class="datetimepicker" id="id_close_time" name="close_time" value="{{form.close_time.value}}">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3>{{form.date_1yr_return.label_tag}}</h3>
+    </div>
+    <div class="col-md-6">
+      <h3>{{form.date_2yr_return.label_tag}}</h3>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <input class="datetimepicker" id="id_date_1yr_return" name="date_1yr_return" value="{{form.date_1yr_return.value}}">
+    </div>
+    <div class="col-md-6">
+      <input class="datetimepicker" id="id_date_2yr_return" name="date_2yr_return" value="{{form.date_2yr_return.value}}">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3>{{form.earliest_arrival_date.label_tag}}</h3>
+    </div>
+    <div class="col-md-6">
+      <h3>{{form.term_begin_date.label_tag}}</h3>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">      
+      <input class="datepicker" id="id_earliest_arrival_date" name="earliest_arrival_date" value="{{form.earliest_arrival_date.value}}">
+    </div>
+    <div class="col-md-6">
+      <input class="datepicker" id="id_term_begin_date" name="term_begin_date" value="{{form.term_begin_date.value}}">
+    </div>
+  </div>  
+</div>
+  <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
+</form>
+
+{% endblock %}

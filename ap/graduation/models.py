@@ -45,7 +45,10 @@ class GradAdmin(models.Model):
   speaking_trainees = models.ManyToManyField(Trainee, blank=True)
 
   def __unicode__(self):
-    return "[Graduation] %s" % (self.term)
+    try:
+      return "[Graduation] %s" % (self.term)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   def get_due_date_of(self, survey_name):
     DUE_DATE_OF = {
@@ -113,7 +116,10 @@ class Survey(models.Model):
     return len(filter(lambda o: o.responded, qset))
 
   def __unicode__(self):
-    return "[%s] %s - %s" % (self.name_of_model, self.due_date, self.show_status)
+    try:
+      return "[%s] %s - %s" % (self.name_of_model, self.due_date, self.show_status)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   def menu_title(self):
     return self.name_of_model.title()
@@ -124,17 +130,14 @@ class Survey(models.Model):
 
 class Testimony(Survey):
 
-  top_experience = models.TextField(null=True)
-  encouragement = models.TextField(null=True)
-  overarching_burden = models.TextField(null=True)
-  highlights = models.TextField(null=True)
+  top_experience = models.TextField(null=True, blank=True)
+  encouragement = models.TextField(null=True, blank=True)
+  overarching_burden = models.TextField(null=True, blank=True)
+  highlights = models.TextField(null=True, blank=True)
 
   @property
   def responded(self):
-    if self.top_experience or self.encouragement or self.overarching_burden or self.highlights:
-      return True
-    else:
-      return False
+    return self.top_experience or self.encouragement or self.overarching_burden or self.highlights
 
 
 class Consideration(Survey):
@@ -170,10 +173,7 @@ class Consideration(Survey):
 
   @property
   def responded(self):
-    if self.attend_XB or self.fellowshipped or self.financial or self.consideration_plan:
-      return True
-    else:
-      return False
+    return self.attend_XB or self.fellowshipped or self.financial or self.consideration_plan
 
 
 class Website(Survey):
@@ -206,10 +206,7 @@ class Website(Survey):
 
   @property
   def responded(self):
-    if self.post_training_website or self.reasons or self.features or self.frequency or self.doing or self.residence or self.email or self.phone_number:
-      return True
-    else:
-      return False
+    return self.post_training_website or self.reasons or self.features or self.frequency or self.doing or self.residence or self.email or self.phone_number
 
 
 class Outline(Survey):
@@ -225,10 +222,7 @@ class Outline(Survey):
 
   @property
   def responded(self):
-    if self.sections or self.participate:
-      return True
-    else:
-      return False
+    return self.sections or self.participate
 
 
 class Remembrance(Survey):
@@ -238,10 +232,7 @@ class Remembrance(Survey):
 
   @property
   def responded(self):
-    if self.remembrance_text or self.remembrance_text:
-      return True
-    else:
-      return False
+    return self.remembrance_text or self.remembrance_text
 
 
 class Misc(Survey):
@@ -251,10 +242,7 @@ class Misc(Survey):
 
   @property
   def responded(self):
-    if self.grad_invitations or self.grad_dvd:
-      return True
-    else:
-      return False
+    return self.grad_invitations or self.grad_dvd
 
   def menu_title(self):
     return "Invites & DVDs"

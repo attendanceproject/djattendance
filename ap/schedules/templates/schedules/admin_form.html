@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $('.select-fk').select2({width: '100%'});
+    $('[multiple*=multiple]').select2({width: '100%'})
+    $("#id_split_button").click(split_schedule);
+  });
+
+  function split_schedule(e){
+    split_url = "{{form.instance.get_split__partial_url}}"
+    e.preventDefault();
+      $.ajax({
+        type: "POST",
+        url: split_url + $("#id_week_select").val(),
+        success: function(result) {
+          if(result.success){
+            window.open(result.success);
+          }
+        },
+        error: function(result) {
+            alert('Something went wrong.');
+        }
+    });
+  }
+ </script>
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+
+{% if form.errors %}
+<!-- Error messaging -->
+  <div id="errors">
+    <div class="inner">
+      <p>There were some errors in the information you entered. Please correct the following:</p>
+      {{ form.non_field_errors }}
+      <ul>
+        {% for field in form %}
+          {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+<!-- /Error messaging -->
+{% endif %}
+
+<form id="id_form" action="" method="post">
+  {% csrf_token %}
+  {% bootstrap_form form %}  
+  <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
+</form>
+{% if delete_button %}
+  <form action = "{{form.instance.get_delete_url}}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger btn-delete" name="delete">Delete</button>
+  </form>
+{% endif %}
+{% if split_button %}
+<label for="id_week_select">Week</label>
+  <select id="id_week_select">
+  {% for y in "xxxxxxxxxxxxxxxxxxxx" %}
+    <option value="{{ forloop.counter0 }}" >{{ forloop.counter0 }}</option>
+  {% endfor %}
+  </select>
+  <button type="button" class="btn btn-danger btn-save" name="split" id="id_split_button">Split Schedule</button>
+{% endif %}
+
+{% endblock %}

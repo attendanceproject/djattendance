@@ -1,12 +1,9 @@
-from django import forms
-
-from django.contrib.admin.widgets import FilteredSelectMultiple
-from django_select2.forms import ModelSelect2MultipleWidget
-from aputils.custom_fields import CSIMultipleChoiceField
-
-from terms.models import Term
-from accounts.widgets import TraineeSelect2MultipleInput
 from accounts.models import Trainee
+from accounts.widgets import TraineeSelect2MultipleInput
+from aputils.custom_fields import CSIMultipleChoiceField
+from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
+from terms.models import Term
 
 from .models import Event, Schedule
 
@@ -49,7 +46,7 @@ class ScheduleForm(forms.ModelForm):
 
   def save(self, commit=True):
     instance = super(ScheduleForm, self).save(commit=False)
-    weeks = self.cleaned_data['weeks'].split(',') # etc
+    weeks = self.cleaned_data['weeks'].split(',')  # etc
     if len(weeks) > 1:
       weeks.sort(key=int)
     instance.weeks = ','.join(weeks)
@@ -59,7 +56,10 @@ class ScheduleForm(forms.ModelForm):
 
   def __init__(self, *args, **kwargs):
     super(ScheduleForm, self).__init__(*args, **kwargs)
-    self.fields['trainees'].widget.attrs = {'style':'width:100%'}
+    self.fields['trainees'].widget.attrs['class'] = 'select-fk'
+    self.fields['parent_schedule'].widget.attrs['class'] = 'select-fk'
+    self.fields['term'].widget.attrs['class'] = 'select-fk'
+    self.fields['query_filter'].widget.attrs['class'] = 'select-fk'
 
   class Meta:
     model = Schedule

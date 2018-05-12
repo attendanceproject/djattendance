@@ -6,7 +6,7 @@ class Period(object):
 
   def period_of_week(self, week):
     """ for a week number, starting from zero, return the period """
-    return week / self.duration + 1
+    return week / self.duration
 
   def period_of_date(self, date):
     """ for a calendar date, return the period """
@@ -15,12 +15,12 @@ class Period(object):
 
   def start(self, n):
     """ for a period number, return the start date """
-    wk = self.duration * (n - 1)  # week number for start of this period
+    wk = self.duration * n  # week number for start of this period
     return self.term.start + timedelta(weeks=wk)
 
   def end(self, n):
     """ for a period number, return end date """
-    wk = n * self.duration  # week number for start of next period
+    wk = (n + 1) * self.duration  # week number for start of next period
     return self.term.start + timedelta(weeks=wk, days=-1)  # and subtract one day
 
   def start_end(self, n):

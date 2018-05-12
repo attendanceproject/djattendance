@@ -16,7 +16,10 @@
     <li {% if classname == 'German' %}class=active{% endif %}><a href="{% url 'classes:classfiles' 'German' %}">German</a></li>
     <li {% if classname == 'Character' %}class=active{% endif %}><a href="{% url 'classes:classfiles' 'Character' %}">Character</a></li>
     <li {% if classname == 'PSRP' %}class=active{% endif %}><a href="{% url 'classes:classfiles' 'PSRP' %}">PSRP</a></li>
-    <li {% if classname == 'Presentations' %}class=active{% endif %}><a href="{% url 'classes:classfiles' 'Presentations' %}">Presentations</a></li>
+    <li {% if classname == 'Presentations' %}class=active{% endif %}><a href="{% url 'classes:classfiles' 'Presentations' %}">Presentations</a></li>  
+    {% if user.current_term == 4 or user.type == 'T' %}
+    <li {% if classname == '4th Term' %}class=active{% endif %}><a href="{% url 'classes:classfiles' '4th Term' %}">Graduation</a></li>
+    {% endif %}
 
   </ul>
 </div>

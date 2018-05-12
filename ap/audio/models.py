@@ -100,7 +100,7 @@ class AudioFile(models.Model):
     elif code == 'HC':
       fellowship_code = trainee.groups.filter(name='HC').exists()
     elif code == '4T':
-      fellowship_code = trainee.current_term = 4
+      fellowship_code = trainee.current_term == 4
     elif code == 'PS':
       fellowship_code = trainee.groups.filter(name='PSRP_facilitator').exists()
     else:
@@ -108,7 +108,10 @@ class AudioFile(models.Model):
     return class_visible and fellowship_code
 
   def __unicode__(self):
-    return '<Audio File {0}>'.format(self.audio_file.name)
+    try:
+      return '<Audio File {0}>'.format(self.audio_file.name)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   @property
   def code(self):

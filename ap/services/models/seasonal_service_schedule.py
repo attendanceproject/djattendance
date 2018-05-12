@@ -31,4 +31,7 @@ class SeasonalServiceSchedule(models.Model):
   active = models.BooleanField(default=True)
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

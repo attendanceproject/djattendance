@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $("#id_interim_intentions_table").DataTable({
+      info: false,
+      paging: false,
+      autoWidth: true,
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      buttons: [
+      {
+        extend: 'print',
+        text: 'Print',
+        autoPrint: true,
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'pdf',
+        text: 'PDF',
+        exportOptions:{
+          columns: ':visible'
+        },
+      },
+      {
+        extend: 'csvHtml5',
+        text: 'CSV',
+        exportOptions: {
+          columns: ':visible'
+        },
+      }
+      ],
+    });
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+
+<h1>{{ page_title }}</h1>
+
+<div class="data-table-container">
+  <table id="id_interim_intentions_table" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Term</th>
+        <th>Team</th>
+        <th>Home Locality</th>
+        <th>Intention</th>
+        <th>Comments</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for trainee in trainees %}
+        <tr>
+          <td>{{trainee.name}}</td>
+          <td>{{trainee.current_term}}</td>
+          <td>{{trainee.team__name}}</td>
+          <td>{{trainee.locality}}</td>
+          <td>{{trainee.intention.get_post_training_intentions_display}}</td>
+          <td>{{trainee.intention.post_intent_comments}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

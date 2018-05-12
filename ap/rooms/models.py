@@ -68,7 +68,10 @@ class Room(models.Model):
   # building = models.CharField(max_length = 3, choices=BUILDING_CODES, default='TC')
 
   def __unicode__(self):
-  	return self.name
+    try:
+    	return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   class Meta:
     ordering = ['name']

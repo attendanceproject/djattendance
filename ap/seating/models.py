@@ -41,7 +41,10 @@ class Chart(models.Model):
   trainees = models.ManyToManyField(Trainee, through='Seat')
 
   def __unicode__(self):
-    return self.term.__unicode__() + ' ' + self.name
+    try:
+      return self.term.__unicode__() + ' ' + self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Seat(models.Model):
@@ -54,7 +57,10 @@ class Seat(models.Model):
   y = models.PositiveSmallIntegerField()
 
   def __unicode__(self):
-    return "%s in %s @ (%s, %s)" % (self.trainee, self.chart, self.x, self.y )
+    try:
+      return "%s in %s @ (%s, %s)" % (self.trainee, self.chart, self.x, self.y )
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Partial(models.Model):
@@ -74,4 +80,7 @@ class Partial(models.Model):
     ordering = ('chart', 'section_name')
 
   def __unicode__(self):
-    return "%s - Section %s from (%s, %s) to (%s, %s)" % (self.chart, self.section_name, self.x_lower, self.y_lower, self.x_upper, self.y_upper)
+    try:
+      return "%s - Section %s from (%s, %s) to (%s, %s)" % (self.chart, self.section_name, self.x_lower, self.y_lower, self.x_upper, self.y_upper)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

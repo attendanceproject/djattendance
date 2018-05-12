@@ -1,42 +1,48 @@
 import json
-import dateutil.parser
+from collections import OrderedDict
+from copy import copy
+from datetime import date, datetime, time, timedelta
 
-from django.views.generic import TemplateView
-from django.core.urlresolvers import resolve
+import dateutil.parser
+from accounts.models import Trainee, TrainingAssistant
+from accounts.serializers import (TraineeForAttendanceSerializer,
+                                  TraineeRollSerializer,
+                                  TrainingAssistantSerializer)
+from ap.forms import TraineeSelectForm
+from aputils.decorators import group_required
+from aputils.eventutils import EventUtils
+from aputils.trainee_utils import is_trainee, trainee_from_user
+from braces.views import GroupRequiredMixin
+from django.core.urlresolvers import resolve, reverse_lazy
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseServerError
+from django.forms.forms import NON_FIELD_ERRORS
+from django.forms.utils import ErrorList
+from django.http import (HttpResponse, HttpResponseBadRequest,
+                         HttpResponseServerError, JsonResponse)
 from django.shortcuts import get_object_or_404, redirect
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from houses.models import House
+from leaveslips.models import GroupSlip, IndividualSlip
+from leaveslips.serializers import (GroupSlipSerializer,
+                                    IndividualSlipSerializer)
 from rest_framework import filters
 from rest_framework.renderers import JSONRenderer
-from datetime import date, datetime, time, timedelta
-from collections import OrderedDict
-from .models import Roll
-from .serializers import RollSerializer, RollFilter, AttendanceSerializer
-from schedules.models import Schedule, Event
+from rest_framework_bulk import BulkModelViewSet
 from schedules.constants import WEEKDAYS
-from leaveslips.models import IndividualSlip, GroupSlip
-from terms.models import Term
-from accounts.models import Trainee, TrainingAssistant
-from seating.models import Chart, Seat, Partial
-from houses.models import House
+from schedules.models import Event, Schedule
+from schedules.serializers import (AttendanceEventWithDateSerializer,
+                                   EventWithDateSerializer)
+from seating.models import Chart, Partial, Seat
+from seating.serializers import (ChartSerializer, PartialSerializer,
+                                 SeatSerializer)
 from teams.models import Team
-from rest_framework_bulk import (
-    BulkModelViewSet
-)
-
-from accounts.serializers import TrainingAssistantSerializer, TraineeRollSerializer, TraineeForAttendanceSerializer
-from schedules.serializers import AttendanceEventWithDateSerializer, EventWithDateSerializer
-from leaveslips.serializers import IndividualSlipSerializer, GroupSlipSerializer
-from seating.serializers import ChartSerializer, SeatSerializer, PartialSerializer
+from terms.models import Term
 from terms.serializers import TermSerializer
 
-from braces.views import GroupRequiredMixin
-
-from ap.forms import TraineeSelectForm
-from aputils.trainee_utils import trainee_from_user, is_trainee
-from aputils.eventutils import EventUtils
-from aputils.decorators import group_required
-from copy import copy
+from .forms import RollAdminForm
+from .models import Roll
+from .serializers import AttendanceSerializer, RollFilter, RollSerializer
 
 
 # if the attendance monitors inputs rolls for a trainee on self attendance
@@ -487,7 +493,6 @@ class YPCRollsView(TableRollsView):
   group_required = [u'ypc_monitors', u'attendance_monitors', u'training_assistant']
 
   def get_context_data(self, **kwargs):
-    trainee = trainee_from_user(self.request.user)
     kwargs['trainees'] = Trainee.objects.filter(team__type__in=['YP', 'CHILD']).filter(Q(self_attendance=False, current_term__gt=2) | Q(current_term__lte=2))
     kwargs['type'] = 'Y'
     ctx = super(YPCRollsView, self).get_context_data(**kwargs)
@@ -643,3 +648,72 @@ def rfid_tardy(request, event_id, event_date):
     return HttpResponseBadRequest('No event found')
   event.roll_set.filter(date=date, status='T', leaveslips__isnull=True).delete()
   return HttpResponse('Roll tardies removed')
+
+
+class RollCRUDMixin(GroupRequiredMixin):
+  model = Roll
+  template_name = 'attendance/roll_admin_form.html'
+  form_class = RollAdminForm
+  group_required = [u'attendance_monitors', u'training_assistant']
+
+
+class RollAdminCreate(RollCRUDMixin, CreateView):
+  def get_context_data(self, **kwargs):
+    ctx = super(RollAdminCreate, self).get_context_data(**kwargs)
+    ctx['page_title'] = 'Create Roll'
+    ctx['button_label'] = 'Create'
+    return ctx
+
+
+class RollAdminUpdate(RollCRUDMixin, UpdateView):
+  def get_context_data(self, **kwargs):
+    ctx = super(RollAdminUpdate, self).get_context_data(**kwargs)
+    ctx['page_title'] = 'Update Roll'
+    ctx['button_label'] = 'Update'
+    ctx['delete_button'] = True
+    return ctx
+
+  def get_form_kwargs(self):
+    kwargs = super(RollAdminUpdate, self).get_form_kwargs()
+    kwargs['trainee'] = self.get_object().trainee
+    return kwargs
+
+  def form_valid(self, form):
+    r = form.instance
+    rolls = Roll.objects.filter(trainee=r.trainee, event=r.event, date=r.date).exclude(id=r.id)
+    AMS = Trainee.objects.filter(groups__name='attendance_monitors')
+    if not r.trainee.self_attendance:
+      if rolls.exists():
+        form._errors[NON_FIELD_ERRORS] = ErrorList([u'This is a duplicate roll.'])
+        # if trainee not self_att and other roll exists, it's a duplicate
+        return super(RollAdminUpdate, self).form_invalid(form)
+    else:
+      if rolls.exists() and r.submitted_by not in AMS:
+        form._errors[NON_FIELD_ERRORS] = ErrorList([u'This is a duplicate. Submitted_by should be an AM.'])
+        # if trainee on self_att and other roll exists, new submitted roll must by AM
+        return super(RollAdminUpdate, self).form_invalid(form)
+    return super(RollAdminUpdate, self).form_valid(form)
+
+
+class RollAdminDelete(RollCRUDMixin, DeleteView):
+  success_url = reverse_lazy('attendance:admin-roll-create')
+
+
+class TraineeAttendanceAdminView(TemplateView):
+  template_name = 'attendance/trainee_attendance_admin_view.html'
+
+  def get_context_data(self, **kwargs):
+    ctx = super(TraineeAttendanceAdminView, self).get_context_data(**kwargs)
+    trainee_id = self.request.GET.get('trainee_id', -1)
+    if trainee_id < 0:
+      t = Trainee.objects.first()
+    else:
+      t = Trainee.objects.get(id=trainee_id)
+    eids = t.schedules.all().order_by('events').distinct('events').values_list('events', flat=True)
+    ctx['page_title'] = 'Single Trainee Attendance View'
+    ctx['rolls'] = t.rolls.all()
+    ctx['schedules'] = t.schedules.all()
+    ctx['events'] = Event.objects.filter(id__in=eids)
+    ctx['trainee_list'] = Trainee.objects.values('id', 'firstname', 'lastname')
+    ctx['trainee'] = t.full_name
+    return ctx

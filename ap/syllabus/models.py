@@ -60,7 +60,10 @@ class Syllabus (models.Model):
   # codes = property(_get_code)
 
   def __unicode__(self):
-    return (self.class_syllabus.name + " | " + self.class_syllabus.term.name)
+    try:
+      return (self.class_syllabus.name + " | " + self.class_syllabus.term.name)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   # code = Syllabus.class_syllabus.code
 
@@ -93,6 +96,9 @@ class ClassSession(models.Model):
   syllabus = models.ForeignKey(Syllabus, on_delete=models.SET_NULL, null=True)
 
   def __unicode__(self):
-    return (self.syllabus.class_syllabus.name + " | "
-        + self.syllabus.class_syllabus.term.name + " | " +
-        self.date.strftime('%Y/%m/%d') + " | " + self.topic)
+    try:
+      return (self.syllabus.class_syllabus.name + " | "
+          + self.syllabus.class_syllabus.term.name + " | " +
+          self.date.strftime('%Y/%m/%d') + " | " + self.topic)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

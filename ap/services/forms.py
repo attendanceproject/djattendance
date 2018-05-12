@@ -18,6 +18,7 @@ class ServiceRollForm(forms.ModelForm):
     widgets = {
       "start_datetime": DatetimePicker(),
       "end_datetime": DatetimePicker(),
+      "task_performed": forms.Textarea()
     }
 
 
@@ -29,7 +30,7 @@ class ServiceAttendanceForm(forms.ModelForm):
     for assignment in worker.assignments.all().filter(service__designated=True).exclude(service__name__contains='Breakfast'):
       service_ids.append(assignment.service.id)
     self.fields['designated_service'].queryset = Service.objects.filter(id__in=service_ids)
-    self.fields['designated_service'].required = False
+    self.fields['designated_service'].required = True
     self.fields['week'].required = False
 
   class Meta:

@@ -6,17 +6,8 @@
 {% block scripts %}
 <script type="text/javascript">
   $(document).ready(() => {
-    $("#id_week_select").on('change', update_form)
+    $("#id_service_select").select2();
   });
-  function update_form(){
-    let week = $("#id_week_select").val();
-    if(parseInt(week) < 0){
-      return;
-    } else {
-      window.location.href = '/services/service_hours_ta_view/' + week;
-    }
-
-  }
 </script>
 {% endblock scripts%}
 
@@ -24,14 +15,24 @@
 
 {% block content %}
 <h2>{{page_title}}</h2>
-<label for="id_week_select">Week</label>
-<select id="id_week_select">
-{% for y in week_range %}
-    <option
-     value="{{ y }}" {% if y == weekinit %} selected="selected" {% endif %}
-    >{{ y }}</option>
-{% endfor %}
-</select>
+<form action="" method="get" id="id_form">
+  {% csrf_token %}
+  <label for="id_week_select">Week</label>
+  <select id="id_week_select" name="week">
+  {% for y in week_range %}
+      <option
+       value="{{ y }}" {% if y == weekinit %} selected="selected" {% endif %}
+      >{{ y }}</option>
+  {% endfor %}
+  </select>
+  <select id="id_service_select" name="services" multiple="multiple">
+  {% for x in services_qs %}
+    <option value="{{x.id}}">{{x.name}}</option>
+  {% endfor %}
+  <option value="-1">All</option>
+  </select>
+  <button class="btn btn-primary btn-save" type="submit">Submit</button>
+</form>
 <div>
   {% for service in designated_services %}
     <h3>{{service.name}}</h3>
@@ -41,6 +42,7 @@
         <tr>
           <th>Trainee</th>
           <th>Service Hours</th>
+          <th>Total Hours</th>
         </tr>
       </thead>
       <tbody>
@@ -67,6 +69,7 @@
               </tbody>
             </table>
           </td>
+          <td>{{worker.total_hours}}</td>
         </tr>
         {% endfor %}
       </tbody>

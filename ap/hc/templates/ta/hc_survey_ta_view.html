@@ -8,6 +8,42 @@
 {% block content %}
 <h2>HC Survey Admin</h2>
 <div>
+  <h3>Summary</h3>
+  <table class="table table-bordered" id="summary_table">
+    <thead>
+      <tr>
+        <th>Brothers Reported</th>
+        <th>Sisters Reported</th>
+        <th>Brothers Unreported</th>
+        <th>Sisters Unreported</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          {% for h in bro_reported %}
+          {{h}},
+          {% endfor %}
+        </td>
+        <td>
+          {% for h in sis_reported %}
+          {{h}},
+          {% endfor %}
+        </td>
+        <td>
+          {% for h in bro_not_reported %}
+          {{h}},
+          {% endfor %}
+        </td>
+        <td>
+          {% for h in sis_not_reported %}
+          {{h}},
+          {% endfor %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
   {% for snc in surveys_and_comments %}
   <h3>{{snc.survey.house}}</h3>
   <table class="table table-bordered" id="survey_table">

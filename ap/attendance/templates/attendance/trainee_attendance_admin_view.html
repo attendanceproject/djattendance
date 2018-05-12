@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+
+<script type="text/javascript">
+  $(document).ready(() => {
+    $("#id_trainee").select2()
+      .on("select2:select", (e) => {
+        $('form').submit();
+      });
+
+    $("table").DataTable({
+      autoWidth: true,
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+
+    });
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+
+<h1>{{page_title}}</h1>
+<form action='' method='get'>
+  <select id="id_trainee" name="trainee_id">
+    {% for tr in trainee_list %}
+      <option value="{{tr.id}}">{{tr.firstname}} {{tr.lastname}}</option>
+    {% endfor %}
+  </select>
+</form>
+<h2>{{trainee}}</h2>
+<h3>Schedules</h3>
+<div class="data-table-container">
+  <table id="id_schedules_table" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Comments</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for schedule in schedules %}
+        <tr>
+          <td>{{schedule.id}}</td>
+          <td>{{schedule}}</td>
+          <td>{{schedule.comments}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h3>Events</h3>
+<div class="data-table-container">
+  <table id="id_events_table" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+        <tr>
+          <td>{{event.id}}</td>
+          <td>{{event}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h3>Rolls</h3>
+<div class="data-table-container">
+  <table id="id_rolls_table" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for roll in rolls %}
+        <tr>
+          <td>{{roll.id}}</td>
+          <td>{{roll}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

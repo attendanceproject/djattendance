@@ -145,7 +145,10 @@ class WorkerGroup(models.Model):
 
 
   def __unicode__(self):
-    return "%s (%s)" % (self.name, self.description)
+    try:
+      return "%s (%s)" % (self.name, self.description)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 

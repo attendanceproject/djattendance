@@ -1,3 +1,40 @@
+from datetime import datetime, date
+from dateutil import parser
+from sets import Set
+from collections import OrderedDict, defaultdict
+import random
+
+from django.db.models import Q
+from django.views.generic import TemplateView
+from django.views.generic.edit import UpdateView, CreateView, FormView
+from django.template.defaulttags import register
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse_lazy
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count, F
+from django.contrib import messages
+from braces.views import GroupRequiredMixin
+
+from rest_framework_bulk import (
+    BulkModelViewSet,
+)
+
+from rest_framework.renderers import JSONRenderer
+
+from .serializers import (
+    UpdateWorkerSerializer,
+    ServiceSlotWorkloadSerializer,
+    ServiceActiveSerializer,
+    WorkerIDSerializer,
+    WorkerAssignmentSerializer,
+    AssignmentPinSerializer,
+    ServiceCalendarSerializer,
+    ServiceTimeSerializer,
+    ExceptionActiveSerializer,
+)
+from .service_scheduler import ServiceScheduler
+from .forms import ServiceRollForm, ServiceAttendanceForm, AddExceptionForm
 from .models import (
     Prefetch,
     Assignment,
@@ -8,47 +45,14 @@ from .models import (
     WeekSchedule,
     WorkerGroup,
     SeasonalServiceSchedule,
-    GraphJson,
     Sum,
     ServiceAttendance,
     ServiceRoll,
     ServiceException
 )
 
-from .forms import ServiceRollForm, ServiceAttendanceForm, AddExceptionForm
-from django.db.models import Q
-from django.views.generic import TemplateView
-from django.views.generic.edit import UpdateView, CreateView, FormView
-from django.template.defaulttags import register
-from braces.views import GroupRequiredMixin
-from datetime import datetime, date
-from dateutil import parser
-
-from graph import DirectedFlowGraph
-
-from sets import Set
-from collections import OrderedDict, defaultdict
-import random
-import json
-
-from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.core.urlresolvers import reverse_lazy
-from django.db.models import Count, F
-from django.contrib import messages
-
-from rest_framework_bulk import (
-    BulkModelViewSet,
-)
-
-from rest_framework.renderers import JSONRenderer
-
-from .serializers import UpdateWorkerSerializer, ServiceSlotWorkloadSerializer,\
-    ServiceActiveSerializer, WorkerIDSerializer, WorkerAssignmentSerializer, \
-    AssignmentPinSerializer, ServiceCalendarSerializer, ServiceTimeSerializer, ExceptionActiveSerializer
-
 from aputils.trainee_utils import trainee_from_user
-from aputils.utils import timeit, timeit_inline, memoize
+from aputils.utils import timeit, memoize
 from aputils.decorators import group_required
 
 from leaveslips.models import GroupSlip
@@ -118,7 +122,6 @@ and trim graph appropriately
 
 (future dev) -> Maybe incorporate how constrained each star in the flipping
 probabilities to bias less constrained stars
-
 '''
 
 
@@ -163,20 +166,18 @@ def hydrate(services, cws):
   workers_cache = WorkersCache(cws)
 
   for s in services:
-    # print 'service', s, 'serviceslot', len(s.serviceslots)
     for slot in s.serviceslots:
       # blow away cache
       wg = slot.worker_group
 
       # If gender restrictions are either all brother/all sister, trim out half the gender by coin flip
+      # https://developers.google.com/optimization/assignment/compare_mip_cp#assignment-with-allowed-groups-of-workers
+      # TODO(see link about avoiding this coin flip using MIP groups)
       if slot.gender == 'X' and slot.workers_required > 1:
         # naively do 50/50, will calculate based on training population ratio later on
         gender = flip_gender(0.5)
-        # print '!!!!!!!!!!!!!!!gender picked', gender
-        # print 'called cache', wg.id, gender
         workers = workers_cache.get(wg.id, gender)
       else:
-        # print' django called cache', wg.id, 'set'
         workers = workers_cache.get(wg.id, 'set')
 
       slot.workers = workers.copy()
@@ -262,20 +263,13 @@ def assign(cws):
   # TODO: time conflict checking for services on same day and time
   # Only happens if we allow more than one services a day
 
-  # print 'services', services
-
   # Build service frequency db for all the workers
 
   # Build and solve graph
-  print "Building graph'"
-  graph = build_graph(services, assignments_count=ac, exceptions_count=ec)
-  print "Solving graph"
-  (status, soln) = graph.solve(debug=False)
-  if status == 'INFEASIBLE':
-    (dontsave_status, soln) = graph.solve_partial_flow(debug=True)
-  graph.graph()
-  # print 'soln', soln
-  return (status, soln, services)
+  scheduler = ServiceScheduler(services, ac, ec)
+  status = scheduler.solve()
+  print(status)
+  scheduler.save(cws)
 
 
 # Checks to see if there's a intersection between 2 time ranges
@@ -397,95 +391,6 @@ def trim_service_exceptions(services, exceptions, pinned_assignments):
                 # print 'removing working!!!!!!!!!!! partial day block', w, slot.workers
 
 
-@timeit
-def build_graph(services, assignments_count={}, exceptions_count={}):
-  total_flow = 0
-  min_cost_flow = DirectedFlowGraph()
-
-  # Add services to source
-  t = timeit_inline("Adding services to source")
-  t.start()
-  for s in services:
-    '''
-      Loop through all the services, all the slots
-      source -> (service, slot) -> workers
-    '''
-    source = 'Source'
-
-    for slot in s.serviceslots:
-      slot_workload = slot.workers_required * slot.workload
-      # Try to assign higher priority first
-      # The multiplication by 10 will offset the worker health parameter
-      # Priority from 1-12
-      priority = max(120 - (slot.worker_group.assign_priority * 10), 1)
-      min_cost_flow.add_or_set_arc(source, (s, slot), capacity=slot_workload, cost=priority, stage=0)
-      # print 'slot', s, slot, slot_workload, slot.workers
-      total_flow += slot_workload
-  t.end()
-
-  # Trim via exceptions from workers
-  # rejoin conflicting times + feed into 1 day (worker, weekday)
-  # all (worker, weekday) feed into worker
-
-  # Add trainees to services
-  t = timeit_inline("Adding trainees to service slots")
-  t.start()
-  for s, slot in min_cost_flow.get_stage(1):
-    # print 'add arcs', s, slot, slot.workers
-
-    for w in slot.workers:
-      # only add worker into graph is capacity is > 0
-      # if w.services_needed > 0:
-      # print w, w.services_cap, assignments_count.get(w.id, 0), exceptions_count.get(w.id, 0)
-      if w.services_cap - assignments_count.get(w.id, 0) - exceptions_count.get(w.id, 0) > 0:
-
-        # TODO - Better way of calculating the cost
-        # Calculate the cost (service freq + workload)
-        s_freq = w.service_frequency[slot.id] if slot.id in w.service_frequency else 0
-
-        # Simplified the way to reduce likelyhood of receiving the same service for two weeks straight
-        # Formula: cost = service history frequency
-        cost = s_freq
-
-        min_cost_flow.add_or_set_arc((s, slot), (w, s.weekday, slot.workload), capacity=slot.workload, cost=cost, stage=1)
-  t.end()
-
-  # Add 1 service/day constraint to each trainee
-  t = timeit_inline("Adding 1 service/day constraint for each trainee")
-  t.start()
-  for w, weekday, workload in min_cost_flow.get_stage(2):
-    min_cost_flow.add_or_set_arc((w, weekday, workload), (w, weekday), capacity=workload, cost=1, stage=2)
-    cap, cost = min_cost_flow.get_arc((w, weekday, workload), (w, weekday))
-    if workload > cap:
-      min_cost_flow.add_or_set_arc((w, weekday), w, capacity=workload, cost=1, stage=3)
-  t.end()
-
-  # add trainees all to sink
-  t = timeit_inline("Adding all trainees to sink")
-  t.start()
-  for w in min_cost_flow.get_stage(4):
-    sink = 'Sink'
-
-    # Only add edges for none pinned assignment capacity left
-    # TODO - Health to factor in last week's total services
-    # services_left = w.services_needed
-    services_left = w.services_cap - assignments_count.get(w.id, 0) - exceptions_count.get(w.id, 0)
-    sick_lvl = max(10 - w.health, 1)  # min sick_lvl is 1 so load balancing works
-    # print w, services_left, sick_lvl
-    for x in range(1, services_left + 1):
-      cost = (x + assignments_count.get(w.id, 0) + exceptions_count.get(w.id, 0)) * sick_lvl  # Add services_count to reduce bias of not including preassigned services
-
-      min_cost_flow.add_or_set_arc(w, sink, capacity=1, cost=cost, stage=4, key=x)
-  t.end()
-  # print(min_cost_flow.stages)
-
-  print '### total flow ###', total_flow
-
-  min_cost_flow.set_total_flow(total_flow)
-
-  return min_cost_flow
-
-
 # Save all designated services as pinned assignments
 # This is run before we start the regular assignment for rotational services
 def save_designated_assignments(cws):
@@ -515,97 +420,6 @@ def save_designated_assignments(cws):
     for worker in workers:
       bulk_assignment_workers.append(ThroughModel(assignment_id=a.id, worker_id=worker.id))
   ThroughModel.objects.bulk_create(bulk_assignment_workers)
-
-
-def save_soln_as_assignments(soln, cws):
-  '''
-    Bulk saves solution in 3 db calls
-  '''
-
-  # {(service, slot): assignment}
-  slot_workers_db = {}
-  # {assignment:set([worker,])}
-  assignment_db = {}
-
-  bulk_assignments = []
-
-  bulk_through = []
-
-  ThroughModel = Assignment.workers.through
-  for (service, slot), worker in soln:
-    # Guarantee only 1 assignment per slot
-    if (service, slot) not in slot_workers_db:
-      a = slot_workers_db[(service, slot)] = Assignment(service=service, service_slot=slot, week_schedule=cws, workload=slot.workload)
-      bulk_assignments.append(a)
-
-    assignment_db.setdefault((service, slot), set()).add(worker)
-
-  Assignment.objects.bulk_create(bulk_assignments)
-
-  # Bulk create assignment/workers joins
-
-  assignments = Assignment.objects.filter(week_schedule=cws, pin=False).select_related('service', 'service_slot')
-
-  for a in assignments:
-    workers = assignment_db[(a.service, a.service_slot)]
-    for worker in workers:
-      bulk_through.append(ThroughModel(assignment_id=a.id, worker_id=worker.id))
-
-  ThroughModel.objects.bulk_create(bulk_through)
-
-
-def graph_to_json(services):
-  # {sID: slotID: [workerID,]}
-  graph = {}
-  for service in services:
-    for slot in service.serviceslots:
-      if slot.workers_required > 0:
-        for w in slot.workers:
-          graph.setdefault(service.id, {}).setdefault(slot.id, []).append(w.id)
-
-  return graph
-
-
-def json_to_graph(json_graph, workers):
-  s_id_tb = {}
-  slot_id_tb = {}
-
-  s_ids = set()
-  slot_ids = set()
-
-  for sID, slots in json_graph.items():
-    for slotID in slots:
-      s_ids.add(sID)
-      slot_ids.add(slotID)
-
-  services = Service.objects.filter(id__in=s_ids).order_by('start', 'end', 'weekday')
-  slots = ServiceSlot.objects.filter(id__in=slot_ids).order_by('name', 'workers_required')
-
-  s_id_tb = {}
-  for s in services:
-    s_id_tb[str(s.id)] = s
-
-  slot_id_tb = {}
-  for slot in slots:
-    slot_id_tb[str(slot.id)] = slot
-
-  w_id_tb = {}
-  # build worker id table
-  for w in workers:
-    w_id_tb[w.id] = w
-
-  graph = OrderedDict()
-
-  for sID, slots in json_graph.items():
-    for slotID, workers in slots.items():
-      key = (s_id_tb[sID], slot_id_tb[slotID])
-
-      for wID in workers:
-        graph.setdefault(key, set()).add(w_id_tb[wID])
-
-  # 1/0
-
-  return graph
 
 
 @timeit
@@ -642,32 +456,8 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
     # Source : https://code.djangoproject.com/ticket/9519
     # Need a better solution for this (maybe sometime in the future when we update Django)
     Assignment.objects.filter(week_schedule=cws, pin=False).delete()
-    status, soln, graph = assign(cws)
-    if status == 'OPTIMAL':
-      print 'OPTIMAL'
-    save_soln_as_assignments(soln, cws)
-
-    json_str = json.dumps(graph_to_json(graph))
-
-    gj = GraphJson(week_schedule=cws, json=json_str, status=status)
-    gj.save()
-
-    # Redirect so page can't be accidentally refreshed upon.
+    assign(cws)
     return HttpResponseRedirect(reverse_lazy('services:services_view') + '?week_schedule=' + str(current_week))
-
-  else:
-    status, soln = None, None
-    # hydrate graph from json (grab latest graph from current week)
-    try:
-      gj = GraphJson.objects.filter(week_schedule=cws).latest('date_created')
-      json_graph = json.loads(gj.json)
-      status = gj.status
-      graph = sorted(json_to_graph(json_graph, workers).items())
-    except GraphJson.DoesNotExist:
-      # No graph found
-      graph = None
-    except KeyError:
-      graph = None
 
   # For Review Tab
   categories = Category.objects.prefetch_related(
@@ -713,8 +503,6 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
   services_bb = lJRender(ServiceCalendarSerializer(services, many=True).data)
 
   ctx = {
-      'status': status,
-      'assignments': soln,
       'workers': workers,
       'workers_bb': workers_bb,
       'exceptions': exceptions,
@@ -723,7 +511,6 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
       'designated_categories': designated_categories,
       'services_bb': services_bb,
       'report_assignments': worker_assignments,
-      'graph': graph,
       'cws': cws,
       'current_week': current_week,
       'prev_week': (current_week - 1),
@@ -786,15 +573,15 @@ def generate_report(request, house=False):
     worker.designated_services = designated_list
 
   ctx = {
-    'columns': 2,
-    'pagesize': 'letter',
-    'orientation': 'landscape',
-    'wkstart': str(week_start),
-    'categories': categories,
-    'worker_assignments': worker_assignments,
-    'encouragement': cws.encouragement,
-    'schedulers': schedulers,
-    'page_title': 'FTTA Service Schedule'
+      'columns': 2,
+      'pagesize': 'letter',
+      'orientation': 'landscape',
+      'wkstart': str(week_start),
+      'categories': categories,
+      'worker_assignments': worker_assignments,
+      'encouragement': cws.encouragement,
+      'schedulers': schedulers,
+      'page_title': 'FTTA Service Schedule'
   }
 
   if house:
@@ -971,7 +758,7 @@ class ServiceHours(GroupRequiredMixin, UpdateView):
     try:
       self.week = self.kwargs['week']
     except KeyError:
-      self.week = self.week = term.term_week_of_date(datetime.now().date())
+      self.week = term.term_week_of_date(datetime.now().date())
 
     # get service
     try:
@@ -1013,11 +800,11 @@ class ServiceHours(GroupRequiredMixin, UpdateView):
     ctx['button_label'] = 'Submit'
     ctx['page_title'] = 'Designated Service Hours'
     service_roll_forms = []
-    service_rolls = ServiceRoll.objects.filter(service_attendance=self.get_object())
+    service_rolls = ServiceRoll.objects.filter(service_attendance=self.get_object()).order_by('start_datetime')
     if service_rolls.count() == 0:
       service_roll_forms.append(ServiceRollForm())
     else:
-      for sr in ServiceRoll.objects.filter(service_attendance=self.get_object()):
+      for sr in service_rolls:
         service_roll_forms.append(ServiceRollForm(instance=sr))
     ctx['service_roll_forms'] = service_roll_forms
     return ctx
@@ -1031,34 +818,41 @@ class ServiceHoursTAView(GroupRequiredMixin, TemplateView):
     context = super(ServiceHoursTAView, self).get_context_data(**kwargs)
     term = Term.current_term()
     week = 0
-    try:
-      week = self.kwargs['week']
-    except KeyError:
-      week = term.term_week_of_date(datetime.now().date())
-    context['designated_services'] = self.get_services_dict(term, week)
+    designated_services = Service.objects.filter(category__name__icontains='designated')  # designates services
+    week = self.request.GET.get('week', term.term_week_of_date(datetime.now().date()))
+    services = self.request.GET.getlist('services', [])
+    if services:
+      if -1 not in services:
+        designated_services = designated_services.filter(id__in=services)
+    else:
+      designated_services = designated_services.filter(id=designated_services.first().id)
+    context['designated_services'] = self.get_services_dict(term, week, designated_services)
     context['week_range'] = [str(i) for i in range(20)]
     context['weekinit'] = str(week)
     context['page_title'] = "Service Hours Report"
+    context['services_qs'] = Service.objects.filter(category__name__icontains='designated')
     return context
 
-  def get_services_dict(self, term, week):
+  def get_services_dict(self, term, week, service_ids=[]):
+    designated_services = Service.objects.filter(category__name__icontains='designated')  # designates services
     services = []
-    for assign in Assignment.objects.filter(service__designated=True):
+    if service_ids:
+      designated_services = designated_services.filter(id__in=service_ids)
+    for ds in designated_services:
       workers = []
-      for worker in assign.workers.all():
-          try:
-            serv_att = worker.serviceattendance_set.get(term=term, week=week, designated_service=assign.service)
-            workers.append({
-              'full_name': worker.full_name,
-              'id': worker.id,
-              'service_attendance': serv_att.__dict__,
-              'service_rolls': serv_att.serviceroll_set.values()
-            })
-          except ServiceAttendance.DoesNotExist:
-            pass
+      worker_ids = ds.assignments.values_list('workers', flat=True).distinct('workers')
+      for worker in Worker.objects.filter(id__in=worker_ids):  # filter out None values
+        try:
+          serv_att = worker.serviceattendance_set.get(term=term, week=week, designated_service=ds)
+          workers.append({
+            'full_name': worker.full_name,
+            'service_rolls': serv_att.serviceroll_set.order_by('start_datetime').values(),
+            'total_hours': serv_att.get_service_hours()
+          })
+        except ObjectDoesNotExist:
+          continue
       services.append({
-        'name': assign.service.name,
-        'id': assign.service.id,
+        'name': ds.name,
         'workers': workers
       })
     return services
@@ -1072,18 +866,24 @@ class DesignatedServiceViewer(GroupRequiredMixin, TemplateView):
     context = super(DesignatedServiceViewer, self).get_context_data(**kwargs)
     designated_services = Service.objects.filter(designated=True)
     services = []
+    for w in Worker.objects.all().values('id', 'trainee__firstname', 'trainee__lastname', 'trainee__gender', 'trainee__current_term', 'trainee__team__type'):
+      services.append({
+          'worker': w,
+          'service_name': '',
+
+      })
+
     for s in designated_services:
-      workers = []
       for wg in s.worker_groups.all():
         for w in wg.workers.all():
-          if w not in workers:
-            workers.append(w)
-      services.append({
-          'name': s.name,
-          'workers': workers
-      })
+          dic = [x for x in services if x['worker']['id'] == w.id][0]
+          if dic['service_name']:
+            dic['service_name'] = dic['service_name'] + ", " + s.name
+          else:
+            dic['service_name'] = s.name
+
     context['designated_services'] = services
-    context['page_title'] = "Designated Service Viewer"
+    context['page_title'] = "Designated Service Trainees"
     return context
 
 
@@ -1134,13 +934,6 @@ class UpdateExceptionView(ExceptionView, UpdateView):
     data['workers'] = [w.trainee for w in obj.workers.all()]
     return AddExceptionForm(data)
 
-
-'''
-ArcIndex AddArcWithCapacityAndUnitCost(
-  NodeIndex tail, NodeIndex head,
-    FlowQuantity capacity,
-     CostValue unit_cost);
-'''
 
 '''
 

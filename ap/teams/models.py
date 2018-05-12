@@ -37,7 +37,10 @@ class Team(models.Model):
   superteam = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   class Meta:
     ordering = ['name', 'locality', 'type']

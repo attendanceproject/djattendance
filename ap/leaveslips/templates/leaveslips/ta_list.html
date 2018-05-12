@@ -30,13 +30,16 @@
 
   $(function() {
     table = $("#display_leaveslips").DataTable({
-      "aaSorting": [],
-      "aLengthMenu": [
+      stateSave: true,
+      aaSorting: [],
+      aLengthMenu: [
         [25, 50, 100, -1],
         [25, 50, 100, "All"]
       ],
-      iDisplayLength: 50,
+      iDisplayLength: 25,
+      autoWidth: true,
     });
+
     $('#leaveslip_trainee_list').select2();
 
     $('#display_leaveslips tbody').on('click', 'tr', function() {
@@ -214,9 +217,11 @@
         <tr>
           <th>ID</th>
           <th>Name(s)</th>
+          <th>Period</th>          
           <th>Reason</th>
           <th>Date</th>
           <th>Description</th>
+          <th>Private TA Comments</th>          
           <th>Status</th>
           <th>Tags</th>
           <th>Actions</th>
@@ -228,17 +233,17 @@
             {% if leaveslip.classname == "individual" %}
               <tr id="{{leaveslip.id}}-individual" class="leaveslip-row">
                 <td>{{leaveslip.id}}</td>
-                <td>{{leaveslip.trainee.full_name}}</td>
+                <td>{{leaveslip.trainee.firstname}} {{leaveslip.trainee.lastname}}</td>
             {% else %}
               <tr id="{{leaveslip.id}}-group" class="leaveslip-row">
                 <td>{{leaveslip.id}}</td>
                 <td>
                   <i title="Group leave slip" class="fa fa-users fa-lg" aria-hidden="true"></i>&nbsp;
-                  {{ leaveslip.trainees.all|join:", " }}
+                  {{ leaveslip.trainees.all|join:", " }}  
                 </td>
             {% endif %}
+            <td>{{leaveslip.periods|cut:"]"|cut:"["}}</td>
             <td><a href="#" data-toggle="tooltip" data-placement="left" title="{{leaveslip.get_type_display}}">{{leaveslip.type}}</a></td>
-            <!-- <td>{{leaveslip.rolls.first.date|date:"N d"}}</td> -->
             <td>
             {% if leaveslip.rolls %}
               {{leaveslip.rolls.first.date|date:"N d"}}
@@ -247,6 +252,7 @@
             {% endif %}
             </td>
             <td>{{leaveslip.description|truncatechars:100}}</td>
+            <td>{{leaveslip.private_TA_comments|truncatechars:100}}</td>            
             <td>{{leaveslip.get_status_display}}</td>
             <td>
               {% include "leaveslips/_ta_labels.html" %}

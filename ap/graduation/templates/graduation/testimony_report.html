@@ -50,7 +50,7 @@
 
 
   });
-  
+
 </script>
 {% endblock %}
 
@@ -63,6 +63,7 @@
       <tr>
         <th>Firstname</th>
         <th>Lastname</th>
+        <th>Gender</th>
         <th>Top Experience</th>
         <th>Encouragement</th>
         <th>Overarching_Burden</th>
@@ -74,6 +75,7 @@
       <tr>
         <td>{{c.trainee.firstname}}</td>
         <td>{{c.trainee.lastname}}</td>
+        <td>{{c.trainee.get_gender_display}}</td>
         <td>{{c.top_experience}}</td>
         <td>{{c.encouragement}}</td>
         <td>{{c.overarching_burden}}</td>

@@ -1,20 +1,20 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView
-from django.views.generic.edit import UpdateView, CreateView
-from django.http import HttpResponseRedirect
-from aputils.decorators import group_required
-from django.core.urlresolvers import reverse_lazy
-from braces.views import GroupRequiredMixin
+from datetime import datetime
 
 from accounts.models import Trainee
-from .models import (
-  House, HCSurvey, HCRecommendation, HCTraineeComment, HCSurveyAdmin, HCRecommendationAdmin
-)
-from .forms import (
-  HCSurveyAdminForm, HCSurveyForm, HCRecommendationForm, HCTraineeCommentForm, HCRecommendationAdminForm
-)
+from aputils.decorators import group_required
+from braces.views import GroupRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views.generic import TemplateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from terms.models import Term
-from datetime import datetime
+
+from .forms import (HCRecommendationAdminForm, HCRecommendationForm,
+                    HCSurveyAdminForm, HCSurveyForm, HCTraineeCommentForm)
+from .models import (HCRecommendation, HCRecommendationAdmin, HCSurvey,
+                     HCSurveyAdmin, HCTraineeComment, House)
 
 
 class HCSurveyAdminCreate(GroupRequiredMixin, CreateView):
@@ -68,7 +68,7 @@ class HCSurveyAdminCreate(GroupRequiredMixin, CreateView):
     ctx = super(HCSurveyAdminCreate, self).get_context_data(**kwargs)
     term = Term.current_term()
 
-    ctx['hc_admins'] = HCSurveyAdmin.objects.filter(term=term)
+    ctx['hc_admins'] = HCSurveyAdmin.objects.filter(term=term).order_by('-index')
     ctx['hcra_form'] = HCRecommendationAdminForm()
     ctx['hcsa_form'] = ctx['form']
     init_open_datetime = HCRecommendationAdmin.objects.get_or_create(term=term)[0].open_time
@@ -94,12 +94,19 @@ class HCSurveyAdminUpdate(UpdateView):
 
   def get_context_data(self, **kwargs):
     ctx = super(HCSurveyAdminUpdate, self).get_context_data(**kwargs)
-    ctx['hc_admins'] = HCSurveyAdmin.objects.filter(term=Term.current_term()).exclude(id=self.object.id)
+    ctx['hc_admins'] = HCSurveyAdmin.objects.filter(term=Term.current_term()).order_by('-index')
     ctx['update'] = True
     ctx['hcsa_form'] = ctx['form']
     ctx['page_title'] = 'Update HC Survey'
     ctx['button_label1'] = 'Update'
     return ctx
+
+
+class HCSurveyAdminDelete(GroupRequiredMixin, DeleteView, SuccessMessageMixin):
+  model = HCSurveyAdmin
+  success_url = reverse_lazy('hc:hc-admin')
+  group_required = [u'training_assistant']
+  success_message = "HC Surveys have been deleted."
 
 
 @group_required(['HC'])
@@ -134,6 +141,7 @@ def submit_hc_survey(request):
       hc_survey.hc = hc
       hc_survey.house = house
       hc_survey.survey_admin = hcsa
+      hc_survey.submitted = True
       hc_survey.save()
 
       for cf in comment_forms:
@@ -173,7 +181,7 @@ def submit_hc_survey(request):
       'comment_forms': comment_forms,
       'button_label': "Submit",
       'page_title': "HC Survey",
-      'period': 1,
+      'period': hcsa.index,
       'house': house,
       'hc': hc,
       'read_only': read_only,
@@ -244,11 +252,16 @@ class HCSurveyTAView(GroupRequiredMixin, TemplateView):
     context = super(HCSurveyTAView, self).get_context_data(**kwargs)
     hcsa = HCSurveyAdmin.objects.filter(term=Term.current_term()).filter(index=index)
     surveys_and_comments = []
-    for hcs in HCSurvey.objects.filter(survey_admin=hcsa):
+    house_ids = HCSurvey.objects.filter(survey_admin=hcsa, submitted=True).values_list('house', flat=True)
+    for hcs in HCSurvey.objects.filter(survey_admin=hcsa, submitted=True).exclude(house__gender='C').order_by('house__gender'):
       surveys_and_comments.append({
         'survey': hcs,
         'trainee_comments': HCTraineeComment.objects.filter(hc_survey=hcs)
       })
+    context['bro_reported'] = House.objects.filter(id__in=house_ids, gender="B")
+    context['bro_not_reported'] = House.objects.exclude(id__in=house_ids).filter(gender="B")
+    context['sis_reported'] = House.objects.filter(id__in=house_ids, gender="S")
+    context['sis_not_reported'] = House.objects.exclude(id__in=house_ids).filter(gender="S")
     context['surveys_and_comments'] = surveys_and_comments
     context['page_title'] = "HC Survey Report"
     return context

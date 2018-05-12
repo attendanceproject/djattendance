@@ -1,16 +1,16 @@
-from datetime import datetime, date
 from collections import namedtuple
+from datetime import date, datetime
 
+from accounts.models import Trainee
+from attendance.utils import Period
+from classnotes.models import Classnotes
 from django import template
 from django.core.urlresolvers import reverse
-
-from lifestudies.models import Discipline
-from classnotes.models import Classnotes
 from django.db.models import Q
-from attendance.utils import Period
-from terms.models import Term
-from accounts.models import Trainee
 from leaveslips.models import IndividualSlip
+from lifestudies.models import Discipline
+from terms.models import Term
+
 
 # code structure copied from aputils/templatetags/smart_menu.py
 # TODO: remove use of namedtuple here and in smart_menu.
@@ -31,10 +31,10 @@ def generate_panels(context):
   if user.is_anonymous():
     return ""
 
-  ls = Discipline.objects.filter(trainee=user).values('quantity')
+  ls = Discipline.objects.filter(trainee=user)
   num_ls = 0
   for l in ls:
-    num_ls = num_ls + l['quantity']
+    num_ls = num_ls + l.get_num_summary_due()
 
   lifestudies_panel = Panel(
       name='Life Studies',

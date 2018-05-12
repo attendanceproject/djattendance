@@ -28,8 +28,16 @@ CLASS_CHOICES = (
     ('German', 'German'),
     ('Character', 'Character'),
     ('PSRP', 'PSRP'),
+    ('4th Term', 'T4'),
+)
+
+# everyone has permissions for these
+CLASS_CHOICES_ALL = (
     ('Presentations', 'Presentations'),
 )
+CLASS_CHOICES_ALL_ITEMS = [c[0] for c in CLASS_CHOICES_ALL]
+
+CLASS_CHOICES += CLASS_CHOICES_ALL
 
 ELECTIVES = r''
 for x, y, in CLASS_CHOICES:

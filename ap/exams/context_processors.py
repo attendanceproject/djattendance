@@ -1,5 +1,5 @@
 from aputils.trainee_utils import is_trainee
-from exams.utils import trainee_can_take_exam
+from exams.utils import trainee_can_take_exam, makeup_available
 
 from .models import Exam, Session
 
@@ -14,6 +14,12 @@ def exams_available(request):
   for exam in exams:
     if trainee_can_take_exam(user, exam):
       exam_count += 1
+  
+  not_open_exams = Exam.objects.filter(is_open=False)
+  for exam in not_open_exams:
+    if makeup_available(exam, user):
+      exam_count += 1
+
   return {'exams_available': exam_count}
 
 

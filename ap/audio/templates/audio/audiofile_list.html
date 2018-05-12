@@ -44,4 +44,34 @@
     <div class="col-xs-12"><i>No audio recordings available for this week.</i></div>
   {% endfor %}
 </div>
+
+{% if trainee_wars %}
+  <h3>Past Requests</h3>
+  <div class="data-table-container">
+    <table id="id_audio_request_table" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Submitted</th>
+          <th>Description</th>
+          <th>TA Comments</th>
+          <th>Status</th>
+          <th>View</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for req in trainee_audio_requests %}
+        <tr>
+          <td>{{req.requester_name}}</td>
+          <td>{{req.date_requested}}</td>
+          <td>{{req.trainee_comments|truncatechars:100}}</td>
+          <td>{{req.TA_comments|truncatechars:100}}</td>
+          <td>{{req.status}}</td>
+          <td><a href="{{ req.get_absolute_url }}">Detail</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
 {% endblock %}

@@ -14,11 +14,18 @@
 
     gradinvite_count = $("#id_grad_invitations").val()
     dvd_count = $("#id_grad_dvd").val()
-    
+
+    // trainee inputted value rounds up to nearest multiple of five upon saving so as to allow for no ambiguities.
+    if (gradinvite_count % 5 != 0) {
+      gradinvite_count = Math.ceil(gradinvite_count/5)*5
+      $("#id_grad_invitations").val(gradinvite_count)
+      $(".btn-save").submit()
+    }
 
     grad_cost = gradinvite_count * 0.5
     dvd_cost = dvd_count * 11
 
+    $("#invite_pack_amount").html(gradinvite_count/5 + " packs")
     $("#invite_cost").html("$"+grad_cost)
     $("#dvd_cost").html("$"+dvd_cost)
 
@@ -49,17 +56,18 @@
 {% endif %}
 <form id="id_grad_form" action="" method="post">
   {% csrf_token %}
-  <div class="row"><div class="col-xs-12"><div class="panel">    
+  <div class="row"><div class="col-xs-12"><div class="panel">
     <p>Please note that invitations come in bundles of 5, so your choice must be a multiple of 5 and represents the total number of invitations (not the number of sets). The average price will be $2.50 per set of 5 invitations. Envelopes included. Stamps not included.</p>
       <div class="row"><div class="col-xs-12">
         Number of invitations: {{form.grad_invitations}}
       </div></div>
       <div class="row"><div class="col-xs-12">
+        Number of packs: <span id="invite_pack_amount">0 packs</span><br>
         Total cost:  <span id="invite_cost">$0.00</span>
       </div></div>
   </div></div></div>
 
-  <div class="row"><div class="col-xs-12"><div class="panel">    
+  <div class="row"><div class="col-xs-12"><div class="panel">
     <p>The price will be $11.00 per DVD. DVD case included.</p>
       <div class="row"><div class="col-xs-12">
         Number of DVD: {{form.grad_dvd}}

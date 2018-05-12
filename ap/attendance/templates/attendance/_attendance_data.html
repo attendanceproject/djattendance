@@ -1,25 +1,25 @@
 <script>
-  let Events = {{ events_bb|safe }};
-  let GroupEvents = {{ groupevents_bb|safe }};
-  let Rolls = {{ rolls_bb|safe}};
-  let IndividualSlips = {{ individualslips_bb|safe }};
-  let GroupSlips = {{ groupslips_bb|safe }};
-  let Trainee = {{ trainee_bb|safe }};
-  let Trainees = {{ trainees_bb|safe }};
-  let TAs = {{ TAs_bb|safe }};
-  let Term = {{ term_bb|safe }};
+  var Events = {{ events_bb|safe }};
+  var GroupEvents = {{ groupevents_bb|safe }};
+  var Rolls = {{ rolls_bb|safe}};
+  var IndividualSlips = {{ individualslips_bb|safe }};
+  var GroupSlips = {{ groupslips_bb|safe }};
+  var Trainee = {{ trainee_bb|safe }};
+  var Trainees = {{ trainees_bb|safe }};
+  var TAs = {{ TAs_bb|safe }};
+  var Term = {{ term_bb|safe }};
   {% if show %}
-    let Show = '{{show}}';
+    var Show = '{{show}}';
   {% endif %}
   {% if Today %}
-    let Today = moment('{{Today}}', 'MM/DD/YYYY');
+    var Today = moment('{{Today}}', 'MM/DD/YYYY');
   {% endif %}
   {% if SelectedEvents %}
-    let SelectedEvents = {{ SelectedEvents|safe }};
+    var SelectedEvents = {{ SelectedEvents|safe }};
   {% endif %}
   {% if actual_user %}
-    let User = {{ actual_user | safe }};
+    var User = {{ actual_user | safe }};
   {% else %}
-    let User = null;
+    var User = null;
   {% endif %}
 </script>

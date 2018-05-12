@@ -5,8 +5,7 @@
 
 {% block title %}{{ page_title }}{% endblock %}
 
-{% block scripts %}
-{{ block.super }}
+{% block references %}
 <style>
   #submit{
     display: inline-block;
@@ -24,52 +23,64 @@
   }
 
 </style>
+{% endblock%}
+
+{% block scripts %}
+{{ block.super }}
 
 <script type="text/javascript">
-
 
 $(document).ready(() => {
 
   const size = 10;
+  var dt_options = {
+    format: 'm/d/Y g:i A',
+    formatTime: 'g:i A',
+    ampm: true,
+    step: 10,
+    defaultSelect: false,
+    allowBlank: false,
+    validateOnBlur: false
+  };
 
-  $('.datetimepicker').datetimepicker({
-    format:'m/d/Y H:i'
-  });
+  $('.datetimepicker').datetimepicker(dt_options);
 
   $("#add_row").click(() => {
-    let val = parseInt($("#id_service_hours_table tr:last").attr('id').split("_").pop());
+    val = parseInt($("#id_service_hours_table tr[id]:last").attr('id').split("_").pop());
 
     if (val < size) {
-      $("#id_service_hours_table tr:last").clone().appendTo("#id_service_hours_table");
+      $("#id_service_hours_table tr[id]:last").clone().appendTo("#id_service_hours_table");
       val++;
-      $("#id_service_hours_table tr:last").attr("id","row_" + val);
-      $('.datetimepicker').datetimepicker({
-        format:'m/d/Y H:i'
-      });
+      $("#id_service_hours_table tr[id]:last").attr("id","row_" + val);
+      $('.datetimepicker').datetimepicker(dt_options);
+      // $('.datetimepicker').datetimepicker(dt_options);
     }
-  })
+  });
 
   $("#delete_row").click(() => {
-    let val = parseInt($("#id_service_hours_table tr:last").attr('id').split("_").pop());
+    let val = parseInt($("#id_service_hours_table tr[id]:last").attr('id').split("_").pop());
     if (val != 0){
-      $("#id_service_hours_table tr:last").remove();
+      $("#id_service_hours_table tr[id]:last").remove();
     }
-  })
+  });
 
   $("#id_designated_service").on("change", function(e) {
-    w = $("#id_week").find(":selected").text()
-    s = $("#id_designated_service").find(":selected").attr('value')
+    w = $("#id_week").find(":selected").text();
+    s = $("#id_designated_service").find(":selected").attr('value');
     if (s){
-      window.location.replace("{% url 'services:designated_service_hours' %}/"+s+"/"+w)
+      window.location.replace("{% url 'services:designated_service_hours' %}/"+s+"/"+w);
     }
   });
 
   $("#id_week").on("change", function(e) {
-    w = $("#id_week").find(":selected").text()
-    s = $("#id_designated_service").find(":selected").attr('value')
+    w = $("#id_week").find(":selected").text();
+    s = $("#id_designated_service").find(":selected").attr('value');
     if (s){
-      window.location.replace("{% url 'services:designated_service_hours' %}/"+s+"/"+w)
+      window.location.replace("{% url 'services:designated_service_hours' %}/"+s+"/"+w);
     }
+
+  // default select first designated service
+  $('#id_designated_service option:eq(2)').attr('selected', 'selected');
 
   });
 
@@ -78,8 +89,6 @@ $(document).ready(() => {
   });
 
 });
-
-
 
 </script>
 {% endblock %}
@@ -119,12 +128,14 @@ Note: 12:00 AM will be interpreted as 00:00 in 24 hour time. Rows with blank hou
       <th>Start</th>
       <th>End</th>
       <th>Task Performed</th>
+      <th>Work Hours</th>
     </tr>
     {% for service_roll_form in service_roll_forms %}
     <tr id="row_{{forloop.counter0}}">
-      <td>{{service_roll_form.start_datetime}}</td>
-      <td>{{service_roll_form.end_datetime}}</td>
+      <td><input class="datetimepicker" id="id_start_datetime" name="start_datetime" value="{{service_roll_form.start_datetime.value|date:'m/d/Y g:i A'}}"></td>
+      <td><input class="datetimepicker" id="id_end_datetime" name="end_datetime" value="{{service_roll_form.end_datetime.value|date:'m/d/Y g:i A'}}"></td>
       <td>{{service_roll_form.task_performed}}</td>
+      <td>{{service_roll_form.instance.get_time_diff|floatformat:2}}</td>
     </tr>
     {% endfor %}
     </table>

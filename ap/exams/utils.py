@@ -178,7 +178,7 @@ def save_exam_creation(request, pk):
     try:
       #okay match to regex pattern hh:mm:ss
       duration_regex.group(0)
-    except AttributeError:
+    except AttributeError :
       return (False, 'Invalid duration given for exam.')
 
 

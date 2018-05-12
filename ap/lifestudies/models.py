@@ -1,12 +1,10 @@
-from datetime import datetime, time, date, timedelta
-
-from django.core.exceptions import ValidationError
-from django.db import models
+from datetime import date, datetime, time, timedelta
 
 from accounts.models import User
 from attendance.utils import Period
 from books.models import Book
-from schedules.models import Schedule
+from django.core.exceptions import ValidationError
+from django.db import models
 from terms.models import Term
 
 
@@ -28,6 +26,7 @@ SUMMARY
     a trainee.
 
 """
+
 
 class Discipline(models.Model):
   TYPE_OFFENSE_CHOICES = (
@@ -70,7 +69,7 @@ class Discipline(models.Model):
 
   note = models.TextField(blank=True)
 
-  #sort disciplines by name
+  # sort disciplines by name
   class Meta:
     ordering = ["trainee__lastname"]
 
@@ -96,9 +95,9 @@ class Discipline(models.Model):
     """checks whether create life-study button will show or not"""
     return not (self.offense == 'MO' and date.today().weekday() != 0)
 
-  #if this is True it means all the lifestudies has been approved and all
-  #have been submitted. This assume num of summary submitted not larger
-  #than num of summary assigned
+  # if this is True it means all the lifestudies has been approved and all
+  # have been submitted. This assume num of summary submitted not larger
+  # than num of summary assigned
   def is_completed(self):
     if self.get_num_summary_due() > 0:
       return False
@@ -108,13 +107,12 @@ class Discipline(models.Model):
           return False
     return True
 
-  #increase the quantity of the discipline by the number specified. Add 1
-  #more summary if num is not specified
-  def increase_penalty(self,num=1):
-    self.quantity+=num
+  # increase the quantity of the discipline by the number specified. Add 1
+  # more summary if num is not specified
+  def increase_penalty(self, num=1):
+    self.quantity += num
     self.save()
     return self.quantity
-
 
   @staticmethod
   def calculate_summary(trainee, period):
@@ -129,8 +127,7 @@ class Discipline(models.Model):
       if roll.date >= Period(current_term).start(period) and roll.date <= Period(current_term).end(period):
         if roll.status == 'A':
           num_A += 1
-        elif roll.status == 'L' or roll.status == 'T' or \
-            roll.status == 'U':
+        elif roll.status == 'L' or roll.status == 'T' or roll.status == 'U':
           num_T += 1
     if num_A >= 2:
       num_summary += num_A
@@ -146,7 +143,7 @@ class Discipline(models.Model):
     now = datetime.now()
     due = datetime.combine(now.date() + timedelta(weeks=1, days=1), time(18, 45))
     d = Discipline(infraction='AT', quantity=amount, date_assigned=now,
-            due=due, offense='MO', trainee=trainee)
+                   due=due, offense='MO', trainee=trainee)
     d.save()
 
   # Grab last date_submitted summary, grab book and check if chapter reached, auto-increment
@@ -156,13 +153,16 @@ class Discipline(models.Model):
     return last_book
 
   def __unicode__(self):
-    return "[{offense}] {name}. Infraction: {infraction}. Quantity: \
-      {quantity}. Still need {num_summary_due} summaries. Completed: \
-      {is_completed}".format(
-      name=self.trainee.full_name,
-      infraction=self.infraction, offense=self.offense,
-      quantity=self.quantity, num_summary_due=self.get_num_summary_due(),
-      is_completed=self.is_completed())
+    try:
+      return "[{offense}] {name}. Infraction: {infraction}. Quantity: \
+        {quantity}. Still need {num_summary_due} summaries. Completed: \
+        {is_completed}".format(
+        name=self.trainee.full_name,
+        infraction=self.infraction, offense=self.offense,
+        quantity=self.quantity, num_summary_due=self.get_num_summary_due(),
+        is_completed=self.is_completed())
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Summary(models.Model):
@@ -184,7 +184,7 @@ class Summary(models.Model):
 
   """ Decided to remove this field. We now auto hide approved submissions"""
   # if the summary is marked for delete then we hide
-  #deleted = models.BooleanField(default=False)
+  # deleted = models.BooleanField(default=False)
 
   # which discipline this summary is associated with
   discipline = models.ForeignKey(Discipline, on_delete=models.SET_NULL, null=True)
@@ -198,14 +198,17 @@ class Summary(models.Model):
   # hardCopy
   hard_copy = models.BooleanField(default=False)
 
-  #sort summaries by name
+  # sort summaries by name
   class Meta:
     ordering = ["approved"]
 
   def __unicode__(self):
-    return "[{book} ch. {chapter}] {name}. Approved: {approved}".format(
-      name=self.discipline.trainee.full_name,
-      book=self.book.name, chapter=self.chapter, approved=self.approved)
+    try:
+      return "[{book} ch. {chapter}] {name}. Approved: {approved}".format(
+        name=self.discipline.trainee.full_name,
+        book=self.book.name, chapter=self.chapter, approved=self.approved)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   # remove fellowship mark if approved
   def approve(self):

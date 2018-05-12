@@ -9,7 +9,10 @@ class OutlinePoint(models.Model):
   string = models.CharField(max_length=20)
 
   def __unicode__(self):
-    return self.string
+    try:
+      return self.string
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class Reference(models.Model):
@@ -58,4 +61,7 @@ class Reference(models.Model):
 
 
   def __unicode__(self):
-    return self.outline_point.string + str((self.book, self.chapter, self.verse, self.end_chapter, self.end_verse,))
+    try:
+      return self.outline_point.string + str((self.book, self.chapter, self.verse, self.end_chapter, self.end_verse,))
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

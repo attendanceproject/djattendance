@@ -35,4 +35,7 @@ class Portion(models.Model):
       return Portion()  # if it fails, return an empty Portion
 
   def __unicode__(self):
-    return self.title
+    try:
+      return self.title
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)

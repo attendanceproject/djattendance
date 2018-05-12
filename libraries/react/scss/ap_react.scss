@@ -421,6 +421,31 @@ textarea {
   }
 }
 
+.denied {
+  &.tardy {
+    background: $yellow;
+
+    &.selected {
+      @include event_select_gradient($yellow, $yellow)
+    }
+  }
+  &.absent {
+    background: $red;
+
+    &.selected {
+      @include event_select_gradient($red, $red)
+    }
+  }
+  &.present {
+    &.selected {
+        @include event_select_gradient($grey-light, $grey-light)
+    }
+  }
+  &.selected{
+    @include event_select_gradient($grey-light, $grey-light)
+  }
+}
+
 .undefined.selected {
   @include event_select_gradient($grey-light, $grey-light)
 }

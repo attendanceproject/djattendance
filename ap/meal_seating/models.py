@@ -29,7 +29,10 @@ class Table(models.Model):
     return self.capacity
 
   def __unicode__(self):
-    return self.name
+    try:
+      return self.name
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
   @staticmethod
   def seatinglist(genderlist, gender):

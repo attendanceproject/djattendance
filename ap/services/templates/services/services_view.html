@@ -114,7 +114,6 @@ Service Scheduling
     <li role="presentation"><a href="#services" aria-controls="services" role="tab" data-toggle="tab">Services</a></li>
     <li role="presentation"><a href="#exceptions" aria-controls="review" role="tab" data-toggle="tab">Exceptions</a></li>
     <li role="presentation"><a href="#review" aria-controls="review" role="tab" data-toggle="tab">Review</a></li>
-    <li role="presentation"><a href="#graph" aria-controls="review" role="tab" data-toggle="tab">Graph</a></li>
     <li role="presentation"><a href="#servicescalendar" aria-controls="review" role="tab" data-toggle="tab">View Service Calendar</a></li>
     <li role="presentation"><a href="#assignments" aria-controls="review" role="tab" data-toggle="tab">Designated Service Assignments</a></li>
     <li role="presentation"><a href="#reports" aria-controls="review" role="tab" data-toggle="tab">Printouts</a></li>
@@ -142,15 +141,9 @@ Service Scheduling
   <div class="tab-content">
   <!-- Assign Tab -->
     <div role="tabpanel" class="tab-pane active" id="assign">
-      {% if status == 'INFEASIBLE' %}
-        <div class="alert alert-danger" role="alert">
-          Parameters are too constrained to solve assignment problem. Please give workers <a class="fake-tab-link" href ="#workers">more capacity</a> or <a class="fake-tab-link" href="#services">lower workers required</a> for services. You can also take a look at the <a class="fake-tab-link" href="#graph">graph</a> to see if there are too many exceptions blocking out workers from services. Finally, you have the option of going into <a href="#" class="manual-mode">Manual Mode</a>.
-        </div>
-      {% else %}
-        <div class="alert alert-info" role="alert">
-          <a href="#" class="manual-mode">Go into Manual Mode</a>.
-        </div>
-      {% endif %}
+      <div class="alert alert-info" role="alert">
+        <a href="#" class="manual-mode">Go into Manual Mode</a>.
+      </div>
       {% for category in categories %}
         <h3>{{ category }}</h3>
         {% for service in category.services.all %}

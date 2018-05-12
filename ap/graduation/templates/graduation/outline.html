@@ -13,9 +13,23 @@
     {% if read_only %}
     $('#id_grad_form *').attr("disabled", true);
     {% endif %}
+
+    $("label[for=id_participate_0]").hide();
   });
 </script>
 
+{% endblock %}
+
+{% block references %}
+<style type="text/css">
+  li {
+    list-style-type: none;
+  }
+
+  label{
+    font-weight: normal;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -25,22 +39,23 @@
 {% endif %}
 <form id="id_grad_form" action="" method="post">
   {% csrf_token %}
-  <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>Which outline sections are you most burdened for?</p>
+  <div class="row"><div class="col-xs-6"><div class="panel">
+    <p><strong>Which outline sections are you most burdened for?</strong></p>
       <div class="row"><div class="col-xs-12">
         Enter the section number you are most impressed by:<br>
         {{form.sections}}
       </div></div>
   </div></div></div>
-  
-  <div class="row"><div class="col-xs-12"><div class="panel">
+
+  <div class="row"><div class="col-xs-6"><div class="panel">
+    <p><strong>How would you like to participate?</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.participate}}
       </div></div>
   </div></div></div>
 
-  <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>Crystallized sentence of what impressed you:</p>
+  <div class="row"><div class="col-xs-6"><div class="panel">
+    <p><strong>Crystallized sentence of what impressed you:</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.sentence}}
       </div></div>

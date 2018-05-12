@@ -26,6 +26,12 @@ class ServiceAttendance(models.Model):
 
   week = models.IntegerField(default=0, choices=CHOICES)
 
+  def get_service_hours(self):
+    hours = 0.0
+    for sr in self.serviceroll_set.all():
+      hours += sr.get_time_diff()
+    return hours
+
   def get_absolute_url(self):
     return reverse('services:designated_service_hours', kwargs={'service_id': self.designated_service.id, 'week': self.week})
 
@@ -39,3 +45,9 @@ class ServiceRoll(models.Model):
   end_datetime = models.DateTimeField(null=True, blank=True)
 
   task_performed = models.CharField(max_length=140, blank=True)
+
+  def get_time_diff(self):
+    try:
+      return (self.end_datetime - self.start_datetime).seconds / 3600.0
+    except Exception:
+      return 0.0

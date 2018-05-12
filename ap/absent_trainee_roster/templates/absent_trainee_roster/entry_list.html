@@ -8,10 +8,7 @@
 <td style='text-align:center'>{{entry.absentee.term}}</td>
 <td style='text-align:center'>{{entry.get_reason_display}} </td>
 <td style='text-align:center'>
-  {{ trainee_absent_freq|get_item:entry.absentee.id }}
-  {% if entry.absentee.house in unreported_list %}
-    +
-  {% endif %}
+  {{ trainee_absent_freq|get_item:entry.absentee.id }}{% if entry.absentee.id in unreported %}+{% endif %}
 </td>
 
 </tr>

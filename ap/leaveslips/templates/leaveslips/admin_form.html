@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+{{form.media}}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $("span.select2").css({ 'width' : ''});
+  });
+ </script>
+{% endblock %}
+
+{% block references %}
+<style type="text/css">
+  .select2 {
+    width: 100%
+  }
+</style>
+
+
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+
+{% if form.errors %}
+<!-- Error messaging -->
+  <div id="errors">
+    <div class="inner">
+      <p>There were some errors in the information you entered. Please correct the following:</p>
+      {{ form.non_field_errors }}
+      <ul>
+        {% for field in form %}
+          {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+<!-- /Error messaging -->
+{% endif %}
+
+<form id="id_form" action="" method="post">
+  {% csrf_token %}
+  {% bootstrap_form form %} 
+  <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
+</form>
+{% if delete_button %}
+  <form action = "{{form.instance.get_delete_url}}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger btn-delete" name="delete">Delete</button>
+  </form>
+{% endif %}
+
+{% endblock %}

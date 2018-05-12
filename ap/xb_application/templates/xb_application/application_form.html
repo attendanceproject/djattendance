@@ -17,8 +17,8 @@
         word_count = 0
       } else{
         word_count = $("#id_narrative").val().split(" ").length;
-      }    
-      $("#remaining_chars").text('Word Count: ' + word_count);      
+      }
+      $("#remaining_chars").text('Word Count: ' + word_count);
     }
 
     function spouse(){
@@ -81,7 +81,7 @@
         $("#id_citizenship_2").prop('checked', true)
       } else if (load_val == "O"){
         $("#id_citizenship_3").prop('checked', true)
-        $("#citizenship_question").show()        
+        $("#citizenship_question").show()
       }
 
       $("#id_citizenship_1").change(function(){
@@ -109,7 +109,7 @@
       }
 
       $("#id_support_other").change(function(){
-        $("#id_support_other_explain").toggle() 
+        $("#id_support_other_explain").toggle()
       })
 
     }
@@ -128,8 +128,8 @@
           return false
         }
 
-        
-      });      
+
+      });
     }
 
     $( document ).ready(() => {
@@ -141,7 +141,6 @@
       citizenship()
       spouse()
       support()
-      
 
       // remove empty choices
       $("label[for=id_gender_0]").remove()
@@ -157,10 +156,10 @@
 
       narrative_wordcount()
 
-      {% if read_only %}
+      {% if read_only or submitted %}
         $('#id_xb_form *').prop("disabled", true);
       {% endif %}
-      
+
     });
   </script>
 
@@ -205,14 +204,11 @@
 <p>Graduates of FTTA-XB are currently laboring on college campuses in the United States and Europe, and both destinations are critical for the Lord's present move.</p>
 
 <div class="text-center">
-<h3 style="margin-top: 15px; margin-bottom: 5px;">Application Deadline: <strong>{{due_date}}</strong></h3>
-<p >
   {% if submitted %}
-    (application submitted)
+    <h3 style="margin-top: 15px; margin-bottom: 5px;"><strong>Application Submitted</strong></h3>
   {% else %}
-    (application not yet submitted)
+    <h3 style="margin-top: 15px; margin-bottom: 5px;">Application Deadline: <strong>{{due_date}}</strong></h3>
   {% endif %}
-</p>
 </div>
 
 <p>Note: Please fellowship with your elder for the Elder's Comments, which is downloadable through the link below.
@@ -237,7 +233,7 @@ If you have any questions, please fellowship with the FTTA Office.</p>
       </div>
       <div class="col-md-4">
         {{form.sending_locality}}
-      </div>      
+      </div>
     </div>
     <div class="row">
       <div class="col-md-2">
@@ -377,7 +373,7 @@ If you have any questions, please fellowship with the FTTA Office.</p>
     </div>
     <div class="row">
       <div class="col-md-3">
-        
+
       </div>
       <div class="col-md-3">
         {{form.college1}}
@@ -391,7 +387,7 @@ If you have any questions, please fellowship with the FTTA Office.</p>
     </div>
     <div class="row">
       <div class="col-md-3">
-        
+
       </div>
       <div class="col-md-3">
         {{form.college2}}
@@ -432,7 +428,7 @@ If you have any questions, please fellowship with the FTTA Office.</p>
       </div>
       <div class="col-md-2">
         {{form.date_baptized}}
-      </div>      
+      </div>
     </div>
     <div class="row">
       <div class="col-md-4">

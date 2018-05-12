@@ -13,7 +13,7 @@
     <tbody>
       {% for admin in hc_admins %}
       <tr>
-        <td><a href="{{ admin.get_update_url }}">{{admin.index}}</a></td>
+        <td><a href="{{ admin.get_update_url }}">{{admin.index}} (Click to Edit/Reopen)</a></td>
         <td>{{admin.open_time}}</td>
         <td>{{admin.close_time}}</td>
         <td><a href="{% url 'hc:hc-survey-ta-view' index=admin.index %}">Click Here</a></td>

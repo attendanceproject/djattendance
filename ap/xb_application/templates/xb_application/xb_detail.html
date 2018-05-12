@@ -49,7 +49,7 @@
   {% else %}
     <dd>No</dd>
   {% endif %}
-  <dt>Bringing a vehicle</dt> 
+  <dt>Bringing a vehicle</dt>
   {% if objects.automobile is None %}
     <dd>No</dd>
   {% else %}
@@ -57,15 +57,15 @@
   {% endif %}
   <dt>Citizenship</dt>
   <dd>
-    {% if object.citizenship == "C" %} 
+    {% if object.citizenship == "C" %}
       Citizen
     {% elif object.citizenship == "R" %}
       Permanent Resident
     {% else %}
-      Other: 
+      Other:
     {% endif %}
     {% if object.citizenship_other is not None %}
-      {{object.citizenship_other}}
+       {{object.citizenship_other}}
     {% endif %}
   </dd>
 
@@ -137,8 +137,8 @@
 </dl>
 
 <dl class="dl-horizontal">
-  <dt>Financial Support</dt>
-  <dd> 
+  <dt>Financial Support </dt>
+  <dd>
     {% if object.support_yourself %}
       Myself, 
     {% endif %}

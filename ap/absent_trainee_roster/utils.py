@@ -6,11 +6,14 @@ from django.conf import settings
 from django.db.models import Prefetch
 
 from .models import Roster
+from terms.models import Term
 from accounts.models import User
 from absent_trainee_roster.models import Entry
 from aputils.utils import render_to_pdf
 
 from collections import Counter
+
+MONDAY = 0
 
 
 def get_or_create_roster(d):
@@ -33,8 +36,7 @@ def build_report_ctx(date):
   bro_unreported_houses = roster.unreported_houses.filter(gender='B')
   sis_unreported_houses = roster.unreported_houses.filter(gender='S')
 
-  trainee_absent_freq = calculate_trainee_absent_freq(date)
-  unreported_list = list_unreported_houses(date)
+  trainee_absent_freq, unreported = calculate_trainee_absent_freq(date)
 
   return {
       'pagesize': 'letter portrait',
@@ -45,7 +47,7 @@ def build_report_ctx(date):
       'bro_unreported_houses': bro_unreported_houses,
       'sis_unreported_houses': sis_unreported_houses,
       'trainee_absent_freq': trainee_absent_freq,
-      'unreported_list': unreported_list,
+      'unreported': unreported,
   }
 
 
@@ -61,11 +63,10 @@ def generate_pdf(year, month, day):
 # calculate how many consecutive days a trainee has been absent going back from today's absence
 # Returns: {trainee.id: absent_count,}
 def calculate_trainee_absent_freq(date):
-  oneday = timedelta(1)
   # Get absentees
-  absent_tb = Counter()
   roster = get_or_create_roster(date)
-
+  unreported = set()
+  absent_tb = Counter()
   entries = roster.entry_set.prefetch_related(
       'absentee',
       Prefetch(
@@ -73,34 +74,30 @@ def calculate_trainee_absent_freq(date):
           queryset=Entry.objects.order_by('-roster__date'), to_attr='sorted_entries'
       )
   )
-
   for absent_entry in entries:
     absentee = absent_entry.absentee
-    a_entries = absentee.sorted_entries
-
-    # Get first one out
-    last_absent_entry = None
-
-    for entry in a_entries:
-      # if first time or difference is only 1 day, consecutive backwards in time
-      if not last_absent_entry or last_absent_entry.roster.date - entry.roster.date == oneday and last_absent_entry.roster.date.weekday() > 0:
-        absent_tb[absentee.id] += 1
-        last_absent_entry = entry
+    d = date
+    i = 0
+    m = 0
+    days = 1
+    while d >= Term.current_term().start:
+      i += 1
+      d = date - timedelta(i)
+      if d.weekday() == MONDAY:
+        m = 1
+        continue
+      r = get_or_create_roster(d)
+      trainees = map(lambda e: e['absentee'], r.entry_set.all().values('absentee'))
+      is_unreported = absentee.house in r.unreported_houses.all()
+      if is_unreported:
+        unreported.add(absentee.id)
+      if absentee.id in trainees or is_unreported:
+        days += 1 + m
+        m = 0
       else:
-        # break out when discontinuity found
         break
-
-  return absent_tb
-
-
-def list_unreported_houses(date):
-  list = []
-  roster = get_or_create_roster(date)
-  for house in roster.unreported_houses.all():
-    if house not in list:
-      list.append(house)
-
-  return list
+    absent_tb[absentee.id] = days
+  return absent_tb, unreported
 
 
 def send_absentee_report(year, month, day):
