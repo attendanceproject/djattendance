@@ -83,8 +83,8 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
  
     #print str("total rolls for a trainee: " + str(total_rolls_in_report_for_one_trainee))
 
-    #filtered_trainees = Trainee.objects.filter(current_term__in=[1, 2, 3, 4])
-    filtered_trainees = Trainee.objects.filter(current_term__in=[1])
+    filtered_trainees = Trainee.objects.filter(current_term__in=[1, 2, 3, 4])
+    #filtered_trainees = Trainee.objects.filter(current_term__in=[1])
 
     #averages of fields
     average_unexcused_absences_percentage = float(0)
@@ -236,8 +236,8 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     #    if final_data_team[each_team] == {}:
     #      del final_data_team[each_team]
     
-    print str(final_data_locality)
-    print str(final_data_team)
+    #print str(final_data_locality)
+    #print str(final_data_team)
 
     if 'sending-locality' in data['report_by'] and 'team' in data['report_by']:
       context = {
