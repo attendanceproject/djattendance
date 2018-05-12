@@ -4,80 +4,98 @@
 {% load report_filters %}
 
 {% block scripts %}
-<script type="text/javascript">
-  $(document).ready(function() {
-    $("#generated-report-table").DataTable({
-      info: false,
-      paging: false,
-      autoWidth: true,
-      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
-      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
-      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
-      fixedHeader: {
-        header: true
-      },
-      buttons: [
-      {
-        extend: 'print',
-        text: 'Print',
-        autoPrint: true,
-        exportOptions:{
-          columns: ':visible'
-        },
-      },
-      {
-        extend: 'csvHtml5',
-        text: 'CSV',
-        exportOptions: {
-          columns: ':visible'
-        },
-      },
-      {
-        extend: 'pdf',
-        text: 'PDF',
-        exportOptions:{
-          columns: ':visible'
-        },
-      },
-      {
-        extend: 'collection',
-        buttons: 'columnsVisibility',
-        text: 'Show/Hide Columns',
-        columns: ':gt(1)',
-      },
-      ],
-    });
-  });
-</script>
+{% endblock %}
+
+{% block references %}
+<style type="text/css">
+@media print {
+    footer {page-break-after: always;}
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<h2>Generated Report {{ date_data|get_date_range }}</h2>
-  <div class="panel-body">
-    <table id="generated-report-table" class="table table-striped">
-      <thead>
-      	<tr>
-        	<th>Trainee</th>
-        	{% for item in data|get_item:0 %}
-      	  <th> {{ item }} </th>
-        	{% endfor %}
-      	</tr>
-      </thead>
-      	
-      <tbody>
-				{% for trainee in data %}
-      	<tr>
-        <td> {{ trainee }} </td>  
-        {% for each in data|get_item_for_data:trainee %}
-        {% with trainee_data=data|get_item_for_data:trainee %}
-				<td>
-				{{ trainee_data|get_item_for_data:each }}
-				</td>
-				{% endwith %}
+  
+  {% if locality_data %}
+    {% for locality in locality_data %}    
+    <div class="panel-body">
+      <table id="generated-report-locality-table" class="table table-striped">
+        <h2> {{ locality }} Sending Locality Generated Report {{ date_data|get_date_range }}</h2>
+        Averages (across all trainees)
+        <ul>
+        {% for average_field in averages %}
+          <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
         {% endfor %}
-      	</tr>
-      	{% endfor %}
-      </tbody>
-    </table>
-  </div>
+        </ul>
+        <thead>
+        	<tr>
+          	<th>Trainee</th>
+          	{% for item in locality_data|get_all_items_for_query:locality %}
+        	  <th> {{ item }} </th>
+          	{% endfor %}
+        	</tr>
+        </thead>
+        	
+        <tbody>
+  			{% for trainee in locality_data|get_item_for_data:locality %}
+        	<tr>
+          <td> {{ trainee }} </td>  
+          {% with locality_dict=locality_data|get_item_for_data:locality %}  <!-- Locality dict is {trainee1: {...}, trainee2: ...}-->
+            {% with trainee_dict=locality_dict|get_item_for_data:trainee %}  <!-- trainee dict is {absences: 2, tardies: 2}-->
+              {% for queried_item in trainee_dict %}
+                <td> {{ trainee_dict|get_item_for_data:queried_item }} </td>
+              {% endfor %}
+            {% endwith %}
+          {% endwith %}
+  				</tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <footer></footer>
+    {% endfor %}
+
+  {% endif %}
+
+  {% if team_data %}
+    {% for team in team_data %}    
+    <div class="panel-body">
+      <table id="generated-report-team-table" class="table table-striped">
+        <h2> {{ team }} Team Generated Report {{ date_data|get_date_range }}</h2>
+        Averages (across all trainees)
+        <ul>
+        {% for average_field in averages %}
+          <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
+        {% endfor %}
+        </ul>
+        <thead>
+          <tr>
+            <th>Trainee</th>
+            {% for item in team_data|get_all_items_for_query:team %}
+            <th> {{ item }} </th>
+            {% endfor %}
+          </tr>
+        </thead>
+          
+        <tbody>
+        {% for trainee in team_data|get_item_for_data:team %}
+          <tr>
+          <td> {{ trainee }} </td>  
+          {% with team_dict=team_data|get_item_for_data:team %}  <!-- Team dict is {trainee1: {...}, trainee2: ...}-->
+            {% with trainee_dict=team_dict|get_item_for_data:trainee %}  <!-- trainee dict is {absences: 2, tardies: 2}-->
+              {% for queried_item in trainee_dict %}
+                <td> {{ trainee_dict|get_item_for_data:queried_item }} </td>
+              {% endfor %}
+            {% endwith %}
+          {% endwith %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <footer></footer>
+    {% endfor %}
+
+  {% endif %}
+
 {% endblock %}

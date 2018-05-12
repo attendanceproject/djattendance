@@ -11,7 +11,7 @@ from leaveslips.models import IndividualSlip, GroupSlip
 from attendance.models import Roll
 from localities.models import Locality
 from teams.models import Team
-from schedules.models import Event
+from schedules.models import Event, Schedule
 
 from collections import OrderedDict
 import pickle
@@ -49,6 +49,13 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
   template_name = 'reports/generated_report.html'
   group_required = [u'training_assistant']
 
+  def clean_empty(self, d):
+    if not isinstance(d, (dict, list)):
+        return d
+    if isinstance(d, list):
+        return [v for v in (self.clean_empty(v) for v in d) if v]
+    return {k: v for k, v in ((k, self.clean_empty(v)) for k, v in d.items()) if v}
+
   def post(self, request, *args, **kwargs):
     data = dict(request.POST.iterlists())
     #print str(data)
@@ -61,6 +68,20 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     date_data['date_from'] = str(date_from)
     date_data['date_to'] = str(date_to)
     delta = date_to - date_from
+
+    number_of_days_covered = abs((date_to - date_from).days)
+
+    total_rolls_in_a_week = Schedule.objects.filter(name='Generic Group Events')[0].events.all()
+
+    #print str("number of days covered: " + str(number_of_days_covered))
+    #print str("total roll in a week: " + str(total_rolls_in_a_week.count()))
+
+    total_rolls_in_report_for_one_trainee = int(float(number_of_days_covered) / 7 * total_rolls_in_a_week.count())
+
+    #Assuming PSRP and Monday Night Revival are classes too, then we should have 12 classes in a week
+    num_classes_in_report_for_one_trainee = int(float(number_of_days_covered) / 7 * 12)  
+ 
+    #print str("total rolls for a trainee: " + str(total_rolls_in_report_for_one_trainee))
 
     #filtered_trainees = Trainee.objects.filter(current_term__in=[1, 2, 3, 4])
     filtered_trainees = Trainee.objects.filter(current_term__in=[1])
@@ -95,6 +116,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       localities = Locality.objects.all()
       for locality in localities:
         final_data_locality[locality.city.name] = {}
+      final_data_locality['N/A'] = {}
 
     if 'team' in data['report_by']:
       teams = Team.objects.all()
@@ -121,7 +143,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       qs_trainee_rolls.query = pickled_trainee_query
 
       try:
-        rtn_data[trainee.full_name]["% Tardy"] = str(round(qs_trainee_rolls.query.filter(status__in=['T','U','L']).count() / float(trainee_all_rolls.count()) * 100, 2)) + "%"
+        rtn_data[trainee.full_name]["% Tardy"] = str(round(qs_trainee_rolls.query.filter(status__in=['T','U','L']).count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
         average_tardy_percentage += float(rtn_data[trainee.full_name]["% Tardy"][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
@@ -137,7 +159,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       #print ("class events: " + str(trainee_class_events.count()))
 
       try:
-        rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(trainee_class_events.count()) * 100, 2)) + "%"
+        rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
         average_classes_missed_percentage += float(rtn_data[trainee.full_name]["% Classes Missed"][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
@@ -152,7 +174,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       indv_slip_qs.query = pickled_indv_slip_filter_qs
 
       try:
-        rtn_data[trainee.full_name]["% Sickness"] = str(round(indv_slip_qs.query.filter(type="SICK").count() / float(trainee_all_rolls.count()) * 100, 2)) + "%"
+        rtn_data[trainee.full_name]["% Sickness"] = str(round(indv_slip_qs.query.filter(type="SICK").count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
         average_sickness_percentage += float(rtn_data[trainee.full_name]["% Sickness"][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
@@ -177,7 +199,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       #print "absent rolls in group slips: " + str(absent_rolls_covered_in_group_slips.count())
       #print "absent rolls in indv slips: " + str(absent_rolls_covered_by_indv_leaveslips.count())
       try:
-        rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(trainee_all_rolls.count()) * 100, 2)) + "%"
+        rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
         average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
@@ -188,22 +210,53 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     average_sickness_percentage = round(average_sickness_percentage / num_trainees, 2)
     average_tardy_percentage = round(average_tardy_percentage / num_trainees, 2)
     average_classes_missed_percentage = round(average_classes_missed_percentage / num_trainees, 2)
+
+    averages = {}
     for trainee in filtered_trainees:
-      rtn_data[trainee.full_name]["Average % Tardy"] = str(average_tardy_percentage) + "%"
-      rtn_data[trainee.full_name]["Average % Classes Missed"] = str(average_classes_missed_percentage) + "%"
-      rtn_data[trainee.full_name]["Average % Sickness"] = str(average_sickness_percentage) + "%"
-      rtn_data[trainee.full_name]["Average % Unex. Abs."] = str(average_unexcused_absences_percentage) + "%"
+      averages["Average % Tardy"] = str(average_tardy_percentage) + "%"
+      averages["Average % Classes Missed"] = str(average_classes_missed_percentage) + "%"
+      averages["Average % Sickness"] = str(average_sickness_percentage) + "%"
+      averages["Average % Unex. Abs."] = str(average_unexcused_absences_percentage) + "%"
       if 'sending-locality' in data['report_by']:
         final_data_locality[rtn_data[trainee.full_name]["Sending Locality"]][trainee.full_name] = rtn_data[trainee.full_name]
       if 'team' in data['report_by']:
         final_data_team[rtn_data[trainee.full_name]["team"]][trainee.full_name] = rtn_data[trainee.full_name]
     
+
+
+    if 'sending-locality' in data['report_by']:
+      final_data_locality = self.clean_empty(final_data_locality)
+    #  for each_locality in final_data_locality:
+    #    if final_data_locality[each_locality] == {}:
+    #      del final_data_locality[each_locality]
+
+    if 'team' in data['report_by']:
+      final_data_team = self.clean_empty(final_data_team)
+    #  for each_team in final_data_team:
+    #    if final_data_team[each_team] == {}:
+    #      del final_data_team[each_team]
+    
     print str(final_data_locality)
     print str(final_data_team)
 
-    context = {
-      'data': rtn_data,
-      'date_data': date_data
-    }
+    if 'sending-locality' in data['report_by'] and 'team' in data['report_by']:
+      context = {
+        'locality_data': final_data_locality,
+        'team_data': final_data_team,
+        'date_data': date_data,
+        'averages': averages
+      }
+    elif 'sending-locality' in data['report_by']:
+      context = {
+        'locality_data': final_data_locality,
+        'date_data': date_data,
+        'averages': averages
+      }
+    elif 'team' in data['report_by']:
+      context = {
+        'team_data': final_data_team,
+        'date_data': date_data,
+        'averages': averages
+      }
 
     return render(request, "reports/generated_report.html", context=context)

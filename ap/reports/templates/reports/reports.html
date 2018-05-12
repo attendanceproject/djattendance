@@ -5,6 +5,7 @@
 {% block content %}
 
   <h2>Generate Attendance Reports </h2>
+  <h5> Note: Generated attendance reports can be printed as separate pages for each locality or team</h5>
 <form action="{% url 'reports:report-generated' %}" id="reportsForm" method="post" class="form-horizontal">
   {% csrf_token %}
   <div class="reports-form-container">
