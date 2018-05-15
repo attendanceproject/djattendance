@@ -23,7 +23,7 @@
         <h2> {{ locality }} Sending Locality Generated Report {{ date_data|get_date_range }}</h2>
         Averages (across all trainees)
         <ul>
-        {% for average_field in averages %}
+        {% for average_field in averages|sorted_reverse %}
           <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
         {% endfor %}
         </ul>
@@ -42,7 +42,7 @@
           <td> {{ trainee }} </td>  
           {% with locality_dict=locality_data|get_item_for_data:locality %}  <!-- Locality dict is {trainee1: {...}, trainee2: ...}-->
             {% with trainee_dict=locality_dict|get_item_for_data:trainee %}  <!-- trainee dict is {absences: 2, tardies: 2}-->
-              {% for queried_item in trainee_dict %}
+              {% for queried_item in trainee_dict|sorted_reverse %}
                 <td> {{ trainee_dict|get_item_for_data:queried_item }} </td>
               {% endfor %}
             {% endwith %}

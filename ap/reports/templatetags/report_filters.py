@@ -10,7 +10,11 @@ def get_item_for_data(data, item):
 
 @register.filter
 def get_all_items_for_query(data, item):
-  return data[item][data[item].keys()[0]].keys()
+  return sorted(data[item][data[item].keys()[0]].keys(), reverse=True)
+
+@register.filter
+def sorted_reverse(data):
+  return sorted(data, reverse=True)
 
 @register.filter
 def get_date_range(data):
