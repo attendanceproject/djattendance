@@ -83,8 +83,8 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
  
     #print str("total rolls for a trainee: " + str(total_rolls_in_report_for_one_trainee))
 
-    filtered_trainees = Trainee.objects.filter(current_term__in=[1, 2, 3, 4])
     #filtered_trainees = Trainee.objects.filter(current_term__in=[1])
+    filtered_trainees = Trainee.objects.filter(current_term__in=[3])
 
     #averages of fields
     average_unexcused_absences_percentage = float(0)
@@ -143,7 +143,14 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       qs_trainee_rolls.query = pickled_trainee_query
 
       try:
-        rtn_data[trainee.full_name]["% Tardy"] = str(round(qs_trainee_rolls.query.filter(status__in=['T','U','L']).count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+        if trainee.self_attendance:
+          tardy_rolls_count = 0
+          for roll in qs_trainee_rolls.query.filter(status__in=['T','U','L']):
+            if roll.submitted_by == trainee:
+              tardy_rolls_count += 1
+          rtn_data[trainee.full_name]["% Tardy"] = str(round(tardy_rolls_count / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+        else:
+          rtn_data[trainee.full_name]["% Tardy"] = str(round(qs_trainee_rolls.query.filter(status__in=['T','U','L']).count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
         average_tardy_percentage += float(rtn_data[trainee.full_name]["% Tardy"][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
@@ -159,8 +166,15 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       #print ("class events: " + str(trainee_class_events.count()))
 
       try:
-        rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
-        average_classes_missed_percentage += float(rtn_data[trainee.full_name]["% Classes Missed"][:-1])
+        if trainee.self_attendance:
+          absent_class_rolls_count = 0
+          for roll in trainee_missed_classes:
+            if roll.submitted_by == trainee:
+              absent_class_rolls_count += 1
+          rtn_data[trainee.full_name]["% Classes Missed"] = str(round(absent_class_rolls_count / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
+        else:
+          rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
+          average_classes_missed_percentage += float(rtn_data[trainee.full_name]["% Classes Missed"][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
         rtn_data[trainee.full_name]["% Classes Missed"] = "N/A"
@@ -198,13 +212,30 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       #print "all absences: " + str(qs_trainee_rolls.query.filter(status='A').count())
       #print "absent rolls in group slips: " + str(absent_rolls_covered_in_group_slips.count())
       #print "absent rolls in indv slips: " + str(absent_rolls_covered_by_indv_leaveslips.count())
+
+      #excluding because they are covered by leaveslips:
+      absent_rolls_to_exclude_from_self_attendance_calculation = []
+      
+      for roll in absent_rolls_covered_in_group_slips:
+        absent_rolls_to_exclude_from_self_attendance_calculation.append(roll.id)
+
+      for roll in absent_rolls_covered_by_indv_leaveslips:
+        absent_rolls_to_exclude_from_self_attendance_calculation.append(roll.id)
+
       try:
-        rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
-        average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
+        if trainee.self_attendance:
+          for roll in qs_trainee_rolls.query.filter(status='A').exclude(id__in=absent_rolls_to_exclude_from_self_attendance_calculation):
+            if roll.submitted_by != trainee:
+              unexcused_absences -= 1
+          rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+        else:
+          rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+          average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
         rtn_data[trainee.full_name]["% Unex. Abs."] = "N/A"
         #return JsonResponse({'bad': False, 'finalize': finalize, 'msg': message})
+      #print str(rtn_data[trainee.full_name])
 
     average_unexcused_absences_percentage = round(average_unexcused_absences_percentage / num_trainees, 2)
     average_sickness_percentage = round(average_sickness_percentage / num_trainees, 2)
