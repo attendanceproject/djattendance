@@ -84,7 +84,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     #print str("total rolls for a trainee: " + str(total_rolls_in_report_for_one_trainee))
 
     #filtered_trainees = Trainee.objects.filter(current_term__in=[1])
-    filtered_trainees = Trainee.objects.filter(active=True)
+    filtered_trainees = Trainee.objects.filter(is_active=True)
 
     #averages of fields
     average_unexcused_absences_percentage = float(0)
