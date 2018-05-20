@@ -84,7 +84,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     #print str("total rolls for a trainee: " + str(total_rolls_in_report_for_one_trainee))
 
     #filtered_trainees = Trainee.objects.filter(current_term__in=[1])
-    filtered_trainees = Trainee.objects.filter(current_term__in=[1, 2, 3, 4])
+    filtered_trainees = Trainee.objects.filter(active=True)
 
     #averages of fields
     average_unexcused_absences_percentage = float(0)
@@ -142,15 +142,13 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       qs_trainee_rolls = Roll.objects.all()
       qs_trainee_rolls.query = pickled_trainee_query
 
-      try:
+      try:        
+        tardy_rolls_count = qs_trainee_rolls.query.filter(status__in=['T','U','L'])
         if trainee.self_attendance:
-          tardy_rolls_count = 0
-          for roll in qs_trainee_rolls.query.filter(status__in=['T','U','L']):
-            if roll.submitted_by == trainee:
-              tardy_rolls_count += 1
-          rtn_data[trainee.full_name]["% Tardy"] = str(round(tardy_rolls_count / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
-        else:
-          rtn_data[trainee.full_name]["% Tardy"] = str(round(qs_trainee_rolls.query.filter(status__in=['T','U','L']).count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+          tardy_rolls_count = tardy_rolls_count.filter(submitted_by=trainee)
+
+          rtn_data[trainee.full_name]["% Tardy"] = str(round(tardy_rolls_count.count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+
         average_tardy_percentage += float(rtn_data[trainee.full_name]["% Tardy"][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
@@ -159,6 +157,8 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
       class_events = Event.objects.filter(start=datetime.strptime('10:15', '%H:%M'), type='C').exclude(name="Session II") | Event.objects.filter(start=datetime.strptime('08:25', '%H:%M')).exclude(name="Session I").exclude(name="Study Roll").exclude(name="Study").exclude(name="End Study") | Event.objects.filter(name="PSRP")
       trainee_class_events = qs_trainee_rolls.query.filter(event__in=class_events)
+      if trainee.self_attendance:
+        trainee_class_events = trainee_class_events.filter(submitted_by=trainee)
       trainee_missed_classes = trainee_class_events.filter(status='A')
 
       #print("trainee is: " + trainee.full_name)
@@ -166,22 +166,15 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       #print ("class events: " + str(trainee_class_events.count()))
 
       try:
-        if trainee.self_attendance:
-          absent_class_rolls_count = 0
-          for roll in trainee_missed_classes:
-            if roll.submitted_by == trainee:
-              absent_class_rolls_count += 1
-          rtn_data[trainee.full_name]["% Classes Missed"] = str(round(absent_class_rolls_count / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
-        else:
-          rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
-          average_classes_missed_percentage += float(rtn_data[trainee.full_name]["% Classes Missed"][:-1])
+        rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
+        average_classes_missed_percentage += float(rtn_data[trainee.full_name]["% Classes Missed"][:-1])
       except ZeroDivisionError:
         message = "Division by 0 error."
         rtn_data[trainee.full_name]["% Classes Missed"] = "N/A"
         #return JsonResponse({'bad': False, 'finalize': finalize, 'msg': message})
 
       #dealing with '% sickness' now, need information on individual leave slips
-      primary_indv_slip_filter = IndividualSlip.objects.filter(trainee=trainee, rolls__in=qs_trainee_rolls.query, rolls__status__contains='A', status__in=['A', 'S'])
+      primary_indv_slip_filter = IndividualSlip.objects.filter(trainee=trainee, rolls__in=qs_trainee_rolls.query, status__in=['A', 'S'])
       pickled_indv_slip_filter = pickle.dumps(primary_indv_slip_filter)
       pickled_indv_slip_filter_qs = pickle.loads(pickled_indv_slip_filter)
       indv_slip_qs = IndividualSlip.objects.all()
