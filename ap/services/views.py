@@ -3,15 +3,18 @@ from dateutil import parser
 from sets import Set
 from collections import OrderedDict, defaultdict
 import random
+import json
 
 from django.db.models import Q
 from django.views.generic import TemplateView
 from django.views.generic.edit import UpdateView, CreateView, FormView
 from django.template.defaulttags import register
 from django.shortcuts import render, redirect
+
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ObjectDoesNotExist
+
 from django.db.models import Count, F
 from django.contrib import messages
 from braces.views import GroupRequiredMixin
@@ -34,7 +37,7 @@ from .serializers import (
     ExceptionActiveSerializer,
 )
 from .service_scheduler import ServiceScheduler
-from .forms import ServiceRollForm, ServiceAttendanceForm, AddExceptionForm
+from .forms import ServiceRollForm, ServiceAttendanceForm, AddExceptionForm, SingleTraineeServicesForm, ServiceCategoryAnalyzerForm
 from .models import (
     Prefetch,
     Assignment,
@@ -934,6 +937,97 @@ class UpdateExceptionView(ExceptionView, UpdateView):
     data['workers'] = [w.trainee for w in obj.workers.all()]
     return AddExceptionForm(data)
 
+
+class SingleTraineeServicesViewer(GroupRequiredMixin, FormView):
+  template_name = 'services/single_trainee_services_viewer.html'
+  group_required = ['training_assistant', 'service_schedulers']
+  form_class = SingleTraineeServicesForm
+
+  def get_success_url(self):
+    if 'trainee_id' in self.kwargs:
+      trainee_id = self.kwargs['trainee_id']
+      return reverse('services:trainee_services_viewer', kwargs={'trainee_id': trainee_id})
+    else:
+      return reverse('services:single_trainee_services_viewer')
+
+  def get_initial(self):
+    """
+    Returns the initial data to use for forms on this view.
+    """
+    initial = super(SingleTraineeServicesViewer, self).get_initial()
+
+    trainee_id = self.kwargs.get('trainee_id', None)
+    if trainee_id:
+      initial['trainee_id'] = Trainee.objects.get(id=trainee_id)
+    else:
+      initial['trainee_id'] = Trainee.objects.filter(is_active=True).first()
+    return initial
+
+  def get_context_data(self, **kwargs):
+    trainee_id = self.kwargs.get('trainee_id', None)
+    if trainee_id:
+      trainee = Trainee.objects.get(id=trainee_id)
+    else:
+      trainee = Trainee.objects.filter(is_active=True).first()
+    context = super(SingleTraineeServicesViewer, self).get_context_data(**kwargs)
+    context['page_title'] = "Single Trainee Services Viewer"
+    context['trainee'] = trainee
+
+    history = trainee.worker.service_history
+    history = self.reformat(history)
+    context['history'] = json.dumps(history)
+
+    return context
+
+  def reformat(self, data):
+    ws = list(set([d['week_schedule__id'] for d in data]))  # already ordered
+    new_data = []
+    for w in ws:
+      alist = []
+      for d in data:
+        if d['week_schedule__id'] == w:
+          alist.append({'service': d['service__name'], 'weekday': d['service__weekday'], 'designated': d['service__designated']})
+      if len(alist) > 0:
+        start_date = WeekSchedule.objects.get(id=w).start
+        week = Term.current_term().term_week_of_date(start_date)
+        new_data.append({'week': week, 'assignments': alist})
+    return new_data
+
+
+class ServiceCategoryAnalyzer(FormView):
+  template_name = 'services/service_category_analyzer.html'
+  form_class = ServiceCategoryAnalyzerForm
+
+  def get_success_url(self):
+    if 'category_id' in self.kwargs:
+      category_id = self.kwargs['category_id']
+      return reverse('services:service_category_analyzer_selected', kwargs={'category_id': category_id})
+    else:
+      return reverse('services:service_category_analyzer')
+
+  def get_initial(self):
+    """
+    Returns the initial data to use for forms on this view.
+    """
+    initial = super(ServiceCategoryAnalyzer, self).get_initial()
+
+    category_id = self.kwargs.get('category_id', None)
+    if category_id:
+      initial['category_id'] = Category.objects.get(id=category_id)
+    else:
+      initial['category_id'] = Category.objects.exclude(name="Designated Services").first()
+    return initial
+
+  def get_context_data(self, **kwargs):
+    category_id = self.kwargs.get('category_id', None)
+    if category_id:
+      category = Category.objects.get(id=category_id)
+    else:
+      category = Category.objects.exclude(name="Designated Services").first()
+    context = super(ServiceCategoryAnalyzer, self).get_context_data(**kwargs)
+    context['page_title'] = "Service Category Analyzer"
+    context['category'] = category
+    return context
 
 '''
 

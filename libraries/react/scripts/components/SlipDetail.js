@@ -12,7 +12,6 @@ const SlipDetail = ({ slip, deleteSlip, onClick }) => {
   let isUnfinalized = '--unfinalized'
   return (
   <div className={"row summary__leaveslips-row" + isUnfinalized} onClick={() => click(slip)}>
-    <div className="col-xs-2">{format(new Date(slip.submitted), dateFormat)}</div>
     <div className="col-xs-1"><SlipStatusIcon status={slip.status} /></div>
     <div className="col-xs-6">
       {
@@ -22,7 +21,12 @@ const SlipDetail = ({ slip, deleteSlip, onClick }) => {
         format(new Date(slip.start), datetimeFormat) + ' to ' + format(new Date(slip.end), datetimeFormat)
       }
     </div>
-    <div className="col-xs-1">{slip.type.charAt(0).toUpperCase() + slip.type.slice(1).toLowerCase()}</div>
+    <div className="col-xs-2">{slip.type.charAt(0).toUpperCase() + slip.type.slice(1).toLowerCase()}</div>
+    <div className="col-xs-1">
+      {slip.late ?
+        <span className="label label-danger">Late</span> :
+        <span className="label label-success">On Time</span>}
+    </div>
     <div className="col-xs-1 col-xs-offset-1">
     </div>
   </div>

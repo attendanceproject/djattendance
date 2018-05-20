@@ -14,7 +14,7 @@ class InterimItineraryForm(forms.ModelForm):
     model = InterimItinerary
     fields = ["start", "end", "comments", ]
     widgets = {
-      "end": forms.TextInput(attrs={'class': 'datepicker'}),
+      "end": DatePicker(),
       "comments": forms.Textarea(attrs={'rows': 2})
     }
 

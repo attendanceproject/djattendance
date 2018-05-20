@@ -17,4 +17,8 @@ urlpatterns = [
   url(r'^designated_service_hours$', views.ServiceHours.as_view(), name='designated_service_hours'),
   url(r'^service_hours_ta_view$', views.ServiceHoursTAView.as_view(), name='service_hours_ta_view'),
   url(r'^designated_services_viewer$', views.DesignatedServiceViewer.as_view(), name='designated_services_viewer'),
+  url(r'^single_trainee_services_viewer$', views.SingleTraineeServicesViewer.as_view(), name='single_trainee_services_viewer'),
+  url(r'^single_trainee_services_viewer/(?P<trainee_id>\d+)', views.SingleTraineeServicesViewer.as_view(), name='trainee_services_viewer'),
+  url(r'^service_category_analyzer$', views.ServiceCategoryAnalyzer.as_view(), name='service_category_analyzer'),
+  url(r'^service_category_analyzer/(?P<category_id>\d+)', views.ServiceCategoryAnalyzer.as_view(), name='service_category_analyzer_selected'),
 ]

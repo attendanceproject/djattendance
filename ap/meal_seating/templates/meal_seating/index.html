@@ -36,7 +36,14 @@ function updateExclusions() {
 }
 
 $( document ).ready(function() {
-  $('.datepicker').datepicker();
+  var dt_options = {
+    timepicker: false,
+    format: 'm/d/Y',
+    formatDate: 'm/d/Y',
+    defaultSelect: true
+  };
+
+  $('.datepicker').datetimepicker(dt_options);
 
   $('#multiselect').multiselect({
     search: {

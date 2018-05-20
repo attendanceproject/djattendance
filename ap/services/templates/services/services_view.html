@@ -115,33 +115,34 @@ Service Scheduling
     <li role="presentation"><a href="#exceptions" aria-controls="review" role="tab" data-toggle="tab">Exceptions</a></li>
     <li role="presentation"><a href="#review" aria-controls="review" role="tab" data-toggle="tab">Review</a></li>
     <li role="presentation"><a href="#servicescalendar" aria-controls="review" role="tab" data-toggle="tab">View Service Calendar</a></li>
-    <li role="presentation"><a href="#assignments" aria-controls="review" role="tab" data-toggle="tab">Designated Service Assignments</a></li>
-    <li role="presentation"><a href="#reports" aria-controls="review" role="tab" data-toggle="tab">Printouts</a></li>
+    <li role="presentation"><a href="#assignments" aria-controls="review" role="tab" data-toggle="tab">Designated Services</a></li>
+    <li role="presentation"><a href="#reports" aria-controls="review" role="tab" data-toggle="tab">Print-outs</a></li>
+    <li role="presentation"><a href="#history" aria-controls="review" role="tab" data-toggle="tab">History</a></li>
   </ul>
 {% endblock %}
 
 {% block content %}
-  <div class="pull-right" role="group">
-    <div class="btn-group">
-      <a href="{% url 'services:services_generate_leaveslips' %}?week_schedule={{current_week}}" class="btn btn-primary">Generate Leave Slips</a>
-    </div>
-    &nbsp;
-    <div class="btn-group">
-      <a href="{% url 'services:services_assign_view' %}?week_schedule={{current_week}}" class="btn btn-success">Make Schedule</a>
-    </div>
-  </div>
 
   <h3 class="no-top-margin">
-    <a class="btn btn-primary" href="?week_schedule={{prev_week}}"><i class="fas fa-angle-double-left"> < </i></a>
+    <a class="btn btn-primary" href="?week_schedule={{prev_week}}"> < </i></a>
     Services Scheduling ({{ cws }})
-    <a class="btn btn-primary" href="?week_schedule={{next_week}}"><i class="fas fa-angle-double-right"> > </i></a>
+    <a class="btn btn-primary" href="?week_schedule={{next_week}}"> > </i></a>
   </h3>
 
   <!-- Tab panes -->
   <div class="tab-content">
   <!-- Assign Tab -->
     <div role="tabpanel" class="tab-pane active" id="assign">
-      <div class="alert alert-info" role="alert">
+      <div class="pull-right" role="group">
+        <div class="btn-group">
+          <a href="{% url 'services:services_generate_leaveslips' %}?week_schedule={{current_week}}" class="btn btn-primary">Generate Leave Slips</a>
+        </div>
+        &nbsp;
+        <div class="btn-group">
+          <a href="{% url 'services:services_assign_view' %}?week_schedule={{current_week}}" class="btn btn-success">Make Schedule</a>
+        </div>
+      </div>
+      <div>
         <a href="#" class="manual-mode">Go into Manual Mode</a>.
       </div>
       {% for category in categories %}
@@ -481,46 +482,38 @@ Service Scheduling
   </div>
   <!-- End Assignments Tab -->
 
-  <!-- Printouts Tab -->
+  <!-- Print-outs Tab -->
   <div role="tabpanel" class="tab-pane" id="reports">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-12">
-          Service Notes for this week:<br>
-          <textarea id=encouragement rows="4" cols="60" placeholder="insert encouragement">{{cws.encouragement}}</textarea>
-          <br>
-          <button type="button" class="btn btn-primary" id="save_encouragement">Save</button>
-        </div>
+    <div class="row">
+      <div class="col-sm-3">
+        <h4>Service Hand-outs</h4>
+        <a href="{% url 'services:services_schedule'%}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">all trainees</a>
+        <a href="{% url 'services:services_schedule_house'%}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">by house</a>
+        <h4>Sign-in Sheets</h4>
+        <a href="{% url 'services:kservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">kitchen sign-in sheets</a>
+        <a href="{% url 'services:rservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">restroom sign-in sheets</a>
+        <a href="{% url 'services:oservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">all other sign-in sheets</a>
       </div>
-      <br>
-      <div class="row">
-        <div class="col-sm-3">
-          <a href="{% url 'services:services_schedule'%}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">all trainees</a>
-        </div>
+      <div class="col-sm-9">
+        <h4>Service Notes for this week</h4>
+        <textarea id=encouragement rows="30" cols="100" placeholder="insert encouragement">{{cws.encouragement}}</textarea>
+        <br>
+        <button type="button" class="btn btn-primary" id="save_encouragement">Save</button>
       </div>
-      <div class="row">
-        <div class="col-sm-3">
-          <a href="{% url 'services:services_schedule_house'%}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">by house</a>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-3">
-          <a href="{% url 'services:kservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">kitchen sign-in sheets</a>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-3">
-          <a href="{% url 'services:rservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">restroom sign-in sheets</a>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-3">
-          <a href="{% url 'services:oservices_signin' %}?week_schedule={{current_week}}" target="_blank" class="btn btn-primary">all other sign-in sheets</a>
-        </div>
+    </div>
+    <br>
+  </div>
+  <!-- End Print-outs Tab -->
+
+  <!-- History Tab -->
+  <div role="tabpanel" class="tab-pane" id="history">
+    <div class="row">
+      <div class="col-sm-3">
+        <a href="{% url 'services:single_trainee_services_viewer' %}" target="_blank" class="btn btn-primary">Single Trainee Services Viewer</a>
       </div>
     </div>
   </div>
-  <!-- End Printouts Tab -->
+  <!-- End History Tab -->
 
 <script>
   var worker_update_url = "/api/update-workers/";

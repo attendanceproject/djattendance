@@ -25,7 +25,7 @@ class DatePicker(DateInput):
 
 
 class DatetimePicker(DateTimeInput):
-  format = '%m/%d/%Y %H:%M'
+  format = '%m/%d/%Y %I:%M %p'
 
   def __init__(self, *args, **kwargs):
     kwargs['attrs'] = {'class': 'datetimepicker'}
@@ -34,6 +34,19 @@ class DatetimePicker(DateTimeInput):
   class Media:
     js = (
         'js/datetimepicker.js',
+    )
+
+
+class TimePicker(DateTimeInput):
+  format = '%I:%M %p'
+
+  def __init__(self, *args, **kwargs):
+    kwargs['attrs'] = {'class': 'timepicker'}
+    super(TimePicker, self).__init__(*args, **kwargs)
+
+  class Media:
+    js = (
+        'js/timepicker.js',
     )
 
 

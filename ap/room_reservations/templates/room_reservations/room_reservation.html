@@ -24,6 +24,10 @@
     let room = rooms_list[data_table.cells({selected: true})[0][0].column - 1].pk;
     $("#id_room").val(room);
   }
+
+  $(document).ready(() => {
+    $("#id_room").select2();
+  });
 </script>
 {% endblock %}
 

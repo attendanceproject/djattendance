@@ -10,6 +10,6 @@
 {% if leaveslip.informed %}
   <span class="label label-default">Informed TA</span>
 {% endif %}
-{% if leaveslip.late == True %}
+{% if leaveslip.is_late %}
   <span class="label label-danger">Submitted Late</span>
 {% endif %}

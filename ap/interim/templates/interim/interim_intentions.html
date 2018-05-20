@@ -5,9 +5,8 @@
 
 {% block title %}{{ page_title }}{% endblock %}
 
-{% block scripts %}
-{{ block.super }}
-<style>
+{% block references %}
+<style type="text/css">
   #submit{
     display: inline-block;
     float: left;
@@ -28,6 +27,11 @@
   }
 
 </style>
+{% endblock %}
+{% block scripts %}
+{{ block.super }}
+{{ form.media }}
+{{ itinerary_forms.0.media }}
 
 <script type="text/javascript">
 
@@ -36,24 +40,22 @@ function date_formater(dt) {
   mon = date.slice(0, 2)
   dat = date.slice(3, 5)
   yer = date.slice(6, 10)
-  return yer + "-" + mon + "-" + dat
+  return mon + "/" + dat + "/" + yer
 }
 
 var dt_options = {
   timepicker: false,
-  format: 'Y-m-d',
-  formatDate: 'Y-m-d',
+  format: 'm/d/Y',
+  formatDate: 'm/d/Y',
   defaultSelect: true,
 };
 var options = {year: 'numeric', month: '2-digit', day: '2-digit' };
 
 $(document).ready(() => {
 
-  var interim_start = "{{interim_start|date:'Y-m-d'}}";
+  var interim_start = "{{interim_start|date:'m/d/Y'}}";
   
   show_hide_post_interim();
-
-  $('.datepicker').datetimepicker(dt_options);
 
   $("#add_row").click(add_row);
 

@@ -1,7 +1,8 @@
 $(document).ready(function() {
-  $('.datepicker').datepicker({
-    changeMonth: true,
-    changeYear: true,
-    yearRange: "1980:c"
+  $(".datepicker").datetimepicker({
+    timepicker: false,
+    format: "m/d/Y",
+    formatDate: "m/d/Y",
+    defaultSelect: true
   });
 });

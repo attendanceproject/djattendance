@@ -19,3 +19,12 @@
     </button>
   </a>
 {% endif %}
+{% if leaveslip.classname == "individual" %}
+<button type="button" title="Delete" class="btn-lg btn-danger delete-slip">
+  <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+</button>
+{% else %}
+<button type="button" title="Delete" class="btn-lg btn-danger delete-slip">
+  <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+</button>
+{% endif %}

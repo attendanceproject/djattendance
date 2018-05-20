@@ -65,8 +65,8 @@ class RoomReservationSubmit(CreateView):
     room_reservation = form.save(commit=False)
     user_id = self.request.user.id
     room_reservation.requester = User.objects.get(id=user_id)
-    if TrainingAssistant.objects.filter(id=user_id).exists():
-      room_reservation.status = 'A'
+#    if TrainingAssistant.objects.filter(id=user_id).exists():
+#      room_reservation.status = 'A'
     room_reservation.save()
     return super(RoomReservationSubmit, self).form_valid(form)
 

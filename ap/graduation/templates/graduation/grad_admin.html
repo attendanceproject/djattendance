@@ -6,10 +6,18 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block scripts %}
+{{form.media}}
 {{block.super}}
   <script type="text/javascript">
 
     var fields = ['testimony', 'consideration', 'website', 'outline', 'misc', 'remembrance', 'xb'];
+
+    var dt_options = {
+      timepicker: false,
+      format: 'm/d/Y',
+      formatDate: 'm/d/Y',
+      defaultSelect: true
+    }
 
     function hide_field(field){
       $('label[for="id_' + field + '_due_date"]').hide();
@@ -52,7 +60,7 @@
         }
       });
 
-      $('.datepicker').datepicker();
+      $('.datepicker').datetimepicker(dt_options);
 
       if ($('#id_trainees').attr('multiple') === 'multiple') {
         $('#id_trainees').select2();
@@ -61,14 +69,7 @@
       hide_or_show_all();
       $( "select" ).change((e) => hide_or_show_element(e.target));
 
-      $('#id_xb_due_date').datepicker({
-        changeMonth: true,
-        changeYear: true,
-        changeYear: true,
-        dateFormat: "yy-mm-dd",
-      });
-
-
+      $('#id_xb_due_date').datetimepicker(dt_options);
 
     });
   </script>

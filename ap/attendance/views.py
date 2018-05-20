@@ -55,8 +55,8 @@ def react_attendance_context(trainee):
   events = trainee.events
   groupevents = trainee.groupevents
   rolls = Roll.objects.filter(trainee=trainee)
-  main_rolls = [r.id for r in rolls if r.is_main_roll]
-  rolls = rolls.filter(id__in=main_rolls)
+  if trainee.self_attendance:
+    rolls = rolls.filter(submitted_by=trainee)
   individualslips = IndividualSlip.objects.filter(trainee=trainee).prefetch_related('rolls')
   groupslips = GroupSlip.objects.filter(Q(trainees__in=[trainee])).distinct().prefetch_related('trainees')
   TAs = TrainingAssistant.objects.filter(groups__name='regular_training_assistant')
@@ -91,11 +91,11 @@ class AttendancePersonal(AttendanceView):
     ctx = super(AttendancePersonal, self).get_context_data(**kwargs)
     listJSONRenderer = JSONRenderer()
     user = self.request.user
-    trainee = trainee_from_user(user)
+    trainee = trainee_from_user(user)    
     if not trainee:
       trainee = Trainee.objects.filter(groups__name='attendance_monitors').first()
       ctx['actual_user'] = listJSONRenderer.render(TraineeForAttendanceSerializer(self.request.user).data)
-    ctx.update(react_attendance_context(trainee))
+    ctx.update(react_attendance_context(trainee))    
     return ctx
 
 
