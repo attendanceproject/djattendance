@@ -143,10 +143,9 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
         average_tardy_percentage += float(rtn_data[trainee.full_name]["% Tardy"][:-1])
       except ZeroDivisionError:
-        # message = "Division by 0 error."
         rtn_data[trainee.full_name]["% Tardy"] = "N/A"
-        # return JsonResponse({'bad': False, 'finalize': finalize, 'msg': message})
       t.end()
+
       t = timeit_inline("Missed Classes")
       t.start()
       class_events = Event.objects.filter(start=datetime.strptime('10:15', '%H:%M'), type='C').exclude(name="Session II") | Event.objects.filter(start=datetime.strptime('08:25', '%H:%M')).exclude(name="Session I").exclude(name="Study Roll").exclude(name="Study").exclude(name="End Study") | Event.objects.filter(name="PSRP")
@@ -159,9 +158,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
         average_classes_missed_percentage += float(rtn_data[trainee.full_name]["% Classes Missed"][:-1])
       except ZeroDivisionError:
-        # message = "Division by 0 error."
         rtn_data[trainee.full_name]["% Classes Missed"] = "N/A"
-        # return JsonResponse({'bad': False, 'finalize': finalize, 'msg': message})
       t.end()
 
       # dealing with '% sickness' now, need information on individual leave slips
@@ -172,9 +169,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         rtn_data[trainee.full_name]["% Sickness"] = str(round(primary_indv_slip_filter.filter(type="SICK").count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
         average_sickness_percentage += float(rtn_data[trainee.full_name]["% Sickness"][:-1])
       except ZeroDivisionError:
-        # message = "Division by 0 error."
         rtn_data[trainee.full_name]["% Sickness"] = "N/A"
-        # return JsonResponse({'bad': False, 'finalize': finalize, 'msg': message})
 
       # get total unexcused absences. This will be: ROLLS_ABSENT - (ROLLS_EXCUSED_BY_INDIVIDUAL_LEAVE_SLIPS + ROLLS_EXCUSED_BY_GROUP_LEAVE_SLIPS) / ALL_ROLLS
       absent_rolls_covered_in_group_slips = Roll.objects.none()
@@ -191,13 +186,6 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       unexcused_absences = qs_trainee_rolls.filter(status='A').count() - absent_rolls_covered_in_group_slips.count() - absent_rolls_covered_by_indv_leaveslips.count()
 
       # excluding because they are covered by leaveslips:
-      absent_rolls_to_exclude_from_self_attendance_calculation = []
-
-      # for roll in absent_rolls_covered_in_group_slips:
-      #   absent_rolls_to_exclude_from_self_attendance_calculation.append(roll.id)
-
-      # for roll in absent_rolls_covered_by_indv_leaveslips:
-      #   absent_rolls_to_exclude_from_self_attendance_calculation.append(roll.id)
       absent_rolls_to_exclude_from_self_attendance_calculation = absent_rolls_covered_in_group_slips.values_list('id', flat=True) | absent_rolls_covered_by_indv_leaveslips.values_list('id', flat=True)
       try:
         if trainee.self_attendance:
@@ -209,9 +197,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
           rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
           average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
       except ZeroDivisionError:
-        # message = "Division by 0 error."
         rtn_data[trainee.full_name]["% Unex. Abs."] = "N/A"
-        # return JsonResponse({'bad': False, 'finalize': finalize, 'msg': message})
       t.end()
 
     average_unexcused_absences_percentage = round(average_unexcused_absences_percentage / num_trainees, 2)
@@ -233,15 +219,9 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
     if 'sending-locality' in data['report_by']:
       final_data_locality = self.clean_empty(final_data_locality)
-    #  for each_locality in final_data_locality:
-    #    if final_data_locality[each_locality] == {}:
-    #      del final_data_locality[each_locality]
 
     if 'team' in data['report_by']:
       final_data_team = self.clean_empty(final_data_team)
-    #  for each_team in final_data_team:
-    #    if final_data_team[each_team] == {}:
-    #      del final_data_team[each_team]
 
     if 'sending-locality' in data['report_by'] and 'team' in data['report_by']:
       context = {
