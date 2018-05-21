@@ -147,7 +147,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         if trainee.self_attendance:
           tardy_rolls_count = tardy_rolls_count.filter(submitted_by=trainee)
 
-          rtn_data[trainee.full_name]["% Tardy"] = str(round(tardy_rolls_count.count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+        rtn_data[trainee.full_name]["% Tardy"] = str(round(tardy_rolls_count.count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
 
         average_tardy_percentage += float(rtn_data[trainee.full_name]["% Tardy"][:-1])
       except ZeroDivisionError:
