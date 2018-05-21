@@ -207,10 +207,6 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       if trainee.self_attendance:
         unexcused_absences = unexcused_absences.filter(submitted_by=trainee)
 
-      print trainee
-      for uea in unexcused_absences:
-        print uea.id, uea
-
       try:          
         rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences.count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
         average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
