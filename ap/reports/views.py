@@ -108,7 +108,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
     qs_group_slips = GroupSlip.objects.filter(status__in=['A', 'S'], start__gte=start_datetime, end__lte=end_datetime)
     t.end()
-    filtered_trainees = filtered_trainees.filter(firstname="David")  # Test line
+    # filtered_trainees = filtered_trainees.filter(firstname="David")  # Test line
     if 'sending-locality' in data['report_by']:
       localities = Locality.objects.all()
       for locality in localities:
@@ -266,7 +266,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     ctx = {'trainee_data': json.dumps(self.clean_empty(rtn_data))}
     ctx['loc_data'] = json.dumps(loc_data)
     ctx['team_data'] = json.dumps(team_data)
-    ctx['date_data'] = date_data
+    ctx['date_data'] = {'date_from': date_from, 'date_to': date_to}
     ctx['averages'] = json.dumps(averages)
     t.end()
     return render(request, "reports/generated_report.html", context=ctx)
