@@ -1,7 +1,6 @@
 from django.db import models
 
 from aputils.models import City
-from django_countries.fields import CountryField
 
 """ LOCALITIES models.py
 
@@ -20,7 +19,7 @@ class Locality(models.Model):
 
   def __unicode__(self):
     try:
-    	return self.city.name + ", " + str(self.city.state)
+      return self.city.name + ", " + str(self.city.state)
     except AttributeError as e:
       return str(self.id) + ": " + str(e)
 

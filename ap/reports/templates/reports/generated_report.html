@@ -1,9 +1,73 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% load bootstrap3 %}
-{% load report_filters %}
+
+{% block title %} Attendance Report {% endblock %}
 
 {% block scripts %}
+<script type="text/javascript">
+  var trainee_data = JSON.parse('{{trainee_data|safe}}');;
+  var loc_data = JSON.parse('{{loc_data|safe}}');
+  var team_data = JSON.parse('{{team_data|safe}}');
+  var averages = JSON.parse('{{averages|safe}}');
+  var date_from = "{{date_data.date_from|date:'m/d/Y'}}";
+  var date_to = "{{date_data.date_to|date:'m/d/Y'}}";
+
+  $(document).ready(function() {
+    let date_range_string = date_from + " to " + date_to;
+    let avg_list_string = make_avg_list(averages);
+    let content = "";
+    for(var i = 0; i < loc_data.length; i++){
+      content += make_table(loc_data[i], date_range_string, avg_list_string, "Sending Locality"); 
+    }
+    for(var i = 0; i < team_data.length; i++){
+      content += make_table(team_data[i], date_range_string, avg_list_string, "Team"); 
+    }
+    $('.panel-body').append(content);
+    
+  });
+
+  function make_table(sending_to, range_string, avg_list, which){
+    let content = "<table class='table table-striped'>";
+    let heading = "<h2>"+ sending_to + " " + which + " Generated Report "+ range_string + "</h2>"
+    content += heading
+    content += avg_list
+    let table_head = "<thead><tr><th>Trainee</th>";
+    let table_body = "<tbody>";
+    let head_count = 0;
+    for (var key in trainee_data){
+      if (trainee_data.hasOwnProperty(key)){
+        if (trainee_data[key][which].localeCompare(sending_to) === 0){
+          table_body += "<tr><td>" + key + "</td>";
+          for (var item in trainee_data[key]){
+            if (trainee_data[key].hasOwnProperty(item)){
+              if (head_count < Object.keys(trainee_data[key]).length) {
+                table_head += "<th>"+ item +"</th>";
+                head_count += 1;
+              }
+              table_body += "<td>"+ trainee_data[key][item] +"</th>";
+            }
+          }
+        }
+      }
+    }
+    content += table_head;
+    content += table_body;
+    content += "</table><footer></footer>"
+    return content;
+  }
+
+  function make_avg_list(data){
+    let content = "<ul>";
+    for (var key in data) {
+      if (data.hasOwnProperty(key)) {
+        content += "<li>" + key + ": " + data[key] + "</li>";
+      }
+    }
+    content += "</ul>";
+    return content;
+  }
+</script>
 {% endblock %}
 
 {% block references %}
@@ -15,87 +79,9 @@
 {% endblock %}
 
 {% block content %}
-  
-  {% if locality_data %}
-    {% for locality in locality_data %}    
-    <div class="panel-body">
-      <table id="generated-report-locality-table" class="table table-striped">
-        <h2> {{ locality }} Sending Locality Generated Report {{ date_data|get_date_range }}</h2>
-        Averages (across all trainees)
-        <ul>
-        {% for average_field in averages|sorted_reverse %}
-          <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
-        {% endfor %}
-        </ul>
-        <thead>
-        	<tr>
-          	<th>Trainee</th>
-          	{% for item in locality_data|get_all_items_for_query:locality %}
-        	  <th> {{ item }} </th>
-          	{% endfor %}
-        	</tr>
-        </thead>
-        	
-        <tbody>
-  			{% for trainee in locality_data|get_item_for_data:locality %}
-        	<tr>
-          <td> {{ trainee }} </td>  
-          {% with locality_dict=locality_data|get_item_for_data:locality %}  <!-- Locality dict is {trainee1: {...}, trainee2: ...}-->
-            {% with trainee_dict=locality_dict|get_item_for_data:trainee %}  <!-- trainee dict is {absences: 2, tardies: 2}-->
-              {% for queried_item in trainee_dict|sorted_reverse %}
-                <td> {{ trainee_dict|get_item_for_data:queried_item }} </td>
-              {% endfor %}
-            {% endwith %}
-          {% endwith %}
-  				</tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <footer></footer>
-    {% endfor %}
 
-  {% endif %}
 
-  {% if team_data %}
-    {% for team in team_data %}    
-    <div class="panel-body">
-      <table id="generated-report-team-table" class="table table-striped">
-        <h2> {{ team }} Team Generated Report {{ date_data|get_date_range }}</h2>
-        Averages (across all trainees)
-        <ul>
-        {% for average_field in averages|sorted_reverse %}
-          <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
-        {% endfor %}
-        </ul>
-        <thead>
-          <tr>
-            <th>Trainee</th>
-            {% for item in team_data|get_all_items_for_query:team %}
-            <th> {{ item }} </th>
-            {% endfor %}
-          </tr>
-        </thead>
-          
-        <tbody>
-        {% for trainee in team_data|get_item_for_data:team %}
-          <tr>
-          <td> {{ trainee }} </td>  
-          {% with team_dict=team_data|get_item_for_data:team %}  <!-- Team dict is {trainee1: {...}, trainee2: ...}-->
-            {% with trainee_dict=team_dict|get_item_for_data:trainee %}  <!-- trainee dict is {absences: 2, tardies: 2}-->
-              {% for queried_item in trainee_dict|sorted_reverse %}
-                <td> {{ trainee_dict|get_item_for_data:queried_item }} </td>
-              {% endfor %}
-            {% endwith %}
-          {% endwith %}
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <footer></footer>
-    {% endfor %}
-
-  {% endif %}
+<div class="panel-body">
+</div>
 
 {% endblock %}

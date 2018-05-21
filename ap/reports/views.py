@@ -1,3 +1,4 @@
+import json
 import pickle
 from collections import OrderedDict
 from datetime import datetime
@@ -107,11 +108,11 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
     qs_group_slips = GroupSlip.objects.filter(status__in=['A', 'S'], start__gte=start_datetime, end__lte=end_datetime)
     t.end()
-    # filtered_trainees = filtered_trainees.filter(firstname="David")  # Test line
+    filtered_trainees = filtered_trainees.filter(firstname="David")  # Test line
     if 'sending-locality' in data['report_by']:
       localities = Locality.objects.all()
       for locality in localities:
-        final_data_locality[locality.city] = {}
+        final_data_locality[str(locality.city)] = {}
       final_data_locality['N/A'] = {}
 
     if 'team' in data['report_by']:
@@ -125,10 +126,10 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         rtn_data[trainee.full_name] = OrderedDict()
       rtn_data[trainee.full_name]["Term"] = trainee.current_term
       if trainee.locality is not None:
-        rtn_data[trainee.full_name]["Sending Locality"] = trainee.locality.city
+        rtn_data[trainee.full_name]["Sending Locality"] = str(trainee.locality.city)
       else:
         rtn_data[trainee.full_name]["Sending Locality"] = 'N/A'
-      rtn_data[trainee.full_name]["team"] = trainee.team.name
+      rtn_data[trainee.full_name]["Team"] = trainee.team.name
       rtn_data[trainee.full_name]["ta"] = trainee.TA.full_name
       rtn_data[trainee.full_name]["Gender"] = trainee.gender
 
@@ -176,7 +177,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
       t.end()
 
-      t = timeit_inline("Unexcude Absences")
+      t = timeit_inline("Unexcused Absences")
       t.start()
 
       # first get all absent rolls for this trainee. This will be: (ROLLS_ABSENT - ROLLS_EXCUSED_BY_INDIVIDUAL_LEAVE_SLIPS - ROLLS_EXCUSED_BY_GROUP_LEAVE_SLIPS) / ALL_ROLLS
@@ -203,11 +204,11 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
             r_end = datetime.combine(r.date, r.event.end)
             if group_slip['start'] <= r_start and group_slip['end'] >= r_end:
               unexcused_absences = unexcused_absences.exclude(id=r.pk)
-        
+
       if trainee.self_attendance:
         unexcused_absences = unexcused_absences.filter(submitted_by=trainee)
 
-      try:          
+      try:
         rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences.count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
         average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
       except ZeroDivisionError:
@@ -225,11 +226,17 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     averages["Average % Unex. Abs."] = str(average_unexcused_absences_percentage) + "%"
     t = timeit_inline("Building Context")
     t.start()
+    loc_data = []
+    team_data = []
     for trainee in filtered_trainees:
       if 'sending-locality' in data['report_by']:
         final_data_locality[rtn_data[trainee.full_name]["Sending Locality"]][trainee.full_name] = rtn_data[trainee.full_name]
+        if rtn_data[trainee.full_name]["Sending Locality"] not in loc_data:
+          loc_data.append(rtn_data[trainee.full_name]["Sending Locality"])
       if 'team' in data['report_by']:
-        final_data_team[rtn_data[trainee.full_name]["team"]][trainee.full_name] = rtn_data[trainee.full_name]
+        final_data_team[rtn_data[trainee.full_name]["Team"]][trainee.full_name] = rtn_data[trainee.full_name]
+        if rtn_data[trainee.full_name]["Team"] not in team_data:
+          team_data.append(rtn_data[trainee.full_name]["Team"])
 
     if 'sending-locality' in data['report_by']:
       final_data_locality = self.clean_empty(final_data_locality)
@@ -256,5 +263,10 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         'date_data': date_data,
         'averages': averages
       }
+    ctx = {'trainee_data': json.dumps(self.clean_empty(rtn_data))}
+    ctx['loc_data'] = json.dumps(loc_data)
+    ctx['team_data'] = json.dumps(team_data)
+    ctx['date_data'] = date_data
+    ctx['averages'] = json.dumps(averages)
     t.end()
-    return render(request, "reports/generated_report.html", context=context)
+    return render(request, "reports/generated_report.html", context=ctx)
