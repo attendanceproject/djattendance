@@ -134,15 +134,14 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       rtn_data[trainee.full_name]["Gender"] = trainee.gender
 
       qs_trainee_rolls = qs_rolls.query.filter(trainee=trainee)
+      if trainee.self_attendance:
+        qs_trainee_rolls = qs_trainee_rolls.filter(submitted_by=trainee)
 
       t = timeit_inline("Tardies")
       t.start()
 
       try:
         tardy_rolls_count = qs_trainee_rolls.exclude(status='A')
-        if trainee.self_attendance:
-          tardy_rolls_count = tardy_rolls_count.filter(submitted_by=trainee)
-
         rtn_data[trainee.full_name]["% Tardy"] = str(round(tardy_rolls_count.count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
 
         average_tardy_percentage += float(rtn_data[trainee.full_name]["% Tardy"][:-1])
@@ -155,8 +154,6 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       # this should come down to about twelve, including all the main, 1st year and 2nd year classes and afternoon class
       class_events = Event.objects.filter(monitor='AM', type='C').exclude(class_type=None)
       trainee_missed_classes = qs_trainee_rolls.filter(event__in=class_events, status='A')
-      if trainee.self_attendance:
-        trainee_missed_classes = trainee_missed_classes.filter(submitted_by=trainee)
 
       try:
         rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
@@ -204,9 +201,6 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
             r_end = datetime.combine(r.date, r.event.end)
             if group_slip['start'] <= r_start and group_slip['end'] >= r_end:
               unexcused_absences = unexcused_absences.exclude(id=r.pk)
-
-      if trainee.self_attendance:
-        unexcused_absences = unexcused_absences.filter(submitted_by=trainee)
 
       try:
         rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences.count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
