@@ -111,7 +111,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     if 'sending-locality' in data['report_by']:
       localities = Locality.objects.all()
       for locality in localities:
-        final_data_locality[locality.city.name] = {}
+        final_data_locality[locality.city] = {}
       final_data_locality['N/A'] = {}
 
     if 'team' in data['report_by']:
@@ -125,7 +125,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         rtn_data[trainee.full_name] = OrderedDict()
       rtn_data[trainee.full_name]["Term"] = trainee.current_term
       if trainee.locality is not None:
-        rtn_data[trainee.full_name]["Sending Locality"] = trainee.locality.city.name
+        rtn_data[trainee.full_name]["Sending Locality"] = trainee.locality.city
       else:
         rtn_data[trainee.full_name]["Sending Locality"] = 'N/A'
       rtn_data[trainee.full_name]["team"] = trainee.team.name
