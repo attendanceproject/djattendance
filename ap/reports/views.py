@@ -92,8 +92,8 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     t = timeit_inline("Initial Pickling")
     t.start()
 
-    # We only want to pickle absent rolls
-    filtered_rolls = Roll.objects.filter(trainee__in=filtered_trainees, date__range=[date_from, date_to], status="A")
+    # We only want to pickle non-present rolls
+    filtered_rolls = Roll.objects.filter(trainee__in=filtered_trainees, date__range=[date_from, date_to]).exclude(status='P')
     pickled_rolls = pickle.dumps(filtered_rolls)
 
     # qs_rolls is the queryset of all pertinent rolls related to the filtered trainees in the date range
@@ -101,8 +101,11 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     qs_rolls = Roll.objects.all()
     qs_rolls.query = pickled_query
 
-    # get all group slips in report's time range with the specified trainees that have been approved.
-    qs_group_slips = GroupSlip.objects.filter(status__in=['A', 'S'], start__gte=date_from, end__lte=date_to)
+    # get all group slips in report's time range with the specified trainees that have been approved, this is needed because groupslip start and end fields are datetime fields and the input is only a date field
+    start_datetime = datetime.combine(date_from, datetime.min.time())
+    end_datetime = datetime.combine(date_to, datetime.max.time())
+
+    qs_group_slips = GroupSlip.objects.filter(status__in=['A', 'S'], start__gte=start_datetime, end__lte=end_datetime)
     t.end()
     # filtered_trainees = filtered_trainees.filter(firstname="David")  # Test line
     if 'sending-locality' in data['report_by']:
@@ -135,7 +138,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       t.start()
 
       try:
-        tardy_rolls_count = Roll.objects.filter(trainee=trainee, status__in=['T', 'U', 'L'], date__range=[date_from, date_to])
+        tardy_rolls_count = qs_trainee_rolls.exclude(status='A')
         if trainee.self_attendance:
           tardy_rolls_count = tardy_rolls_count.filter(submitted_by=trainee)
 
@@ -148,11 +151,11 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
       t = timeit_inline("Missed Classes")
       t.start()
-      class_events = Event.objects.filter(start=datetime.strptime('10:15', '%H:%M'), type='C').exclude(name="Session II") | Event.objects.filter(start=datetime.strptime('08:25', '%H:%M')).exclude(name="Session I").exclude(name="Study Roll").exclude(name="Study").exclude(name="End Study") | Event.objects.filter(name="PSRP")
-      trainee_class_rolls = qs_trainee_rolls.filter(event__in=class_events)
+      # this should come down to about twelve, including all the main, 1st year and 2nd year classes and afternoon class
+      class_events = Event.objects.filter(monitor='AM', type='C').exclude(class_type=None)
+      trainee_missed_classes = qs_trainee_rolls.filter(event__in=class_events, status='A')
       if trainee.self_attendance:
-        trainee_class_rolls = trainee_class_rolls.filter(submitted_by=trainee)
-      trainee_missed_classes = trainee_class_rolls.filter(status='A')
+        trainee_missed_classes = trainee_missed_classes.filter(submitted_by=trainee)
 
       try:
         rtn_data[trainee.full_name]["% Classes Missed"] = str(round(trainee_missed_classes.count() / float(num_classes_in_report_for_one_trainee) * 100, 2)) + "%"
@@ -171,31 +174,46 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       except ZeroDivisionError:
         rtn_data[trainee.full_name]["% Sickness"] = "N/A"
 
-      # get total unexcused absences. This will be: ROLLS_ABSENT - (ROLLS_EXCUSED_BY_INDIVIDUAL_LEAVE_SLIPS + ROLLS_EXCUSED_BY_GROUP_LEAVE_SLIPS) / ALL_ROLLS
-      absent_rolls_covered_in_group_slips = Roll.objects.none()
+      t.end()
+
+      t = timeit_inline("Unexcude Absences")
+      t.start()
+
+      # first get all absent rolls for this trainee. This will be: (ROLLS_ABSENT - ROLLS_EXCUSED_BY_INDIVIDUAL_LEAVE_SLIPS - ROLLS_EXCUSED_BY_GROUP_LEAVE_SLIPS) / ALL_ROLLS
+      unexcused_absences = qs_trainee_rolls.filter(status='A')
+
+      # remove absences with an approved or sister approved individual leaveslip
+      unexcused_absences = unexcused_absences.exclude(leaveslips__status__in=['A', 'S'])
+
+      # start to remove absences excused by groupleaveslips
       group_slips_for_trainee = qs_group_slips.filter(trainees=trainee).values('start', 'end')
       for group_slip in group_slips_for_trainee:
-        rolls_in_slip = qs_trainee_rolls.filter(event__start__gte=group_slip['start'], event__end__lte=group_slip['end'], status='A')
-        absent_rolls_covered_in_group_slips = absent_rolls_covered_in_group_slips | rolls_in_slip
 
-      indv_leaveslips_with_absences = primary_indv_slip_filter.exclude(rolls__in=absent_rolls_covered_in_group_slips)
-      all_absent_rolls_in_ind_slips = indv_leaveslips_with_absences.filter(rolls__status='A').values_list('rolls', flat=True)
-      absent_rolls_covered_by_indv_leaveslips = qs_trainee_rolls.filter(id__in=all_absent_rolls_in_ind_slips)
+        # majority of groupslips are on the same date
+        if group_slip['start'].date() == group_slip['end'].date():
+          unexcused_absences = unexcused_absences.exclude(event__start__gte=group_slip['start'].time(), event__end__lte=group_slip['end'].time())
 
-      # get total unexcused absences
-      unexcused_absences = qs_trainee_rolls.filter(status='A').count() - absent_rolls_covered_in_group_slips.count() - absent_rolls_covered_by_indv_leaveslips.count()
-
-      # excluding because they are covered by leaveslips:
-      absent_rolls_to_exclude_from_self_attendance_calculation = absent_rolls_covered_in_group_slips.values_list('id', flat=True) | absent_rolls_covered_by_indv_leaveslips.values_list('id', flat=True)
-      try:
-        if trainee.self_attendance:
-          for roll in qs_trainee_rolls.filter(status='A').exclude(id__in=absent_rolls_to_exclude_from_self_attendance_calculation):
-            if roll.submitted_by != trainee:
-              unexcused_absences -= 1
-          rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+        # to cover multi day groupslips for conference or other events
         else:
-          rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
-          average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
+          potentials_rolls = unexcused_absences.filter(date__range=[group_slip['start'].date(), group_slip['end'].date()])
+          if potentials_rolls.count() == 0:
+            continue
+          for r in potentials_rolls:
+            r_start = datetime.combine(r.date, r.event.start)
+            r_end = datetime.combine(r.date, r.event.end)
+            if group_slip['start'] <= r_start and group_slip['end'] >= r_end:
+              unexcused_absences = unexcused_absences.exclude(id=r.pk)
+        
+      if trainee.self_attendance:
+        unexcused_absences = unexcused_absences.filter(submitted_by=trainee)
+
+      print trainee
+      for uea in unexcused_absences:
+        print uea.id, uea
+
+      try:          
+        rtn_data[trainee.full_name]["% Unex. Abs."] = str(round(unexcused_absences.count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+        average_unexcused_absences_percentage += float(rtn_data[trainee.full_name]["% Unex. Abs."][:-1])
       except ZeroDivisionError:
         rtn_data[trainee.full_name]["% Unex. Abs."] = "N/A"
       t.end()
