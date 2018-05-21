@@ -193,12 +193,12 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       # excluding because they are covered by leaveslips:
       absent_rolls_to_exclude_from_self_attendance_calculation = []
 
-      for roll in absent_rolls_covered_in_group_slips:
-        absent_rolls_to_exclude_from_self_attendance_calculation.append(roll.id)
+      # for roll in absent_rolls_covered_in_group_slips:
+      #   absent_rolls_to_exclude_from_self_attendance_calculation.append(roll.id)
 
-      for roll in absent_rolls_covered_by_indv_leaveslips:
-        absent_rolls_to_exclude_from_self_attendance_calculation.append(roll.id)
-
+      # for roll in absent_rolls_covered_by_indv_leaveslips:
+      #   absent_rolls_to_exclude_from_self_attendance_calculation.append(roll.id)
+      absent_rolls_to_exclude_from_self_attendance_calculation = absent_rolls_covered_in_group_slips.values_list('id', flat=True) | absent_rolls_covered_by_indv_leaveslips.values_list('id', flat=True)
       try:
         if trainee.self_attendance:
           for roll in qs_trainee_rolls.filter(status='A').exclude(id__in=absent_rolls_to_exclude_from_self_attendance_calculation):
