@@ -1,6 +1,7 @@
 from django.db import models
 
 from django_countries.fields import CountryField
+from django_countries import countries
 
 from localflavor.us.models import USStateField
 
@@ -38,7 +39,7 @@ class City(models.Model):
       if self.country == 'US':
         city_str = city_str + ", " + str(self.state)
       else:
-        city_str = city_str + ", " + str(self.country)
+        city_str = city_str + ", " + str(dict(countries)[self.country])
       return city_str
     except AttributeError as e:
       return str(self.id) + ": " + str(e)
