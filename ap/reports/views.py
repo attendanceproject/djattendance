@@ -1,10 +1,13 @@
 import json
+from reportlab.pdfgen import canvas
+import os
+
 import pickle
 from collections import OrderedDict
 from datetime import datetime
 
 from accounts.models import Trainee
-from aputils.utils import timeit, timeit_inline
+from aputils.utils import timeit, timeit_inline, render_to_pdf
 from attendance.models import Roll
 from braces.views import GroupRequiredMixin, LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy
@@ -263,4 +266,47 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     ctx['date_data'] = {'date_from': date_from, 'date_to': date_to}
     ctx['averages'] = json.dumps(averages)
     t.end()
-    return render(request, "reports/generated_report.html", context=ctx)
+
+    import copy
+
+    for ld in list(context['locality_data']):      
+      ld_ctx = copy.deepcopy(context)
+      ld_ctx.pop('team_data')
+      for none_ld in list(ld_ctx['locality_data']):
+        if none_ld != ld:
+          print none_ld
+          ld_ctx['locality_data'].pop(none_ld)
+      
+      pdf_file = render_to_pdf("reports/generated_report.html", ld_ctx)      
+      path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
+
+      with open(path, 'w+') as f:
+        f.write(pdf_file.content)
+
+    for ld in list(context['team_data']):      
+      ld_ctx = copy.deepcopy(context)
+      ld_ctx.pop('locality_data')
+      for none_ld in list(ld_ctx['team_data']):
+        if none_ld != ld:
+          print none_ld
+          ld_ctx['team_data'].pop(none_ld)
+      
+      pdf_file = render_to_pdf("reports/generated_report.html", ld_ctx)      
+      path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
+
+      with open(path, 'w+') as f:
+        f.write(pdf_file.content)
+
+
+    # for td in context['team_data']:
+
+    # pdf_file = render_to_pdf("reports/generated_report.html", context)
+    # path = '/home/benjamin/Attendance_Report/somefilename.pdf'
+
+    # p = canvas.Canvas(path, pdf_file)
+    # p.save()
+   
+
+    
+
+    return render(request, "reports/generated_report.html", context=context)
