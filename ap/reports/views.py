@@ -91,16 +91,16 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     qs_group_slips = GroupSlip.objects.filter(status__in=['A', 'S'], start__gte=start_datetime, end__lte=end_datetime)
     t.end()
     # filtered_trainees = filtered_trainees.filter(firstname="David")  # Test line
-    if 'sending-locality' in data['report_by']:
-      localities = Locality.objects.all()
-      for locality in localities:
-        final_data_locality[str(locality.city)] = {}
-      final_data_locality['N/A'] = {}
 
-    if 'team' in data['report_by']:
-      teams = Team.objects.all()
-      for team in teams:
-        final_data_team[team.name] = {}
+    localities = Locality.objects.all()
+    for locality in localities:
+      final_data_locality[str(locality.city)] = {}
+    final_data_locality['N/A'] = {}
+
+
+    teams = Team.objects.all()
+    for team in teams:
+      final_data_team[team.name] = {}
 
     for trainee in filtered_trainees:
       print trainee.full_name
@@ -205,40 +205,26 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     loc_data = []
     team_data = []
     for trainee in filtered_trainees:
-      if 'sending-locality' in data['report_by']:
-        final_data_locality[rtn_data[trainee.full_name]["Sending Locality"]][trainee.full_name] = rtn_data[trainee.full_name]
-        if rtn_data[trainee.full_name]["Sending Locality"] not in loc_data:
-          loc_data.append(rtn_data[trainee.full_name]["Sending Locality"])
-      if 'team' in data['report_by']:
-        final_data_team[rtn_data[trainee.full_name]["Team"]][trainee.full_name] = rtn_data[trainee.full_name]
-        if rtn_data[trainee.full_name]["Team"] not in team_data:
-          team_data.append(rtn_data[trainee.full_name]["Team"])
 
-    if 'sending-locality' in data['report_by']:
-      final_data_locality = self.clean_empty(final_data_locality)
+      final_data_locality[rtn_data[trainee.full_name]["Sending Locality"]][trainee.full_name] = rtn_data[trainee.full_name]
+      if rtn_data[trainee.full_name]["Sending Locality"] not in loc_data:
+        loc_data.append(rtn_data[trainee.full_name]["Sending Locality"])
+    
+      final_data_team[rtn_data[trainee.full_name]["Team"]][trainee.full_name] = rtn_data[trainee.full_name]
+      if rtn_data[trainee.full_name]["Team"] not in team_data:
+        team_data.append(rtn_data[trainee.full_name]["Team"])
 
-    if 'team' in data['report_by']:
-      final_data_team = self.clean_empty(final_data_team)
 
-    if 'sending-locality' in data['report_by'] and 'team' in data['report_by']:
-      context = {
-        'locality_data': final_data_locality,
-        'team_data': final_data_team,
-        'date_data': date_data,
-        'averages': averages
-      }
-    elif 'sending-locality' in data['report_by']:
-      context = {
-        'locality_data': final_data_locality,
-        'date_data': date_data,
-        'averages': averages
-      }
-    elif 'team' in data['report_by']:
-      context = {
-        'team_data': final_data_team,
-        'date_data': date_data,
-        'averages': averages
-      }
+    final_data_locality = self.clean_empty(final_data_locality)
+    final_data_team = self.clean_empty(final_data_team)
+
+    context = {
+      'locality_data': final_data_locality,
+      'team_data': final_data_team,
+      'date_data': date_data,
+      'averages': averages
+    }
+
     ctx = {'trainee_data': json.dumps(self.clean_empty(rtn_data))}
     ctx['loc_data'] = json.dumps(loc_data)
     ctx['team_data'] = json.dumps(team_data)
