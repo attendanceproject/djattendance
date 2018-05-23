@@ -1,8 +1,7 @@
 import json
-from reportlab.pdfgen import canvas
-import os
-
 import pickle
+import copy
+
 from collections import OrderedDict
 from datetime import datetime
 
@@ -29,26 +28,6 @@ class ReportCreateView(LoginRequiredMixin, GroupRequiredMixin, FormView):
   # success_url = reverse_lazy('reports:generate-reports')
   success_url = reverse_lazy('reports:report-generated')
   form_class = ReportGenerateForm
-
-  LS_TYPES = {
-      'CONF': 'Conference',
-      'EMERG': 'Family Emergency',
-      'FWSHP': 'Fellowship',
-      'FUNRL': 'Funeral',
-      'GOSP': 'Gospel',
-      'INTVW': 'Grad School/Job Interview',
-      'GRAD': 'Graduation',
-      'MEAL': 'Meal Out',
-      'NIGHT': 'Night Out',
-      'OTHER': 'Other',
-      'SERV': 'Service',
-      'SICK': 'Sickness',
-      'SPECL': 'Special',
-      'WED': 'Wedding',
-      'NOTIF': 'Notification Only',
-      'TTRIP': 'Team Trip',
-  }
-
 
 class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
   template_name = 'reports/generated_report.html'
@@ -267,8 +246,8 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     ctx['averages'] = json.dumps(averages)
     t.end()
 
-    import copy
 
+    # for making pdf files per locality and team
     for ld in list(context['locality_data']):      
       ld_ctx = copy.deepcopy(context)
       ld_ctx.pop('team_data')
@@ -296,17 +275,5 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
-
-
-    # for td in context['team_data']:
-
-    # pdf_file = render_to_pdf("reports/generated_report.html", context)
-    # path = '/home/benjamin/Attendance_Report/somefilename.pdf'
-
-    # p = canvas.Canvas(path, pdf_file)
-    # p.save()
-   
-
-    
-
+  
     return render(request, "reports/generated_report.html", context=context)
