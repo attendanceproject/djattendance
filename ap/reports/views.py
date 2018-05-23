@@ -216,12 +216,22 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         team_data.append(rtn_data[trainee.full_name]["Team"])
 
 
+    final_data_locality = self.clean_empty(final_data_locality)
+    final_data_team = self.clean_empty(final_data_team)
 
-    context = {'trainee_data': json.dumps(self.clean_empty(rtn_data))}
-    context['loc_data'] = json.dumps(loc_data)
-    context['team_data'] = json.dumps(team_data)
-    context['date_data'] = {'date_from': date_from, 'date_to': date_to}
-    context['averages'] = json.dumps(averages)
+
+    context = {
+      'locality_data': final_data_locality,
+      'team_data': final_data_team,
+      'date_data': date_data,
+      'averages': averages
+    }
+
+    ctx = {'trainee_data': json.dumps(self.clean_empty(rtn_data))}
+    ctx['loc_data'] = json.dumps(loc_data)
+    ctx['team_data'] = json.dumps(team_data)
+    ctx['date_data'] = {'date_from': date_from, 'date_to': date_to}
+    ctx['averages'] = json.dumps(averages)
     t.end()
 
 
@@ -234,7 +244,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         'averages': context['averages'],
       }
       
-      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
+      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
       path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
 
       with open(path, 'w+') as f:
@@ -248,10 +258,11 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         'averages': context['averages'],
       }
       
-      pdf_file = render_to_pdf("reports/template_report.html", td_ctx)      
+      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
       path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
-  
-    return render(request, "reports/generated_report.html", context=context)
+
+    return render(request, "reports/generated_report.html", ctx)
+
