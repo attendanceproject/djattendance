@@ -242,7 +242,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
           print none_ld
           ld_ctx['locality_data'].pop(none_ld)
       
-      pdf_file = render_to_pdf("reports/generated_report.html", ld_ctx)      
+      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
       path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
 
       with open(path, 'w+') as f:
@@ -256,7 +256,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
           print none_ld
           ld_ctx['team_data'].pop(none_ld)
       
-      pdf_file = render_to_pdf("reports/generated_report.html", ld_ctx)      
+      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
       path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
 
       with open(path, 'w+') as f:

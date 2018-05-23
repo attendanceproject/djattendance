@@ -1,0 +1,96 @@
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load report_filters %}
+{% load common_tags %}
+{% load render_bundle from webpack_loader %}
+
+{% block media %}
+  {# PLEASE SEE static/README.md for instructions on how to add libraries and modify front-end files #}
+  {# Change to use bootflat.min.css when launching to production #}
+  {% render_bundle 'main' 'css' %}
+  {% render_bundle 'main' 'js' %}
+{% endblock %}
+
+
+
+{% block content %}
+
+{% for locality in locality_data %}    
+<div class="panel-body">
+  <table id="generated-report-locality-table" class="table table-striped">
+    <h2> {{ locality }} Sending Locality Generated Report {{ date_data|get_date_range }}</h2>
+    Averages (across all trainees)
+    <ul>
+    {% for average_field in averages|sorted_reverse %}
+      <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
+    {% endfor %}
+    </ul>
+    <thead>
+    	<tr>
+      	<th>Trainee</th>
+      	{% for item in locality_data|get_all_items_for_query:locality %}
+    	  <th> {{ item }} </th>
+      	{% endfor %}
+    	</tr>
+    </thead>
+    	
+    <tbody>
+		{% for trainee in locality_data|get_item_for_data:locality %}
+    	<tr>
+      <td> {{ trainee }} </td>  
+      {% with locality_dict=locality_data|get_item_for_data:locality %}  <!-- Locality dict is {trainee1: {...}, trainee2: ...}-->
+        {% with trainee_dict=locality_dict|get_item_for_data:trainee %}  <!-- trainee dict is {absences: 2, tardies: 2}-->
+          {% for queried_item in trainee_dict|sorted_reverse %}
+            <td> {{ trainee_dict|get_item_for_data:queried_item }} </td>
+          {% endfor %}
+        {% endwith %}
+      {% endwith %}
+			</tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<footer></footer>
+{% endfor %}
+
+
+{% for team in team_data %}    
+<div class="panel-body">
+  <table id="generated-report-team-table" class="table table-striped">
+    <h2> {{ team }} Team Generated Report {{ date_data|get_date_range }}</h2>
+    Averages (across all trainees)
+    <ul>
+    {% for average_field in averages|sorted_reverse %}
+      <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
+    {% endfor %}
+    </ul>
+    <thead>
+      <tr>
+        <th>Trainee</th>
+        {% for item in team_data|get_all_items_for_query:team %}
+        <th> {{ item }} </th>
+        {% endfor %}
+      </tr>
+    </thead>
+      
+    <tbody>
+    {% for trainee in team_data|get_item_for_data:team %}
+      <tr>
+      <td> {{ trainee }} </td>  
+      {% with team_dict=team_data|get_item_for_data:team %}  <!-- Team dict is {trainee1: {...}, trainee2: ...}-->
+        {% with trainee_dict=team_dict|get_item_for_data:trainee %}  <!-- trainee dict is {absences: 2, tardies: 2}-->
+          {% for queried_item in trainee_dict|sorted_reverse %}
+            <td> {{ trainee_dict|get_item_for_data:queried_item }} </td>
+          {% endfor %}
+        {% endwith %}
+      {% endwith %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<footer></footer>
+{% endfor %}
+
+
+{% endblock %}
