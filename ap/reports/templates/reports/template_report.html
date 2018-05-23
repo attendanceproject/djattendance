@@ -11,11 +11,10 @@
   {% render_bundle 'main' 'js' %}
 {% endblock %}
 
-
-
 {% block content %}
 
-{% for locality in locality_data %}    
+{% if loc_data %}
+{% for locality in loc_data %}    
 <div class="panel-body">
   <table id="generated-report-locality-table" class="table table-striped">
     <h2> {{ locality }} Sending Locality Generated Report {{ date_data|get_date_range }}</h2>
@@ -52,8 +51,9 @@
 </div>
 <footer></footer>
 {% endfor %}
+{% endif %}
 
-
+{% if team_data %}
 {% for team in team_data %}    
 <div class="panel-body">
   <table id="generated-report-team-table" class="table table-striped">
@@ -89,8 +89,8 @@
     </tbody>
   </table>
 </div>
-<footer></footer>
 {% endfor %}
+{% endif %}
 
 
 {% endblock %}

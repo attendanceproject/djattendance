@@ -201,6 +201,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     averages["Average % Sickness"] = str(average_sickness_percentage) + "%"
     averages["Average % Unex. Abs."] = str(average_unexcused_absences_percentage) + "%"
     t = timeit_inline("Building Context")
+
     t.start()
     loc_data = []
     team_data = []
@@ -215,32 +216,23 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         team_data.append(rtn_data[trainee.full_name]["Team"])
 
 
-    final_data_locality = self.clean_empty(final_data_locality)
-    final_data_team = self.clean_empty(final_data_team)
 
-    context = {
-      'locality_data': final_data_locality,
-      'team_data': final_data_team,
-      'date_data': date_data,
-      'averages': averages
-    }
-
-    ctx = {'trainee_data': json.dumps(self.clean_empty(rtn_data))}
-    ctx['loc_data'] = json.dumps(loc_data)
-    ctx['team_data'] = json.dumps(team_data)
-    ctx['date_data'] = {'date_from': date_from, 'date_to': date_to}
-    ctx['averages'] = json.dumps(averages)
+    context = {'trainee_data': json.dumps(self.clean_empty(rtn_data))}
+    context['loc_data'] = json.dumps(loc_data)
+    context['team_data'] = json.dumps(team_data)
+    context['date_data'] = {'date_from': date_from, 'date_to': date_to}
+    context['averages'] = json.dumps(averages)
     t.end()
 
 
     # for making pdf files per locality and team
-    for ld in list(context['locality_data']):      
-      ld_ctx = copy.deepcopy(context)
-      ld_ctx.pop('team_data')
-      for none_ld in list(ld_ctx['locality_data']):
-        if none_ld != ld:
-          print none_ld
-          ld_ctx['locality_data'].pop(none_ld)
+    for ld in list(context['loc_data']):
+      ld_ctx = {
+        'trainee_data': context['trainee_data'],
+        'loc_data': context['loc_data'][ld],
+        'date_data': context['date_data'],
+        'averages': context['averages'],
+      }
       
       pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
       path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
@@ -248,15 +240,15 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
 
-    for ld in list(context['team_data']):      
-      ld_ctx = copy.deepcopy(context)
-      ld_ctx.pop('locality_data')
-      for none_ld in list(ld_ctx['team_data']):
-        if none_ld != ld:
-          print none_ld
-          ld_ctx['team_data'].pop(none_ld)
+    for td in list(context['team_data']):
+      td_ctx = {
+        'trainee_data': context['trainee_data'],
+        'team_data': context['loc_data'][ld],
+        'date_data': context['date_data'],
+        'averages': context['averages'],
+      }
       
-      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
+      pdf_file = render_to_pdf("reports/template_report.html", td_ctx)      
       path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
 
       with open(path, 'w+') as f:
