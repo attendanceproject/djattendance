@@ -62,7 +62,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     num_classes_in_report_for_one_trainee = int(float(number_of_days_covered) / 7 * 12)
 
     # filtered_trainees = Trainee.objects.filter(current_term__in=[1])
-    filtered_trainees = Trainee.objects.filter(is_active=True)
+    filtered_trainees = Trainee.objects.filter(firstname='Carlos')
 
     # averages of fields
     average_unexcused_absences_percentage = float(0)
@@ -221,7 +221,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
 
     context = {
-      'locality_data': final_data_locality,
+      'loc_data': final_data_locality,
       'team_data': final_data_team,
       'date_data': date_data,
       'averages': averages
@@ -238,7 +238,6 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     # for making pdf files per locality and team
     for ld in list(context['loc_data']):
       ld_ctx = {
-        'trainee_data': context['trainee_data'],
         'loc_data': context['loc_data'][ld],
         'date_data': context['date_data'],
         'averages': context['averages'],
@@ -252,8 +251,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
     for td in list(context['team_data']):
       td_ctx = {
-        'trainee_data': context['trainee_data'],
-        'team_data': context['loc_data'][ld],
+        'team_data': context['loc_data'][td],
         'date_data': context['date_data'],
         'averages': context['averages'],
       }
