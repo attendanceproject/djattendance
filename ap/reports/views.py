@@ -67,9 +67,8 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     num_classes_in_report_for_one_trainee = int(float(number_of_days_covered) / 7 * 12)
 
     # filtered_trainees = Trainee.objects.filter(current_term__in=[1])
-    # filtered_trainees = Trainee.objects.filter(is_active=True)
-    filtered_trainees = Trainee.objects.filter(firstname='Carlos')
-
+    filtered_trainees = Trainee.objects.filter(is_active=True)
+    
     # averages of fields
     average_unexcused_absences_percentage = float(0)
     average_sickness_percentage = float(0)
