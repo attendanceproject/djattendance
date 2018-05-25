@@ -65,7 +65,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     num_classes_in_report_for_one_trainee = int(float(number_of_days_covered) / 7 * 12)
 
     # filtered_trainees = Trainee.objects.filter(current_term__in=[1])
-    filtered_trainees = Trainee.objects.filter(firstname='Carlos')
+    filtered_trainees = Trainee.objects.filter(is_active=True)
 
     # averages of fields
     average_unexcused_absences_percentage = float(0)
@@ -237,23 +237,10 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     ctx['averages'] = json.dumps(averages)
     t.end()
 
-
-
-    from StringIO import StringIO
-    from zipfile import ZipFile
-    from django.http import HttpResponse
-
-    
+  
     in_memory = StringIO()
     zip = ZipFile(in_memory, "a")
-        
-    # zip.writestr("file1.txt", "some text contents")
-    # zip.writestr("file2.csv", "csv,data,here")
-          
-    # zip.close()
-
-    # response = render(request, "reports/generated_report.html", ctx)
-    # with ZipFile("Attendance_Report.zip", "w") as z:
+         
 
     for ld in list(context['loc_data']):      
       ld_ctx = copy.deepcopy(context)
@@ -264,7 +251,6 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
           ld_ctx['loc_data'].pop(none_ld)
       
       pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
-      # path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
       path = str(ld) + '.pdf'
 
       with open(path, 'w+') as f:
@@ -279,8 +265,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
           print none_ld
           ld_ctx['team_data'].pop(none_ld)
       
-      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
-      # path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
+      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
       path = str(ld) + '.pdf'
 
       with open(path, 'w+') as f:
@@ -294,7 +279,10 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     zip.close()
     response = HttpResponse(content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=Attendance_Report.zip'
-    in_memory.seek(0)    
+    in_memory.seek(0)
     response.write(in_memory.read())
     
     return response
+
+    # # prints report instead of serving zip file
+    # response = render(request, "reports/generated_report.html", ctx)
