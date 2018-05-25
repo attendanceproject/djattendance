@@ -9,12 +9,12 @@
 <form action="{% url 'reports:report-generated' %}" id="reportsForm" method="post" class="form-horizontal">
   {% csrf_token %}
   <div class="reports-form-container">
-  	<div class="form-group right-push col-xs-2 col-sm-2 col-md-2 col-lg-2 Attendance Period Time Range">
+  	<div class="form-group right-push col-md-2 Attendance Period Time Range">
   		Time Range
     	<p> Date from: <input type="text" name="date_from" class="datepicker"> </p>
     	<p> Date to: <input type="text" name="date_to" class="datepicker"> </p>
-  	</div> 
-    <button type="submit" id="report-submit-button" name="report-submit" class="btn btn-success">Generate Report</button>  	
+      <button type="submit" id="report-submit-button" name="report-submit" class="btn btn-success">Generate Report</button>
+  	</div>
 	</div>
 </form>
 

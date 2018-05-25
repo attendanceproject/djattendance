@@ -1,6 +1,8 @@
 import json
 import pickle
 import copy
+import os
+
 from StringIO import StringIO
 from zipfile import ZipFile
 
@@ -65,7 +67,8 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     num_classes_in_report_for_one_trainee = int(float(number_of_days_covered) / 7 * 12)
 
     # filtered_trainees = Trainee.objects.filter(current_term__in=[1])
-    filtered_trainees = Trainee.objects.filter(is_active=True)
+    # filtered_trainees = Trainee.objects.filter(is_active=True)
+    filtered_trainees = Trainee.objects.filter(firstname='Carlos')
 
     # averages of fields
     average_unexcused_absences_percentage = float(0)
@@ -256,6 +259,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
       zip.write(path)
+      os.remove(path)
 
     for ld in list(context['team_data']):      
       ld_ctx = copy.deepcopy(context)
@@ -271,6 +275,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
       zip.write(path)
+      os.remove(path)
       
     # fix for Linux zip files read in Windows
     for file in zip.filelist:
