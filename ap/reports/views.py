@@ -1,10 +1,13 @@
 import json
 import pickle
 import copy
+from StringIO import StringIO
+from zipfile import ZipFile
 
 from collections import OrderedDict
 from datetime import datetime
 
+from django.http import HttpResponse
 from accounts.models import Trainee
 from aputils.utils import timeit, timeit_inline, render_to_pdf
 from attendance.models import Roll
@@ -235,32 +238,63 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     t.end()
 
 
-    # for making pdf files per locality and team
-    for ld in list(context['loc_data']):
-      ld_ctx = {
-        'loc_data': context['loc_data'][ld],
-        'date_data': context['date_data'],
-        'averages': context['averages'],
-      }
+
+    from StringIO import StringIO
+    from zipfile import ZipFile
+    from django.http import HttpResponse
+
+    
+    in_memory = StringIO()
+    zip = ZipFile(in_memory, "a")
+        
+    # zip.writestr("file1.txt", "some text contents")
+    # zip.writestr("file2.csv", "csv,data,here")
+          
+    # zip.close()
+
+    # response = render(request, "reports/generated_report.html", ctx)
+    # with ZipFile("Attendance_Report.zip", "w") as z:
+
+    for ld in list(context['loc_data']):      
+      ld_ctx = copy.deepcopy(context)
+      ld_ctx.pop('team_data')
+      for none_ld in list(ld_ctx['loc_data']):
+        if none_ld != ld:
+          print none_ld
+          ld_ctx['loc_data'].pop(none_ld)
       
       pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
-      path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
+      # path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
+      path = str(ld) + '.pdf'
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
+      zip.write(path)
 
-    for td in list(context['team_data']):
-      td_ctx = {
-        'team_data': context['loc_data'][td],
-        'date_data': context['date_data'],
-        'averages': context['averages'],
-      }
+    for ld in list(context['team_data']):      
+      ld_ctx = copy.deepcopy(context)
+      ld_ctx.pop('loc_data')
+      for none_ld in list(ld_ctx['team_data']):
+        if none_ld != ld:
+          print none_ld
+          ld_ctx['team_data'].pop(none_ld)
       
       pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
-      path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
+      # path = '/home/benjamin/Attendance_Report/' + str(ld) + '.pdf'
+      path = str(ld) + '.pdf'
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
+      zip.write(path)
+      
+    # fix for Linux zip files read in Windows
+    for file in zip.filelist:
+      file.create_system = 0
 
-    return render(request, "reports/generated_report.html", ctx)
-
+    zip.close()
+    response = HttpResponse(content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=Attendance_Report.zip'
+    in_memory.seek(0)    
+    response.write(in_memory.read())
+    
+    return response
