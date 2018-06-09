@@ -99,13 +99,16 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
     localities = Locality.objects.all()
     for locality in localities:
-      final_data_locality[str(locality.city)] = {}
+      if str(locality.city) == "Richmond, VA":
+        final_data_locality["Richmond VA"] = {}
+      else:
+        final_data_locality[locality.city.name] = {}
     final_data_locality['N/A'] = {}
 
 
     teams = Team.objects.all()
     for team in teams:
-      final_data_team[team.name] = {}
+      final_data_team[team.code] = {}
 
     for trainee in filtered_trainees:
       print trainee.full_name
@@ -113,10 +116,13 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         rtn_data[trainee.full_name] = OrderedDict()
       rtn_data[trainee.full_name]["Term"] = trainee.current_term
       if trainee.locality is not None:
-        rtn_data[trainee.full_name]["Sending Locality"] = str(trainee.locality.city)
+        if str(locality.city) == "Richmond, VA":
+          rtn_data[trainee.full_name]["Sending Locality"] = "Richmond VA"
+        else:
+          rtn_data[trainee.full_name]["Sending Locality"] = trainee.locality.city.name
       else:
         rtn_data[trainee.full_name]["Sending Locality"] = 'N/A'
-      rtn_data[trainee.full_name]["Team"] = trainee.team.name
+      rtn_data[trainee.full_name]["Team"] = trainee.team.code
       rtn_data[trainee.full_name]["ta"] = trainee.TA.full_name
       rtn_data[trainee.full_name]["Gender"] = trainee.gender
 
@@ -253,7 +259,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
           ld_ctx['loc_data'].pop(none_ld)
       
       pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
-      path = str(ld) + '.pdf'
+      path = ld + '.pdf'
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
@@ -269,7 +275,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
           ld_ctx['team_data'].pop(none_ld)
       
       pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
-      path = str(ld) + '.pdf'
+      path = ld + '.pdf'
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
