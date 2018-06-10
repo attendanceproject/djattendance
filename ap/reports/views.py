@@ -241,7 +241,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     t.end()
 
     in_memory = StringIO()
-    zip = ZipFile(in_memory, "a")
+    zfile = ZipFile(in_memory, "a")
 
     for ld in list(context['loc_data']):
       ld_ctx = copy.deepcopy(context)
@@ -256,7 +256,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
-      zip.write(path)
+      zfile.write(path)
       os.remove(path)
 
     for ld in list(context['team_data']):
@@ -272,14 +272,14 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
-      zip.write(path)
+      zfile.write(path)
       os.remove(path)
 
     # fix for Linux zip files read in Windows
-    for file in zip.filelist:
-      file.create_system = 0
+    for zf in zfile.filelist:
+      zf.create_system = 0
 
-    zip.close()
+    zfile.close()
     response = HttpResponse(content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=Attendance_Report.zip'
     in_memory.seek(0)
