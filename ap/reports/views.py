@@ -113,7 +113,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         rtn_data[trainee.full_name] = OrderedDict()
       rtn_data[trainee.full_name]["Term"] = trainee.current_term
       if trainee.locality is not None:
-        if str(locality.city) == "Richmond, VA":
+        if str(trainee.locality.city) == "Richmond, VA":
           rtn_data[trainee.full_name]["Sending Locality"] = "Richmond VA"
         else:
           rtn_data[trainee.full_name]["Sending Locality"] = trainee.locality.city.name
