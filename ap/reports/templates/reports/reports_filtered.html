@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block content %}
+
+  <h2>Generate Attendance Reports </h2>
+  <h5> Note: Generated attendance reports can be printed as separate pages for each locality or team</h5>
+
+<form action="{% url 'reports:report-filtered-generated' %}" id="reportsForm" method="post" class="form-horizontal">
+  {% csrf_token %}
+  <div class="reports-form-container">
+    <div class="form-group right-push col-xs-2 col-sm-2 col-md-2 col-lg-2 Attendance Period Time Range">
+      Time Range
+      <p> Date from: <input type="text" name="date_from" class="datepicker"> </p>
+      <p> Date to: <input type="text" name="date_to" class="datepicker"> </p>
+    </div> 
+
+    
+    <div class="form-group right-push col-xs-2 col-sm-2 col-md-2 col-lg-2 Term">
+      Term
+      <li> 1st Term <input type="checkbox" value="1" name="term"> </li>
+      <li> 2nd Term <input type="checkbox" value="2" name="term"> </li>
+      <li> 3rd Term <input type="checkbox" value="3" name="term"> </li>
+      <li> 4th Term <input type="checkbox" value="4" name="term"> </li>
+    </div>  
+    <div class="form-group right-push col-xs-2 col-sm-2 col-md-2 col-lg-2 Gender">
+      Gender
+      <li> Male <input type="checkbox" value="Male" name="gender"> </li>
+      <li> Female <input type="checkbox" value="Female" name="gender"> </li>
+    </div> 
+
+    <div class="form-group right-push col-xs-2 col-sm-2 col-md-2 col-lg-2 General-Items">
+      Columns for General Items
+      <li>Gender <input type="checkbox" value="Gender" name="general_item"></li>
+      <li>Term <input type="checkbox" value="Term" name="general_item"></li>
+      <li>Sending Locality <input type="checkbox" value="Sending Locality" name="general_item"></li>
+      <li>Team <input type="checkbox" value="Team" name="general_item"></li>
+      <li>TA <input type="checkbox" value="TA" name="general_item"></li>
+    </div>  
+
+    <div class="form-group right-push col-xs-4 col-sm-4 col-md-4 col-lg-4 General-Report">
+      Columns for General Report
+      <li>Absences - Excused<input type="checkbox" value="Absences - Excused" name="general_report"></li>
+      <li>Absences - Unexcused <input type="checkbox" value="Absences - Unexcused" name="general_report"></li>
+      <li>Absences - Total <input type="checkbox" value="Absences - Total" name="general_report"></li>
+      <li>Absences - Unexcused and Sickness <input type="checkbox" value="Absences - Unexcused and Sickness" name="general_report"></li>
+      <li>Absences - Excused - Conference <input type="checkbox" value="Absences - Excused - Conference" name="general_report"></li>
+      <li>Absences - Excused - Family Emergency <input type="checkbox" value="Absences - Excused - Family Emergency" name="general_report"></li>
+      <li>Absences - Excused - Funeral <input type="checkbox" value="Absences - Excused - Funeral" name="general_report"></li>
+      <li>Absences - Excused - Gospel <input type="checkbox" value="Absences - Excused - Gospel" name="general_report"></li>
+      <li>Absences - Excused - Grad School/Job Interview <input type="checkbox" value="Absences - Excused - Grad School/Job Interview" name="general_report"></li>
+      <li>Absences - Excused - Graduation <input type="checkbox" value="Absences - Excused - Graduation" name="general_report"></li>
+      <li>Absences - Excused - Meal Out <input type="checkbox" value="Absences - Excused - Meal Out" name="general_report"></li>
+      <li>Absences - Excused - Night Out <input type="checkbox" value="Absences - Excused - Night Out" name="general_report"></li>
+      <li>Absences - Excused - Other <input type="checkbox" value="Absences - Excused - Other" name="general_report"></li>
+      <li>Absences - Excused - Service <input type="checkbox" value="Absences - Excused - Service" name="general_report"></li>
+      <li>Absences - Excused - Sickness <input type="checkbox" value="Absences - Excused - Sickness" name="general_report"></li>
+      <li>Absences - Excused - Special <input type="checkbox" value="Absences - Excused - Special" name="general_report"></li>
+      <li>Absences - Excused - Wedding <input type="checkbox" value="Absences - Excused - Wedding" name="general_report"></li>
+      <li>Absences - Excused - Team Trip <input type="checkbox" value="Absences - Excused - Team Trip" name="general_report"></li>
+    <li>Tardies - Late <input type="checkbox" value="Tardies - Late" name="general_report"></li>
+    <li>Tardies - Left Class <input type="checkbox" value="Tardies - Left Class" name="general_report"></li>
+    <li>Tardies - Uniform <input type="checkbox" value="Tardies - Uniform" name="general_report"></li>
+    <li>Tardies - Total <input type="checkbox" value="Tardies - Total" name="general_report"></li>
+    <li>Tardies - Excused <input type="checkbox" value="Tardies - Excused" name="general_report"></li>
+    <li>Tardies - Unexcused <input type="checkbox" value="Tardies - Unexcused" name="general_report"></li>
+    <li>Number of LS <input type="checkbox" value="Number of LS" name="general_report"></li>
+    <li>Classes Missed <input type="checkbox" value="Classes Missed" name="general_report"</li>
+    </div>  
+  </div>
+  <button type="submit" id="report-submit-button" name="report-submit" class="btn btn-success">
+    Generate Report
+  </button>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+  <script>
+  const SUCCESS_URL = "{{view.get_success_url}}";
+
+  $( function() {
+    $( ".datepicker" ).datepicker();
+  } );
+  </script>
+{% endblock %}
+
