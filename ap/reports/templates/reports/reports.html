@@ -17,6 +17,7 @@
       <button type="submit" id="report-submit-button" name="report-submit" class="btn btn-success">Generate Report</button>
   	</div>
 	</div>
+  <img src="{% static 'reports/img/temp.gif' %}" id="loading" style="display:none"/ >
 </form>
 
 {% endblock %}
@@ -27,7 +28,10 @@
 
   $( function() {
     $( ".datepicker" ).datepicker();
+    $('form').on('submit', () => {
+      $('#loading').show();
+    });
   } );
   </script>
-{% endblock %}
 
+{% endblock %}

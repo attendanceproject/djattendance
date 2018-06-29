@@ -1,21 +1,18 @@
-import json
-import pickle
 import copy
+import json
 import os
-
+import pickle
+from collections import OrderedDict
+from datetime import datetime
 from StringIO import StringIO
 from zipfile import ZipFile
 
-from collections import OrderedDict
-from datetime import datetime
-
-from django.http import HttpResponse
 from accounts.models import Trainee
-from aputils.utils import timeit, timeit_inline, render_to_pdf
+from aputils.utils import render_to_pdf, timeit, timeit_inline
 from attendance.models import Roll
 from braces.views import GroupRequiredMixin, LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy
-from django.shortcuts import render
+from django.http import HttpResponse
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 from leaveslips.models import GroupSlip, IndividualSlip
@@ -34,6 +31,7 @@ class ReportCreateView(LoginRequiredMixin, GroupRequiredMixin, FormView):
   # success_url = reverse_lazy('reports:generate-reports')
   success_url = reverse_lazy('reports:report-generated')
   form_class = ReportGenerateForm
+
 
 class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
   template_name = 'reports/generated_report.html'
@@ -69,7 +67,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
     # filtered_trainees = Trainee.objects.filter(current_term__in=[1])
     filtered_trainees = Trainee.objects.filter(is_active=True)
-    
+
     # averages of fields
     average_unexcused_absences_percentage = float(0)
     average_sickness_percentage = float(0)
@@ -105,7 +103,6 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       else:
         final_data_locality[locality.city.name] = {}
     final_data_locality['N/A'] = {}
-
 
     teams = Team.objects.all()
     for team in teams:
@@ -222,15 +219,13 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       final_data_locality[rtn_data[trainee.full_name]["Sending Locality"]][trainee.full_name] = rtn_data[trainee.full_name]
       if rtn_data[trainee.full_name]["Sending Locality"] not in loc_data:
         loc_data.append(rtn_data[trainee.full_name]["Sending Locality"])
-    
+
       final_data_team[rtn_data[trainee.full_name]["Team"]][trainee.full_name] = rtn_data[trainee.full_name]
       if rtn_data[trainee.full_name]["Team"] not in team_data:
         team_data.append(rtn_data[trainee.full_name]["Team"])
 
-
     final_data_locality = self.clean_empty(final_data_locality)
     final_data_team = self.clean_empty(final_data_team)
-
 
     context = {
       'loc_data': final_data_locality,
@@ -246,53 +241,51 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     ctx['averages'] = json.dumps(averages)
     t.end()
 
-  
     in_memory = StringIO()
-    zip = ZipFile(in_memory, "a")
-         
+    zfile = ZipFile(in_memory, "a")
 
-    for ld in list(context['loc_data']):      
+    for ld in list(context['loc_data']):
       ld_ctx = copy.deepcopy(context)
       ld_ctx.pop('team_data')
       for none_ld in list(ld_ctx['loc_data']):
         if none_ld != ld:
           print none_ld
           ld_ctx['loc_data'].pop(none_ld)
-      
-      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)      
+
+      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
       path = ld + '.pdf'
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
-      zip.write(path)
+      zfile.write(path)
       os.remove(path)
 
-    for ld in list(context['team_data']):      
+    for ld in list(context['team_data']):
       ld_ctx = copy.deepcopy(context)
       ld_ctx.pop('loc_data')
       for none_ld in list(ld_ctx['team_data']):
         if none_ld != ld:
           print none_ld
           ld_ctx['team_data'].pop(none_ld)
-      
+
       pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
       path = ld + '.pdf'
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
-      zip.write(path)
+      zfile.write(path)
       os.remove(path)
-      
-    # fix for Linux zip files read in Windows
-    for file in zip.filelist:
-      file.create_system = 0
 
-    zip.close()
+    # fix for Linux zip files read in Windows
+    for zf in zfile.filelist:
+      zf.create_system = 0
+
+    zfile.close()
     response = HttpResponse(content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=Attendance_Report.zip'
     in_memory.seek(0)
     response.write(in_memory.read())
-    
+
     return response
 
     # # prints report instead of serving zip file
