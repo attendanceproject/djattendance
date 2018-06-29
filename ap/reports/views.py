@@ -13,6 +13,7 @@ from attendance.models import Roll
 from braces.views import GroupRequiredMixin, LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 from leaveslips.models import GroupSlip, IndividualSlip
@@ -429,20 +430,20 @@ class GeneratedFilteredReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
         #t = timeit_inline("Group Slip Absences for Trainee")
         #t.start()
         for slip in group_slips_for_trainee:
-          t = timeit_inline("Get rolls in slip for group slips")
-          t.start()
+          #t = timeit_inline("Get rolls in slip for group slips")
+          #t.start()
           rolls_in_slip = qs_trainee_rolls.query.filter(event__start__gte=slip['start'], event__end__lte=slip['end'], status='A')
-          t.end()
-          t = timeit_inline("Get absent rolls in slip for group slips")
+          #t.end()
+          #t = timeit_inline("Get absent rolls in slip for group slips")
           t.start()
-          absent_rolls_covered_in_group_slips = absent_rolls_covered_in_group_slips | rolls_in_slip
-          t.end()
-          t = timeit_inline("Get tardy rolls in slip for group slips")
-          t.start()
+          #absent_rolls_covered_in_group_slips = absent_rolls_covered_in_group_slips | rolls_in_slip
+          #t.end()
+          #t = timeit_inline("Get tardy rolls in slip for group slips")
+          #t.start()
           tardy_rolls_covered_in_group_slips = tardy_rolls_covered_in_group_slips | qs_trainee_rolls.query.filter(event__start__gte=slip['start'], event__end__lte=slip['end'], status__in=['T', 'U', 'L'])
-          t.end()
-          t = timeit_inline("Add special type absent rolls to list")
-          t.start()
+          #t.end()
+          #t = timeit_inline("Add special type absent rolls to list")
+          #t.start()
           if 'Absences - Excused - Conference' in items_for_query and slip['type'] == 'CONF':
             rolls_covered_in_conference_group_slips = rolls_covered_in_conference_group_slips | rolls_in_slip
           if 'Absences - Excused - Fellowship' in items_for_query and slip['type'] == 'FWSHP':
@@ -457,10 +458,10 @@ class GeneratedFilteredReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
             rolls_covered_in_service_group_slips = rolls_covered_in_service_group_slips | rolls_in_slip
           if 'Absences - Excused - Team Trip' in items_for_query and slip['type'] == 'TTRIP':
             rolls_covered_in_team_trip_group_slips = rolls_covered_in_team_trip_group_slips | rolls_in_slip
-          t.end()
+          #t.end()
 
-        t = timeit_inline("Get count of special absent rolls")
-        t.start()
+        #t = timeit_inline("Get count of special absent rolls")
+        #t.start()
         # add count of absent rolls covered by group slips to special excused absences count; deal with individual slips after this block of code
         if 'Absences - Excused - Conference' in items_for_query:
           rtn_data[trainee.full_name]['Absences - Excused - Conference'] = rolls_covered_in_conference_group_slips.count()
@@ -476,7 +477,7 @@ class GeneratedFilteredReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
           rtn_data[trainee.full_name]['Absences - Excused - Service'] = rolls_covered_in_service_group_slips.count()
         if 'Absences - Excused - Team Trip' in items_for_query:
           rtn_data[trainee.full_name]['Absences - Excused - Team Trip'] = rolls_covered_in_team_trip_group_slips.count()
-        t.end()
+        #t.end()
         #t.end()
 
 
