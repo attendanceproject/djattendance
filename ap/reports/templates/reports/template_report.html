@@ -10,12 +10,32 @@
 </style>
 {% endblock %}
 
+{% block style %}
+<style media="screen" type="text/css">
+.generated-report-locality-table { 
+  width:50%;float:left;clear:left
+}
+.generated-report-team-table { 
+  width:50%;float:left;clear:left
+}
+td {
+  width:50%;
+}
+th {
+  width:50%;
+}
+</style>
+{% endblock %}
+
 {% block content %}
   
   {% if loc_data %}
     {% for locality in loc_data %}    
     <div class="panel-body">
       <table id="generated-report-locality-table" class="table table-striped">
+        <colgroup>
+          <col span="5">
+        </colgroup>
         <h2> {{ locality }} Sending Locality Generated Report {{ date_data }}</h2>
         Averages (across all trainees)
         <ul>
@@ -57,6 +77,9 @@
     {% for team in team_data %}    
     <div class="panel-body">
       <table id="generated-report-team-table" class="table table-striped">
+        <colgroup>
+          <col span="5">
+        </colgroup>
         <h2> {{ team }} Team Generated Report {{ date_data|get_date_range }}</h2>
         Averages (across all trainees)
         <ul>

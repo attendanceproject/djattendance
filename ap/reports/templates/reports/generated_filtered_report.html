@@ -21,12 +21,6 @@
     <div class="panel-body">
       <table id="generated-report-locality-table" class="table table-striped">
         <h2> {{ locality }} Sending Locality Generated Report {{ date_data|get_date_range }}</h2>
-        Averages (across all trainees)
-        <ul>
-        {% for average_field in averages %}
-          <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
-        {% endfor %}
-        </ul>
         <thead>
         	<tr>
           	<th>Trainee</th>
@@ -62,12 +56,6 @@
     <div class="panel-body">
       <table id="generated-report-team-table" class="table table-striped">
         <h2> {{ team }} Team Generated Report {{ date_data|get_date_range }}</h2>
-        Averages (across all trainees)
-        <ul>
-        {% for average_field in averages %}
-          <li> {{ average_field }}: {{ averages|get_item_for_data:average_field }} </li>
-        {% endfor %}
-        </ul>
         <thead>
           <tr>
             <th>Trainee</th>

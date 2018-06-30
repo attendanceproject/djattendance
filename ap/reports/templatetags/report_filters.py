@@ -14,7 +14,10 @@ def get_all_items_for_query(data, item):
 
 @register.filter
 def sorted_reverse(data):
-  return sorted(data, reverse=True)
+  try:
+    return sorted(data, reverse=True)
+  except TypeError:
+    return []
 
 @register.filter
 def get_date_range(data):

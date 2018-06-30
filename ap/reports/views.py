@@ -110,7 +110,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       final_data_team[team.code] = {}
 
     for trainee in filtered_trainees:
-      print trainee.full_name
+      #print trainee.full_name
       if trainee.full_name not in rtn_data:
         rtn_data[trainee.full_name] = OrderedDict()
       rtn_data[trainee.full_name]["Term"] = trainee.current_term
@@ -356,6 +356,7 @@ class GeneratedFilteredReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       pickled_group_slips = pickle.dumps(filtered_group_slips)
 
       items_for_query = data['general_report']
+      print str(items_for_query)
 
       # qs_rolls is the queryset of all pertinent rolls related to the filtered trainees in the date range that are tardies or absences
       pickled_query = pickle.loads(pickled_rolls)
@@ -635,9 +636,136 @@ class GeneratedFilteredReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
     final_data_locality = self.clean_empty(final_data_locality)
     final_data_team = self.clean_empty(final_data_team)
-    print str(final_data_team)
-    print str(final_data_locality)
+    
 
+    loc_data = []
+    team_data = []
+    for trainee in filtered_trainees:
+
+      final_data_locality[rtn_data[trainee.full_name]["Sending Locality"]][trainee.full_name] = rtn_data[trainee.full_name]
+      if rtn_data[trainee.full_name]["Sending Locality"] not in loc_data:
+        loc_data.append(rtn_data[trainee.full_name]["Sending Locality"])
+
+      final_data_team[rtn_data[trainee.full_name]["Team"]][trainee.full_name] = rtn_data[trainee.full_name]
+      if rtn_data[trainee.full_name]["Team"] not in team_data:
+        team_data.append(rtn_data[trainee.full_name]["Team"])
+
+    #final_data_locality = self.clean_empty(final_data_locality)
+    #final_data_team = self.clean_empty(final_data_team)
+
+    #print str(rtn_data)
+    #print str(final_data_team)
+    #print str(final_data_locality)
+    
+    context = {
+      'loc_data': final_data_locality,
+      'team_data': final_data_team,
+      'date_data': date_data
+      #'averages': averages
+    }
+
+    ctx = {'trainee_data': json.dumps(self.clean_empty(rtn_data))}
+    ctx['loc_data'] = json.dumps(loc_data)
+    ctx['team_data'] = json.dumps(team_data)
+    ctx['date_data'] = {'date_from': date_from, 'date_to': date_to}
+    #ctx['averages'] = json.dumps(averages)
+    t.end()
+
+    in_memory = StringIO()
+    zfile = ZipFile(in_memory, "a")
+
+    for ld in list(context['loc_data']):
+      ld_ctx = copy.deepcopy(context)
+      ld_ctx.pop('team_data')
+      for none_ld in list(ld_ctx['loc_data']):
+        if none_ld != ld:
+          #print none_ld
+          ld_ctx['loc_data'].pop(none_ld)
+
+      print str(ld_ctx)
+      #pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
+      #locality_trainees = ld_ctx['loc_data'][ld_ctx['loc_data'].keys()[0]]
+
+      #for lt in locality_trainees:
+      #  ld_ctx_0 = dict(ld_ctx['loc_data'][ld_ctx['loc_data'].keys()[0]].items()[0:len(ld_ctx['loc_data'][ld_ctx['loc_data'].keys()[0]])/4])
+      #  ld_ctx_1 = dict(ld_ctx['loc_data'][ld_ctx['loc_data'].keys()[0]].items()[len(ld_ctx['loc_data'][ld_ctx['loc_data'].keys()[0]])/4:len(ld_ctx['loc_data'])/4 * 2])
+      #  ld_ctx_2 = dict(ld_ctx['loc_data'][ld_ctx['loc_data'].keys()[0]].items()[len(ld_ctx['loc_data'])/4 * 2:len(ld_ctx['loc_data'])/4 * 3])
+      #  ld_ctx_3 = dict(ld_ctx['loc_data'][ld_ctx['loc_data'].keys()[0]].items()[len(ld_ctx['loc_data'])/4 * 3:len(ld_ctx['loc_data'])/4 * 4])
+
+      #print "************************************************************************************************"
+      #print str(ld_ctx_0)
+      #print str(ld_ctx_1)
+      #print str(ld_ctx_2)
+      #print str(ld_ctx_3)
+      #print "************************************************************************************************"
+
+      #pdf_file0 = render_to_pdf("reports/template_report.html", ld_ctx_0)
+      #pdf_file1 = render_to_pdf("reports/template_report.html", ld_ctx_1)
+      #pdf_file2 = render_to_pdf("reports/template_report.html", ld_ctx_2)
+      #pdf_file3 = render_to_pdf("reports/template_report.html", ld_ctx_3)
+      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
+      path = ld + '.pdf'
+
+      with open(path, 'w+') as f:
+        f.write(pdf_file.content)
+        #f.write(pdf_file0.content)
+        #f.write(pdf_file1.content)
+        #f.write(pdf_file2.content)
+        #f.write(pdf_file3.content)
+      zfile.write(path)
+      os.remove(path)
+
+    for ld in list(context['team_data']):
+      ld_ctx = copy.deepcopy(context)
+      ld_ctx.pop('loc_data')
+      for none_ld in list(ld_ctx['team_data']):
+        if none_ld != ld:
+          #print none_ld
+          ld_ctx['team_data'].pop(none_ld)
+
+      print str(ld_ctx)
+
+      #ld_ctx_0 = dict(ld_ctx['loc_data'].items()[0:len(ld_ctx['loc_data'])/4])
+      #ld_ctx_1 = dict(ld_ctx['loc_data'].items()[len(ld_ctx['loc_data'])/4:len(ld_ctx['loc_data'])/4 * 2])
+      #ld_ctx_2 = dict(ld_ctx['loc_data'].items()[len(ld_ctx['loc_data'])/4 * 2:len(ld_ctx['loc_data'])/4 * 3])
+      #ld_ctx_3 = dict(ld_ctx['loc_data'].items()[len(ld_ctx['loc_data'])/4 * 3:len(ld_ctx['loc_data'])/4 * 4])
+
+      #print "************************************************************************************************"
+      #print str(ld_ctx_0)
+      #print str(ld_ctx_1)
+      #print str(ld_ctx_2)
+      #print str(ld_ctx_3)
+      #print "************************************************************************************************"
+
+      #pdf_file0 = render_to_pdf("reports/template_report.html", ld_ctx_0)
+      #pdf_file1 = render_to_pdf("reports/template_report.html", ld_ctx_1)
+      #pdf_file2 = render_to_pdf("reports/template_report.html", ld_ctx_2)
+      #pdf_file3 = render_to_pdf("reports/template_report.html", ld_ctx_3)
+      pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
+      path = ld + '.pdf'
+
+      with open(path, 'w+') as f:
+        f.write(pdf_file.content)
+        #f.write(pdf_file0.content)
+        #f.write(pdf_file1.content)
+        #f.write(pdf_file2.content)
+        #f.write(pdf_file3.content)
+      zfile.write(path)
+      os.remove(path)
+
+    # fix for Linux zip files read in Windows
+    for zf in zfile.filelist:
+      zf.create_system = 0
+    zfile.close()
+    response = HttpResponse(content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=Attendance_Report.zip'
+    in_memory.seek(0)
+    response.write(in_memory.read())
+    return response
+
+    #print str(final_data_team)
+    #print str(final_data_locality)
+    """
     context = {
       'data': rtn_data,
       'locality_data': final_data_locality,
@@ -646,4 +774,5 @@ class GeneratedFilteredReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
     }
 
     return render(request, "reports/generated_filtered_report.html", context=context)
+    """
 
