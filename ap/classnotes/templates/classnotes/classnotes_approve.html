@@ -39,13 +39,14 @@
           <div class="pull-right"></div>
         </div>
         <button name="save" type="submit" class="btn btn-primary btn-sm">Save</button>
-        {% if classnotes.approved == False %}
+        {% if not classnotes.approved %}
           {% if not classnotes.fellowship %}
               <button name="fellowship" type="submit" class="btn btn-warning btn-sm">Fellowship</button>
           {% else %}
               <button name="unfellowship" type="submit" class="btn btn-warning btn-sm">Remove Fellowship</button>
           {% endif %}
           <button name="approve" type="submit" class="btn btn-success btn-sm">Approve</button>
+          <button name="hard_copy_approve" type="submit" class="btn btn-success btn-sm">Hard copy Approve</button>
         {% else %}
           <button name="unapprove" type="submit" class="btn btn-danger btn-sm">Un-Approve</button>
         {% endif %}

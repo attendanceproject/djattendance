@@ -7,6 +7,11 @@ from verse_parse.bible_re import *
 import json
 
 
+EMPTY_WEEKLY_STATUS = "_______"
+FINALIZED_STR = "Y"
+UNFINALIZED_STR = "N"
+
+
 class BibleReading(models.Model):
   trainee = models.ForeignKey(Trainee, null=True, on_delete=models.SET_NULL)
   weekly_reading_status = HStoreField()

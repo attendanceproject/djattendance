@@ -3,7 +3,7 @@ import { postRoll, changeTraineeView, changeRollForm, finalizeRoll } from '../ac
 import { getDateDetails } from '../selectors/selectors.js'
 import { canFinalizeRolls, canSubmitRoll } from '../constants.js'
 import RollForm from '../components/RollForm'
-import { ATTENDANCE_MONITOR_GROUP } from '../constants'
+import { isAM } from '../constants'
 
 const mapStateToProps = (state) => {
   let dateDetails = getDateDetails(state)
@@ -15,8 +15,8 @@ const mapStateToProps = (state) => {
       trainees: state.trainees,
       traineeView: state.form.traineeView,
     },
-    canFinalizeWeek: canFinalizeRolls(state.rolls, dateDetails) ||  state.trainee.groups.indexOf(ATTENDANCE_MONITOR_GROUP) >= 0,
-    canSubmitRoll: canSubmitRoll(dateDetails) ||  state.trainee.groups.indexOf(ATTENDANCE_MONITOR_GROUP) >= 0
+    canFinalizeWeek: canFinalizeRolls(state.rolls, dateDetails) ||  isAM(state.trainee),
+    canSubmitRoll: canSubmitRoll(dateDetails) ||  isAM(state.trainee),
   }
 }
 

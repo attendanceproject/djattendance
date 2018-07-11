@@ -81,6 +81,10 @@ textarea {
       border: 0;
       display: inline-flex;
       width: 40px;
+      position: unset;
+    }
+    .Select-arrow-zone {
+      padding-right: 0px
     }
   }
 }

@@ -5,21 +5,42 @@
 {% block title %}Assign Life-study{% endblock %}
 {% block scripts %}
   {{ form.media }}
+  <script type="text/javascript">
+    $( document ).ready(() => {
+      // since this template is only being used for initial discipline creation, no need to check load value of infraction
+      // hide entire row on load
+      var missed_service_input = $("#id_missed_service").parent().parent()
+      missed_service_input.hide()
+
+      $("#id_infraction").change(function(){
+        if ($("#id_infraction").val() == 'MS'){
+          missed_service_input.show()
+        } else{
+          missed_service_input.hide()
+        }
+      })
+
+    });
+  </script>
+
 {% endblock %}
 
 {% block tab3 %}class="active"{% endblock %}
 
 {% block lifestudies_content %}
 
-<h3>Assign Life-study to Single Trainee</h3>
-<div class="form-group col-mid-6">
-  <form action="" method="post" class="form form-horizontal">
-    {% csrf_token %}
-    {% bootstrap_form form layout='horizontal' %}
-
-    <button type="submit" class="btn btn-success">Assign</button>
-  </form>
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-4"><h3>Assign Life-study to Single Trainee</h3></div>
 </div>
+<form action="" method="post" class="form form-horizontal">
+  {% csrf_token %}
+  {% bootstrap_form form label_class="col-md-2" field_class="col-md-4" %}
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-4"><button type="submit" class="btn btn-success">Assign</button></div>
+  </div>
+</form>
 
 
 {% endblock %}

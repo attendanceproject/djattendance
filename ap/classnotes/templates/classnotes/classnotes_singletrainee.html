@@ -1,0 +1,125 @@
+{% extends "classnotes/base_classnotes.html" %}
+
+{% load staticfiles %}
+{% load common_tags %}
+
+{% block references %}
+<link rel="stylesheet" href="{% static 'classnotes/css/classnotes.css' %}" />
+{% endblock %}
+
+{% block scripts %}
+  <script type="text/javascript" src="{% static 'classnotes/js/click-all.js' %}"></script>
+  <script type="text/javascript" src="{% static 'classnotes/js/checkboxes.js' %}"></script>
+  <script type="text/javascript">
+    $(document).ready(() => {
+      $('#trainee_list').select2()
+      .on("select2:select", (e) => {
+          $('#id_detail_form').submit();
+        });
+    });
+  </script>
+
+{% endblock %}
+
+{% block tab2 %} class="active" {% endblock %}
+
+{% block classnotes_content %}
+
+<h2> Class Notes Detail for {{selected_trainee.full_name}} </h2>
+<form id="id_detail_form">
+  <select id="trainee_list" name="trainee_list">
+    {% for choice in trainee_list %}
+      <option {% if selected_trainee.id == choice.id %}selected="selected"{% endif %} value="{{choice.id}}">{{choice.firstname}} {{choice.lastname}}</option>
+    {% endfor %}
+  </select>
+</form>
+
+{% if not detail %}
+<em>No missed classes</em>
+{% endif %}
+  <table id="id_report_table"class="table table-hover">
+    <thead>
+      <tr>
+        <th>Class</th>
+        <th>Count</th>
+        <th>Owed</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for ev, c in detail.items %}
+      <tr>
+        <td>{{ev}}</td>
+        <td>{{c.count}}</td>
+        <td>{{c.owed}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+
+
+<div class="panel-body">
+  <form role="form" action="" method="post">
+  {% csrf_token %}
+
+  <table class="table table-hover table-condensed" id="mytable">
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="checkall" /></th>
+        <th> Edit </th>
+        <th> ID </th>
+        <th> Event </th>
+        <th> Date Assigned </th>
+        <th> Due Date </th>
+      </tr>
+    </thead>
+
+    <tbody>
+    {% for classnote in classnotes_pending %}
+    <tr>
+      <td><input type="checkbox" name="selection" value="{{classnote.pk}}"></input> {{classnote.get_status_display}}</td>
+      <td>
+        <a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn btn-primary btn-xs" role="button">
+          <span class="glyphicon glyphicon-pencil"></span>
+        </a>
+      </td>
+      <td>{{classnote.id}}</td>
+      <td>{{classnote.event.name}}</td>
+      <td>{{classnote.date_assigned|date:"m/d/y"}}</td>
+      <td>{{classnote.date_due|date:"m/d/y"}}</td>
+    </tr>
+    {% endfor %}
+    {% for classnote in classnotes_other %}
+    <tr>
+      <td>{{classnote.get_status_display}}</td>
+      <td>
+        <a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn btn-primary btn-xs" role="button">
+          <span class="glyphicon glyphicon-pencil"></span>
+        </a>
+      </td>
+      <td>{{classnote.id}}</td>
+      <td>{{classnote.event.name}}</td>
+      <td>{{classnote.date_assigned|date:"m/d/y"}}</td>
+      <td>{{classnote.date_due|date:"m/d/y"}}</td>
+    </tr>
+    {% endfor %}
+
+    </tbody>
+
+    </table>
+    <p class="col-lg-6 well legend">
+      <b>N</b>o || <b>L</b>EGEND || <b>Y</b>ET
+    </p>
+    <div class="pull-right">
+    <button type="submit" name="approve" class="btn btn-success">Approve Selected</button>
+    <button type="submit" name="hard_copy_approve" class="btn btn-success">Hard Copy Approve</button>
+    <button type="submit" name="fellowship" class="btn btn-warning">Mark for Fellowship Selected</button>
+    <button type="submit" name="delete" class="btn btn-danger">Delete Selected</button>
+    </div>
+  </form>
+</div>
+{% if classnotes_pending %}
+{% else %}
+<em>No pending classnotes</em>
+{% endif %}
+{% endblock %}

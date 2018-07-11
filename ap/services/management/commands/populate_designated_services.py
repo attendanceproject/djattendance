@@ -66,6 +66,23 @@ class Command(BaseCommand):
           end_datetime=datetime(2018, 2, 14 + i, 15, 0, 0), task_performed='I ushered {0} tables'.format(i)
         )
 
+  def _delete_duplicates(model, unique_fields):  # id/pk is always unique, so don't include it in unique_fields
+    from django.db.models import Count, Min
+    ret = []
+    # finds a duplicates and gets the lower pk value of each duplicate
+    master_pks = model.objects.values(*unique_fields).annotate(Min('pk'), count=Count('pk')).filter(count__gt=1).values_list('pk__min', flat=True)
+    # gets a dict of {id: object_to_keep}
+    masters = model.objects.in_bulk(list(master_pks))
+    for master in masters.values():  # for each object
+      # create a filter dictionary of {field: mater_object_value}
+      d = dict(zip(unique_fields, [getattr(master, f) for f in unique_fields]))
+      # get duplicates, filter out the pk we are keeping and delete the rest
+      to_delete = model.objects.filter(**d).exclude(pk=master.pk)
+      print to_delete
+      msg = to_delete.delete()
+      ret.append(msg)
+    return ret
+
   def handle(self, *args, **options):
     print('* Deleting existing designated service data...')
     ServiceRoll.objects.all().delete()

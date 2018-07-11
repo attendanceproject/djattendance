@@ -10,10 +10,18 @@ export const toggleLegend = () => {
   }
 }
 
+export const TOGGLE_PERIOD_SELECT = 'TOGGLE_PERIOD_SELECT'
+export const togglePeriodSelect = () => {
+  return {
+    type: TOGGLE_PERIOD_SELECT
+  }
+}
+
 export const selectPeriod = (period) => {
   return (dispatch, getState) => {
     let dateDetails = getDateDetails(getState())
     dispatch(changeDate((period - dateDetails.period) * 14))
+    dispatch(deselectAllEvents())
   }
 }
 
@@ -488,7 +496,7 @@ export const selectTab = (index) => {
   return function(dispatch, getState) {
     let show = getState().show
     // deselect events if going to and from the group slip tab. Reset the forms.
-    if ((show!=='groupslip' && index===3) || (show==='groupslip' && index!==3)) {
+    if ((show !== 'groupslip' && index === 3) || (show === 'groupslip' && index !== 3)) {
       dispatch(resetGroupslipForm())
       dispatch(resetLeaveslipForm())
       dispatch(resetRollForm())

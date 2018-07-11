@@ -9,6 +9,7 @@ const mapStateToProps = (state) => {
     ...details,
     showLegend: state.showLegend,
     traineeView: state.form.traineeView,
+    disablePeriodSelect: state.disablePeriodSelect,
   }
 }
 

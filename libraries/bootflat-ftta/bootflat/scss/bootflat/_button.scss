@@ -298,4 +298,21 @@ $button-panel-shadow:		 3px 2px;
       background-color: $button-danger-hover;
     }
   }
+
+  #bibleTrackerButton{
+    border: 0;
+    color: #095F80;
+    
+    &:hover{
+      color: gray;
+    }
+
+    &:disabled{
+      color: gray;
+    }
+  }
+
+  .bibleTrackerUpdate{
+    color: #095F80;
+  }
 }

@@ -19,7 +19,8 @@ from .models import Event, Schedule
 from .serializers import (EventFilter, EventSerializer,
                           EventWithDateSerializer, ScheduleFilter,
                           ScheduleSerializer)
-from .utils import should_split_schedule, split_schedule, time_overlap
+from .utils import should_split_schedule, split_schedule
+from aputils.eventutils import EventUtils
 
 
 def assign_trainees_to_schedules(request):
@@ -196,7 +197,7 @@ class ScheduleAdminUpdate(ScheduleCRUDMixin, UpdateView):
       tr_event_set = t.rolls.order_by('event').distinct('event').values('event__id', 'event__start', 'event__end')
       for i in tr_event_set:
         for j in sch_event_set:
-          if time_overlap(i['event__start'], i['event__end'], j['event__start'], j['event__end']):
+          if EventUtils.time_overlap(i['event__start'], i['event__end'], j['event__start'], j['event__end']):
             form._errors[NON_FIELD_ERRORS] = ErrorList([u'Trainee(s) cannot be added to schedule. Split the schedule.'])
             return super(ScheduleAdminUpdate, self).form_invalid(form)
 

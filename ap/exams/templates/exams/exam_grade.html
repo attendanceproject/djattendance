@@ -9,10 +9,12 @@
   <ol id="question-list">
     {% for section, response, score, comments in data %}
       {% for question in section.questions %}
-        {% include section.template %}
-        {% if question.answer %}
-          <b>Correct Answer: {{ question.answer|get_answers }}</b>
-          <div class="clearfix"></div>
+        {% if question.prompt.strip != '' %}
+          {% include section.template %}
+          {% if question.answer %}
+            <b>Correct Answer: {{ question.answer|get_answers }}</b>
+            <div class="clearfix"></div>
+          {% endif %}
         {% endif %}
       {% endfor %}
       {% if role == 'Grade' %}

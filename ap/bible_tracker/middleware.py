@@ -3,6 +3,8 @@ from django.utils.deprecation import MiddlewareMixin
 from django.core.urlresolvers import reverse
 from .utils import unfinalized_week
 
+from django.conf import settings
+
 
 class BibleReadingMiddleware(MiddlewareMixin):
   def process_request(self, request):
@@ -15,6 +17,6 @@ class BibleReadingMiddleware(MiddlewareMixin):
       return None
     if request.path not in url_list:
       week = unfinalized_week(request.user)
-      if week:
+      if week and not settings.DEBUG:
         return HttpResponseRedirect(reverse('bible_tracker:index') + '?week=' + str(week))
     return None

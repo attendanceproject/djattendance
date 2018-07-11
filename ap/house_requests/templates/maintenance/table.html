@@ -1,18 +1,22 @@
 <table class="table">
-  <tr><td>Status:</td>
-    <td>{{ object.get_status_display }}</td></tr>
-  <tr><td>Type:</td>
-    <td>{{ object.request_type }}</td></tr>
-  <tr><td>Description:</td>
-    <td>{{ object.description }}</td></tr>
+  <tr><td>Date submitted:</td>
+    <td>{{ object.get_date_created }}</td></tr>
+  <tr><td>Name:</td>
+    <td>{{ object.trainee_author.full_name }}</td></td>
+  <tr><td>Phone:</td>
+    <td>{{ object.trainee_author.meta.phone }}</td></td>
   <tr><td>House:</td>
     <td>{{ object.house }}</td></tr>
   <tr><td>Room:</td>
     <td>{{ object.room}}</td></tr>
-  <tr><td>Date submitted:</td>
-    <td>{{ object.get_date_created }}</td></tr>
+  <tr><td>Type:</td>
+    <td>{{ object.request_type }}</td></tr>
+  <tr><td>Description:</td>
+    <td>{{ object.description }}</td></tr>
   <tr><td>TA Comment:</td>
     <td>{{ object.TA_comments }}</td></tr>
+  <tr><td>Status:</td>
+-   <td>{{ object.get_status_display }}</td></tr>
   <tr><td>Urgent:</td>
     <td>{{ object.urgent }}</td></td>
 </table>

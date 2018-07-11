@@ -102,6 +102,13 @@ class IndividualSlipSerializer(BulkSerializerMixin, ModelSerializer):
     return slip
 
 
+class IndividualSlipTADetailSerializer(IndividualSlipSerializer):
+  class Meta(object):
+    model = IndividualSlip
+    list_serializer_class = BulkListSerializer
+    fields = ('status', 'events')
+
+
 class IndividualSlipFilter(filters.FilterSet):
   submitted__lt = django_filters.DateTimeFilter(name='submitted', lookup_expr='lt')
   submitted__gt = django_filters.DateTimeFilter(name='submitted', lookup_expr='gt')
@@ -135,6 +142,13 @@ class GroupSlipSerializer(BulkSerializerMixin, ModelSerializer):
     model = GroupSlip
     list_serializer_class = BulkListSerializer
     fields = GROUP_FIELDS
+
+
+class GroupSlipTADetailSerializer(GroupSlipSerializer):
+  class Meta(object):
+    model = GroupSlip
+    list_serializer_class = BulkListSerializer
+    fields = ('status', 'start', 'end')
 
 
 class GroupSlipFilter(filters.FilterSet):

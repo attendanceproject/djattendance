@@ -1,428 +1,38 @@
-from datetime import datetime, date
-from dateutil import parser
-from sets import Set
-from collections import OrderedDict, defaultdict
-import random
 import json
+from collections import defaultdict
+from datetime import date, datetime
 
-from django.db.models import Q
-from django.views.generic import TemplateView
-from django.views.generic.edit import UpdateView, CreateView, FormView
-from django.template.defaulttags import register
-from django.shortcuts import render, redirect
-
-from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse_lazy, reverse
-from django.core.exceptions import ObjectDoesNotExist
-
-from django.db.models import Count, F
-from django.contrib import messages
-from braces.views import GroupRequiredMixin
-
-from rest_framework_bulk import (
-    BulkModelViewSet,
-)
-
-from rest_framework.renderers import JSONRenderer
-
-from .serializers import (
-    UpdateWorkerSerializer,
-    ServiceSlotWorkloadSerializer,
-    ServiceActiveSerializer,
-    WorkerIDSerializer,
-    WorkerAssignmentSerializer,
-    AssignmentPinSerializer,
-    ServiceCalendarSerializer,
-    ServiceTimeSerializer,
-    ExceptionActiveSerializer,
-)
-from .service_scheduler import ServiceScheduler
-from .forms import ServiceRollForm, ServiceAttendanceForm, AddExceptionForm, SingleTraineeServicesForm, ServiceCategoryAnalyzerForm
-from .models import (
-    Prefetch,
-    Assignment,
-    Service,
-    ServiceSlot,
-    Worker,
-    Category,
-    WeekSchedule,
-    WorkerGroup,
-    SeasonalServiceSchedule,
-    Sum,
-    ServiceAttendance,
-    ServiceRoll,
-    ServiceException
-)
-
-from aputils.trainee_utils import trainee_from_user
-from aputils.utils import timeit, memoize
-from aputils.decorators import group_required
-
-from leaveslips.models import GroupSlip
 from accounts.models import Trainee
+from aputils.decorators import group_required
+from aputils.trainee_utils import trainee_from_user
+from aputils.utils import timeit
+from braces.views import GroupRequiredMixin
+from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse, reverse_lazy
+from django.db.models import F, Q, Count
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, render
+from django.views.generic import TemplateView
+from django.views.generic.edit import CreateView, FormView, UpdateView
 from houses.models import House
-from terms.models import Term, FIRST_WEEK, LAST_WEEK
-'''
-Pseudo-code for algo
-
-
------
-Hard-constraint
-
-Get all the services without day (repeating services) + date falls within this coming week
-Get all the workergroups + roles + count (related to services)
-
-duplicate services node with multiple count for workergroups (single instance)
-
-Get all workers?
-
-Create edges based on worker.services_needed
-
-check only 1 service per day, weekday
-check conflicting services on same day -> flow into a single bottle-neck node
-
---------
-Trim operation?
-Apply exceptions to trim workers from services
-
-All pre-assigned, take out of the graph (designated, shuttle, etc.), if
-assignment counts as service, trim all other services that day
-
-how to check for time conflict
-All pinned assignments -> check time conflict but not count as +1 service?
-
-All time conflict will be caused only by irregular services
-(piano, AV, Shuttle, Outline Sisters)
-
-
-------
-special operation
-
-to choose star assignments for duo star assignments
-flip coin for brother/sister and create edges
-
--------
-Soft-constraint (edges cost)
-
-Calculate the cost for the edges
-
-pull history, health
-
-health (base weight of trainee -> sink)
-history (+1 for each service already done before), more weight, closer to current date (3 weeks?)
-(visualize it for SS) experience (-0.5 for each service already done before)
-noise (+- noise for randomly in the cost run each time)? maybe optional
-
-ServiceSlot.workload (base weight of each trainee -> service)
-
-
-
-
--------
-star assignment -> maybe greedy trim star edges and then
-randomly flip coins to ratio of brother/sister star ratio
-and trim graph appropriately
-
-(future dev) -> Maybe incorporate how constrained each star in the flipping
-probabilities to bias less constrained stars
-'''
-
-
-def flip_gender(p):
-    return 'B' if random.random() < p else 'S'
-
-
-class WorkersCache(object):
-
-  def __init__(self, cws):
-    self.workers_cache = {}
-    workergroups = WorkerGroup.objects.prefetch_related('workers')
-    for wg in workergroups:
-      ws = wg.get_workers_prefetch_assignments(cws)
-      self.workers_cache[wg.id] = ws
-
-  @memoize
-  def get(self, id, type):
-    # print 'called cold cache', id, type
-    if type == 'query':
-      return self.workers_cache[id]
-    elif type == 'set':
-      return set(self.workers_cache[id])
-    elif type == 'B':
-      return set(self.workers_cache[id].filter(trainee__gender='B'))
-    elif type == 'S':
-      return set(self.workers_cache[id].filter(trainee__gender='S'))
-    else:
-      return None
-
-
-def hydrate_worker_list(allworkers_cache, workers):
-  result = set()
-  for w in workers:
-    result.add(allworkers_cache[w.id])
-  return result
-
-
-@timeit
-def hydrate(services, cws):
-
-  workers_cache = WorkersCache(cws)
-
-  for s in services:
-    for slot in s.serviceslots:
-      # blow away cache
-      wg = slot.worker_group
-
-      # If gender restrictions are either all brother/all sister, trim out half the gender by coin flip
-      # https://developers.google.com/optimization/assignment/compare_mip_cp#assignment-with-allowed-groups-of-workers
-      # TODO(see link about avoiding this coin flip using MIP groups)
-      if slot.gender == 'X' and slot.workers_required > 1:
-        # naively do 50/50, will calculate based on training population ratio later on
-        gender = flip_gender(0.5)
-        workers = workers_cache.get(wg.id, gender)
-      else:
-        workers = workers_cache.get(wg.id, 'set')
-
-      slot.workers = workers.copy()
-
-  return services
-
-
-def assign_leaveslips(service_scheduler, cws):
-  assignments = Assignment.objects.filter(week_schedule=cws).select_related('service').prefetch_related('workers')
-  # Delete old group leave slips
-  GroupSlip.objects.filter(service_assignment__in=assignments).delete()
-  timestamp = datetime.now()
-  bulk_leaveslips_assignments = []
-  bulk_groupslip_trainees = []
-  for a in assignments.distinct('service'):
-    gs = GroupSlip(type='SERV', status='A', trainee=service_scheduler, description=a.service, comments=a, start=a.startdatetime, end=a.enddatetime, submitted=timestamp, last_modified=timestamp, finalized=timestamp, service_assignment=a)
-    bulk_leaveslips_assignments.append(gs)
-  GroupSlip.objects.bulk_create(bulk_leaveslips_assignments)
-  ThroughModel = GroupSlip.trainees.through
-  bulk_groupSlips = GroupSlip.objects.filter(service_assignment__in=assignments)
-  for gs in bulk_groupSlips:
-    workers = set()
-    sa = gs.service_assignment
-    for a in assignments.filter(service=sa.service):
-      workers |= set(a.workers.all())
-    for worker in workers:
-      bulk_groupslip_trainees.append(ThroughModel(groupslip_id=gs.id, trainee_id=worker.trainee.id))
-  ThroughModel.objects.bulk_create(bulk_groupslip_trainees)
-  bulk_groupSlips.annotate(num_trainees=Count('trainees')).filter(num_trainees=0).delete()
-
-
-@timeit
-def assign(cws):
-  # get start date and end date of effective week
-  week_start, week_end = cws.week_range
-
-  # Gets services that are active with day null or day between week range
-  css = SeasonalServiceSchedule.objects.filter(active=True)\
-      .prefetch_related('services')
-
-  # Get pinned assignments
-  pinned_assignments = Assignment.objects.filter(week_schedule=cws, pin=True).select_related('service').prefetch_related('workers')
-
-  # Load all active services onto memory
-  services = Set()
-  for ss in css:
-    s = ss.services.filter(Q(day__isnull=True) | Q(day__range=(week_start, week_end)))\
-        .filter(active=True)\
-        .filter(designated=False)\
-        .select_related()\
-        .prefetch_related(Prefetch('serviceslot_set', queryset=ServiceSlot.objects.exclude(assignments__pin=True, assignments__week_schedule=cws).select_related('worker_group').prefetch_related('worker_group__workers').order_by('-worker_group__assign_priority', 'workers_required'), to_attr='serviceslots'),
-                          'worker_groups__workers',
-                          'worker_groups__workers__trainee')\
-        .distinct()\
-        .order_by('start', 'end')
-    services.union_update(Set(s))
-  print "#services", len(services)
-
-  # Populate fields onto memory
-  print "Populating fields onto memory"
-  services = hydrate(services, cws)
-
-  # Get all active exception in time period with active or no schedule constrains
-  print "Fetching exceptions"
-  ac = {}
-  ec = {}
-  exceptions = ServiceException.objects.filter(active=True, start__lte=week_end)\
-      .filter(Q(end__isnull=True) | Q(end__gte=week_start))\
-      .filter(Q(schedule=None) | Q(schedule__active=True))\
-      .distinct()
-  assignments_count_list = Assignment.objects.filter(week_schedule=cws).values('workers').annotate(count=Sum('workload'))
-  exceptions_count_list = exceptions.values('workers').annotate(count=Sum('workload'))
-  exceptions = exceptions.prefetch_related('services', 'workers', 'workers__trainee')
-
-  for a in assignments_count_list:
-    ac[a['workers']] = a['count']
-  for e in exceptions_count_list:
-    ec[e['workers']] = e['count']
-
-  print "Trimming service exceptions"
-  trim_service_exceptions(services, exceptions, pinned_assignments)
-
-  # TODO: time conflict checking for services on same day and time
-  # Only happens if we allow more than one services a day
-
-  # Build service frequency db for all the workers
-
-  # Build and solve graph
-  scheduler = ServiceScheduler(services, ac, ec)
-  status = scheduler.solve()
-  print(status)
-  scheduler.save(cws)
-
-
-# Checks to see if there's a intersection between 2 time ranges
-def is_overlap(a, b):
-  # (StartA <= EndB) and (EndA >= StartB)
-  return (a.calculated_weekday == b.calculated_weekday) and (a.start <= b.end) and (a.end >= b.start)
-
-
-def sort_services(services):
-  services = list(services)
-  # in place stable sort
-  services.sort(key=lambda x: (x.calculated_weekday, x.start, x.end))
-  return services
-
-
-def build_service_conflict_table(services):
-  '''
-  Only have to worry about service time overlap conflict if I assign trainees
-  more than 1 service per day.
-  '''
-
-  # build a table of service mapping to other services in conflicting times/day
-  c_tb = {}
-
-  services = sort_services(services)
-  len_l = len(services)
-
-  # for each service, check to see if it overlaps with next service and keep checking
-  # until no more overlaps and then move on to the next service. Build collision table 2-way
-  for i in range(len_l - 1):
-    j = i + 1
-    while j < len_l and is_overlap(services[i], services[j]):
-      # if overlap build 2-way table
-      c_tb.setdefault(services[i], Set()).add(services[j])
-      # reverse
-      c_tb.setdefault(services[j], Set()).add(services[i])
-
-      j += 1
-
-  # Run time: if every item overlaps with every other item, O(n^2), if only ~1, O(n)
-  return c_tb
-
-
-@timeit
-def build_trim_table(services, exceptions, pinned_assignments):
-  # build exception table and then remove everyone in that table
-  # {service: set([worker])}
-  s_w_tb = {}
-  # set([(w, weekday)])
-  # block_whole_day = set()
-
-  # {(w, weekday):set([services])}
-  block_conflicting_services = OrderedDict()
-
-  for e in exceptions:
-    ws = e.workers.all()
-    for s in e.services.all():
-      for w in ws:
-        s_w_tb.setdefault(s, Set()).add(w)
-  # Add to exception table for pinned_assignments to be removed
-  for a in pinned_assignments:
-    s = a.service
-    wholedayblock = a.workload > 0
-    for w in a.workers.all():
-      s_w_tb.setdefault(s, Set()).add(w)
-      # add to block list
-      if wholedayblock:
-        # print 'whole day block', w, s.weekday
-        # override conflict checking blocking b/c it's whole day
-        block_conflicting_services[(w, s.weekday)] = True
-      else:
-        # print 'parital day block', w, s.weekday
-        # only add blocking if no whole day blocking already
-        if (w, s.weekday) not in block_conflicting_services:
-          block_conflicting_services.setdefault((w, s.weekday), set()).add(s)
-        else:
-          if not block_conflicting_services[(w, s.weekday)]:
-            block_conflicting_services.setdefault((w, s.weekday), set()).add(s)
-
-  return (s_w_tb, block_conflicting_services)
-
-
-@timeit
-def trim_service_exceptions(services, exceptions, pinned_assignments):
-  s_w_tb, block_conflicting_services = build_trim_table(services, exceptions, pinned_assignments)
-
-  # print 'Bloocked!!!!!!!!!!!', block_conflicting_services
-  # go through all exceptions and delete workers out of hydrated services
-  for s in services:
-    # print 'exception service', s
-
-    for slot in s.serviceslots:
-      # Removing exceptions
-      # if service mentioned in exception
-      if s in s_w_tb:
-        ws = s_w_tb[s]
-        # print 'EXCEPTIONS!!!!!', s, s.serviceslots
-        # remove all trainees in ts from all the serviceslots.workers.trainee
-        for w in ws:
-          # print 'checking worker exception', w, a.workers
-          # loop through all trainees listed in exception
-          if w in slot.workers:
-            # remove worker
-            slot.workers.remove(w)
-            # print 'removing worker!!!!!!!!!!!1', w, slot.workers
-
-      # Removing pinned assignments
-      for w, weekday in block_conflicting_services:
-        if weekday == s.weekday and w in slot.workers:
-          conflict_ss = block_conflicting_services[(w, s.weekday)]
-          if conflict_ss:
-            # print 'trying to remove', s, w, slot.workers
-            slot.workers.remove(w)
-            # print 'removing worker!!!!!!!!!!!1 whole day block', w, slot.workers
-          else:
-            for conflict_s in conflict_ss:
-              if conflict_s.check_time_conflict(s) and w in slot.workers:
-                slot.workers.remove(w)
-                # print 'removing working!!!!!!!!!!! partial day block', w, slot.workers
-
-
-# Save all designated services as pinned assignments
-# This is run before we start the regular assignment for rotational services
-def save_designated_assignments(cws):
-  '''
-    Grab all services with designated=True and in active schedule
-    For each designated service grab worker slots
-    For each worker slots create Assignment with service=service, service_slot=slot, week_schedule=cws, workload=slot.workload, workers=slot.worker_group.get_workers
-
-    Bulk saves solution in 4 db calls
-  '''
-  bulk_service_assignments = []
-  bulk_assignment_workers = []
-  services = Service.objects.filter(designated=True, active=True).prefetch_related('worker_groups').distinct()
-  # Delete all outdated Assignments for designated services
-  Assignment.objects.filter(service__in=services, week_schedule=cws).delete()
-  for service in services:
-    for slot in service.serviceslot_set.all():
-      a = Assignment(service=service, service_slot=slot, week_schedule=cws, workload=slot.workload, pin=True)
-      slot.save()
-      bulk_service_assignments.append(a)
-  Assignment.objects.bulk_create(bulk_service_assignments)
-
-  ThroughModel = Assignment.workers.through
-  assignments = Assignment.objects.filter(week_schedule=cws, pin=True, service__in=services).prefetch_related('service_slot', 'service_slot__worker_group', 'service_slot__worker_group__workers')
-  for a in assignments:
-    workers = set(a.service_slot.worker_group.get_workers.all())
-    for worker in workers:
-      bulk_assignment_workers.append(ThroughModel(assignment_id=a.id, worker_id=worker.id))
-  ThroughModel.objects.bulk_create(bulk_assignment_workers)
+from rest_framework.renderers import JSONRenderer
+from rest_framework_bulk import BulkModelViewSet
+from terms.models import FIRST_WEEK, LAST_WEEK, Term
+
+from .forms import (AddExceptionForm, ServiceAttendanceForm,
+                    ServiceCategoryAnalyzerForm, ServiceRollForm,
+                    SingleTraineeServicesForm)
+from .models import (Assignment, Category, Prefetch, SeasonalServiceSchedule,
+                     Service, ServiceAttendance, ServiceException, ServiceRoll,
+                     ServiceSlot, WeekSchedule, Worker)
+from .serializers import (AssignmentPinSerializer, ExceptionActiveSerializer,
+                          ServiceActiveSerializer, ServiceCalendarSerializer,
+                          ServiceSlotWorkloadSerializer, ServiceTimeSerializer,
+                          UpdateWorkerSerializer, WorkerAssignmentSerializer,
+                          WorkerIDSerializer)
+from .utils import (assign, assign_leaveslips, merge_assigns,
+                    save_designated_assignments, SERVICE_CHECKS)
 
 
 @timeit
@@ -483,18 +93,33 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
       Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.all().order_by('-worker_group__assign_priority'))
   ).distinct()
 
-  worker_assignments = Worker.objects.select_related('trainee').prefetch_related(Prefetch('assignments',
-                                                                                          queryset=Assignment.objects.filter(week_schedule=cws).select_related('service', 'service_slot', 'service__category').order_by('service__weekday'),
-                                                                                          to_attr='week_assignments'))
+  pre_assignments = Assignment.objects.filter(week_schedule=cws)\
+                    .select_related('service',
+                                    'service_slot',
+                                    'service__category'
+                    )\
+                    .order_by('service__weekday')
+  worker_assignments = Worker.objects\
+                       .select_related('trainee')\
+                       .prefetch_related(Prefetch('assignments',
+                                                  queryset=pre_assignments,
+                                                  to_attr='week_assignments')
+                       )
 
-  exceptions = ServiceException.objects.all().prefetch_related('workers', 'services').select_related('schedule')
+  exceptions = ServiceException.objects.all()\
+               .prefetch_related('workers', 'services').select_related('schedule')
 
   # Getting all services to be displayed for calendar
-  services = Service.objects.filter(active=True).prefetch_related('serviceslot_set', 'worker_groups').order_by('start', 'end')
-  # .filter(Q(day__isnull=True) | Q(day__range=(week_start, week_end)))
+  services = Service.objects.filter(active=True)\
+             .prefetch_related('serviceslot_set', 'worker_groups')\
+             .order_by('start', 'end')
 
-  # attach services directly to trainees for easier template traversal
   for worker in worker_assignments:
+    worker.workload = sum(a.workload for a in worker.week_assignments)
+    worker.checks = [
+        c.check(worker.week_assignments) for c in SERVICE_CHECKS
+    ]
+    # attach services directly to trainees for easier template traversal
     service_db = {}
     for a in worker.week_assignments:
       service_db.setdefault(a.service.category, []).append((a.service, a.service_slot.name))
@@ -517,7 +142,8 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
       'cws': cws,
       'current_week': current_week,
       'prev_week': (current_week - 1),
-      'next_week': (current_week + 1)
+      'next_week': (current_week + 1),
+      'service_checks': SERVICE_CHECKS,
   }
   return render(request, 'services/services_view.html', ctx)
 
@@ -599,29 +225,6 @@ def generate_report(request, house=False):
       cws.save()
 
   return render(request, 'services/services_report_base.html', ctx)
-
-
-@register.filter
-def merge_assigns(assigns):
-  non_stars = []
-  stars = []
-  star_assignment = None
-  non_star_assignment = None
-  assignments = []
-  for a in assigns:
-    if '*' in a.service_slot.role:
-      star_assignment = a
-      stars.extend(a.get_worker_list())
-    else:
-      non_star_assignment = a
-      non_stars.extend(a.get_worker_list())
-  if star_assignment:
-    star_assignment.get_worker_list = lambda: stars
-    assignments.append(star_assignment)
-  if non_star_assignment:
-    non_star_assignment.get_worker_list = lambda: non_stars
-    assignments.append(non_star_assignment)
-  return assignments
 
 
 def generate_signin(request, k=False, r=False, o=False):
@@ -750,14 +353,14 @@ class ServiceHours(GroupRequiredMixin, UpdateView):
   form_class = ServiceAttendanceForm
   group_required = ['designated_service']
   service = None
-  designated_assignmnets = None
+  designated_assignments = None
   service_id = 0  # from ajax
   week = 0  # from ajax
 
   def get_object(self, queryset=None):
     term = Term.current_term()
     worker = trainee_from_user(self.request.user).worker
-    self.designated_assignmnets = worker.assignments.all().filter(service__designated=True)
+    self.designated_assignments = worker.assignments.all().filter(service__designated=True).exclude(service__name__icontains="Breakfast")
     try:
       self.week = self.kwargs['week']
     except KeyError:
@@ -767,12 +370,12 @@ class ServiceHours(GroupRequiredMixin, UpdateView):
     try:
       self.service_id = self.kwargs['service_id']
     except KeyError:
-      self.service_id = self.designated_assignmnets[0].service.id
+      self.service_id = self.designated_assignments[0].service.id
 
     self.service = Service.objects.get(id=self.service_id)
 
     # get the existing object or created a new one
-    service_attendance, created = ServiceAttendance.objects.get_or_create(worker=worker, term=term, week=self.week, designated_service=self.service)
+    service_attendance = ServiceAttendance.objects.get_or_create(worker=worker, term=term, week=self.week, designated_service=self.service)[0]
     return service_attendance
 
   def get_form_kwargs(self):
@@ -780,23 +383,47 @@ class ServiceHours(GroupRequiredMixin, UpdateView):
     kwargs['worker'] = trainee_from_user(self.request.user).worker
     return kwargs
 
-  def form_valid(self, form):
-    self.update_service_roll(service_attendance=self.get_object(), data=self.request.POST.copy())
-    return super(ServiceHours, self).form_valid(form)
+  def dispatch(self, request, *args, **kwargs):
+    if request.method == 'GET':
+      try:
+        self.kwargs['week']
+        self.kwargs['service_id']
+      except KeyError:
+        self.get_object()
+        return redirect(reverse('services:designated_service_hours', kwargs={'service_id': self.service_id, 'week': self.week}))
+    return super(ServiceHours, self).dispatch(request, *args, **kwargs)
 
-  def update_service_roll(self, service_attendance, data):
-    start_list = data.pop('start_datetime')
-    end_list = data.pop('end_datetime')
-    task_list = data.pop('task_performed')
-    ServiceRoll.objects.filter(service_attendance=service_attendance).delete()
+  def post(self, request, *args, **kwargs):
+    service_roll_forms = self.get_service_roll_forms(self.request.POST)
+    if all(f.is_valid() for f in service_roll_forms):
+      service_attendance = self.get_object()
+      ServiceRoll.objects.filter(service_attendance=service_attendance).delete()
+      for srf in service_roll_forms:
+        sr = srf.save(commit=False)
+        sr.service_attendance = service_attendance
+        sr.save()
+      return redirect(reverse('services:designated_service_hours', kwargs={'service_id': self.kwargs['service_id'], 'week': self.kwargs['week']}))
+    else:
+      ctx = {'form': self.form_class(request.POST, worker=trainee_from_user(self.request.user).worker)}
+      ctx['button_label'] = 'Submit'
+      ctx['page_title'] = 'Designated Service Hours'
+      ctx['service_roll_forms'] = service_roll_forms
+      return super(ServiceHours, self).render_to_response(ctx)
 
+  @staticmethod
+  def get_service_roll_forms(data):
+    start_list = data.getlist('start_datetime')
+    end_list = data.getlist('end_datetime')
+    task_list = data.getlist('task_performed')
+    service_roll_forms = []
     for index in range(len(start_list)):
-      sr = ServiceRoll()
-      sr.service_attendance = service_attendance
-      sr.start_datetime = parser.parse(start_list[index])
-      sr.end_datetime = parser.parse(end_list[index])
-      sr.task_performed = task_list[index]
-      sr.save()
+      temp = {}
+      temp['start_datetime'] = start_list[index]
+      temp['end_datetime'] = end_list[index]
+      temp['task_performed'] = task_list[index]
+      srf = ServiceRollForm(temp)
+      service_roll_forms.append(srf)
+    return service_roll_forms
 
   def get_context_data(self, **kwargs):
     ctx = super(ServiceHours, self).get_context_data(**kwargs)
@@ -1028,42 +655,3 @@ class ServiceCategoryAnalyzer(FormView):
     context['page_title'] = "Service Category Analyzer"
     context['category'] = category
     return context
-
-'''
-
-  services.worker_groups
-
-  # Make network nodes for services
-  # Service.name : serviceslot_set.role x serviceslot_set.workers_required
-
-  services.serviceslot_set.worker_group.workers
-
-  {
-    servicename: service
-  }
-
-  {
-    workerid: worker
-  }
-
-
-  {
-    servicename: {
-      workers: [
-        worker1,
-        worker2
-      ],
-      role: worker,
-      workers_required: 3,
-      workload: 3
-    },
-    day: Monday
-  }
-
-  worker = {
-    history: [],
-    service_cap: 3,
-    service_needed: 3
-  }
-
-'''

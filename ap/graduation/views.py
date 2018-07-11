@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.views.generic.edit import UpdateView
 from django.views.generic import ListView
 from django.template.defaultfilters import title
+from django.shortcuts import redirect
 
 from terms.models import Term
 from graduation.models import *
@@ -70,6 +71,14 @@ class OutlineView(CreateUpdateView):
   form_class = OutlineForm
   template_name = 'graduation/outline.html'
 
+  # hack for those speaking, needs to be cleaned up and used the proper methods, override the default clean methods
+  # instead of using a form invalid as a hack
+  def form_invalid(self, form):
+    obj = self.object
+    obj.speaking_section = form.cleaned_data['speaking_section']
+    obj.speaking = form.cleaned_data['speaking']
+    obj.save()
+    return redirect('graduation:outline-view')
 
 class RemembranceView(CreateUpdateView):
   model = Remembrance
@@ -172,6 +181,19 @@ class WebsiteReport(ReportView):
 class OutlineReport(ReportView):
   model = Outline
   template_name = 'graduation/outline_report.html'
+
+
+class SpeakingReport(ReportView):
+  model = Outline
+  template_name = 'graduation/speaking_report.html'
+
+  def get_context_data(self, **kwargs):
+    context = super(SpeakingReport, self).get_context_data(**kwargs)
+    speaking_trainees = GradAdmin.objects.get(term=Term.current_term()).speaking_trainees.all()
+    context['data'] = Outline.objects.filter(trainee__in=speaking_trainees)
+    context['title'] = 'Speaking Report'
+
+    return context
 
 
 class MiscReport(ReportView):

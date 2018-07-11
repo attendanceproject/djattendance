@@ -116,6 +116,7 @@ function generateBody(date, list_of_rooms) {
   let relevant_reservations = getRelevantReservations(date);
   let reset_row = Array(list_of_rooms.length + 1).fill('');
   row = reset_row.slice(0);
+  let shift = 2;
 
   //iterate through rows
   for(i=0; i < times_list.length; i++) {
@@ -128,15 +129,16 @@ function generateBody(date, list_of_rooms) {
       for(k=0; k < reservations.length; k++) {
         reservation = reservations[k];
         if(room == reservation.fields.room) {
-          if(i >= reservation.fields.slot_start && i <= reservation.fields.slot_end) {
+          if(i >= reservation.fields.slot_start+shift && i <= reservation.fields.slot_end+shift) {
 
             //update row element with group name and remove reservation from list
             row[j + 1] = reservation.fields.group;
 
             {% if view.request.user|is_TA %}
-            if (i == reservation.fields.slot_start) {
+            if (i == reservation.fields.slot_start+shift) {
+
               row[j + 1] += `<a href="${DELETE_URL}${reservation.pk}">
-                              <button class="btn btn-danger delete_request_button" type="submit" title="Delete"/>
+                              <button class="btn btn-danger delete-request-button" type="submit" title="Delete"/>
                                 <span class="glyphicon glyphicon-trash"></span>
                               </button>
                             </a>`

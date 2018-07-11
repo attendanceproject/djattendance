@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+{{form.media}}
+<script type="text/javascript">
+	$( document ).ready(() => {
+		load_val = "{{form.location.value}}"
+		if (load_val != 'Other'){
+			$("#id_comments").hide()
+		};
+
+		$("#id_attendance_form").change(function(){
+			if ($("#id_location_2").prop('checked')){
+				$("#id_comments").show()
+			} else{
+				$("#id_comments").hide()
+			};
+		});
+
+
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>Semi-Annual Training {{ term }}</h2>
+<h2>{{ page_title }}</h2>
+
+<p>Indicate "Training Center" if you are burdened to study with FTTA trainees. Indicate "Ministry Conference Center" if you are burdened to study with the college students and young people. If you would like to request another location or have a conflict with this arrangement, indicate "Other" with the proposed location and submit a note to Jerome Keh’s mail slot for approval or denial indicating the reason for the request. <strong>First term trainees must study at the Training Center or Ministry Conference Center.</strong> You must indicate your choice by Friday, June 29. Otherwise, you will study at the Training Center by default.
+<br>
+<strong>Regardless of where you are assigned, all trainees are required to report to the Training Center on the Tuesday morning of semi-annual training week for a corporate study and testing time.</strong> You may study at your assigned location starting the Wednesday morning of semi-annual training week.</p>
+<form id="id_attendance_form" action="" method="post">
+  {% csrf_token %}
+  {% for loc in form.location %}
+  <div class="row">
+    <div class="col-md-12">
+	  {{loc}} {% if forloop.counter0 == 2 %} {{form.comments}} {% endif %}
+	</div>
+  </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
+</form>
+{% endblock %}

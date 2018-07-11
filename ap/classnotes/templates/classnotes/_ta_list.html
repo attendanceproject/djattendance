@@ -1,0 +1,85 @@
+{% load common_tags %}
+{% block scripts %}
+<script type="text/javascript">
+$(document).ready(() => {
+  var allRows = $("[name='selection']").parents('tr');
+  allRows.has('span.received').hide();
+
+  $('#received_button').on('click', function(){
+    let txt = $(this).text();
+    let sel = txt.split(' ')[1].toLowerCase();
+    allRows.hide();
+    allRows.has('span.' + sel).show();
+    newtxt = txt === "Show Unreceived" ? "Show Received" : "Show Unreceived";
+    $(this).text(newtxt);
+  });
+});  
+</script>
+
+{% endblock %}
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h2> Classnotes TA List </h2>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="received_button">Show Received</button>
+  <div class="panel-body">
+    <form role="form" action="{% url 'classnotes:classnotes_list' %}" method="post">
+    {% csrf_token %}
+
+    <table class="table table-hover table-condensed" id="mytable">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="checkall" /></th>
+          <th> Edit </th>
+          <th> Name </th>
+          <th> Status</th>
+          <th> Date Assigned </th>
+          <th> Due Date </th>
+        </tr>
+      </thead>
+
+      <tbody>
+      {% for classnote in classnotes_list %}
+      <tr>
+        <td><input type="checkbox" name="selection" value="{{classnote.pk}}"></input></td>
+        <td>
+          <a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn btn-primary btn-xs" role="button">
+            <span class="glyphicon glyphicon-pencil"></span>
+          </a>
+        </td>
+        <td>{{classnote.trainee.full_name}}</td>
+        <td>
+          {% if classnote.approved %}
+            <span class="label label-primary received">Approved</span>
+          {% elif classnote.pending %}
+            <span class="label label-warning received">Pending</span>
+          {% elif classnote.unsubmitted %}
+            <span class="label label-danger unreceived">Unsubmitted</span>
+          {% elif classnote.fellowship %}
+            <span class="label label-warning received">Marked for fellowship</span>
+          {% endif %}
+          {% if classnote.past_due %}
+            <span class="label label-danger">Past due</span>
+          {% endif %}
+        </td>
+        <td>{{classnote.date_assigned | date:"m/d/y"}}</td>
+        <td>{{classnote.date_due | date:"m/d/y"}}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+
+      </table>
+      <p class="col-lg-6 well legend">
+        <b>N</b>o || <b>L</b>EGEND || <b>Y</b>ET
+      </p>
+      <div class="pull-right">
+      <button type="submit" name="approve" class="btn btn-success">Approve Selected</button>
+      <button type="submit" name="hard_copy_approve" class="btn btn-success">Hard Copy Approve</button>
+      <button type="submit" name="fellowship" class="btn btn-warning">Mark for Fellowship Selected</button>
+      <button type="submit" name="delete" class="btn btn-danger">Delete Selected</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -28,16 +28,37 @@ def get_exam_questions_for_section(exam, section_id, include_answers):
   if section is None:
     return None
 
-  for i in range(section.first_question_index, section.question_count + 1):
-    q = section.questions[str(i)]
-    questions.append(json.loads(q))
   section_obj['type'] = section.section_type
   section_obj['section_type'] = section.get_section_type_display()
   section_obj['instructions'] = section.instructions
   section_obj['required_number_to_submit'] = section.required_number_to_submit
   section_obj['template'] = section.question_template
   section_obj['id'] = section.id
+
+  if section_obj['type'] == 'M':
+    unused_answer_choices = []
+    for i in range(section.first_question_index, section.question_count + 1):
+      q = section.questions[str(i)]
+      json_q = json.loads(q)
+      questions.append(json_q)
+      if i == section.first_question_index:
+        unused_answer_choices = questions[0]['matching_answers'][:]
+      if json_q['answer'] in unused_answer_choices:
+        unused_answer_choices.remove(json_q['answer'])
+
+    for extra_answer in unused_answer_choices:
+      json_q2 = json_q.copy()
+      json_q2['prompt'] = ''
+      json_q2['points'] = ''
+      json_q2['answer'] = extra_answer
+      questions.append(json_q2)
+  else:
+    for i in range(section.first_question_index, section.question_count + 1):
+      q = section.questions[str(i)]
+      questions.append(json.loads(q))
+
   section_obj['questions'] = questions
+
   matching_answers = []
   if not include_answers:
     for each in section_obj['questions']:
@@ -214,6 +235,7 @@ def save_exam_creation(request, pk):
     question_hstore = {}
     question_count = 1
     matching_answers = set()
+
     # Start packing questions
     for question in section_questions:
       # Avoid saving hidden questions that are blank

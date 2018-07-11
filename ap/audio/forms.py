@@ -23,7 +23,7 @@ class AudioRequestForm(forms.ModelForm):
     self.user = kwargs.pop('user')
     super(AudioRequestForm, self).__init__(*args, **kwargs)
     sorted_files = order_audio_files(AudioFile.objects.filter_term(Term.current_term()))
-    choices = [(a.id, a.get_full_name()) for a in sorted_files]
+    choices = [(a.id, a.request_title) for a in sorted_files]
     self.fields['audio_requested'].widget.attrs['class'] = 'select-fk'
     self.fields['audio_requested'].choices = choices
     if not is_TA(self.user):

@@ -34,8 +34,14 @@
       <thead>
         <tr>
           <th>Count</th>
-          <th>Name</th>
           <th>Date Requested</th>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>House</th>
+          <th>Room</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Comments</th>
           <th>Status</th>
           <th>View</th>
         </tr>
@@ -44,8 +50,14 @@
         {% for req in reqs %}
         <tr>
           <td>{{forloop.counter}}</td>
+          <td>{{req.date_requested|date:"M d"}}</td>
           <td>{{req.trainee_author.full_name}}</td>
-          <td>{{req.date_requested}}</td>
+          <td>{{req.trainee_author.meta.phone}}</td>
+          <td>{{req.house}}</td>
+          <td>{{req.room}}</td>
+          <td>{{req.request_type}}</td>
+          <td>{{req.description}}</td>
+          <td>{{req.TA_comments}}</td>
           <td>{{req.status}}</td>
           <td><a href="{{ req.get_absolute_url }}">Detail</a></td>
         </tr>

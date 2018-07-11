@@ -10,6 +10,7 @@ var groupevents = require("./testdata/groupevents");
 var date = new Date();
 var selectedEvents = [];
 var show = 'summary';
+var disablePeriodSelect = 0;
 
 import { TA_IS_INFORMED, TA_EMPTY } from './constants'
 
@@ -58,6 +59,9 @@ if (typeof SelectedEvents !== 'undefined') {
 if (typeof Show != 'undefined') {
   show = Show;
 }
+if (typeof DisablePeriodSelect !== 'undefined') {
+  disablePeriodSelect = DisablePeriodSelect;
+}
 
 var initialState = {
   show: show,
@@ -92,6 +96,7 @@ var initialState = {
   tas: tas,
   term: term,
   showLegend: true,
+  disablePeriodSelect: disablePeriodSelect,
 
   submitting: false,
   formSuccess: null,

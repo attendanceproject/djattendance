@@ -1,228 +1,235 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% load staticfiles %} {% load bootstrap3 %} {% load panels %} {% load smart_cards %} {% load common_tags
+%} {% block title %}Home{% endblock %} {% block scripts %}
+<script type="text/javascript" src="{% static 'js/bootstrap-tab-history.js' %}"></script>
+{% if isTrainee %}
+<script type="text/javascript" src="{% static 'bible_tracker/js/bible_reading.js' %}"></script>
+<script type="text/javascript">
 
-{% load staticfiles %}
-{% load bootstrap3 %}
-{% load panels %}
-{% load smart_cards %}
-{% load common_tags %}
+  var isTrainee = "{{isTrainee}}";
+  var currentWeek = "{{current_week}}";
+  var finalized = "{{finalized}}";
+  var bibleReadingStatus = "{{weekly_status}}";
+  var weekdayCodes = {{ weekday_codes| safe}};
+  var changeWeekUrl = "{% url 'bible_tracker:changeWeek' %}";
+  var updateStatusUrl = "{% url 'bible_tracker:updateStatus' %}";
+  var finalizeStatusUrl = "{% url 'bible_tracker:finalizeStatus' %}";
 
-{% block title %}Home{% endblock %}
+  $(document).ready(function () {
+    $("#week_select option[value='{{current_week}}']").attr("selected", "selected");
 
-{% block scripts %}
-{{block.super}}
-<script>
-  $(".dropdown-menu li a").click(function(){
-    $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
-    $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+    changetoFinalize();
+    getWeeklyStatus();
+
+    $("#week_select").on('change', changeHomepageWeek);
+
+    $("#bibleTrackerButton").click(function (e) {
+      e.preventDefault();
+      if ($('#bibleTrackerButton').val() == "Finalize") {
+        finalizeStatusFromHomepage();
+      }
+      else {
+        updateStatusFromHomepage
+          (finalized);
+      }
+    });
+
+    $(".bible-selector").on('change', changetoFinalize);
   });
 </script>
-{% endblock %}
-
-{% block references %}
+{% endif %}
+{% endblock %} {% block references %}
 
 <!-- Disable scaling to remove click delay on mobile for this page -->
 <meta name="viewport" content="width=device-width, user-scalable=no">
+
+<!-- This css is specific for the index page for the progress bar -->
 <style type="text/css">
-td{
-  text-align: center;
-}
+  .percent {
+    padding: 0px;
+    padding-left: 7px;
+    width: 30px;
+    line-height: 1;
+  }
 
-.bible-indicator{
-  font-weight: bold;
-}
-
-.trainee-search-container {
-  overflow: auto;
-}
-
-.trainee-search-container:hover {
-  background-color: #FFF;
-  color: #095F80;
-  border-color: #A6C5D1;
-  -webkit-box-shadow: 3px 2px #A6C5D1;
-  -moz-box-shadow: 3px 2px #A6C5D1;
-  box-shadow: 3px 2px #A6C5D1;
-}
-
-.trainee-search-input {
-  border: none;
-  float: left;
-}
-
-.trainee-search-input:focus {
-  outline: none;
-}
-
-.trainee-search-box {
-  background: #A6C5D1;
-  padding: 0.25px 26px 0.2px 12px;
-  margin-top: 3px;
-  margin-left: 8px;
-  margin-right: 0px;
-  height: 1em;
-  float: right;
-}
-
+  .progress-style {
+    padding-right: 0px;
+  }
 </style>
-{% endblock %}
+{% endblock %} {% block content %}
+<div class="container">
+  <div class="row">
+    <h1 class="col-md-12"> Welcome, {{ user.firstname }}! </h1>
+  </div>
 
-{% block content %}
-<div class="row">
-  <h1 class="col-md-4"> Welcome, {{ user.firstname }}! </h1>
-</div>
+  {% if user.type == 'T' %}
+  <!-- Trainee Search Box for TAs -->
+  <!--
+  <div class="row">
+    <div class="col-md-4">
+      <div class="btn-group-vertical">
+        <div class="btn btn-panel trainee-search-container">
+          <input class="btn-txt trainee-search-input" type="text" placeholder="TRAINEE SEARCH"></input>
+          <span class="trainee-search-box"></span>
+        </div>
+      </div>
+    </div>
+  </div> 
+  -->
 
-{% if user.type == 'T' %}
-{% ifusergroup training_assistant %}
-<!-- Trainee Search Box for TAs -->
-<!-- <div class="row">
-  <div class="col-md-4">
-    <div class="btn-group-vertical">
-      <div class="btn btn-panel trainee-search-container">
-        <input class="btn-txt trainee-search-input" type="text" placeholder="TRAINEE SEARCH"></input>
-        <span class="trainee-search-box"></span>
+  {% elif user.type == 'R' %}
+
+  <div class="row">
+    <!-- Panels -->
+    <div class="col-md-4">
+      <div id="panelsDiv" class="btn-group-vertical">
+        {% generate_panels as panels %} {% for panel in panels %}
+        <a class="btn btn-panel" href="{{ panel.url }}">
+          {# moved number first to fix firefox rendering issue #} {% if panel.num is not None %} {% if panel.num == 0 %}
+          <span class="btn-num-nought"> {{ panel.num }}</span>
+          {% else %}
+          <span class="btn-num"> {{ panel.num }}</span>
+          {% endif %} {% endif %}
+          <span class="btn-txt"> {{ panel.name }} </span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Weekly Summary -->
+    <div class="col-md-8 ml-auto">
+      <div class="row">
+        <form>
+          <div class="col-sm-1">
+            Week:
+          </div>
+          <div class="col-sm-4">
+            <!-- Pick a week of a term -->
+            <select id="week_select" class="form-control" name="week" size="0">
+              {% for i, week in weeks %}
+              <option value="{{i}}" {% if i > current_week %} disabled {% endif %}>{{week}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </form>
+      </div>
+      <br />
+
+      <table class="table table-bordered-wkly-sum">
+        <thead>
+          <tr>
+            <th scope="col" class="col-md-1"></th>
+            {% for day in 0|get_weekday_codes %}
+            <th scope="col" class="col-md-1">{{day}}</th>
+            {% endfor %}
+            <th scope="col" class="col-md-1"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- COMMENT OUT: SERVICE AND GOSPEL STATS ROWS --
+          <tr>
+            <th>SERVICE</th>
+            {% for i in "xxxxxxxx" %}
+            <td></td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th>GOSPEL STATISTICS</th>
+            {% for i in "xxxxxxx" %}
+            <td></td>
+            {% endfor %}
+            <td><a href="#">Input Stats</a></td>
+          </tr>
+          -->
+          <tr>
+            <form class="form-group bibleDropDown" id="bibleDropDown" method="post">
+              <th rowspan="3">BIBLE READING PROGRESS</th>
+              {% for day in 0|get_weekday_codes %}
+              <td class="bibleReadingRow">
+                <select class="bible-selector" id="bibleDropDown_{{day}}" data-day="{{day}}">
+                  <option value="_"></option>
+                  <br />
+                  <option value="C">C</option>
+                  <br />
+                  <option value="M">M</option>
+                  <br />
+                  <option value="N">N</option>
+                  <br />
+                </select>
+              </td>
+              {% endfor %}
+              <td>
+                <input class="bibleTrackerButton" type="submit" name="save" Value="Save" id='bibleTrackerButton'></input>
+              </td>
+            </form>
+          </tr>
+          <tr>
+            <td class="td-remove-indent" colspan="7">
+              <div class="row">
+                <div class="col-10 col-sm-6 col-md-10 progress-style">
+                  <div class="homepage-progress">
+                    <a href="{% url 'bible_tracker:index' %}">
+                      <div class="homepage-progress-bar" role="progressbar" aria-valuenow="{{bible_reading_progress}}" aria-valuemin="0" aria-valuemax="100"
+                        style="width: {{bible_reading_progress}}%">
+                      </div>
+                    </a>
+                  </div>
+                </div>
+                <div class="col-2 col-md-2 percent">
+                  {{bible_reading_progress}}%
+                </div>
+              </div>
+            </td>
+            <td>
+              <a class="bibleTrackerUpdate" href="{% if user.current_term == 1 or user.current_term == 2%}
+              {% url 'bible_tracker:index' %}#first-year-bible-reading
+              {% elif user.current_term == 3 or user.current_term == 4 %}
+              {% url 'bible_tracker:index' %}#second-year-bible-reading {% endif %}">Update</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Cards -->
+  {% spaceless %}
+  <div class="row">
+    <div class="row-md-12">
+      <div class="card_container">
+        {% generate_cards as cards %} {% for card in cards %} {% if card.condition %}
+        <div class="card">
+          <span class="card-header h3"> {{ card.header_title }} </span>
+          <span class=card-content>
+            {% for card_link in card.card_links %}
+            <span class="card-item">
+              <a href="{{ card_link.url }}" class="card-list">{{ card_link.title }}</a>
+              {% if card_link.number is not None %} {% if card_link.number == 0 %}
+              <div class="number-nought">0</div>
+              {% else %}
+              <div class="number-alert">{{ card_link.number }}</div>
+              {% endif %} {% endif %}
+            </span>
+            {% endfor %}
+          </span>
+        </div>
+        {% endif %} {% endfor %}
       </div>
     </div>
   </div>
-</div> -->
-{% endifusergroup %}
-
-<!-- below is the frontpage display intended for maintenance brothers, user type training assistant with only one group, the facility group -->
-{% ifusergroup facility_maintenance %}
-  {% include "maintenance/summary.html" %}
-{% endifusergroup %}
-
-{% elif user.type == 'R' %}
-<div class="row">
-  <!-- Panels -->
-  <div class="col-md-4">
-    <div id="panelsDiv" class="btn-group-vertical">
-      {% generate_panels as panels %}
-      {% for panel in panels %}
-      <a class="btn btn-panel" href="{{ panel.url }}" >
-        {# moved number first to fix firefox rendering issue #}
-        {% if panel.num is not None %}
-        {% if panel.num == 0 %}
-        <span class="btn-num-nought"> {{ panel.num }}</span>
-        {% else %}
-        <span class="btn-num"> {{ panel.num }}</span>
-        {% endif %}
-        {% endif %}
-        <span class="btn-txt"> {{ panel.name }} </span>
-      </a>
-      {% endfor %}
+  {% endspaceless %} {% if schedule %}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h5 class="panel-title">Today's Schedule</h5>
     </div>
-  </div>
-</div>
-<!-- Weekly Summary -->
-  <!-- <div class="col-md-8">
-    <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        {% for i, week in weeks %}
-        {% if i == current_week %}
-        {{week}}
-        {% endif %}
-        {% endfor %}
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        {% for i, week in weeks %}
-        <li class="{% if i == current_week %}disabled{% endif %}"><a href="#"> {{week}} </a> </li>
+    <div class="panel-body">
+      <ul>
+        {% for event in schedule.todays_events %}
+        <li>{{ event.name }} @ {{ event.start }}</li>
         {% endfor %}
       </ul>
     </div>
-    <div class="weekly_sum">
-      <div class="row">
-        <div class="col-md-1"></div>
-        {% for day in 6|get_weekday_codes %}
-        <div class="col-md-1">{{day}}</div>
-        {% endfor %}
-        <div class="col-md-1"></div>
-      </div>
-      <div class="row">
-        <div class="col-md-1">SERVICE</div>
-        {% for i in "xxxxxxxx" %}
-        <div class="col-md-1"></div>
-        {% endfor %}
-      </div>
-      <div class="row">
-        <div class="col-md-1">GOSPEL STATISTICS</div>
-        {% for i in "xxxxxxx" %}
-        <div class="col-md-1"></div>
-        {% endfor %}
-        <div class="col-md-1"><a href="#">Input Stats</a></div>
-      </div>
-      <div class="row">
-        <div class="col-md-1" rowspan="2">BIBLE READING PROGRESS</div>
-        {% for day in 6|get_weekday_codes %}
-        <div class="col-md-1">
-          <div class="dropdown">
-            <button class="btn btn-bible-dropdown dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-             </button>
-            <div class="dropdown-menu">
-              <li><a class="dropdown-item" href="#"> Completed </a></li>
-              <li><a class="dropdown-item" href="#"> Made Up </a></li>
-              <li><a class="dropdown-item" href="#"> Not Completed </a></li>
-            </div>
-          </div>
-        </div>
-        {% endfor %}
-        <div class="col-md-1"><a href="#" >Finalize</a></div>
-        <div class="col-md-7">
-          <div class="progress">
-            <a href="{% url 'bible_tracker:index' %}"><div class="progress-bar" role="progressbar" aria-valuenow="{{bible_reading_progress}}" aria-valuemin="0" aria-valuemax="100" style="width: {{bible_reading_progress}}%"> {{bible_reading_progress}}
-            </div></a>
-          </div>
-        </div>
-        <div class="col-md-1"><a href="#">Update</a></div>
-      </div>
-    </div>
-  </div> -->
-
-{% endif %}
-
-<!-- Cards -->
-{% spaceless %}
-<div class="row">
-  <div class="row-md-12">
-    <div class="card_container">
-      {% generate_cards as cards %}
-      {% for card in cards %}
-      {% if card.condition %}
-      <div class="card">
-        <span class="card-header h3"> {{ card.header_title }} </span>
-        <span class=card-content>
-          {% for card_link in card.card_links %}
-          <span class="card-item">
-            <a href="{{ card_link.url }}" class="card-list">{{ card_link.title }}</a>
-            {% if card_link.number is not None %}
-              {% if card_link.ta_number is None %}
-                {% if card_link.number == 0 %}
-                <div class="card-num">0</div>
-                {% else %}
-                <div class="card-num-alert">{{ card_link.number }}</div>
-                {% endif %}
-              {% else %}
-                {% if card_link.ta_number == 0 %}
-                <div class="card-num">0 ({{ card_link.number }})</div>
-                {% else %}
-                <div class="card-num-alert">{{ card_link.ta_number }} ({{ card_link.number }})</div>
-                {% endif %}
-              {% endif %}
-            {% endif %}
-          </span>
-          {% endfor %}
-        </span>
-      </div>
-      {% endif %}
-      {% endfor %}
-    </div>
   </div>
+  {% endif %}
 </div>
-{% endspaceless %}
-
-{% endblock %}
-
-{% block post_container %}
-  {{ block.super }}
-  {% include 'popups/announcement_popup.html' %}
-{% endblock %}
+{% endblock %} {% block post_container %} {% include 'popups/announcement_popup.html' %} {% endblock %}

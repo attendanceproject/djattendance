@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+{{form.media}}
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+
+<form method="post">
+  {% csrf_token %}
+  <p>
+  {% if object.leaveslips.all %}
+    This roll is attached to the following leave slip(s):<br>
+    {% for slip in object.leaveslips.all %}
+      <ul>
+        <li><a href="{{slip.get_admin_url}}">{{slip}}</a></li>
+      </ul>
+    {% endfor %}
+  {% endif %}
+    Are you sure you want to delete "<strong>{{ object }}</strong>"?<br>
+  </p>
+    <button type="submit" class="btn btn-danger btn-delete" name="delete">{{button_label}}</button>
+</form>
+
+{% endblock %}

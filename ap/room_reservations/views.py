@@ -10,10 +10,11 @@ from django.http import JsonResponse, HttpResponse
 
 from .models import RoomReservation
 from .forms import RoomReservationForm
-from accounts.models import TrainingAssistant, User
+from accounts.models import User
 from rooms.models import Room
 from aputils.trainee_utils import is_TA
 from aputils.utils import modify_model_status
+from terms.models import Term
 
 from braces.views import GroupRequiredMixin
 
@@ -25,11 +26,11 @@ TIMES_AM = [
 
 TIMES_PM = [
     '%s:%s%s' % (h, m, 'pm')
-    for h in (list(range(1, 12)))
+    for h in ([12]+list(range(1, 12)))
     for m in ('00', '30')
 ]
 
-TIMES = TIMES_AM + TIMES_PM
+TIMES = TIMES_AM + ['12:00pm', '12:30pm'] + TIMES_PM
 
 
 class RoomReservationSubmit(CreateView):
@@ -63,10 +64,9 @@ class RoomReservationSubmit(CreateView):
 
   def form_valid(self, form):
     room_reservation = form.save(commit=False)
-    user_id = self.request.user.id
-    room_reservation.requester = User.objects.get(id=user_id)
-#    if TrainingAssistant.objects.filter(id=user_id).exists():
-#      room_reservation.status = 'A'
+    room_reservation.requester = User.objects.get(id=self.request.user.id)
+    if is_TA(self.request.user):
+      room_reservation.status = 'A'
     room_reservation.save()
     return super(RoomReservationSubmit, self).form_valid(form)
 
@@ -77,6 +77,9 @@ class RoomReservationUpdate(RoomReservationSubmit, UpdateView):
     ctx['page_title'] = 'Edit Reservation'
     ctx['button_label'] = 'Update'
     return ctx
+
+  def form_valid(self, form):
+    return super(RoomReservationSubmit, self).form_valid(form)
 
 
 class RoomReservationDelete(RoomReservationSubmit, DeleteView):
@@ -127,9 +130,17 @@ def tv_page_reservations(request):
   rooms = Room.objects.all()[offset:limit + offset]
   room_data = []
   for r in rooms:
-    reservations = RoomReservation.objects.filter(room=r, date=date.today())
+    reservations = []
+    # Include recurring events
+    reservations.extend(RoomReservation.objects.filter(room=r, frequency='Term', status='A'))
+    # Include non recurring events
+    reservations.extend(RoomReservation.objects.filter(room=r, date=date.today(), status='A'))
     res = []
     for reservation in reservations:
+      # Exclude events not on the current weekday
+
+      if reservation.date > date.today() and reservation.date < Term.current_term().monday_start or date.today().weekday() != reservation.date.weekday():
+        continue
       hours = reservation.end.hour - reservation.start.hour
       minutes = reservation.end.minute - reservation.start.minute
       intervals = hours * 2 + minutes // 30

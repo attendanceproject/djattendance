@@ -113,6 +113,21 @@ class InterimIntentionsTAView(TemplateView, GroupRequiredMixin):
     ctx = super(InterimIntentionsTAView, self).get_context_data(**kwargs)
     term = Term.current_term()
 
+    def merge_locality_entries(d, sep=' '):
+      prefix = 'locality__city__'
+      try:
+        d['locality'] = unicode(d[prefix + 'name']) + unicode(sep)
+        if not d[prefix + 'state']:
+          d['locality'] += unicode(d[prefix + 'country'])
+        else:
+          d['locality'] += unicode(d[prefix + 'state'])
+        del d[prefix + 'name']
+        del d[prefix + 'state']
+        del d[prefix + 'country']
+        return 1
+      except KeyError:
+        return 0
+
     def merge_entries(d, key1, key2, newkey, sep=' '):
       try:
         d[newkey] = unicode(d[key1]) + unicode(sep) + unicode(d[key2])
@@ -123,11 +138,11 @@ class InterimIntentionsTAView(TemplateView, GroupRequiredMixin):
         return 0
 
     trainees = Trainee.objects.values('firstname', 'lastname', 'current_term',
-                                      'team__name', 'locality__city__name',
-                                      'locality__city__state', 'id')
+                                      'team__name', 'locality__city__name', 'locality__city__state',
+                                      'locality__city__country', 'id')
     for t in trainees:
       t['intention'] = InterimIntentions.objects.filter(trainee__id=t['id'], admin__term=term).first()
-      merge_entries(t, 'locality__city__name', 'locality__city__state', 'locality', sep=', ')
+      merge_locality_entries(t, sep=', ')
       merge_entries(t, 'firstname', 'lastname', 'name')
 
     ctx['trainees'] = trainees

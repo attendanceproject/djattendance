@@ -71,7 +71,7 @@
       </br>
       </br>
       <table id="stats" class="table table-condensed statistics">
-        <tr><td>Average score </td><td>{{ average }} / {{ exam.total_score }}</td></tr>
+        <tr><td>Average score </td><td>{{ average|floatformat:"2" }} / {{ exam.total_score }}</td></tr>
         <tr><td>Maximum score </td><td>{{ maximum }} / {{ exam.total_score }}</td></tr>
         <tr><td>Minimum score </td><td>{{ minimum }} / {{ exam.total_score }}</td></tr>
       </table>

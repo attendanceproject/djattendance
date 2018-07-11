@@ -1,8 +1,9 @@
+from django.http import JsonResponse
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group
 from accounts.models import *
 from attendance.models import Roll
-from schedules.models import Event
+from schedules.models import *
 from terms.models import Term
 from datetime import datetime
 from leaveslips.models import IndividualSlip
@@ -11,7 +12,9 @@ from django.db.models import Q
 import sys
 from contextlib import contextmanager
 
-AMs = Trainee.objects.filter(groups__name='attendance_monitors')
+AMs = Trainee.objects.filter(Q(groups__name='attendance_monitors'))
+AMs = AMs.filter(~Q(groups__name='dev'))
+AMs = AMs.filter(~Q(groups__name='regular_training_assistant'))
 
 @contextmanager
 def stdout_redirected(new_stdout):
@@ -43,6 +46,11 @@ class Command(BaseCommand):
         '--mr',
         dest='mislink_rolls',
         help='Pull rolls with a mislink in schedules',
+    )
+    parser.add_argument(  # --mr2 1
+        '--mr2',
+        dest='mislink_rolls2',
+        help='Pull rolls with a mislink in schedules, improved',
     )
     parser.add_argument(  # --gr 1
         '--gr',
@@ -170,6 +178,40 @@ class Command(BaseCommand):
       for r in [r for r in other_rolls if r.trainee == t]:
         print "Roll ID", r.id, r, "submitted by", r.submitted_by, "on", r.last_modified
 
+  file_name = '../ghost_rolls' + RIGHT_NOW + '.txt'
+
+  # @open_file(file_name)
+  def _mislink_rolls2(self):
+    mislinked_rolls_ids = {}
+    for t in Trainee.objects.all():
+      rolls = Roll.objects.filter(trainee=t).order_by('date')
+      t_set = [t]
+      schedules = t.active_schedules
+      weeks = range(0, 20)
+
+      schedules = Schedule.get_all_schedules_in_weeks_for_trainees(weeks, t_set)
+      w_tb = EventUtils.collapse_priority_event_trainee_table(weeks, schedules, t_set)
+      for r in rolls:
+        key = Term.objects.get(current=True).reverse_date(r.date)
+        evs = w_tb[key]
+        if r.event not in evs:
+          if t.id in mislinked_rolls_ids.keys():
+            mislinked_rolls_ids[t.id].append(r.id)
+          else:
+            mislinked_rolls_ids[t.id] = [r.id]
+
+          # print r.id
+          # mislinked_rolls_ids.append(r.id)
+
+    # mislink_rolls = Roll.objects.filter(id__in=mislinked_rolls_ids)
+    # trainees_with_mislink_rolls_id = mislink_rolls.order_by('trainee__id').distinct('trainee__id').values_list('trainee_id', flat=True)
+    # trainees_with_mislink_rolls = Trainee.objects.filter(id__in=trainees_with_mislink_rolls_id).order_by('lastname')
+    # for t in trainees_with_mislink_rolls:
+    #   for r in mislink_rolls.filter(trainee=t):
+    #     print r
+
+    #   print '\n'
+    print JsonResponse(mislinked_rolls_ids)
 
 
   file_name = '../ghost_rolls' + RIGHT_NOW + '.txt'
@@ -274,7 +316,7 @@ class Command(BaseCommand):
       trainee_rolls = Roll.objects.filter(trainee=t).order_by('date', 'event').distinct('date', 'event')
       for roll in trainee_rolls:
         dup = Roll.objects.filter(trainee=t, event=roll.event, date=roll.date).order_by('last_modified')
-        
+
         if dup.count() == 2:
           invalid_duplicates = True
           duplicate_rolls.append(dup)
@@ -306,7 +348,7 @@ class Command(BaseCommand):
     print '------------ For Attendanece Monitros ----------'
     print '------------ invalid duplicate rolls ----------'
     for am in AMs:
-      for r in [qs.all() for qs in two_rolls if qs.filter(submitted_by).exist()]:
+      for r in [qs.all() for qs in two_rolls if qs.filter(submitted_by=am).exists()]:
         print output.format(str(r.id), r, r.submitted_by, r.last_modified)
         coutner += 1
       print '\n'
@@ -315,11 +357,14 @@ class Command(BaseCommand):
 
   def handle(self, *args, **options):
     allcmd = False
-    if all(options[x] is None for x in ['mislink_rolls', 'ghost_rolls', 'mislink_slips', 'invalid_duplicates']):
+    if all(options[x] is None for x in ['mislink_rolls','mislink_rolls2', 'ghost_rolls', 'mislink_slips', 'invalid_duplicates']):
       allcmd = True
     if allcmd or options['mislink_rolls']:
       print('* Pulling Rolls with mislinked Trainee...')
       self._mislink_rolls()
+    if allcmd or options['mislink_rolls2']:
+      print('* Actually pulling Rolls with mislinked Trainee...')
+      self._mislink_rolls2()
     if allcmd or options['ghost_rolls']:
       print('* Pulling "present" Rolls with no leavslips attached...')
       self._ghost_rolls()

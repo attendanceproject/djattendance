@@ -18,7 +18,8 @@
   $(document).ready(function() {
     $("#mytable").DataTable({
       info: false,
-      paging: false,
+      paging: true,
+      lengthMenu: [ [50, 100, -1], [50, 100, "All"] ],
       autoWidth: true,
       order: [6, 'desc'],
       dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
@@ -67,7 +68,9 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <h2 class="panel-title">
-                Discipline assigned for {{discipline.get_infraction_display}}. Summaries left: <b>{{discipline.get_num_summary_due}}</b>.
+                {% with infrac=discipline.get_infraction_display %}
+                Discipline assigned for {{infrac}} {% if infrac == 'Missed Service' %} ({{discipline.missed_service}}) {% endif %}. Summaries left: <b>{{discipline.get_num_summary_due}}</b>.
+                {% endwith %}
                 {% if discipline.offense == 'MO' %}
                   Offense type: <b><span class="text-danger">{{discipline.get_offense_display}}</span></b>.
                 {% else %}

@@ -13,8 +13,16 @@
     {% if read_only %}
     $('#id_grad_form *').attr("disabled", true);
     {% endif %}
+    {% if user in object.grad_admin.speaking_trainees.all %}
+      $("#id_speaking_section").attr("disabled", false);
+      $("#id_speaking").attr("disabled", false);
+      $("button.btn").attr("disabled", false);
+      $("input[name='csrfmiddlewaretoken']").attr("disabled", false);
+
+    {% endif %}
 
     $("label[for=id_participate_0]").hide();
+
   });
 </script>
 
@@ -39,32 +47,54 @@
 {% endif %}
 <form id="id_grad_form" action="" method="post">
   {% csrf_token %}
-  <div class="row"><div class="col-xs-6"><div class="panel">
+  <div class="row">
+  <div class="col-xs-6">
+    <div class="panel">
     <p><strong>Which outline sections are you most burdened for?</strong></p>
       <div class="row"><div class="col-xs-12">
         Enter the section number you are most impressed by:<br>
         {{form.sections}}
       </div></div>
-  </div></div></div>
+  </div>
 
-  <div class="row"><div class="col-xs-6"><div class="panel">
+  <div class="panel">
     <p><strong>How would you like to participate?</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.participate}}
       </div></div>
-  </div></div></div>
+  </div>
 
-  <div class="row"><div class="col-xs-6"><div class="panel">
+  <div class="panel">
     <p><strong>Crystallized sentence of what impressed you:</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.sentence}}
       </div></div>
-  </div></div></div>
+  </div>
 
     <div class="row">
       <div class="col-md-12">
         <button type="submit" class="btn btn-primary btn-save">{{button_label|safe}}</button>
       </div>
     </div>
+    </div>
+  {% if user in object.grad_admin.speaking_trainees.all %}
+  <div class="col-xs-6">
+  <div class="panel">
+    <p><strong>Section you will be speaking on:</strong></p>
+      <div class="row"><div class="col-xs-12">
+        {{form.speaking_section}}
+      </div></div>
+  </div>
+  <div class="panel">
+    <p><strong>What you will be speaking:</strong></p>
+      <div class="row"><div class="col-xs-12">
+        {{form.speaking}}
+      </div></div>
+  </div>
+  </div>
+  {% endif %}
+
+  </div>
+
   </form>
   {% endblock %}

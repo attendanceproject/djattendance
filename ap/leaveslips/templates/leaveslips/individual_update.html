@@ -1,8 +1,8 @@
 {% extends "leaveslips/leaveslip_update.html" %}
 {% load common_tags %}
 
-{% block ls-link %}
-href="{% url 'leaveslips:individual-update' leaveslip.id %}"
+{% block ls_link %}
+href="{{next_ls_url}}"
 {% endblock %}
 
 {% block leaveslip_script %}
@@ -56,4 +56,11 @@ $('#id_type').change(function() {
 
 {% block onsubmit %}
 populate_events();
+{% endblock %}
+
+{% block trainee_display %}
+<div class="form-group">
+  <label class="control-label" for="id_trainee">Trainee</label>
+  <textarea name="trainee" rows="2" title="" cols="40" id="id_trainee" class="form-control" readonly="yes" style="resize: none; height: 32px; background-color: white; border-radius: 5px;">{{ leaveslip.trainee }}</textarea>
+</div>
 {% endblock %}

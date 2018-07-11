@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from graduation.utils import grad_forms
 from form_manager.utils import user_forms
 from hc.utils import hc_surveys, hc_recommendations
+from semi.utils import location_form_available, attendance_form_available
 
 
 # Type Declarations
@@ -54,17 +55,16 @@ def generate_menu(context):
       trainee_only=[
           SubMenuItem(name='Absent Trainee Roster', permission='absent_trainee_roster.add_roster', url='absent_trainee_roster:absent_trainee_form', condition=user.has_group(['HC', 'absent_trainee_roster'])),
           SubMenuItem(name='Personal Attendance', url='attendance:attendance-submit', condition=True),
-          SubMenuItem(name='Class Roll', permission='attendance.add_roll', url='attendance:class-rolls', condition=user.has_group(['training_assistant', 'attendance_monitors'])),
-          SubMenuItem(name='Meal Roll', permission='attendance.add_roll', url='attendance:meal-rolls', condition=user.has_group(['training_assistant', 'attendance_monitors'])),
-          SubMenuItem(name='Study Roll', permission='attendance.add_roll', url='attendance:study-rolls', condition=user.has_group(['training_assistant', 'attendance_monitors'])),
-          SubMenuItem(name='Class Table', permission='attendance.add_roll', url='attendance:class-table-rolls', condition=user.has_group(['attendance_monitors'])),
-          SubMenuItem(name='YPC Roll', permission='attendance.add_roll', url='attendance:ypc-rolls', condition=user.has_group(['attendance_monitors', 'ypc_monitors'])),
+          SubMenuItem(name='Semi Annual Study Attendance', url='semi:attendance-base', condition=attendance_form_available()),
+          SubMenuItem(name='Semi Annual Study Location', url='semi:location-base', condition=location_form_available()),
+          SubMenuItem(name='Roll Entry Seating Chart', permission='attendance.add_roll', url='attendance:class-rolls', condition=user.has_group(['attendance_monitors'])),
           SubMenuItem(name='Audit', permission='attendance.add_roll', url='attendance:audit-rolls', condition=user.has_group(['attendance_monitors'])),
           SubMenuItem(name='Designated Service Hours', permission='services.add_designated_service_hours', url='services:designated_service_hours', condition=user.has_group(['designated_service'])),
       ],
       common=[
-          SubMenuItem(name='House Roll', permission='attendance.add_roll', url='attendance:house-rolls', condition=user.has_group(['attendance_monitors', 'HC'])),
-          SubMenuItem(name='Team Roll', permission='attendance.add_roll', url='attendance:team-rolls', condition=user.has_group(['attendance_monitors', 'team_monitors'])),
+          SubMenuItem(name='Roll Entry Table', permission='attendance.add_roll', url='attendance:house-rolls', condition=user.has_group(['attendance_monitors', 'training_assistant'])),
+          SubMenuItem(name='House Roll', permission='attendance.add_roll', url='attendance:house-rolls', condition=user.has_group(['HC'])),
+          SubMenuItem(name='Team Roll', permission='attendance.add_roll', url='attendance:team-rolls', condition=user.has_group(['team_monitors'])),
       ])
 
   discipline_menu = MenuItem(
@@ -82,6 +82,7 @@ def generate_menu(context):
           SubMenuItem(name='Manage Exams', permission='exams.add_exam', url='exams:manage', condition=user.has_group(['exam_graders', 'training_assistant'])),
       ],
       trainee_only=[
+        SubMenuItem(name="Take Exam", url='exams:list', condition=context['exams_available']),
         SubMenuItem(name="View Graded Exams", url='exams:taken', condition=context['exams_taken']),
       ]
 
@@ -155,8 +156,7 @@ def generate_menu(context):
   current_menu = MenuItem(
       name='Current',
       trainee_only=[
-          SubMenuItem(name="Take Exam", url='exams:list', condition=context['exams_available']),
-          SubMenuItem(name='Interim intentions', url='interim:interim_intentions', condition=context['interim_intentions_available']),
+          SubMenuItem(name='Interim Intentions', url='interim:interim_intentions', condition=context['interim_intentions_available']),
       ] + [SubMenuItem(name=pf.name, url='/forms/view/' + pf.slug) for pf in user_forms(user)],
   )
 

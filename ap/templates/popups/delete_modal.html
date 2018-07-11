@@ -1,7 +1,7 @@
 {% load common_tags %}
 
 <script type="text/javascript">
-  $(document).on('click', ".delete_request_button", function(event) {
+  $(document).on('click', ".delete-request-button", function(event) {
     event.preventDefault();
     let url = $(event.currentTarget).parent().attr('href');
     $('#deleteModal').modal('show');

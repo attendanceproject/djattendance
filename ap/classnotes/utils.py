@@ -1,24 +1,27 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from itertools import chain
 
-from django.db import models
-
-from .models import Classnotes
+from accounts.models import Trainee
 from attendance.models import Roll
-from attendance.utils import Period
 from leaveslips.models import IndividualSlip, GroupSlip
 from terms.models import Term
-from accounts.models import Trainee
-from classes.models import Class
+
+from .models import Classnotes
 
 
-def assign_classnotes():
+def assign_classnotes(week=None):
+  term = Term.current_term()
+  start = term.start
+  end = term.end
+  if week is not None:
+    start = term.startdate_of_week(week)
+    end = term.enddate_of_week(week)
   for trainee in Trainee.objects.all().iterator():
     update_classnotes_list(trainee)
-    assign_individual_classnotes(trainee)
+    assign_individual_classnotes(trainee, start, end)
 
 
-def assign_individual_classnotes(trainee):
+def assign_individual_classnotes(trainee, start, end):
   '''
     Assign Classnotes based on class absences
     - Any special leave of absence (eg. interviews, wedding):
@@ -28,9 +31,9 @@ def assign_individual_classnotes(trainee):
   '''
   # look at trainee's absences (for class event).
   # Increment absence_counts based on classname (HStore)
+  print trainee
   regular_absence_counts = {}
-  term = Term.current_term()
-  rolls = trainee.rolls.all().filter(date__gte=term.start, date__lte=term.end, status='A', event__type='C').order_by('date').select_related('event')
+  rolls = trainee.rolls.all().filter(date__gte=start, date__lte=end, status='A', event__type='C').order_by('date').select_related('event')
   for roll in rolls.iterator():
       classname = roll.event.name
       number_classnotes = calculate_number_classnotes(trainee, roll)
