@@ -14,6 +14,7 @@ from braces.views import GroupRequiredMixin, LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 from leaveslips.models import GroupSlip, IndividualSlip
@@ -23,6 +24,22 @@ from lifestudies.models import Discipline
 from teams.models import Team
 
 from .forms import ReportGenerateForm
+
+
+class GenerateAttendanceReport(TemplateView):
+  template_name = 'reports/generate_attendance_report.html'
+
+
+class AttendanceReport(TemplateView):
+  template_name = 'reports/attendance_report.html'
+
+def attendance_report_trainee(request):
+  return None
+
+
+def zip_attendance_report(request):
+  return None
+
 
 
 class ReportCreateView(LoginRequiredMixin, GroupRequiredMixin, FormView):

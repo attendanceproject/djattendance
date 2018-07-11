@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block content %}
+
+<h2>Generate Attendance Reports </h2>
+<h5> Note: Generated attendance reports can be printed as separate pages for each locality or team</h5>
+<form action="{% url 'reports:report-generated' %}" id="reportsForm" method="post" class="form-horizontal">
+  {% csrf_token %}
+  <div class="reports-form-container">
+  	<div class="form-group right-push col-md-2 Attendance Period Time Range">
+  		Time Range
+    	<p> Date from: <input type="text" name="date_from" class="datepicker"> </p>
+    	<p> Date to: <input type="text" name="date_to" class="datepicker"> </p>
+      <button type="submit" id="report-submit-button" name="report-submit" class="btn btn-success">Generate Report</button>
+  	</div>
+	</div>
+  <img src="{% static 'reports/img/temp.gif' %}" id="loading" style="display:none"/ >
+</form>
+
+{% endblock %}
