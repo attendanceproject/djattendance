@@ -33,6 +33,11 @@ class GenerateAttendanceReport(TemplateView):
 class AttendanceReport(TemplateView):
   template_name = 'reports/attendance_report.html'
 
+  def post(self, request, *args, **kwargs):
+    print request.POST.get("date_from")
+    print request.POST.get("date_to")
+    return self.get(request, *args, **kwargs)
+
 def attendance_report_trainee(request):
   return None
 
