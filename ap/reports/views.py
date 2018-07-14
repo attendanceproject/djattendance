@@ -12,7 +12,7 @@ from aputils.utils import render_to_pdf, timeit, timeit_inline
 from attendance.models import Roll
 from braces.views import GroupRequiredMixin, LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
@@ -34,12 +34,26 @@ class AttendanceReport(TemplateView):
   template_name = 'reports/attendance_report.html'
 
   def post(self, request, *args, **kwargs):
-    print request.POST.get("date_from")
-    print request.POST.get("date_to")
-    return self.get(request, *args, **kwargs)
+
+    context = self.get_context_data()
+    context['trainees'] = list(Trainee.objects.filter(is_active=True, current_term=1).values_list('pk', flat=True))
+    context['date_from'] = request.POST.get("date_from")
+    context['date_to'] = request.POST.get("date_to")
+
+    return super(AttendanceReport, self).render_to_response(context)
 
 def attendance_report_trainee(request):
-  return None
+  data = request.GET
+  t_id = data['t_id']
+  date_from = data['date_from']
+  date_to = data['date_to']
+  print t_id, date_from, date_to
+
+
+
+
+
+  return JsonResponse({'succes': 'yes'})
 
 
 def zip_attendance_report(request):
