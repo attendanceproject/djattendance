@@ -2,21 +2,26 @@ import copy
 import json
 import os
 import pickle
-from collections import OrderedDict
+
+from collections import OrderedDict, Counter
 from datetime import datetime
 from StringIO import StringIO
 from zipfile import ZipFile
 
-from accounts.models import Trainee
 from aputils.utils import render_to_pdf, timeit, timeit_inline
-from attendance.models import Roll
+from aputils.eventutils import EventUtils
 from braces.views import GroupRequiredMixin, LoginRequiredMixin
+
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
+
+from accounts.models import Trainee
+from terms.models import Term
+from attendance.models import Roll
 from leaveslips.models import GroupSlip, IndividualSlip
 from localities.models import Locality
 from schedules.models import Event, Schedule
@@ -36,7 +41,7 @@ class AttendanceReport(TemplateView):
   def post(self, request, *args, **kwargs):
 
     context = self.get_context_data()
-    context['trainees'] = list(Trainee.objects.filter(is_active=True, current_term=1).values_list('pk', flat=True))
+    context['trainees'] = list(Trainee.objects.filter(is_active=True).values_list('pk', flat=True))
     context['date_from'] = request.POST.get("date_from")
     context['date_to'] = request.POST.get("date_to")
 
@@ -44,16 +49,48 @@ class AttendanceReport(TemplateView):
 
 def attendance_report_trainee(request):
   data = request.GET
-  t_id = data['t_id']
-  date_from = data['date_from']
-  date_to = data['date_to']
-  print t_id, date_from, date_to
 
+  res = dict()
 
+  t_id = int(data['t_id'])
+  trainee = Trainee.objects.get(pk=t_id)
+  res['trainee_id'] = t_id
+  res['firstname'] = trainee.firstname
+  res['lastname'] = trainee.lastname
+  res['sending_locality'] = trainee.locality.id
+  res['team'] = trainee.team.code
+  res['ta'] = trainee.TA.full_name
+  res['gender'] = trainee.gender
 
+  rolls = Roll.objects.filter(trainee=trainee).exclude(status='P').exclude(event__monitor=None)
+  if trainee.self_attendance:
+    rolls = rolls.filter(submitted_by=trainee)
 
+  date_from = datetime.strptime(data['date_from'], '%m/%d/%Y').date()
+  date_to = datetime.strptime(data['date_to'], '%m/%d/%Y').date()
+  ct = Term.objects.get(current=True)
+  if date_from < ct.start:
+    date_from = ct.start
+  if date_to > ct.end:
+    date_to = ct.end
 
-  return JsonResponse({'succes': 'yes'})
+  week_from = ct.reverse_date(date_from)[0]
+  week_to = ct.reverse_date(date_to)[0]
+  weeks = range(week_from, week_to)
+  w_tb = EventUtils.collapse_priority_event_trainee_table(weeks, trainee.active_schedules, [trainee])
+  count = Counter()
+  for kv in w_tb:
+    for ev, t in w_tb[kv].items():
+      if ev in count:
+        count[ev] += 1
+      else:
+        count[ev] = 1
+
+  total_rolls_for_trainee = sum(count[ev] for ev in count if ev.monitor is not None)
+  tardy_rolls_count = rolls.exclude(status='A').count()
+  res['% Tardy'] = str(round(tardy_rolls_count / float(total_rolls_for_trainee) * 100, 2)) + "%"
+
+  return JsonResponse(res)
 
 
 def zip_attendance_report(request):
