@@ -121,7 +121,7 @@ def attendance_report_trainee(request):
       else:
         count[ev] = 1
 
-  # this calculates tardy percentage
+  # CALCULATE %TARDY
   total_possible_rolls_count = sum(count[ev] for ev in count if ev.monitor is not None)
   tardy_rolls = rolls.exclude(status='A')
 
@@ -135,7 +135,7 @@ def attendance_report_trainee(request):
   res["% Tardy"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
 
-  # this calculates % of classes missed
+  # CALCULATE %CLASSES MISSED
   possible_class_rolls_count = sum(count[ev] for ev in count if ev.monitor == 'AM' and ev.type == 'C')
   missed_classes = rolls.filter(event__monitor='AM', event__type='C')
 
@@ -147,6 +147,17 @@ def attendance_report_trainee(request):
   missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips)
 
   res["% Classes Missed"] = str(round(missed_classes.count() / float(possible_class_rolls_count) * 100, 2)) + "%"
+
+  # CALCULATE %SICKNESS
+  rolls_covered_by_sickness = Roll.objects.filter(trainee=trainee, leaveslips__status='A', leaveslips__type='SICK').distinct()
+
+  res["% Sickness"] = str(round(rolls_covered_by_sickness.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
+
+  # CALCULATE UNEXCUSED ABSENCES
+  unexcused_absences = rolls.filter(status='A')
+  unexcused_absences = unexcused_absences.exclude(leaveslips__status='A')
+  unexcused_absences = rolls_excused_by_groupslips(unexcused_absences, group_slips)
+  res["% Unex. Abs."] = str(round(unexcused_absences.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
   return JsonResponse(res)
 
