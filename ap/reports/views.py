@@ -30,11 +30,17 @@ from teams.models import Team
 
 from .forms import ReportGenerateForm
 
-
+# input view for generating generic attendance report
 class GenerateAttendanceReport(TemplateView):
   template_name = 'reports/generate_attendance_report.html'
 
 
+# initial attendance report base that results in may ajax queries being generated
+# according to list fed of trainee ids, localities, and teams
+# this is done to bypass nginex timeout and to run more synchronous operations
+# on computing the attendance record for trainees
+# client requests to server would become easier to implement
+# rather than running parallel processing via the backend
 class AttendanceReport(TemplateView):
   template_name = 'reports/attendance_report.html'
 
@@ -47,32 +53,61 @@ class AttendanceReport(TemplateView):
 
     return super(AttendanceReport, self).render_to_response(context)
 
-def attendance_report_trainee(request):
-  data = request.GET
+# given a list or rolls and groupslips, return rolls that are not excused by rolls
+def rolls_excused_by_groupslips(rolls, groupslips):
+  unexcused_rolls = rolls
+  for group_slip in groupslips:
 
+    # majority of groupslips are on the same date
+    if group_slip['start'].date() == group_slip['end'].date():
+      unexcused_rolls = unexcused_rolls.exclude(event__start__gte=group_slip['start'].time(), event__end__lte=group_slip['end'].time())
+
+    # to cover multi day groupslips for conference or other events
+    else:
+      potentials_rolls = unexcused_rolls.filter(date__range=[group_slip['start'].date(), group_slip['end'].date()])
+      if potentials_rolls.count() == 0:
+        continue
+      for r in potentials_rolls:
+        r_start = datetime.combine(r.date, r.event.start)
+        r_end = datetime.combine(r.date, r.event.end)
+        if group_slip['start'] <= r_start and group_slip['end'] >= r_end:
+          unexcused_rolls = unexcused_rolls.exclude(id=r.pk)
+
+  return unexcused_rolls
+
+
+# computing the attendance record per trainee
+# could potentiall explore more optimized runtine by reducing duplicate computation
+def attendance_report_trainee(request):
+
+  data = request.GET
   res = dict()
 
-  t_id = int(data['t_id'])
+  t_id = int(data["t_id"])
   trainee = Trainee.objects.get(pk=t_id)
-  res['trainee_id'] = t_id
-  res['firstname'] = trainee.firstname
-  res['lastname'] = trainee.lastname
-  res['sending_locality'] = trainee.locality.id
-  res['team'] = trainee.team.code
-  res['ta'] = trainee.TA.full_name
-  res['gender'] = trainee.gender
+  res["trainee_id"] = t_id
+  res["firstname"] = trainee.firstname
+  res["lastname"] = trainee.lastname
+  res["sending_locality"] = trainee.locality.id
+  res["team"] = trainee.team.code
+  res["ta"] = trainee.TA.full_name
+  res["gender"] = trainee.gender
 
-  rolls = Roll.objects.filter(trainee=trainee).exclude(status='P').exclude(event__monitor=None)
-  if trainee.self_attendance:
-    rolls = rolls.filter(submitted_by=trainee)
-
-  date_from = datetime.strptime(data['date_from'], '%m/%d/%Y').date()
-  date_to = datetime.strptime(data['date_to'], '%m/%d/%Y').date()
+  date_from = datetime.strptime(data["date_from"], '%m/%d/%Y').date()
+  date_to = datetime.strptime(data["date_to"], '%m/%d/%Y').date()
   ct = Term.objects.get(current=True)
   if date_from < ct.start:
     date_from = ct.start
   if date_to > ct.end:
     date_to = ct.end
+
+  rolls = Roll.objects.filter(trainee=trainee).exclude(status='P').exclude(event__monitor=None)
+  if trainee.self_attendance:
+    rolls = rolls.filter(submitted_by=trainee)
+
+  start_datetime = datetime.combine(date_from, datetime.min.time())
+  end_datetime = datetime.combine(date_to, datetime.max.time())
+  group_slips = GroupSlip.objects.filter(status='A', start__gte=start_datetime, end__lte=end_datetime, trainees=trainee).values('start', 'end')
 
   week_from = ct.reverse_date(date_from)[0]
   week_to = ct.reverse_date(date_to)[0]
@@ -86,16 +121,39 @@ def attendance_report_trainee(request):
       else:
         count[ev] = 1
 
-  total_rolls_for_trainee = sum(count[ev] for ev in count if ev.monitor is not None)
-  tardy_rolls_count = rolls.exclude(status='A').count()
-  res['% Tardy'] = str(round(tardy_rolls_count / float(total_rolls_for_trainee) * 100, 2)) + "%"
+  # this calculates tardy percentage
+  total_possible_rolls_count = sum(count[ev] for ev in count if ev.monitor is not None)
+  tardy_rolls = rolls.exclude(status='A')
+
+  # currently counts rolls excused by individual and group slips
+  # comment this part out to not count those rolls
+  # exclude tardy rolls excused by individual slips
+  tardy_rolls = tardy_rolls.exclude(leaveslips__status='A')
+  # exclude tardy rolls excused by group slips
+  tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips)
+
+  res["% Tardy"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
+
+
+  # this calculates % of classes missed
+  possible_class_rolls_count = sum(count[ev] for ev in count if ev.monitor == 'AM' and ev.type == 'C')
+  missed_classes = rolls.filter(event__monitor='AM', event__type='C')
+
+  # currently counts rolls excused by individual and group slips
+  # comment this part out to not count those rolls
+  # exclude tardy rolls excused by individual slips
+  missed_classes = missed_classes.exclude(leaveslips__status='A')
+  # exclude tardy rolls excused by group slips
+  missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips)
+
+  res["% Classes Missed"] = str(round(missed_classes.count() / float(possible_class_rolls_count) * 100, 2)) + "%"
 
   return JsonResponse(res)
 
 
+# function to take request parameters and generate zip file of pdfs per team and locality
 def zip_attendance_report(request):
   return None
-
 
 
 class ReportCreateView(LoginRequiredMixin, GroupRequiredMixin, FormView):
