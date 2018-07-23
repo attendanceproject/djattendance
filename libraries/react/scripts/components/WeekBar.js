@@ -6,7 +6,7 @@ import Select from 'react-select';
 import SlipStatusIcon from './SlipStatusIcon'
 
 const WeekBar = ({isFirst, firstStart, firstEnd, secondStart, secondEnd, period, currentPeriod, showLegend,
-                    onPrevWeek, onNextWeek, traineeView, selectPeriod, toggleLegend}) =>
+                    onPrevWeek, onNextWeek, traineeView, disablePeriodSelect, selectPeriod, toggleLegend}) =>
 {
   let periodChoices = Array.from(Array(10).keys()).map(c => { return {value: c, label: c}})
   let selectedPeriod = {value: period, label: period}
@@ -18,7 +18,11 @@ const WeekBar = ({isFirst, firstStart, firstEnd, secondStart, secondEnd, period,
             <div className="row">
               <div className="weekbar__title no-padding col-md-5">
                 WEEK {period * 2 + (isFirst ? 0 : 1)}&nbsp;
-                PERIOD <Select className="weekbar__period" clearable={false} options={periodChoices} value={selectedPeriod} onChange={selectPeriod}/>
+                PERIOD { disablePeriodSelect ?
+                  period
+                :
+                  <Select className="weekbar__period" clearable={false} options={periodChoices} value={selectedPeriod} onChange={selectPeriod}/>
+                }
               </div>
               <div className="col-md-7">
                 <div className="legend row">

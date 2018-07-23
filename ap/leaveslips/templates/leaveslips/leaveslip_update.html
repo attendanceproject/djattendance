@@ -15,43 +15,57 @@
 
     $('.hidden-input').hide();
 
-    let href = '';
+    let status = '';
     $('.modify-status').click((e) => {
       e.preventDefault();
-      href = e.currentTarget.href;
+      status = e.currentTarget.dataset.status;
       $('form').submit();
     });
-    $('.btn-save').click((e) => {
-      href = '';
-    });
+    let redirect = $('#ajax-redirect').attr('href');
     $('form').on('submit', (e) => {
       {% block onsubmit %}{% endblock %}
       e.preventDefault();
       let form = $(e.currentTarget);
+      let postData = form.serialize();
+      if (status) {
+        postData += "&status=" + status
+      }
       $.ajax({
         url: form.attr('action'),
         type: "POST",
-        data: form.serialize(),
+        data: postData,
         success: (data) => {
-          if (!href) {
+          if (!status) {
             new Notification(Notification.SUCCESS, 'Saved').show();
             return;
+          } else {
+            // let msg = "{{leaveslip.requester_name}}'s {{verbose_name}} was {{leaveslip.get_status_for_message}}";
+            // new Notification(Notification.SUCCESS, msg).show();
+            window.location.href = redirect;
           }
-          $.ajax({
-            url: href,
-            type: "GET",
-            success: (data) => {
-              let page = $(data);
-              let redirect = page.find('#ajax-redirect').attr('href');
-              new Notification(Notification.SUCCESS, page.find('.announce__title').html()).show();
-              window.location.href = redirect;
-            }
-          });
         },
         error: (jXHR, textStatus, errorThrown) => {
           alert(errorThrown);
         }
       });
+    });
+
+    $(".delete-slip").click(function (e) {
+      var check = confirm("Are you sure you want to delete this leaveslip?");
+      if (check) {
+        $.ajax({
+          url: "/api/{{ leaveslip.classname }}slips/{{ leaveslip.id }}",
+          type: "DELETE",
+          success: function(data, status, jqXHR) {
+            new Notification(Notification.SUCCESS, "Leave slip deleted!").show();
+            window.location.href = redirect;
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            console.log("Slip delete error!");
+            console.log(jqXHR, textStatus, errorThrown);
+          }
+        });
+      }
     });
   });
 </script>
@@ -62,22 +76,22 @@
 {% endblock %}
 
 {% block content %}
-  <h2>TA {{leaveslip.classname|title}} Slip View</h2>
-  <p>Leaveslip ID: <a id="ajax-redirect" {% block ls-link %}{% endblock %}>{{leaveslip.id}}</a></p>
-  {% include "leaveslips/_ta_labels.html" %}
-  <form action="{{leaveslip.get_ta_update_url}}" method="post">
-    {% csrf_token %}
-    <div class="row">
-      <div class="col-md-5 col-xs-12">
+    <h2>TA {{leaveslip.classname|title}} Slip View</h2>
+    <div class="col-md-5 col-xs-12">
+      <p>Leaveslip ID: <a id="ajax-redirect" {% block ls_link %}{% endblock %}>{{leaveslip.id}}</a></p>
+      {% include "leaveslips/_ta_labels.html" %}
+      <form action="{{leaveslip.get_ta_update_url}}" method="post">
+        {% csrf_token %}
+        {% block trainee_display %}{% endblock %}
         {% bootstrap_form form %}
         {% include 'leaveslips/_ta_actions.html' with selected_ta=view.request.user %}
         <button type="submit" class="btn-lg btn-primary btn-save">Save</button>
-      </div>
-      <div class="col-md-7 col-xs-12">
-        <div id="react-calendar-root"></div>
-      </div>
+      </form>
     </div>
-  </form>
+    <div class="col-md-7 col-xs-12">
+      <div id="react-calendar-root"></div>
+    </div>
+
 
   {% block leaveslip_script %}
   {% endblock %}

@@ -37,6 +37,16 @@ $progress-background-color:        $white !default;
         background-color: $progress-danger;
       }
   }
+
+  .homepage-progress{
+      box-shadow: $red;
+      border: 0.5px solid $blue-light;
+
+      &-bar {
+        background-color: $red;
+        height: 15px;
+      }
+  }
 }
 
 

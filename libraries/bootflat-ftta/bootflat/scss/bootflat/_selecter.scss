@@ -253,6 +253,28 @@ $selecter-item-selected-border-color:  $blue !default;
 				padding: 0;
 			}
 		}
+	}
 
+	.bible-selector{
+		margin: 0;
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		text-align: center;
+		text-align-last: center;
+		width: inherit;
+		height: inherit;
+		font-size: inherit;
+		background: inherit;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+
+		&:hover {
+			cursor: pointer;
+		}
+
+		&:disabled{
+			cursor: default;
+		}
 	}
 }

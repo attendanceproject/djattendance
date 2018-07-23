@@ -1,35 +1,34 @@
-import datetime
 import logging
+from datetime import datetime, timedelta
 
-from django import dispatch
+from accounts.models import Trainee
+from aputils.trainee_utils import trainee_from_user
+from aputils.utils import timeit_inline
+from attendance.models import Roll
+from attendance.utils import Period
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.urlresolvers import reverse_lazy, reverse
-from django.db import transaction
-from django.forms.formsets import formset_factory
-from django.http import HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse_lazy
+from django.db import IntegrityError, transaction
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import FormView, CreateView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
-
-from .forms import NewSummaryForm, NewDisciplineForm, EditSummaryForm, HouseDisciplineForm
-from .models import Discipline, Summary
-from accounts.models import User, Trainee, TrainingAssistant
-from aputils.trainee_utils import trainee_from_user
-from attendance.utils import Period
-from books.models import Book
 from houses.models import House
-from schedules.models import Schedule
+from rest_framework import viewsets
+from rest_framework.decorators import permission_classes
 from teams.models import Team
 from terms.models import Term
 
-from rest_framework import viewsets
+from .forms import (EditSummaryForm, HouseDisciplineForm, NewDisciplineForm,
+                    NewSummaryForm)
+from .models import Discipline, Summary
+from .permissions import IsOwner
 from .serializers import SummarySerializer
 
 """ API Views Imports """
-from rest_framework.decorators import permission_classes
-from .permissions import IsOwner
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +42,7 @@ class DisciplineListView(ListView):
     """'approve' when an approve button is pressed 'delete' when a delete
     button is pressed 'attend_assign' when assgning discipline from
     AttendanceAssign"""
+
     if 'approve' in request.POST:
       for value in request.POST.getlist('selection'):
         Discipline.objects.get(pk=value).approve_all_summary()
@@ -51,29 +51,30 @@ class DisciplineListView(ListView):
       for value in request.POST.getlist('selection'):
         Discipline.objects.get(pk=value).delete()
       messages.success(request, "Checked Discipline(s) Deleted!")
-    if 'attendance_assign' in request.POST:
-      period = int(request.POST.get('attendance_assign'))
-      for trainee in Trainee.objects.all():
-        num_summary = Discipline.calculate_summary(trainee, period)
-        if num_summary > 0:
-          discipline = Discipline(infraction='attendance',
-                      quantity=num_summary,
-                      due=Period().end(period),
-                      offense='MO',
-                      trainee=trainee)
-          try:
-            discipline.save()
-          except IntegrityError:
-            logger.error('Abort trasanction error')
-            transaction.rollback()
+    if 'trainee_pk' in request.POST:
+      trainee_pk = request.POST.getlist('trainee_pk')
+      ls_count = request.POST.getlist('ls_count')
+      period = int(request.POST.get('period'))
+      for idx, pk in enumerate(trainee_pk):
+        discipline = Discipline(
+          infraction='AT',
+          quantity=ls_count[idx],
+          due=Period(Term.current_term()).start(period + 1) + timedelta(weeks=1),  # Due on the second Monday of the next period
+          offense='MO',
+          trainee=Trainee.objects.get(pk=pk))
+        try:
+          discipline.save()
+        except IntegrityError:
+          logger.error('Abort trasanction error')
+          transaction.rollback()
       messages.success(request, "Discipline Assigned According to Attendance!")
     return self.get(request, *args, **kwargs)
 
-  #profile is the user that's currently logged in
+  # profile is the user that's currently logged in
   def get_context_data(self, **kwargs):
     context = super(DisciplineListView, self).get_context_data(**kwargs)
     try:
-      context['current_period'] = Period(Term.current_term()).period_of_date(datetime.datetime.now().date())
+      context['current_period'] = Period(Term.current_term()).period_of_date(datetime.now().date())
     except ValueError:
       # ValueError thrown if current date is not in term (interim)
       # return last period of previous period
@@ -86,12 +87,12 @@ class DisciplineReportView(ListView):
   model = Discipline
   context_object_name = 'disciplines'
 
-  #this function is called whenever 'post'
+  # this function is called whenever 'post'
   def post(self, request, *args, **kwargs):
-    #turning the 'post' into a 'get'
+    # turning the 'post' into a 'get'
     return self.get(request, *args, **kwargs)
 
-  #profile is the user that's currently logged in
+  # profile is the user that's currently logged in
   def get_context_data(self, **kwargs):
     context = super(DisciplineReportView, self).get_context_data(**kwargs)
     context['trainees'] = Trainee.objects.all()
@@ -109,6 +110,7 @@ class DisciplineCreateView(SuccessMessageMixin, CreateView):
   form_class = NewDisciplineForm
   success_url = reverse_lazy('lifestudies:discipline_list')
   success_message = "Discipline Assigned to Single Trainee Successfully!"
+
 
 def post_summary(summary, request):
   if 'fellowship' in request.POST:
@@ -135,17 +137,16 @@ class DisciplineDetailView(DetailView):
       approve_summary_pk = int(request.POST['summary_pk'])
       summary = Summary.objects.get(pk=approve_summary_pk)
       post_summary(summary, request)
-    if 'hard_copy' in request.POST:
-      self.get_object().summary_set.create(
-          content='approved hard copy summary',
-          chapter=0,
-          hard_copy=True,
-          approved=True
-      )
-      messages.success(request, "Hard Copy Submission Created!")
-    if 'increase_penalty' in request.POST:
-      self.get_object().increase_penalty()
-      messages.success(request, "Increased Summary by 1")
+    if ('penalty_num' in request.POST):
+      penalty_num = int(request.POST['penalty_num'])
+      if 'decrease_penalty' in request.POST:
+        self.get_object().decrease_penalty(penalty_num)
+        messages.success(request, "Decreased summary by x")
+
+      if 'increase_penalty' in request.POST:
+        self.get_object().increase_penalty(penalty_num)
+        messages.success(request, "Increased Summary by x")
+
     return HttpResponseRedirect(reverse_lazy('lifestudies:discipline_list'))
 
 
@@ -174,7 +175,7 @@ class SummaryCreateView(SuccessMessageMixin, CreateView):
     # Check if minimum words are met
     if form.is_valid:
       summary.discipline = Discipline.objects.get(pk=self.kwargs['pk'])
-      summary.date_submitted = datetime.datetime.now()
+      summary.date_submitted = datetime.now()
       summary.save()
     return super(SummaryCreateView, self).form_valid(form)
 
@@ -235,8 +236,6 @@ class CreateHouseDiscipline(TemplateView):
     """this manually creates Disciplines for each house member"""
     if request.method == 'POST':
       form = HouseDisciplineForm(request.POST)
-      print(form)
-      print(form.errors)
       if form.is_valid():
         house = House.objects.get(id=request.POST['House'])
         listTrainee = Trainee.objects.filter(house=house)
@@ -277,26 +276,52 @@ class AttendanceAssign(ListView):
     p = Period(Term.current_term())
     context['start_date'] = p.start(period)
     context['end_date'] = p.end(period)
-    context['outstanding_trainees'] = {}
-    for trainee in Trainee.objects.all():
-      num_summary = Discipline.calculate_summary(trainee, period)
-      if num_summary > 0:
-        context['outstanding_trainees'][trainee] = num_summary
+    context['period_list'] = list()
+    for period_num in range(1, 11):
+      context['period_list'].append((period_num, p.start(period_num), p.end(period_num)))
     return context
 
   def post(self, request, *args, **kwargs):
-    if request.method == 'POST':
+    self.object_list = Trainee.objects.all()
+    context = super(AttendanceAssign, self).get_context_data(*args, **kwargs)
+
+    """Preview button was pressed"""
+    if 'preview_attendance_assign' in request.POST:
+
       period = int(request.POST['select_period'])
-      print period, 'period'
-      return HttpResponseRedirect(reverse_lazy('lifestudies:attendance_assign',
-                            kwargs={'period' : period}))
-    else:
-      return HttpResponseRedirect(reverse_lazy('lifestudies:attendance_assign',
-                            kwargs={'period' : 1}))
+      context['period'] = period
+      p = Period(Term.current_term())
+      start_date = p.start(period)
+      end_date = p.end(period)
+      context['start_date'] = start_date
+      context['end_date'] = end_date
+      context['period_list'] = list()
+      for period_num in range(1, 11):
+        context['period_list'].append((period_num, p.start(period_num), p.end(period_num)))
+      context['preview_return'] = 1
+      # outstanding_trainees = list()
+      context['outstanding_trainees'] = list()
+
+      '''FILTERING OUT TRAINEES BASED ON INDIVIDUAL LEAVESLIPS'''
+      rolls = Roll.objects.all()
+      rolls = rolls.filter(date__gte=start_date, date__lte=end_date)
+      t = timeit_inline("summary calculation")
+      t.start()
+      for trainee in Trainee.objects.all():
+        # print trainee
+        # num_summary += trainee.calculate_summary(period
+        num_summary = 0
+        num_summary += trainee.calculate_summary(period)
+        if num_summary > 0:
+          print trainee, num_summary
+          context['outstanding_trainees'].append((trainee, num_summary))
+
+      t.end()
+
+    return render(request, 'lifestudies/attendance_assign.html', context)
 
 
 class MondayReportView(TemplateView):
-
   template_name = "lifestudies/monday_report.html"
 
   def get_context_data(self, **kwargs):
@@ -304,12 +329,12 @@ class MondayReportView(TemplateView):
     list_dis = [disc for disc in Discipline.objects.all() if disc.get_num_summary_due()]
 
     context['disciplines'] = list_dis
-    context['date_today'] = datetime.date.today()
+    context['date_today'] = datetime.today().strftime('%m/%d/%Y')
     return context
 
 
-
 """ API Views """
+
 
 @permission_classes((IsOwner, ))
 class DisciplineSummariesViewSet(viewsets.ModelViewSet):

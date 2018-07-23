@@ -9,14 +9,12 @@
     </a>
   {% endif %}
 {% endif %}
-{% if request.get_status_display != 'Approved' and request.get_status_display != 'Denied' and not request.is_expired %}
+{% if request.get_status_display != 'Approved' and request.get_status_display != 'Denied' and not request.is_expired and request.trainee %}
   <a href ="{{ request.get_update_url }}">
     <button class="btn btn-primary" title="Edit details"><span class="glyphicon glyphicon-pencil"></span></button>
   </a>
 {% endif %}
 
-<a href="{{ request.get_delete_url }}">
-  <button class="btn btn-danger delete_request_button" type="submit" title="Delete">
-    <span class="glyphicon glyphicon-trash"></span>
-  </button>
-</a>
+<button class="btn btn-danger delete-request-button" type="submit" title="Delete" data-url="{{ request.get_delete_url }}" data-id="{{ request.id }}">
+  <span class="glyphicon glyphicon-trash"></span>
+</button>

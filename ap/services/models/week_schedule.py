@@ -32,6 +32,10 @@ class WeekSchedule(models.Model):
   # exceptions inactive for just this week
   silenced_exceptions = models.ManyToManyField('ServiceException', blank=True, verbose_name='Exceptions to ignore this week')
 
+  @property
+  def week(self):
+    return Term.current_term().term_week_of_date(self.start)
+
   # TODO
   # average workload for this schedule
   @property

@@ -7,20 +7,21 @@ import RollPane from '../containers/RollPane'
 import LeaveSlipPane from '../containers/LeaveSlipPane'
 import GroupSlipPane from '../containers/GroupSlipPane'
 import TraineeSelectorContainer from '../containers/TraineeSelectorContainer'
-import { ATTENDANCE_MONITOR_GROUP } from '../constants'
+import { isAM } from '../constants'
 
 const ActionBar = ({show, trainee, onSelectTab, traineeView}) => {
   return (
     <div className="dt">
       <h2 className="dt__actionbar-heading">View Personal Attendance</h2>
-        {trainee.groups.indexOf(ATTENDANCE_MONITOR_GROUP) >= 0 ?
+        { isAM(trainee) ?
           <TraineeSelectorContainer />
-          : ''}
+          : ''
+        }
       <Tabs activeKey={["summary", "roll", "leaveslip", "groupslip"].indexOf(show)} animation={false} id="noanim-tab-example" onSelect={onSelectTab}>
         <Tab eventKey={0} title="Summary">
           <SummaryPane />
         </Tab>
-        {trainee.self_attendance || trainee.groups.indexOf(ATTENDANCE_MONITOR_GROUP) >= 0 ?
+        {trainee.self_attendance || isAM(trainee) ?
           <Tab eventKey={1} title="Roll">
             <RollPane />
           </Tab>

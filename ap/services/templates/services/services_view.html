@@ -321,16 +321,16 @@ Service Scheduling
       <table class="table table-striped table-bordered data-table" id="table_exceptions">
         <thead>
           <tr>
-            <td></td>
-            <td>Name</td>
-            <td>Tags</td>
-            <td>Start</td>
-            <td>End</td>
-            <td>Count</td>
-            <td>Workload</td>
-            <td>Trainees</td>
-            <td>Schedule</td>
-            <td></td>
+            <th></th>
+            <th>Name</th>
+            <th>Tags</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Count</th>
+            <th>Workload</th>
+            <th>Trainees</th>
+            <th>Schedule</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -364,17 +364,20 @@ Service Scheduling
         <thead>
           <tr>
             <th class="category-info">Workers</th>
+            <th class="category-info">Workload</th>
             {% for category in categories %}
               <th class="category-info">{{ category.name }}</th>
             {% endfor %}
-           </tr>
+            {% for c in service_checks %}
+              <th class="service-limits"></th>
+            {% endfor %}
+          </tr>
         </thead>
         <tbody>
         {% for worker in report_assignments %}
           <tr>
-            <td>
-              {{ worker.trainee.full_name }}
-            </td>
+            <td>{{ worker.trainee.full_name }}</td>
+            <td>{{ worker.workload }}</td>
             {% for category in categories %}
               {% if category in worker.services %}
                 <td>
@@ -389,6 +392,9 @@ Service Scheduling
               {% else %}
                 <td></td>
               {% endif %}
+            {% endfor %}
+            {% for c in worker.checks %}
+              <td>{{ c }}</td>
             {% endfor %}
            </tr>
         {% endfor %}
@@ -860,10 +866,26 @@ Service Scheduling
 
     var options = [];
 
+    const NUM_FILTERS = {{ service_checks|length }};
+    let showAll = (dt) => {
+      for (var i = dt.columns().nodes().length - NUM_FILTERS; i < dt.columns().nodes().length; i++) {
+        dt.columns(i).search('', true, false).draw();
+      }
+    }
+    let filterer = (index) => {
+      return function(e, dt, node, config) {
+        showAll(dt);
+        dt.columns(index(dt)).search('True', true, false).draw();
+      }
+    }
     function initializeDataTable(elem) {
       elem.DataTable({
         paging: false,
         columnDefs: [
+          {
+            targets: 'service-limits',
+            visible: false,
+          },
           {
             targets: 'no-sort',
             orderable: false,
@@ -878,9 +900,12 @@ Service Scheduling
           {
             targets: '_all',
             visible: true
-          }
+          },
         ],
-        dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+        scrollY: '45vh',
+        scrollCollapse: true,
+        scrollX: true,
+        dom: '<"row"<"col-sm-8"Bl><"col-sm-4"f>>' +
           '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
           '<"row"<"col-sm-5"i><"col-sm-7"p>>',
         buttons: {
@@ -899,6 +924,18 @@ Service Scheduling
               text: 'Show/Hide Columns',
               columns: ':gt(0)',
             },
+            {
+              text: 'Show all trainees',
+              action: function(e, dt, node, config) {
+                showAll(dt);
+              }
+            },
+            {% for check in service_checks %}
+            {% verbatim %}{{% endverbatim %}
+              text: "{{ check.name|safe }}",
+              action: filterer((dt) => dt.columns().nodes().length - (NUM_FILTERS - {{ forloop.counter0 }})),
+            {% verbatim %}},{% endverbatim %}
+            {% endfor %}
           ],
           dom: {
             container: {

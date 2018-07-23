@@ -1,13 +1,27 @@
 {% extends "leaveslips/leaveslip_update.html" %}
 
-{% block ls-link %}
-href="{% url 'leaveslips:group-update' leaveslip.id %}"
+{% block ls_link %}
+href="{{next_ls_url}}"
+{% endblock %}
+
+{% block references %}
+  {{ block.super }}
+  {{ form.media }}
+  <style type="text/css" media="screen">
+    li[title="{{ leaveslip.trainee.full_name }}"] {
+      background-color: #FFDB77 !important;
+    }
+  </style>
 {% endblock %}
 
 {% block leaveslip_script %}
   <script>
     $(document).ready(() => {
-      $('#id_trainees').select2({width: '100%'});
+      $("label[for|='id_trainees']").append(
+        '<span id="submitter_display" style="margin-left: 10px; font-size: 12px;">Submitter: {{ leaveslip.trainee.full_name }}</span>');
+      $("#id_trainees").djangoSelect2({
+        width: "100%"
+      });
     });
   </script>
 {% endblock %}

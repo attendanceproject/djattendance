@@ -2,8 +2,6 @@ import { addDays, differenceInWeeks, startOfWeek } from 'date-fns'
 
 //constants
 
-export const ATTENDANCE_MONITOR_GROUP = 4
-
 export const ATTENDANCE_STATUS = [
   {id: 'P', name: 'Present'},
   {id: 'A', name: 'Absent'},
@@ -206,4 +204,13 @@ export const taInformedToServerFormat = ta_informed => {
       texted: false,
     }
   }
+}
+
+export const isAM = (user) => {
+  for (let group of AM_GROUPS) {
+    if (user.groups.indexOf(group) >= 0) {
+      return true;
+    }
+  }
+  return false;
 }

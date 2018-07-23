@@ -10,7 +10,7 @@
   {% if classnotes.unsubmitted %}
     {% csrf_token %}
     {% bootstrap_form form %}
-
+    <em>A minimum of 250 words are needed to submit class notes. Or you may submit as a paper copy.<br></em>
     {% if classnotes.fellowship %}
       <div class="panel panel-warning">
         <div class="panel-heading">TA Comments</div>

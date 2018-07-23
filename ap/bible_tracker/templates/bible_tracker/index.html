@@ -37,26 +37,31 @@ label.btn-primary.active:visited {
 {% block scripts %}
 {{ block.super }}
 <script type="text/javascript" src="{% static 'js/bootstrap-tab-history.js' %}"></script>
+<script type="text/javascript" src="{% static 'bible_tracker/js/bible_reading.js' %}"></script>
 <script type="text/javascript">
 /****** START UP ******/
-  //Util functions
+
+  // variables used in index and bible_tracker page
+  var currentWeek = "{{current_week}}";
+  var changeWeekUrl = "{% url 'bible_tracker:changeWeek' %}";
+  var updateStatusUrl = "{% url 'bible_tracker:updateStatus' %}";
+  var updateBooksUrl = "{% url 'bible_tracker:updateBooks' %}";
+  var finalizeStatusUrl = "{% url 'bible_tracker:finalizeStatus' %}";
+  var finalized = "{{finalized}}";
+  var traineeId = "{{trainee.id}}";
+
+  // variables exclusive for bible_tracker page
   var is_TA = JSON.parse("{{user|is_TA|yesno:"true,false"}}")
-  var is_trainee = JSON.parse("{{user|is_trainee|yesno:"true,false"}}")
-  var first_year_progress = {{first_year_progress}};
-  var second_year_progress = {{second_year_progress}};
+  var isTrainee = JSON.parse("{{user|is_trainee|yesno:"true,false"}}")
+  var first_year_progress = '{{first_year_progress}}';
+  var second_year_progress = '{{second_year_progress}}';
   var first_day_term = "{{start_date}}";
   var weekly_status = "{{weekly_status}}";
-  var second_year_checked_list = {{second_year_checked_list}};
   var first_year_checked_list = {{first_year_checked_list}};
-  var finalized = "{{finalized}}";
+  var second_year_checked_list = {{second_year_checked_list}};
   var index_url = "{% url 'bible_tracker:index' %}";
-  var update_books_url = "{% url 'bible_tracker:updateBooks' %}";
-  var change_week_url = "{% url 'bible_tracker:changeWeek' %}";
-  var update_status_url = "{% url 'bible_tracker:updateStatus' %}";
-  var finalize_status_url = "{% url 'bible_tracker:finalizeStatus' %}";
   var forced = "{{bible_tracker_forced}}";
   var weeks_in_term = 20;
-  var current_week = {{current_week}};
   var users = {{ trainees_bb|safe }};
     var userNames = {};
     var userList = [];
@@ -66,224 +71,6 @@ label.btn-primary.active:visited {
         id: users[i].id
       });
     }
-
-  function setWeeks(){
-    var firstDayofWeek = moment(first_day_term, "YYYYMMDD");
-    var lastDayofWeek = firstDayofWeek.clone().add(6,'days');
-    for (i = 0; i <= current_week; i++) {
-      $("#select_menu").append($("<option />").val("week-"+i).text("Week "+i+": "+firstDayofWeek.format("ddd MMM D")+" - "+lastDayofWeek.format("ddd MMM D")).attr('id',i));
-      firstDayofWeek = lastDayofWeek.add(1,'day');
-      lastDayofWeek = firstDayofWeek.clone().add(6,'days');
-    }
-  }
-
-  function setDatesforWeek(week){
-    enableButtons();
-    var firstDay = moment(first_day_term, "YYYYMMDD");
-    var firstDayofWeek = firstDay.add(week,'weeks');
-    var WedofNextWeek = firstDayofWeek.clone().add(9, 'days');
-    var lastDayofWeek = firstDayofWeek.clone().add(6, 'days');
-    var currentDayofWeek = firstDayofWeek.clone();
-    var now = moment();
-    for (var i = 0; i < 7; i++) {
-      $("#day-"+i).html(currentDayofWeek.format("ddd - MMM D"));
-      currentDayofWeek.add(1,'days');
-    }
-    //finalize is disabled on Wednesday of next week (with HH:mm of 00:00) or before week is over (Sunday midnight+20 minutes)
-    if (is_trainee && (now > WedofNextWeek || now < lastDayofWeek.clone().add(20, 'minutes'))){
-      $("#finalize").prop('disabled', true);
-    }
-    //save button is disabled for more than this week's Bible reading
-    if (is_trainee && lastDayofWeek >= now.clone().add(6, 'days')){
-      $("#save").prop('disabled', true);
-    }
-  }
-
-  function disableButtons(){
-    $("#save").prop('disabled', true);
-    $("#finalize").prop('disabled', true);
-    $(".btn-group label").attr("disabled", true);
-    $(".btn-group :input").attr("disabled", true);
-  }
-
-  function enableButtons(){
-    $("#save").prop('disabled', false);
-    $("#finalize").prop('disabled', false);
-    $(".btn-group label").attr("disabled", false);
-    $(".btn-group :input").attr("disabled", false);
-  }
-
-  function modify_boxes(classname){
-    var x = document.getElementsByClassName(classname)[0];
-    x.setAttribute("checked", "true");
-  }
-
-  function updateProgressBar(selector, data) {
-    $(selector).css('width', data + '%');
-    $(selector).html(data+"%");
-    $(selector).attr("aria-valuenow", data);
-  }
-
-  /****** METHODS FOR DAILY BIBLE READING ******/
-  /****** METHODS FOR FIRST AND SECOND YEAR BIBLE READING ******/
-  function changeWeek() {
-    var weekid = $("#select_menu").find('option:selected').attr('id');
-    var userId = $("input#userId").val();
-    var url = '/bible_tracker/?week=' + weekid
-    history.pushState({urlPath: url},"", url)
-     $('.btn.btn-primary.active').removeClass('active');
-
-     $.ajax({
-      type:"GET",
-      url: change_week_url,
-      dataType: 'json',
-      data: {
-        'week': weekid,
-        csrfmiddlewaretoken:'{{ csrf_token }}',
-        'userId': userId,
-        'forced': forced,
-      },
-      success: function(data){
-        var obj = JSON.parse(data);
-        var status = obj.status;
-        var finalized = obj.finalized;
-
-        setDatesforWeek(parseInt(weekid));
-        var res = status.split("");
-        for (i = 0; i < res.length; i++) {
-          $('#status-day-'+i).find("input#"+res[i]).parent().addClass("active");
-        }
-        if (finalized == "Y"){
-          $("#unfinalize").prop('disabled', false);
-          disableButtons();
-        }
-        if (finalized == "N"){
-          $("#save").prop('disabled', false);
-          $(".btn-group label").attr("disabled", false);
-          $(".btn-group :input").attr("disabled", false);
-          $("#unfinalize").prop('disabled', true);
-        }
-
-        if (forced == "True") {
-          $("#finalize").prop('disabled', false);
-        }
-      },
-    });
-  }
-
-  function getStatus() {
-    var weekly_status = ''
-    for (i = 0; i < 7; i++) {
-      day_status = $('#status-day-'+ i +' label.active input').val();
-      if (day_status == null){
-        weekly_status += '_';
-      }
-      else{
-        weekly_status += day_status;
-      }
-    }
-    return weekly_status;
-  }
-
-  function updateStatus(finalize){
-    var weekly_status = getStatus();
-    var week_id =  $('#select_menu').find(":selected").attr('id');
-    var userId = $("input#userId").val();
-    $.ajax({
-      type:"POST",
-      url: update_status_url,
-      data: {
-        'week_id':week_id,
-        'weekly_status':weekly_status,
-        csrfmiddlewaretoken: '{{ csrf_token }}',
-        'userId':userId,
-      },
-      success: function(data) {
-        if (finalize) {
-          finalizeStatus();
-        }
-        new Notification(Notification.SUCCESS, 'Saved').show();
-      },
-    });
-  }
-
-  function finalizeStatus(){
-    var confirmed = confirm("Are you sure you want to finalize bible reading for this week? You will not be able to edit afterwards.");
-    if (confirmed) {
-      var week_id =  $('#select_menu').find(":selected").attr('id');
-      var userId = $("input#userId").val();
-      $.ajax({
-        type:"POST",
-        url: finalize_status_url,
-        data: {
-          'week_id':week_id,
-          csrfmiddlewaretoken: '{{ csrf_token }}',
-          'action' : 'finalize',
-          'userId': userId,
-          'forced': forced,
-        },
-        success: function(data){
-          new Notification(Notification.SUCCESS, 'Finalized').show();
-          disableButtons();
-          $("#unfinalize").prop('disabled', false);
-        },
-        error: function(data) {
-          alert("Cannot finalize at this time");
-        }
-      });
-    } else {
-      //makes sure button does not stay pressed
-      $("#finalize").blur();
-    }
-  }
-
-  function unfinalizeStatus(){
-    var week_id =  $('#select_menu').find(":selected").attr('id');
-    var userId = $("input#userId").val();
-    $.ajax({
-      type:"POST",
-      url: finalize_status_url,
-      data: {
-        'week_id':week_id,
-        csrfmiddlewaretoken: '{{ csrf_token }}',
-        'action' : 'unfinalize',
-        'userId': userId,
-      },
-      success: function(data){
-        enableButtons();
-        $("#unfinalize").prop('disabled', true);
-      },// success
-      error: function(data){
-        alert("Sorry, there was an error processing this request."); // <- this should run if user is not activated
-      } // error
-    });
-  }
-
-
-  function toggleCheckbox(classname, id, year) {
-    var checked = document.getElementsByClassName(classname)[0].checked;
-    var userId = $("input#userId").val();
-    $.ajax({
-      type:"POST",
-      url: update_books_url,
-      data: {
-        'book':id,
-        'year': year,
-        'checked': checked,
-        csrfmiddlewaretoken: '{{ csrf_token }}',
-        'userId': userId,
-      },
-      success: function(data){
-        let text = checked ? 'Saved' : 'Deleted';
-        new Notification(Notification.SUCCESS, text).show();
-        if(year==1) {
-          updateProgressBar('#first-year-prog', data);
-        } else if(year==2) {
-          updateProgressBar('#second-year-prog', data);
-        }
-      }
-    });
-  }
 
   $(document).ready(function() {
     $('body').on('click', '.btn-group .btn[disabled="disabled"]', function(event) {
@@ -310,22 +97,22 @@ label.btn-primary.active:visited {
       }
     });
     setWeeks();
-    $("#select_menu option[id='{{ current_week }}']").attr("selected", "selected");
-    setDatesforWeek({{ current_week }});
+    $("#week_select option[id='{{ current_week }}']").attr("selected", "selected");
+    setDatesforWeek({{ currentWeek }});
 
     for (var i = 0, len = weekly_status.length; i < len; i++) {
       $('#status-day-'+i).find("input#"+weekly_status[i]).parent().addClass("active");
     }
 
     for (var i = 0, len = first_year_checked_list.length; i < len; i++) {
-    modify_boxes("first-year"+first_year_checked_list[i]);
+    modifyBoxes("first-year"+first_year_checked_list[i]);
     }
 
     for (var i = 0, len = second_year_checked_list.length; i < len; i++) {
-      modify_boxes("second-year"+second_year_checked_list[i]);
+      modifyBoxes("second-year"+second_year_checked_list[i]);
     }
 
-    $(document).on('change','#select_menu', changeWeek);
+    $(document).on('change','#week_select', changeWeek);
     $('#save').click(function() {
       updateStatus(false);
     });
@@ -358,9 +145,9 @@ label.btn-primary.active:visited {
     }
 
     //if url parameter for week is added(i.e. ?week=13), opens to that week
-    var week = new URL(window.location.href).searchParams.get('week') || current_week;
-    $("#select_menu option:selected").removeAttr("selected");
-    $("#select_menu option[id='" + week + "']").attr("selected", "selected");
+    var week = new URL(window.location.href).searchParams.get('week') || currentWeek;
+    $("#week_select option:selected").removeAttr("selected");
+    $("#week_select option[id='" + week + "']").attr("selected", "selected");
     setDatesforWeek(week);
     changeWeek();
 
@@ -403,7 +190,7 @@ label.btn-primary.active:visited {
     </div>
     <div class="col-sm-6">
       <!-- Pick a week of a term -->
-       <b>Week:</b> <select id="select_menu" class="form-control" name="week" size="0" >
+       <b>Week:</b> <select id="week_select" class="form-control" name="week" size="0" >
       </select>
       <br>
       <br>

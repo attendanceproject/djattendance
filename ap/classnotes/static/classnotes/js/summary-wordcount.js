@@ -16,4 +16,13 @@ $().ready(function (){
     span.innerHTML = counter.words;
     $("#summary_submit").get(0).disabled = counter.words >= minCount ? false : true;
   });
+
+  $("#id_submitting_paper_copy").click(function(){
+    if (!$("#id_submitting_paper_copy").prop("checked")){
+      $("#summary_submit").get(0).setAttribute("disabled", true);
+    }else{
+      $("#summary_submit").get(0).removeAttribute("disabled");
+    }
+
+  });
 });

@@ -16,4 +16,5 @@ urlpatterns = [
     url(r'consideration_report$', views.ConsiderationReport.as_view(), name='consideration-report'),
     url(r'website_report$', views.WebsiteReport.as_view(), name='website-report'),
     url(r'outline_report$', views.OutlineReport.as_view(), name='outline-report'),
+    url(r'speaking_report$', views.SpeakingReport.as_view(), name='speaking-report'),
 ]

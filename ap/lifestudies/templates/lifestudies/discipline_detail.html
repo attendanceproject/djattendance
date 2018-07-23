@@ -6,29 +6,29 @@
 
 {% block lifestudies_content %}
 
-  <h2>
+  <div>
     {{discipline.trainee.full_name}}
-
     <div class="pull-right">
       <form action="" method="post">
         {% csrf_token %}
-        <button type="sumbit" name="increase_penalty" class="btn btn-default btn-sm">
-          <span class="glyphicon glyphicon-plus-sign"></span>
-          Increase Penalty
+        <label for="penalty_num">Increase/Decrease by:</label><br>
+        <input name="penalty_num" value="1">
+        <button type="submit" name="increase_penalty" class="btn btn-default btn-sm">
+          <span class="glyphicon glyphicon-plus-sign"></span> Increase Penalty
         </button>
-        <button type="submit" name="hard_copy" class="btn btn-default btn-sm">
+        <button type="submit" name="decrease_penalty" class="btn btn-default btn-sm">
           <span class="glyphicon glyphicon-plus-sign"></span> Decrease Penalty
         </button>
       </form>
     </div>
-  </h2>
-  <h5>
-    Infraction: {{discipline.get_infraction_display}}
-    {% if discipline.infraction == 'MS' %}<br>
-    Missed Service: {{discipline.missed_service}}
+  </div>
+  <p>
+    Infraction: {{discipline.get_infraction_display}}<br>
+    {% if discipline.infraction == 'MS' %}
+    Missed Service: {{discipline.missed_service}}<br>
     {% endif %}
-    
-  </h5>
+    Summaries Due: <strong>{{discipline.get_num_summary_due}}</strong>
+  <p>
 
   {% for summary in discipline.summary_set.all %}
   <div class="container">

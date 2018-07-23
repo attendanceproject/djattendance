@@ -216,7 +216,7 @@ class Term(models.Model):
     term = self.current_term()
     week_start = term.startdate_of_week(week)
     week_end = term.enddate_of_week(week)
-    if trainee.rolls.filter(date__lte=week_end, date__gte=week_start, finalized=True).count() > 0:
+    if trainee.rolls.filter(date__lte=week_end, date__gte=week_start, finalized=True, submitted_by=trainee).count() > 0:
       return True
     else:
       return False

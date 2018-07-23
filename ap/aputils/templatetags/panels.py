@@ -1,7 +1,7 @@
 from collections import namedtuple
-from datetime import date, datetime
+from datetime import date
 
-from accounts.models import Trainee
+from aputils.trainee_utils import trainee_from_user
 from attendance.utils import Period
 from classnotes.models import Classnotes
 from django import template
@@ -54,16 +54,15 @@ def generate_panels(context):
   p = Period(Term.current_term()).period_of_date(date.today())
   uet = uea = 0
   try:
-    att_rcd = Trainee.objects.filter(email=user.email).first().get_attendance_record()
+    att_rcd = trainee_from_user(user).get_attendance_record(p)
     for att in att_rcd:
-      if (datetime.strptime(att['start'][0:10], "%Y-%m-%d").date() > Period(Term.current_term()).start(p)) and (datetime.strptime(att['end'][0:10], "%Y-%m-%d").date() < Period(Term.current_term()).end(p)):
-        if att['attendance'] in ['A', 'T']:
-          excused = filter(lambda a: a['start'] == att['start'], att_rcd)
-          if len(excused) < 2:
-            if att['attendance'] == 'A':
-              uea += 1
-            elif att['attendance'] == 'T':
-              uet += 1
+      if att['attendance'] in ['A', 'T']:
+        excused = filter(lambda a: a['start'] == att['start'], att_rcd)
+        if len(excused) < 2:
+          if att['attendance'] == 'A':
+            uea += 1
+          elif att['attendance'] == 'T':
+            uet += 1
   except AttributeError:
     pass
 

@@ -22,6 +22,10 @@
     float: right;
   }
 
+  #errors .inner{
+    color: red;
+  }
+
 </style>
 {% endblock%}
 
@@ -53,7 +57,6 @@ $(document).ready(() => {
       val++;
       $("#id_service_hours_table tr[id]:last").attr("id","row_" + val);
       $('.datetimepicker').datetimepicker(dt_options);
-      // $('.datetimepicker').datetimepicker(dt_options);
     }
   });
 
@@ -78,9 +81,6 @@ $(document).ready(() => {
     if (s){
       window.location.replace("{% url 'services:designated_service_hours' %}/"+s+"/"+w);
     }
-
-  // default select first designated service
-  $('#id_designated_service option:eq(2)').attr('selected', 'selected');
 
   });
 
@@ -112,7 +112,23 @@ $(document).ready(() => {
 <!-- /Error messaging -->
 {% endif %}
 
-
+{% for form in service_roll_forms %}
+  {% if form.errors %}
+<!-- Error messaging -->
+  <div id="errors">
+    <div class="inner">
+      <p>There were some errors in the information you entered. Please correct the following:</p>
+      {{ form.non_field_errors }}
+      <ul>
+        {% for field in form %}
+          {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+<!-- /Error messaging -->
+  {% endif %}
+{% endfor %}
 <p>You can just add a comment on "tasked performed" column by itself (ie: sick/service/etc).
 Also, posting hours again overwrites the old submission so you can post more than once.
 Note: 12:00 AM will be interpreted as 00:00 in 24 hour time. Rows with blank hours and no tasks performed will be deleted on save.</p>
@@ -132,9 +148,9 @@ Note: 12:00 AM will be interpreted as 00:00 in 24 hour time. Rows with blank hou
     </tr>
     {% for service_roll_form in service_roll_forms %}
     <tr id="row_{{forloop.counter0}}">
-      <td><input class="datetimepicker" id="id_start_datetime" name="start_datetime" value="{{service_roll_form.start_datetime.value|date:'m/d/Y g:i A'}}"></td>
-      <td><input class="datetimepicker" id="id_end_datetime" name="end_datetime" value="{{service_roll_form.end_datetime.value|date:'m/d/Y g:i A'}}"></td>
-      <td>{{service_roll_form.task_performed}}</td>
+      <td>{% bootstrap_field service_roll_form.start_datetime layout='inline' %}</td>
+      <td>{% bootstrap_field service_roll_form.end_datetime layout='inline' %}</td>
+      <td>{% bootstrap_field service_roll_form.task_performed layout='inline' %}</td>
       <td>{{service_roll_form.instance.get_time_diff|floatformat:2}}</td>
     </tr>
     {% endfor %}

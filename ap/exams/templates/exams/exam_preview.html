@@ -28,10 +28,9 @@
           <ol id="question-list">
             {% for section, response, score, comments in data %}
               <h4> {{ section.section_type }} section </h4>
-              Instructions: {{ section.instructions }}
-              </br>
+              <b> Instructions: </b> {{ section.instructions|linebreaks }}
               You must answer at least {{ section.required_number_to_submit }} questions for this section in order to submit the exam.
-              </br>
+              <br>
               {% if section.section_type == 'Matching' %}
                 Matching Options:
                 <ol type="A">
@@ -44,7 +43,10 @@
               <input type="hidden" value="{{ section.id }}" name="section_id">
               <input type="hidden" value="{{ section.type }}" name="section_type">
               {% for question in section.questions %}
-                {% include section.template %}
+                {% if question.prompt.strip != '' %}
+                  {% include section.template %}
+                  <br>
+                {% endif %}
               {% endfor %}
             {% empty %}
               <i>No exam questions to view.</i><br />

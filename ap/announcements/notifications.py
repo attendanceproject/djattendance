@@ -6,11 +6,13 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 
 from models import Announcement
+from lifestudies.models import Summary
 from bible_tracker.models import BibleReading
 from leaveslips.models import IndividualSlip, GroupSlip
 from web_access.models import WebRequest
 from house_requests.models import MaintenanceRequest, LinensRequest, FramingRequest
 from audio.models import AudioRequest
+from room_reservations.models import RoomReservation
 from terms.models import Term
 from aputils.trainee_utils import is_trainee, trainee_from_user
 
@@ -46,6 +48,8 @@ def request_statuses(trainee):
       LinensRequest.objects.filter(trainee_author=trainee, status='F'),
       FramingRequest.objects.filter(trainee_author=trainee, status='F'),
       AudioRequest.objects.filter(trainee_author=trainee, status='F'),
+      Summary.objects.filter(discipline__trainee=trainee, fellowship=True),
+      RoomReservation.objects.filter(requester=trainee, status='F')
   )
   message = 'Your <a href="{url}">{request}</a> has been marked for fellowship'
   return [(messages.ERROR, message.format(url=reverse('attendance:attendance-submit'), request=req._meta.verbose_name)) if isinstance(req, IndividualSlip) else (messages.ERROR, message.format(url=req.get_absolute_url(), request=req._meta.verbose_name)) for req in requests]

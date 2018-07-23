@@ -19,21 +19,19 @@ from services.models import (
     ServiceException,
 )
 
+from .forms import (
+  SeasonalServiceScheduleForm,
+  AssignmentAdminForm,
+  WorkGroupAdminForm,
+  ExceptionAdminForm,
+  QualificationForm
+)
+
 from aputils.admin_utils import FilteredSelectMixin
 from aputils.widgets import MultipleSelectFullCalendar
 from aputils.queryfilter import QueryFilterService
-from aputils.custom_fields import CSIMultipleChoiceField
 
-
-# This is written to improve query performance on admin backend
-class WorkerPrejoinMixin(forms.ModelForm):
-  workers = forms.ModelMultipleChoiceField(
-      label='Workers',
-      queryset=Worker.objects.select_related('trainee').all(),
-      required=False,
-      widget=admin.widgets.FilteredSelectMultiple('workers', is_stacked=False)
-  )
-
+NONSERVICE_GROUPS = ['training_assistant', 'regular_training_assistant', 'saturday_training_assistant', 'grad_committee', 'HC', 'team_monitors', 'ypc_monitors', 'designated_service', 'PSRP_facilitator']
 
 class ReadonlyException(object):
   def name(self, instance):
@@ -114,22 +112,6 @@ class WorkerAdmin(admin.ModelAdmin):
   class Meta:
     model = Worker
     fields = '__all__'
-
-
-class SeasonalServiceScheduleForm(forms.ModelForm):
-  services = forms.ModelMultipleChoiceField(
-      label='Services',
-      queryset=Service.objects.all(),
-      required=False,
-      widget=admin.widgets.FilteredSelectMultiple('services', is_stacked=False)
-  )
-
-  class Meta:
-    model = SeasonalServiceSchedule
-    exclude = []
-    widgets = {
-        'services': admin.widgets.FilteredSelectMultiple('services', is_stacked=False),
-    }
 
 
 class SeasonalServiceScheduleAdmin(FilteredSelectMixin, admin.ModelAdmin):
@@ -254,12 +236,6 @@ class ServiceAdmin(admin.ModelAdmin):
     fields = '__all__'
 
 
-class AssignmentAdminForm(WorkerPrejoinMixin, forms.ModelForm):
-  class Meta:
-    model = Assignment
-    fields = '__all__'
-
-
 class AssignmentAdmin(admin.ModelAdmin):
   form = AssignmentAdminForm
   list_display = ('id', 'week_schedule', 'service', 'service_slot', 'worker_list', 'workers_needed', 'pin')
@@ -277,14 +253,6 @@ class AssignmentAdmin(admin.ModelAdmin):
     fields = '__all__'
 
 
-class WorkGroupAdminForm(WorkerPrejoinMixin, forms.ModelForm):
-  query_filters = CSIMultipleChoiceField(choices=QueryFilterService.get_choices(), required=False, label='Filters')
-
-  class Meta:
-    model = WorkerGroup
-    fields = '__all__'
-
-
 class WorkerGroupAdmin(admin.ModelAdmin):
   form = WorkGroupAdminForm
   list_display = ('name', 'description', 'active', 'worker_count')
@@ -299,7 +267,7 @@ class WorkerGroupAdmin(admin.ModelAdmin):
   fieldsets = (
       (None, {
           'classes': ('suit-tab', 'suit-tab-general',),
-          'fields': ('name', 'description', 'active', 'assign_priority', 'query_filters', 'workers')
+          'fields': ('name', 'description', 'active', 'assign_priority', 'workers') #, 'permission_groups')
       }),
       ('Preview', {
           'classes': ('suit-tab', 'suit-tab-preview',),
@@ -311,7 +279,11 @@ class WorkerGroupAdmin(admin.ModelAdmin):
                     ('preview', 'Filter Preview'),)
 
   def worker_count(self, obj):
-    return obj.get_workers.count()
+    worker_count = obj.get_workers
+    if worker_count == []:
+      return 0
+    else:
+      return worker_count.count()
 
   def get_worker_list(self, obj):
     return obj.get_worker_list()
@@ -321,20 +293,26 @@ class WorkerGroupAdmin(admin.ModelAdmin):
     model = WorkerGroup
     fields = '__all__'
 
+  # saves the ManyToMany relation of permission groups with trainees
+  def save_related(self, request, form, formsets, change):
+    super(WorkerGroupAdmin, self).save_related(request, form, formsets, change)
+    instance = form.save(commit=False)
+    # permission_groups = instance.permission_groups.all()
+    workers = instance.workers.all()
+    trainees = Trainee.objects.filter(worker__in=workers)
+    # for g in permission_groups:
+    #   if g.name not in NONSERVICE_GROUPS:
+    #     g.user_set.clear()
+    #   for t in trainees:
+    #     # adds trainee to the permission group
+    #     g.user_set.add(t)
+    #   g.save()
+
 
 # method for updating
 @receiver(post_save, sender=Qualification)
 def add_query_filter(sender, instance, **kwargs):
   QueryFilterService.addQ(instance.name, worker__qualifications__name=instance.name)
-
-class ExceptionAdminForm(WorkerPrejoinMixin, forms.ModelForm):
-
-  class Meta:
-    model = ServiceException
-    fields = '__all__'
-    widgets = {
-        'services': MultipleSelectFullCalendar(Service.objects.all(), 'services'),
-    }
 
 
 class ExceptionAdmin(admin.ModelAdmin):
@@ -354,16 +332,6 @@ class ExceptionAdmin(admin.ModelAdmin):
   class Meta:
     model = ServiceException
     fields = '__all__'
-
-
-class QualificationForm(WorkerPrejoinMixin, forms.ModelForm):
-
-  class Meta:
-    model = Qualification
-    exclude = []
-    widgets = {
-        'workers': admin.widgets.FilteredSelectMultiple('workers', is_stacked=False),
-    }
 
 
 class QualificationAdmin(FilteredSelectMixin, admin.ModelAdmin):
@@ -443,19 +411,14 @@ class WeekScheduleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SeasonalServiceSchedule, SeasonalServiceScheduleAdmin)
-
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(ServiceSlot, ServiceSlotAdmin)
-
 admin.site.register(Qualification, QualificationAdmin)
 admin.site.register(Worker, WorkerAdmin)
-
 # admin.site.register(Worker, WorkerAdmin2)
 
 admin.site.register(WorkerGroup, WorkerGroupAdmin)
-
 admin.site.register(ServiceException, ExceptionAdmin)
-
 admin.site.register(Assignment, AssignmentAdmin)
 admin.site.register(WeekSchedule, WeekScheduleAdmin)

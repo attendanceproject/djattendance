@@ -12,6 +12,8 @@ class LeaveslipForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     super(LeaveslipForm, self).__init__(*args, **kwargs)
     self.fields['type'].label = 'Reason'
+    # TODO: uncomment after we add a group for TA sisters
+    # self.fields['TA'].queryset = TrainingAssistant.objects.filter(Q(groups__name='regular_training_assistant') || Q(groups__name='sister_training_assistant'))
     if self.instance.TA:
       self.fields['TA'].label = 'TA assigned to this leave slip: %s' % self.instance.TA.full_name + '. Transfer to:'
     else:
@@ -22,6 +24,8 @@ class LeaveslipForm(forms.ModelForm):
     self.fields['description'].widget.attrs['rows'] = 2
     self.fields['private_TA_comments'].widget.attrs['rows'] = 2
     self.fields['comments'].widget.attrs['rows'] = 2
+    self.fields['TA'].queryset = User.objects.filter(groups__name='regular_training_assistant')
+    self.fields['TA_informed'].queryset = User.objects.filter(groups__name='regular_training_assistant')
 
 
 class IndividualSlipForm(LeaveslipForm):
@@ -38,7 +42,7 @@ class IndividualSlipForm(LeaveslipForm):
 
   class Meta:
     model = IndividualSlip
-    fields = ['trainee', 'type', 'description', 'location', 'host_name', 'host_phone', 'hc_notified',
+    fields = ['type', 'description', 'location', 'host_name', 'host_phone', 'hc_notified',
               'comments', 'TA_informed', 'texted', 'TA', 'private_TA_comments']
 
 
@@ -46,7 +50,10 @@ class GroupSlipForm(LeaveslipForm):
   trainees = forms.ModelMultipleChoiceField(
       queryset=Trainee.objects.all(),
       required=True,
-      widget=ModelSelect2MultipleWidget(model=Trainee),
+      widget=ModelSelect2MultipleWidget(
+        model=Trainee,
+        search_fields=['firstname__icontains', 'lastname__icontains']
+      ),
   )
 
   def __init__(self, *args, **kwargs):

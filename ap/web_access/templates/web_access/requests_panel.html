@@ -1,28 +1,29 @@
 {% regroup guest_access_requests by get_status_display as sorted %}
 {% for requestGroups in sorted %}
   <h4>{{ requestGroups.grouper }}</h4>
-  {% if requestGroups.grouper == 'Approved' %}
-    <div class="panel panel-success">
-  {% elif requestGroups.grouper == 'Pending' %}
-    <div class="panel panel-default">
-  {% elif requestGroups.grouper == 'Denied'%}
-    <div class="panel panel-danger">
-  {% elif requestGroups.grouper == 'Marked for Fellowship' %}
-    <div class="panel panel-info">
-  {% endif %}
 
   {% for request in requestGroups.list|dictsortreversed:"date_assigned" %}
-    <div class="panel-heading">
-      <h4 class="panel-title">{{ request.get_reason_display }}</h4>
-      <div class="pull-right">
-        {% include request.get_button_template %}
+    <div id="request-{{ request.id }}" class="panel
+    {% if request.get_status_display == 'Approved' %}
+      panel-success
+    {% elif request.get_status_display == 'Pending' %}
+      panel-default
+    {% elif request.get_status_display == 'Denied'%}
+      panel-danger
+    {% elif request.get_status_display == 'Marked for Fellowship' %}
+      panel-info
+    {% endif %}">
+      <div class="panel-heading">
+        <h4 class="panel-title">{{ request.get_reason_display }}</h4>
+        <div class="pull-right">
+          {% include request.get_button_template %}
+        </div>
+      </div>
+      <div class="panel-body">
+        {% include "web_access/web_access_description.html" %}
       </div>
     </div>
-    <div class="panel-body">
-      {% include "web_access/web_access_description.html" %}
-    </div>
   {% endfor %}
-  </div>
 {% empty %}
   <h4><i>You have no web access requests.</i></h4>
 {% endfor %}

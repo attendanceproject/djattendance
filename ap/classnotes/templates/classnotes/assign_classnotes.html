@@ -1,6 +1,19 @@
 {% extends "classnotes/base_classnotes.html" %}
+{% load staticfiles %}
+{% load common_tags %}
 
 {% block tab3 %} class="active" {% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $("#id_service_select").select2();
+    $('#id_assign_form').on('submit', () => {
+      $('#loading').show();
+    });
+  });
+</script>
+{% endblock scripts %}
 
 
 {% block classnotes_content %}
@@ -8,11 +21,20 @@
 <h3>Assign Class Notes</h3>
 
 <div class="panel panel-default">
-<form action="#"  method="post" >
+<form id="id_assign_form" action="#"  method="post" >
   {% csrf_token %}
+  <label for="id_week_select">Week</label>
+  <select id="id_week_select" name="week">
+  {% for y in week_range %}
+      <option
+       value="{{ y }}" {% if y == weekinit %} selected="selected" {% endif %}
+      >{{ y }}</option>
+  {% endfor %}
+  </select>
   <input id="assign_classnotes" name="assign_classnotes" class="btn btn-success" type="submit" value="Assign"></input>
 </form>
 </div>
+<img src="{% static 'classnotes/img/temp.gif' %}" id="loading" style="display:none"/>
 
 
 {% endblock %}

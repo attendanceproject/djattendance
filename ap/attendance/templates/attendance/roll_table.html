@@ -1,13 +1,7 @@
-{% extends 'base.html' %}
 {% load staticfiles %}
 {% load common_tags %}
 
-{% block title %}
-{{title}}
-{% endblock %}
-
 {% block scripts %}
-{{ block.super }}
 <script>
   var ATTENDANCE_TYPE = ['', 'P','A','T','U','L'];
   var table;
@@ -47,71 +41,9 @@
     });
   };
 
-  // function revalidate() {
-  //   table.rows().every(function() {
-  //     var d = this.data();
-  //     d.counter++; // update data source for the row
-  //     this.invalidate(); // invalidate the data DataTables has cached for this row
-  //   });
-  // };
-
-  // $.fn.dataTable.ext.buttons.order_by = {
-  //   text: 'Last/First Name',
-  //   action: function() {
-  //     if (this.active()) {
-  //       $(".full_name").attr("hidden", false);
-  //       $(".full_name2").attr("hidden", true);
-  //       this.active("false");
-  //       $(".full_name").each(function(){
-  //         $(this).insertBefore($(this).prev());
-  //       })
-  //     } else {
-  //       $(".full_name").attr("hidden", true);
-  //       $(".full_name2").attr("hidden", false);
-  //       this.active("true");
-  //       $(".full_name").each(function() {
-  //         $(this).insertBefore($(this).prev());
-  //       });
-  //     };
-  //     revalidate();
-  //     table.sort();
-  //   },
-  // };
-
-  let toggle_function = (row) => {
-    return function() {
-      r = $("thead tr").get(row);
-      if (this.active()) {
-        $(r).attr("hidden", true);
-        this.active("false");
-      } else {
-        $(r).attr("hidden", false);
-        this.active("true");
-      };
-    }
-  };
-
   function init_function() {
     this.active(true);
   }
-
-  $.fn.dataTable.ext.buttons.date_header = {
-    text: 'Date',
-    init: init_function,
-    action: toggle_function(0),
-  };
-
-  $.fn.dataTable.ext.buttons.roll_header = {
-    text: 'Roll',
-    init: init_function,
-    action: toggle_function(1),
-  };
-
-  $.fn.dataTable.ext.buttons.time_header = {
-    text: 'Time',
-    init: init_function,
-    action: toggle_function(2),
-  };
 
   var q_year = [true, true];
   var q_gender = [true, true, true];
@@ -126,7 +58,6 @@
       r_term += "3|4 ";
     }
     r_term = "("+r_term.substring(0, r_term.length-1)+")";
-    console.log(r_term)
     table.column(1).search(r_term, true, false).draw();
   }
 
@@ -235,28 +166,22 @@
       '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
       '<"row"<"col-sm-5"i><"col-sm-7"p>>',
       buttons: [
-        // "order_by",
         // only attendance monitors, devs, and tas can view these controls for the datatable
         // this allows the display of headers and filter by trainee year, gender and self attendance
         {% ifusergroup attendance_monitors|dev|training_assistant %}
         {
           extend: 'collection',
-          text: 'Show/Hide Headers',
-          buttons:[ "date_header", "roll_header", "time_header" ]
-        },
-        {
-          extend: 'collection',
           text: 'Filters',
           buttons: ["first_year", "second_year", "brothers", "sisters"]
         },
-        
+
         "self_attendance",
         {% endifusergroup %}
       ],
     });
 
     // normal HC or TM or YPC can only see trainees not on self-attendance
-    selfattendance_filter("False")    
+    selfattendance_filter("False")
 
     function getParamsForColumn(index) {
       var selects = $('.set_all');
@@ -281,7 +206,6 @@
     }).on('focus', '.sectionInputs', function (e){
       var button = $(e.currentTarget);
       button.removeClass('danger');
-      button.selectText();
     }).on('blur', '.sectionInputs', function(e) {
       //Content edit
       var button = $(e.currentTarget);
@@ -316,33 +240,16 @@
       var col = select.data("col");
       $("td[data-col='"+col+"'").text(select.val().trim()).blur();
     });
-    $("#week_menu").on("change", function(e) {
+
+    $("#week_menu, #team_menu, #house_menu").on("change", function(e) {
       $(e.currentTarget).closest("form").submit();
     });
-    if ("{{event_type}}" == "T") {
-      {% for t in teams %}
-        $("#team_menu").append($("<option />").val("{{t.name}}").text("{{t.name}}"));
-      {% endfor %}
-      $("#team_menu option[value='{{team}}']").attr("selected", "selected");
-      $("#team_menu").on("change", function(e) {
-        $(e.currentTarget).closest("form").submit();
-      });
-    } else if ("{{event_type}}" == "H") {
-      {% for h in houses %}
-        $("#house_menu").append($("<option />").val("{{h.name}}").text("{{h.name}}"));
-      {% endfor %}
 
-      $("#house_menu option[value='{{house}}']").attr("selected", "selected");
-      $("#house_menu").on("change", function(e) {
-        $(e.currentTarget).closest("form").submit();
-      });
-    }
   });
 </script>
 {% endblock %}
 
 {% block references %}
-{{ block.super }}
 <link rel="stylesheet" href="{% static 'seating/css/seating.css' %}" />
 <style>
 .tab-pane:not(.active) {
@@ -367,17 +274,26 @@
           {% ifusergroup attendance_monitors %}
             {% if event_type == "T" %}
               Team:
-              <select id="team_menu" name="team" size="0" ></select>
+              <select id="team_menu" name="team" size="0" >
+                {% for t in teams %}
+                <option value="{{t.pk}}" {% if t.pk == selected_team_id %} selected="selected" {% endif %} >{{t.name}}</option>
+                {% endfor %}
+              </select>
             {% elif event_type == "H" %}
               House:
-              <select id="house_menu" name="house" size="0" ></select>
+              <select id="house_menu" name="house" size="0" >
+                {% for h in houses %}
+                <option value="{{h.pk}}" {% if h.pk == selected_house_id %} selected="selected" {% endif %}>{{h.name}}</option>
+                {% endfor %}
+
+              </select>
             {% endif %}
           {% endifusergroup %}
         </form>
       </label>
     </div>
   </div>
-  <p>If there's no roll entered, it's assumed as a Present. Green boxes mean that there's a leave slip.</p>
+  <p>If there's no roll entered, it's assumed as a Present.</p>
   <div class="row">
     <div class="col-md-12">
       &nbsp;
@@ -462,11 +378,9 @@
               {% with events=trainees_event_list|get_item:t %}
               {% if event in events %}
               {% with evt=events|lookup:event %}
-              {% with t_gs=event_groupslip_tbl|get_item:evt %}
-              <td contenteditable="true" class='sectionInputs {% if evt.roll %}{% if evt.roll.leaveslip %}leaveslip{% endif %}{% endif %} {% if t in t_gs %}leaveslip{% endif %}' data-row='{{t.id}}' data-col='{{evt.id}}' data-date='{{ evt.start_datetime.date|date:"c"}}'>
+              <td contenteditable="true" class='sectionInputs' data-row='{{t.id}}' data-col='{{evt.id}}' data-date='{{ evt.start_datetime.date|date:"c"}}'>
                 {% if evt.roll %}{{evt.roll.status}}{% endif %}
               </td>
-              {% endwith %}
               {% endwith %}
               {% else %}
               <td class="roll-disabled"></td>

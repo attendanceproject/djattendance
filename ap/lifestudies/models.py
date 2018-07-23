@@ -1,12 +1,12 @@
 from datetime import date, datetime, time, timedelta
 
 from accounts.models import User
-from attendance.utils import Period
 from books.models import Book
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 from django.db import models
 from terms.models import Term
-
+from attendance.utils import Period
 
 """ lifestudies models.py
 This discipline module handles the assigning and managing of
@@ -93,19 +93,24 @@ class Discipline(models.Model):
 
   def show_create_button(self):
     """checks whether create life-study button will show or not"""
-    return not (self.offense == 'MO' and date.today().weekday() != 0)
+    return self.quantity - len(self.summary_set.all()) > 0 and not (self.offense == 'MO' and date.today().weekday() != 0)
 
   # if this is True it means all the lifestudies has been approved and all
   # have been submitted. This assume num of summary submitted not larger
   # than num of summary assigned
   def is_completed(self):
-    if self.get_num_summary_due() > 0:
-      return False
+    return self.get_num_summary_due() <= 0
+
+  # decrease the quantity of the discipline by the number specified. Subtract 1
+  # summary if num is not specified
+  def decrease_penalty(self, num=1):
+    if self.quantity - num < 1:
+      # Delete the discipline
+      self.delete()
     else:
-      for summary in self.summary_set.all():
-        if summary.approved is False:
-          return False
-    return True
+      self.quantity -= num
+      self.save()
+    return self.quantity
 
   # increase the quantity of the discipline by the number specified. Add 1
   # more summary if num is not specified
@@ -248,3 +253,6 @@ class Summary(models.Model):
 
   def prev(self):
     return Summary.objects.filter(date_submitted__lt=self.date_submitted, discipline=self.discipline).order_by('-date_submitted').first()
+
+  def get_absolute_url(self):
+    return reverse('lifestudies:summary_detail', kwargs={'pk': self.id})

@@ -88,7 +88,8 @@ def calculate_trainee_absent_freq(date):
         continue
       r = get_or_create_roster(d)
       trainees = map(lambda e: e['absentee'], r.entry_set.all().values('absentee'))
-      is_unreported = absentee.house in r.unreported_houses.all()
+      # removed couples and commuters houses from unreported list
+      is_unreported = absentee.house in r.unreported_houses.all().exclude(name__icontains="Couple").exclude(name__icontains="Hall Apt").exclude(name__icontains="COMMUTER")
       if is_unreported:
         unreported.add(absentee.id)
       if absentee.id in trainees or is_unreported:
@@ -102,8 +103,6 @@ def calculate_trainee_absent_freq(date):
 
 def send_absentee_report(year, month, day):
   d = date(int(year), int(month), int(day))
-  if d.weekday() == 0:
-    return "Today's a monday, so no absent trainee roster"
   ctx = build_report_ctx(d)
 
   subject = "Absent Trainee Roster for " + str(d)

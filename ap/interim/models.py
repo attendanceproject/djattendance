@@ -32,7 +32,8 @@ class InterimIntentionsAdmin(models.Model):
 class InterimIntentions(models.Model):
   INTENT_CHOICES = (
       ('R', 'Returning'),
-      ('N', 'Graduating or not returning'),
+      ('G', 'Graduating'),
+      ('N', 'Not returning'),
       ('U', 'Unsure if I will return next term'),
   )
 
@@ -55,25 +56,25 @@ class InterimIntentions(models.Model):
 
   cell_phone = models.CharField(max_length=50, blank=True, default='555-555-5555')
 
-  email = models.CharField(max_length=50, blank=True)
+  email = models.CharField(max_length=200, blank=True)
 
-  home_phone = models.CharField(max_length=50, blank=True, default='555-555-5555')
+  home_phone = models.CharField(max_length=200, blank=True, default='')
 
-  home_locality = models.CharField(max_length=50, blank=True)
+  home_locality = models.CharField(max_length=200, blank=True)
 
-  home_address = models.CharField(max_length=50, blank=True, null=True)
+  home_address = models.CharField(max_length=200, blank=True, null=True)
 
-  home_city = models.CharField(max_length=50, blank=True, null=True)
+  home_city = models.CharField(max_length=200, blank=True, null=True)
 
-  home_state = models.CharField(max_length=50, blank=True, null=True)
+  home_state = models.CharField(max_length=200, blank=True, null=True)
 
-  home_zip = models.CharField(max_length=50, blank=True, null=True)
+  home_zip = models.CharField(max_length=200, blank=True, null=True)
 
   intent = models.CharField(max_length=1, choices=INTENT_CHOICES, default="R")
 
-  post_training_intentions = models.CharField(max_length=3, choices=POST_INTENT_CHOICES, default='NON')
+  post_training_intentions = models.CharField(max_length=3, choices=POST_INTENT_CHOICES)
 
-  post_intent_comments = models.CharField(max_length=250, blank=True)
+  post_intent_comments = models.CharField(max_length=1000, blank=True)
 
   submitted = models.BooleanField(default=False)
 
@@ -95,7 +96,7 @@ class InterimItinerary(models.Model):
 
   end = models.DateField(null=True, blank=True)
 
-  comments = models.CharField(max_length=250, blank=True)
+  comments = models.CharField(max_length=1000, blank=True)
 
   def __unicode__(self):
     return "[InterimItinerary] - %s" % (self.interim_intentions.trainee.full_name)

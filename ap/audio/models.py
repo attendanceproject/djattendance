@@ -7,11 +7,11 @@ from django.utils.functional import cached_property
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
+from .utils import parse_audio_name
 from terms.models import Term
 from classnotes.models import Classnotes
 from schedules.models import Event
 from accounts.models import Trainee
-from aputils.decorators import for_all_methods
 from aputils.utils import OverwriteStorage, RequestMixin
 
 # run from live server to mount A/V files for read-only access
@@ -19,9 +19,7 @@ from aputils.utils import OverwriteStorage, RequestMixin
 
 
 def valid_audiofile_name(name):
-  if not re.match(AUDIO_FILE_FORMAT, name) or re.match(PRETRAINING_FORMAT, name):
-    return False
-  return True
+  return re.match(AUDIO_FILE_FORMAT, name) or re.match(PRETRAINING_FORMAT, name)
 
 
 def validate_audiofile_name(name):
@@ -38,13 +36,12 @@ fs = OverwriteStorage(
 
 def order_audio_files(files):
   lambdas = [
-      lambda f: f.audio_file.name.split(' ')[2],
+      lambda f: f.title,
       lambda f: f.code,
-      lambda f: f.event.name if f.event else '',
       lambda f: f.week,
   ]
   for l in lambdas:
-      files = sorted(files, key=l)
+    files = sorted(files, key=l)
   return files
 
 
@@ -55,18 +52,19 @@ def order_decorator(filter_function):
   return ordered_filter
 
 
-@for_all_methods(order_decorator)
 class AudioFileManager(models.Manager):
   def filter_list(self, week, trainee):
     term = Term.current_term()
     # return pre-training recordings
     if week == 0:
-      return filter(lambda f: f.code == 'PT' and f.term == term, self.all())
+      return filter(lambda f: f.code == 'PT', self.filter_term(term))
     # also filters year: if not a class with a Y1/Y2 designation or if the class year matches trainee's year, add file to files list
-    return filter(lambda f: f.week == week and f.term == term and f.can_trainee_view(trainee), self.all())
+    return filter(lambda f: f.week == week and f.can_trainee_view(trainee), self.filter_term(term))
 
+  @order_decorator
   def filter_term(self, term):
-    return filter(lambda f: f.term == term, self.all())
+    current_term = Term.current_term()
+    return filter(lambda f: current_term.is_date_within_term(f.date), self.all())
 
   def get_file(self, event, date):
     return filter(lambda f: f.event == event and f.date == date, self.all())
@@ -85,6 +83,15 @@ class AudioFile(models.Model):
   objects = AudioFileManager()
 
   audio_file = models.FileField(storage=fs, validators=[validate_audiofile_name])
+
+  @property
+  def year(self):
+    if self.code in ('WG', 'TG', 'E1', 'B1', 'YP'):
+      return 1
+    elif self.code in ('B2', 'LS', 'E2', 'NJ'):
+      return 2
+    else:  # main classes: 'MR', 'FM', 'CH', 'GK', 'GW', 'GE', 'B2', 'SP', FW')
+      return 0
 
   @property
   def fellowship_code(self):
@@ -114,17 +121,41 @@ class AudioFile(models.Model):
       return str(self.id) + ": " + str(e)
 
   @property
+  def list_title(self):
+    return (self.event.name + ' ' + self.title if self.event else self.title)
+
+  @property
+  def request_title(self):
+    return 'Week {0} {1} by {2}'.format(self.week, self.list_title, ', '.join(self.speakers))
+
+  # DATA DERIVED FROM THE AUDIO FILE NAME
+  @property
+  def parsed_name(self):
+    return parse_audio_name(self.audio_file.name)
+
+  @property
   def code(self):
-    return self.audio_file.name.split(SEPARATOR)[0].split('-')[0]
+    return self.parsed_name.code
 
   @property
   def date(self):
-    return datetime.strptime(self.audio_file.name.split(SEPARATOR)[1], '%Y-%m-%d').date()
+    return self.parsed_name.date
 
   @property
-  def display_name(self):
-    return (self.event.name + self.pretraining_class() if self.event else self.audio_file.name.split('.')[0])
+  def speakers(self):
+    return self.parsed_name.speakers
 
+  @property
+  def title(self):
+    return self.parsed_name.title
+
+  @property
+  def week(self):
+    if self.code == 'PT':
+      return 0
+    return self.parsed_name.week
+
+  # DATA DERIVED FROM THE AUDIO FILE NAME PLUS OTHER MODELS
   @cached_property
   def term(self):
     t = filter(lambda term: term.is_date_within_term(self.date), Term.objects.all())
@@ -134,42 +165,16 @@ class AudioFile(models.Model):
   def event(self):
     return Event.objects.filter(av_code=self.code).first()
 
-  def pretraining_class(self):
-    if self.code in ('PT', 'FW'):
-      return ': ' + ' '.join(self.audio_file.name.split(SEPARATOR)[2:-1])
-    return ''
-
-  @property
-  def week(self):
-    if self.code == 'PT':
-      return 0
-    return int(self.audio_file.name.split(SEPARATOR)[0].split('-')[1])
-
-  @property
-  def speaker(self):
-    return self.audio_file.name.split(SEPARATOR)[-1].split('.')[0]
-
-  @property
-  def year(self):
-    if self.code in ('WG', 'TG', 'E1', 'B1', 'YP'):
-      return 1
-    elif self.code in ('B2', 'LS', 'E2', 'NJ'):
-      return 2
-    else:  # main classes: 'MR', 'FM', 'CH', 'GK', 'GW', 'GE', 'B2', 'SP', FW')
-      return 0
-
-  def get_full_name(self):
-    return 'Week {0} {1} by {2}'.format(self.week, self.display_name, self.speaker)
-
   def request(self, trainee):
     return self.audio_requests.filter(trainee_author=trainee).first()
 
   def classnotes(self, trainee):
     return Classnotes.objects.filter(trainee=trainee, event=self.event, date=self.date).first()
 
-  def has_leaveslip(self, trainee):
+  def has_leaveslip(self, trainee, attendance_record=None):
     has_leaveslip = False
-    attendance_record = trainee.attendance_record
+    if not attendance_record:
+      attendance_record = trainee.attendance_record
     excused_events = filter(lambda r: r['attendance'] == 'E', attendance_record)
     for record in excused_events:
       d = datetime.strptime(record['start'].split('T')[0], '%Y-%m-%d').date()
@@ -177,18 +182,28 @@ class AudioFile(models.Model):
         has_leaveslip = True
     return has_leaveslip
 
-  def can_download(self, trainee):
+  def can_download(self, request, has_leaveslip):
+    return (request and request.status == 'A') or has_leaveslip
+
+  def can_trainee_download(self, trainee):
     request = self.request(trainee)
-    return self.has_leaveslip(trainee) or (request and request.status == 'A')
+    return self.can_download(request, self.has_leaveslip(trainee))
 
   def get_absolute_url(self):
     return reverse('audio:audio-update', kwargs={'pk': self.id})
 
 
 class AudioRequestManager(models.Manager):
+  def trainee_requests(self, trainee):
+    reqs = self.filter(trainee_author=trainee).order_by('-status', 'date_requested')
+    term = Term.current_term()
+    return filter(lambda a: term.is_date_within_term(a.date_requested), reqs)
+
   def filter_term(self, term):
-    ids = map(lambda f: f.id, AudioFile.objects.filter_term(term))
-    return self.filter(audio_requested__in=ids).distinct()
+    start_dt = datetime.combine(term.start, datetime.min.time())
+    end_dt = datetime.combine(term.end, datetime.min.time())
+    return self.filter(date_requested__gte=start_dt,
+                       date_requested__lte=end_dt)
 
 
 class AudioRequest(models.Model, RequestMixin):
@@ -207,6 +222,12 @@ class AudioRequest(models.Model, RequestMixin):
   TA_comments = models.TextField(null=True, blank=True)
   trainee_comments = models.TextField()
   audio_requested = models.ManyToManyField(AudioFile, related_name='audio_requests')
+
+  def __unicode__(self):
+    return "<Audio Request ({2}) by {0}, {1}>".format(self.trainee_author, 
+                                                   self.date_requested.date(),
+                                                   self.status,
+    )
 
   @staticmethod
   def get_button_template():

@@ -26,6 +26,9 @@ class ServiceAttendance(models.Model):
 
   week = models.IntegerField(default=0, choices=CHOICES)
 
+  class Meta:
+    unique_together = ('worker', 'designated_service', 'term', 'week')
+
   def get_service_hours(self):
     hours = 0.0
     for sr in self.serviceroll_set.all():
@@ -34,6 +37,12 @@ class ServiceAttendance(models.Model):
 
   def get_absolute_url(self):
     return reverse('services:designated_service_hours', kwargs={'service_id': self.designated_service.id, 'week': self.week})
+
+  def __unicode__(self):
+    try:
+      return "[%s - %s] %s - %s" % (self.term, self.week, self.designated_service, self.worker)
+    except AttributeError as e:
+      return str(self.id) + ": " + str(e)
 
 
 class ServiceRoll(models.Model):

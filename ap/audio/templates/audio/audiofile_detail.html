@@ -3,7 +3,12 @@
     <div class="panel-heading">
       <div class="row">
         <div class="col-xs-11">
-          {{audiofile.display_name }} <span class="pull-right">{{ audiofile.speaker }}</span>
+          {{audiofile.list_title }}
+          <span class="pull-right">
+            {% for s in audiofile.speakers %}
+              {{ s }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </span>
           <div class="panel-heading-date">{{ audiofile.date }}</div>
         </div>
         <div class="col-xs-1">

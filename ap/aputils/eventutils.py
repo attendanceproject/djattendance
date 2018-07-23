@@ -1,5 +1,5 @@
 from datetime import datetime
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 from copy import copy
 
 
@@ -83,7 +83,7 @@ class EventUtils:
           # append ev to list, check for any conflicts (intersectinng time), replace any intersecting evs
           # Cop day_evnts b/c later on will modified same events over multi-weeks to add start_time
           for day_evnt in day_evnts.copy():
-            if day_evnt.check_time_conflict(ev):
+            if day_evnt.check_time_conflict(ev) and ev.priority > day_evnt.priority:
               # replace ev if conflict
               # delete any conflicted evs
               # remove trainees in t_intersect from conflicting event and add new event with trainees in it
@@ -99,13 +99,13 @@ class EventUtils:
     return w_tb
 
   @staticmethod
-  def export_typed_ordered_roll_list(w_tb, type):
+  def export_typed_ordered_roll_list(w_tb, monitor):
     # OrderedDict so events are in order of start/end time when iterated out unto the template
     event_trainee_tb = []
     for (w, d), evs in w_tb.items():
       for ev, ts in evs.items():
-        # only calculate ev for type wanted
-        if (type == ev.type) or (type == 'RF' and ev.monitor == 'RF'):
+        # only calculate ev for monitor wanted
+        if (monitor == ev.monitor) or (monitor == 'RF' and ev.monitor == 'RF'):
           date = ev.date_for_week(w)
           # calc date from w
           ev.start_datetime = datetime.combine(date, ev.start)
@@ -147,3 +147,14 @@ class EventUtils:
         t_ev_tb.setdefault(t, []).append(ev)
 
     return (ordered_ev_list, t_ev_tb)
+
+  @staticmethod
+  def time_overlap(start1, end1, start2, end2):
+    Range = namedtuple('Range', ['start', 'end'])
+    r1 = Range(start=start1, end=end1)
+    r2 = Range(start=start2, end=end2)
+    latest_start = max(r1.start, r2.start)
+    earliest_end = min(r1.end, r2.end)
+    delta = (earliest_end - latest_start).days + 1
+    overlap = max(0, delta)
+    return overlap

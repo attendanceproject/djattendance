@@ -11,6 +11,7 @@
       <li {% block tab2 %}{%endblock%} class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Reports <span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
+          <li><a href="{% url 'classnotes:classnotes_single_trainee' %}">Class Notes Detail</a></li>
           <li><a href="{% url 'classnotes:classnotes_report' %}">Class Notes Reports</a></li>
         </ul>
       </li>

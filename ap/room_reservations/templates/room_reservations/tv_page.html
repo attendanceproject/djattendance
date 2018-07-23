@@ -126,7 +126,6 @@ $(document).ready(function() {
   loadWeather();
   setInterval(loadWeather, 10000);
   updateClock();
-  setInterval(updateClock, 1000);
 
   setInterval(function() {
     $.get(PAGE_VERSION + "?random=" + Math.random(), function(data) {
@@ -252,6 +251,8 @@ function updateClock()
     day: "numeric"
   };
   $("#date").html(currentTime.toLocaleDateString('en-us', options));
+
+  setTimeout(updateClock, 1000 - (currentTime.getTime() % 1000))
 }
 
 </script>

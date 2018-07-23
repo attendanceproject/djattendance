@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load common_tags %}
+
+{% block scripts %}
+{{ block.super }}
+{% endblock %}
+
+{% block references %}
+{{ block.super }}
+{% endblock %}
+
+
+{% block title %}
+{{title}}
+{% endblock %}
+
+{% block content %}
+
+{% ifusergroup attendance_monitors|training_assistant %}
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" {% if event_type == 'C' %} class="active" {% endif %}><a href="{% url 'attendance:class-table-rolls'%}" role="tab">Class</a></li>
+  <li role="presentation" {% if event_type == 'M' %} class="active" {% endif %}><a href="{% url 'attendance:meal-rolls'%}" role="tab">Meal</a></li>
+  <li role="presentation" {% if event_type == 'S' %} class="active" {% endif %}><a href="{% url 'attendance:study-rolls'%}" role="tab">Study</a></li>
+  <li role="presentation" {% if event_type == 'H' %} class="active" {% endif %}><a href="{% url 'attendance:house-rolls'%}" role="tab">House</a></li>
+  <li role="presentation" {% if event_type == 'T' %} class="active" {% endif %}><a href="{% url 'attendance:team-rolls'%}" role="tab">Team</a></li>
+  <li role="presentation" {% if event_type == 'Y' %} class="active" {% endif %}><a href="{% url 'attendance:ypc-rolls'%}" role="tab">YPC</a></li>
+</ul>
+{% endifusergroup %}
+
+{% include "attendance/roll_table.html" %}
+
+{% endblock %}

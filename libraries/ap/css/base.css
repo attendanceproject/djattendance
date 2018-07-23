@@ -100,3 +100,53 @@ li.dropdown.open .triangle-up {
 .welcome {
   color: #F69D74;
 }
+
+label.btn-primary:hover,
+label.btn-primary:focus,
+label.btn-primary:active,
+label.btn-primary:visited {
+  color: #fff;
+  background-color: #337ab7 !important;
+  border-color: #2e6da4 !important;
+}
+
+label.btn-primary.active:hover,
+label.btn-primary.active:focus,
+label.btn-primary.active:active,
+label.btn-primary.active:visited {
+  color: #fff;
+  background-color: #286090 !important;
+  border-color: #204d74 !important;
+}
+
+.trainee-search-container {
+  overflow: auto;
+}
+
+.trainee-search-container:hover {
+  background-color: #FFF;
+  color: #095F80;
+  border-color: #A6C5D1;
+  -webkit-box-shadow: 3px 2px #A6C5D1;
+  -moz-box-shadow: 3px 2px #A6C5D1;
+  box-shadow: 3px 2px #A6C5D1;
+}
+
+.trainee-search-input {
+  border: none;
+  float: left;
+}
+
+.trainee-search-input:focus {
+  outline: none;
+}
+
+.trainee-search-box {
+  background: #A6C5D1;
+  padding: 0.25px 26px 0.2px 12px;
+  margin-top: 3px;
+  margin-left: 8px;
+  margin-right: 0px;
+  height: 1em;
+  float: right;
+}

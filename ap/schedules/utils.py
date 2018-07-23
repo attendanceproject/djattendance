@@ -1,6 +1,4 @@
 from datetime import timedelta
-from collections import namedtuple
-# from schedules.models import Schedule
 
 
 def next_dow(d, day):
@@ -115,14 +113,3 @@ def split_schedule(schedule, week):
     return schedule.parent_schedule, s1, s2
   else:
     return schedule, s1, s2
-
-
-def time_overlap(start1, end1, start2, end2):
-  Range = namedtuple('Range', ['start', 'end'])
-  r1 = Range(start=start1, end=end1)
-  r2 = Range(start=start2, end=end2)
-  latest_start = max(r1.start, r2.start)
-  earliest_end = min(r1.end, r2.end)
-  delta = (earliest_end - latest_start).days + 1
-  overlap = max(0, delta)
-  return overlap

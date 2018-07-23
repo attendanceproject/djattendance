@@ -316,7 +316,6 @@ class SeatController {
       notes: seat.notes,
       date: t.date
     };
-    t.update(seat); // Draw optimistically to remove UI delay
     if (finalize) {
       data.finalized = seat.finalized;
     }
@@ -324,15 +323,17 @@ class SeatController {
       type: "POST",
       url: t.options.url_rolls,
       data: data,
-      success: response => {
-        let seat = t.trainees[response.trainee];
-        if (moment(seat.last_modified) < moment(response.last_modified)) {
-          seat.last_modified = response.last_modified;
-          // Update seat status if different and update UI
-          if (seat.status != response.status) {
-            seat.status = response.status;
-            // t.update(seat);
-          }
+      seat: seat,
+      t: t,
+      success: function(response) {
+        t.update(seat);
+        let trainee = t.trainees[response.trainee];
+        if (moment(trainee.last_modified) < moment(response.last_modified)) {
+          trainee.last_modified = response.last_modified;
+          // Update trainee status if different and update UI
+        }
+        if (trainee.status != response.status) {
+          trainee.status = response.status;
         }
       },
       error: (jqXHR, status, err) => {

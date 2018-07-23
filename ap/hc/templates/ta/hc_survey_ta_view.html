@@ -3,19 +3,35 @@
 {% load bootstrap3 %}
 {% load common_tags %}
 
+{% block scripts %}
+<script type="text/javascript">
+  var stat = false
+  $( document ).ready(() => {
+    $("#collapse_all").on('click', function(){
+      if (stat){
+        $("#content .collapse").collapse("show") 
+        stat = false
+      } else{
+        $("#content .collapse").collapse("hide") 
+        stat = true
+      }
+      
+    })
+  })
+</script>
+{% endblock %}
+
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
 <h2>HC Survey Admin</h2>
-<div>
+<div id="content">
   <h3>Summary</h3>
   <table class="table table-bordered" id="summary_table">
     <thead>
       <tr>
         <th>Brothers Reported</th>
-        <th>Sisters Reported</th>
-        <th>Brothers Unreported</th>
-        <th>Sisters Unreported</th>
+        <th>Sisters Reported</th>        
       </tr>
     </thead>
     <tbody>
@@ -23,29 +39,51 @@
         <td>
           {% for h in bro_reported %}
           {{h}},
+          {% empty %}
+          None reported
           {% endfor %}
         </td>
         <td>
           {% for h in sis_reported %}
           {{h}},
+          {% empty %}
+          None reported
           {% endfor %}
         </td>
+      </tr>
+      <tr>
+        <th>Brothers Unreported</th>
+        <th>Sisters Unreported</th>
+      </tr>
+      <tr>
         <td>
           {% for h in bro_not_reported %}
           {{h}},
+          {% empty %}
+          All reported
           {% endfor %}
         </td>
         <td>
           {% for h in sis_not_reported %}
           {{h}},
+          {% empty %}
+          All reported
           {% endfor %}
         </td>
       </tr>
     </tbody>
   </table>
-
+  <button class="btn btn-default" id="collapse_all">Show/Collapse All</button>
   {% for snc in surveys_and_comments %}
-  <h3>{{snc.survey.house}}</h3>
+  <div class="panel-group">  <div class="panel panel-default">     <div class="panel-heading">
+
+  <h3 class="panel-title"><a data-toggle="collapse" data-target="#{{snc.survey.id}}">
+      {{snc.survey.house}}
+  </a></h3>
+
+  <div id="{{snc.survey.id}}" class="panel-collapse collapse">
+  <div class="panel-body">
+
   <table class="table table-bordered" id="survey_table">
     <thead>
       <tr>
@@ -79,6 +117,8 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
+</div></div></div>
   {% endfor %}
 </div>
 {% endblock %}

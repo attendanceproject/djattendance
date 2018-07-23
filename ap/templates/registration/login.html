@@ -51,11 +51,11 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title"><span class="glyphicon glyphicon-signal"></span> Guest Web Access Request</h4>
+          <h4 class="modal-title"><span class="glyphicon glyphicon-globe"></span> Guest Web Access Request</h4>
         </div>
         <div class="modal-body">
           <div class="webaccess-form">
-          <form id="guest_web_acccess_form" action="{% url 'web_access:create-guest' %}" method="post">{% csrf_token %}
+          <form id="guest_web_acccess_form" action="{% url 'web_access:create-guest-request' %}" method="post">{% csrf_token %}
             {% bootstrap_form webaccess_form %}
 
             {% buttons %}
@@ -83,36 +83,32 @@
   <script type="text/javascript">
 
   $(document).ready(function() {
-
     $('#guest_web_acccess_form').submit(function() {
-      $(".webaccess-form").hide();
       $.ajax({
         data: $(this).serialize(),
         type: $(this).attr('method'),
         url: $(this).attr('action'),
         success: function(response) {
-         $('#guest_war_submit').html(response);
-         $('#guest_war_submit').prop("disabled", true);
-         update_guest_requests();
+          $(".webaccess-form").hide();
+          $('#guest_war_submit').html(response);
+          $('#guest_war_submit').prop("disabled", true);
+          update_guest_requests();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.log(textStatus, errorThrown);
         }
       });
       return false;
     });
 
-    $("#requests_panel").on("click", "button[name=delete_button]", function() {
-      $.ajax({
-        url: $(this).attr('action'),
-        success: function(response) {
-          $('#requests_panel').html(response);
-        }
-      });
-    });
-
     $.ajax({
       type: 'GET',
-      url: '{% url 'web_access:get-remote-address' %}',
+      url: "{% url 'web_access:get-remote-address' %}",
       success: function(response) {
         $('#mac_address').html(response);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.log(textStatus, errorThrown);
       }
     });
   });
@@ -120,9 +116,26 @@
   function update_guest_requests() {
     $.ajax({
       type: 'GET',
-      url: '{% url 'web_access:get-guest-requests' %}',
+      url: "{% url 'web_access:get-guest-requests' %}",
       success: function(response) {
         $('#requests_panel').html(response);
+        $(".delete-request-button").click(function(e) {
+          var requestId = e.currentTarget.dataset.id;
+          $.ajax({
+            type: "POST",
+            url: e.currentTarget.dataset.url,
+            success: function(response) {
+              new Notification(Notification.SUCCESS, 'Deleted').show();
+              $("#request-" + requestId).hide()
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              console.log(textStatus, errorThrown);
+            }
+          });
+        })
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.log(textStatus, errorThrown);
       }
     });
   }

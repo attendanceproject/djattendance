@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/attendanceproject/djattendance.svg?branch=dev)](https://travis-ci.org/attendanceproject/djattendance) [![Coverage Status](https://coveralls.io/repos/attendanceproject/djattendance/badge.png?branch=dev)](https://coveralls.io/r/attendanceproject/djattendance?branch=dev)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/attendanceproject/djattendance.svg)](https://greenkeeper.io/) [![Requirements Status](https://requires.io/github/attendanceproject/djattendance/requirements.svg)](https://requires.io/github/attendanceproject/djattendance/requirements)
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 

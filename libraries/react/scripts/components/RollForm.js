@@ -6,7 +6,7 @@ import Form from 'react-formal'
 import types from 'react-formal-inputs'
 import yup from 'yup'
 
-import { ATTENDANCE_STATUS, ATTENDANCE_MONITOR_GROUP } from '../constants'
+import { ATTENDANCE_STATUS } from '../constants'
 import SelectedEventsField from './SelectedEventsField'
 import FormSummary from './FormSummary'
 

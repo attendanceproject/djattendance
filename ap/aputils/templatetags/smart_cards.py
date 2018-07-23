@@ -124,6 +124,16 @@ def generate_cards(context):
 
     cards.append(TA_reports)
 
+    semi_annual = Card(
+        header_title="Semi-Annual",
+        card_links=[
+            CardLink(title="Study Location Report", url=reverse('semi:location-report')),
+            CardLink(title="Study Attendance Report", url=reverse('semi:attendance-report')),
+        ]
+    )
+
+    cards.append(semi_annual)
+
   if user.has_group(['badges']):
     badge_card = Card(
         header_title='Badges',
@@ -153,7 +163,7 @@ def generate_cards(context):
     )
     cards.append(service_card)
 
-  if user.has_group(['attendance_monitors']):
+  if user.has_group(['attendance_monitors', 'training_assistant']):
     attendance_card = Card(
         header_title='Rolls',
         card_links=[
@@ -163,7 +173,6 @@ def generate_cards(context):
             CardLink(title="Study", url=reverse('attendance:study-rolls')),
             CardLink(title="Team", url=reverse('attendance:team-rolls')),
             CardLink(title="YPC", url=reverse('attendance:ypc-rolls')),
-            CardLink(title="Assign trainees to schedules", url=reverse('schedules:assign-trainees')),
         ]
     )
     cards.append(attendance_card)

@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta
+from collections import Counter
 
 from django.db import models
 from django.db.models import Sum, Q
-from week_schedule import *
+from django.utils.functional import cached_property
 
-from collections import Counter
+from week_schedule import WeekSchedule
+from terms.models import Term
+
 
 """ Service models.py
 
@@ -76,13 +78,14 @@ class Worker(models.Model):
 
   # dictionary of all the types and freq
   @property
-  def service_frequency(self):
+  def weighted_service_frequency(self):
     # cache results
     if not hasattr(self, '_service_freq'):
       self._services_freq = Counter()
-      # limit history frequency to last 3 weeks (fading window that forgets)
-      for a in self.assignments.all()[:10]:
-        self._services_freq[a.service.category] += 1
+      current_term = Term.current_term()
+      for a in self.assignments.all():
+        if a.week_schedule.start >= current_term.start:
+          self._services_freq[a.service.category] += a.week_schedule.week / 10.0
     return self._services_freq
 
   # This is very inefficient. ...
