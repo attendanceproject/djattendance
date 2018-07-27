@@ -47,11 +47,27 @@ class AttendanceReport(TemplateView):
   def post(self, request, *args, **kwargs):
 
     context = self.get_context_data()
-    context['trainees'] = list(Trainee.objects.filter(is_active=True).values_list('pk', flat=True))
+    trainees = Trainee.objects.filter(is_active=True, current_term=2)
+    context['trainee_ids'] = json.dumps(list(trainees.values_list('pk', flat=True)))
+    locality_ids = set(trainees.values_list('locality__id', flat=True).distinct())
+    localities = [{'id': loc_id, 'name': Locality.objects.get(pk=loc_id).city.name}for loc_id in locality_ids]
+
+    # for localities with duplicate names, process it here
+    try:
+      dup_locality = Locality.objects.get(city__name='Richmond', city__state='VA')
+      for locality in localities:
+        if locality['id'] == dup_locality.id:
+          locality['name'] = "Richmond, VA"
+
+    except:
+      pass
+
+    context['localities'] = json.dumps(localities)
     context['date_from'] = request.POST.get("date_from")
     context['date_to'] = request.POST.get("date_to")
 
     return super(AttendanceReport, self).render_to_response(context)
+
 
 # given a list or rolls and groupslips, return rolls that are not excused by rolls
 def rolls_excused_by_groupslips(rolls, groupslips):

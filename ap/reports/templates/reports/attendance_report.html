@@ -10,6 +10,9 @@
 var attendance_records = [];
 var date_from = "{{date_from}}";
 var date_to = "{{date_to}}";
+var trainee_ids = {{trainee_ids|safe}};
+var locality_ids = {{localities|safe}};
+
 
 function get_trainee_record(trainee_id){
 	$.ajax({
@@ -22,15 +25,18 @@ function get_trainee_record(trainee_id){
       },
       success: function(response){
           attendance_records.push(response)
+          if (attendance_records.length == trainee_ids.length){
+            console.log("complete")
+          }
         },
       })
 };
 
 $( document ).ready(() => {
-	var t_ids = {{trainees}};
-	t_ids.forEach(function(element) {
+	trainee_ids.forEach(function(element) {
 		get_trainee_record(element);
 	})
+
 
 });
 
@@ -45,13 +51,8 @@ $( document ).ready(() => {
 
 {% block content %}
 
-{{trainees}}
-<br>
 
-<br>
-
-
-<div class="panel-body">
-</div>
 
 {% endblock %}
+
+
