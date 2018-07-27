@@ -301,7 +301,7 @@ class GeneratedReport(LoginRequiredMixin, GroupRequiredMixin, ListView):
       t = timeit_inline("Leave slipped Rolls")
       t.start()
       try:
-        rtn_data[trainee.full_name]["% Sickness"] = str(round(primary_indv_slip_filter.filter(type="SICK").count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
+        rtn_data[trainee.full_name]["% Sickness"] = str(round(primary_indv_slip_filter.filter(type="SICK").values('rolls').count() / float(total_rolls_in_report_for_one_trainee) * 100, 2)) + "%"
         average_sickness_percentage += float(rtn_data[trainee.full_name]["% Sickness"][:-1])
       except ZeroDivisionError:
         rtn_data[trainee.full_name]["% Sickness"] = "N/A"
