@@ -48,7 +48,7 @@ class AttendanceReport(TemplateView):
 
     context = self.get_context_data()
     trainees = Trainee.objects.filter(is_active=True, current_term=2)
-    context['trainee_ids'] = json.dumps(list(trainees.values_list('pk', flat=True)))
+    context['trainee_ids'] = list(trainees.order_by('lastname').values_list('pk', flat=True))
     locality_ids = set(trainees.values_list('locality__id', flat=True).distinct())
     localities = [{'id': loc_id, 'name': Locality.objects.get(pk=loc_id).city.name}for loc_id in locality_ids]
 
@@ -62,7 +62,7 @@ class AttendanceReport(TemplateView):
     except:
       pass
 
-    context['localities'] = json.dumps(localities)
+    context['localities'] = localities
     context['date_from'] = request.POST.get("date_from")
     context['date_to'] = request.POST.get("date_to")
 
@@ -93,7 +93,7 @@ def rolls_excused_by_groupslips(rolls, groupslips):
 
 
 # computing the attendance record per trainee
-# could potentiall explore more optimized runtine by reducing duplicate computation
+# could potentially explore more optimized runtine by reducing duplicate computation
 def attendance_report_trainee(request):
 
   data = request.GET
@@ -105,6 +105,7 @@ def attendance_report_trainee(request):
   res["firstname"] = trainee.firstname
   res["lastname"] = trainee.lastname
   res["sending_locality"] = trainee.locality.id
+  res["term"] = trainee.current_term
   res["team"] = trainee.team.code
   res["ta"] = trainee.TA.full_name
   res["gender"] = trainee.gender
