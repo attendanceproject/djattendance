@@ -14,7 +14,6 @@ from braces.views import GroupRequiredMixin, LoginRequiredMixin
 
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
@@ -47,7 +46,7 @@ class AttendanceReport(TemplateView):
   def post(self, request, *args, **kwargs):
 
     context = self.get_context_data()
-    trainees = Trainee.objects.filter(is_active=True, current_term=2)
+    trainees = Trainee.objects.filter(is_active=True, current_term=1)
     context['trainee_ids'] = list(trainees.order_by('lastname').values_list('pk', flat=True))
     locality_ids = set(trainees.values_list('locality__id', flat=True).distinct())
     localities = [{'id': loc_id, 'name': Locality.objects.get(pk=loc_id).city.name}for loc_id in locality_ids]
@@ -63,6 +62,7 @@ class AttendanceReport(TemplateView):
       pass
 
     context['localities'] = localities
+    context['teams'] = set(trainees.values_list('team__code', flat=True))
     context['date_from'] = request.POST.get("date_from")
     context['date_to'] = request.POST.get("date_to")
 
@@ -181,6 +181,7 @@ def attendance_report_trainee(request):
 
 # function to take request parameters and generate zip file of pdfs per team and locality
 def zip_attendance_report(request):
+  print request
   return None
 
 

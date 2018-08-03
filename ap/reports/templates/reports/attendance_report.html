@@ -17,10 +17,66 @@ function update_progress(){
   $("#progressbar").children().attr("aria-valuenow", compute_percentage).css("width", compute_percentage + "%").text(compute_percentage + "% Complete");
 }
 
+function append_response(trainee_info){
+  var trainee_record = document.createElement("tr");
+  var col = document.createElement("td");
+  col.innerHTML = trainee_info["lastname"] + ', ' + trainee_info["firstname"]
+  trainee_record.append(col)
+
+  col = document.createElement("td");
+  col.innerHTML = trainee_info["ta"]
+  trainee_record.append(col)
+
+  col = document.createElement("td");
+  col.innerHTML = trainee_info["term"]
+  trainee_record.append(col)
+
+  col = document.createElement("td");
+  col.innerHTML = trainee_info["team"]
+  trainee_record.append(col)
+
+  col = document.createElement("td");
+  col.innerHTML = trainee_info["gender"]
+  trainee_record.append(col)
+
+  col = document.createElement("td");
+  col.innerHTML = trainee_info["% Unex. Abs."]
+  trainee_record.append(col)
+
+  col = document.createElement("td");
+  col.innerHTML = trainee_info["% Tardy"]
+  trainee_record.append(col)
+
+  col = document.createElement("td");
+  col.innerHTML = trainee_info["% Sickness"]
+  trainee_record.append(col)
+
+  col = document.createElement("td");
+  col.innerHTML = trainee_info["% Classes Missed"]
+  trainee_record.append(col)
+
+  table_id = "locality-" + trainee_info["sending_locality"]
+  $("#"+table_id).children("tbody").append(trainee_record)
+
+  append_team(trainee_record.cloneNode(true), trainee_info)
+
+}
+
+function append_team(constructed_row, trainee_info){
+  l_id = trainee_info["sending_locality"]
+  locality = $("#locality-"+l_id).prev().children().first().text()
+  col = constructed_row.children.item(3)
+  col.innerHTML = locality
+
+  table_id = "team-" + trainee_info["team"]
+  $("#"+table_id).children("tbody").append(constructed_row)
+
+}
+
 function get_trainee_record(trainee_id){
 	$.ajax({
       type: "GET",
-      url: "{%url 'reports:attendance-report-individual-trainee' %}",
+      url: "{% url 'reports:attendance-report-individual-trainee' %}",
       data: {
       	t_id: trainee_id,
       	date_from: date_from,
@@ -28,50 +84,14 @@ function get_trainee_record(trainee_id){
       },
       success: function(response){
           attendance_records.push(response)
-          var trainee_record = document.createElement("tr");
-          var col = document.createElement("td");
-          col.innerHTML = response["lastname"] + ', ' + response["firstname"]
-          trainee_record.append(col)
-
-          col = document.createElement("td");
-          col.innerHTML = response["ta"]
-          trainee_record.append(col)
-
-          col = document.createElement("td");
-          col.innerHTML = response["term"]
-          trainee_record.append(col)
-
-          col = document.createElement("td");
-          col.innerHTML = response["team"]
-          trainee_record.append(col)
-
-          col = document.createElement("td");
-          col.innerHTML = response["gender"]
-          trainee_record.append(col)
-
-          col = document.createElement("td");
-          col.innerHTML = response["% Unex. Abs."]
-          trainee_record.append(col)
-
-          col = document.createElement("td");
-          col.innerHTML = response["% Tardy"]
-          trainee_record.append(col)
-
-          col = document.createElement("td");
-          col.innerHTML = response["% Sickness"]
-          trainee_record.append(col)
-
-          col = document.createElement("td");
-          col.innerHTML = response["% Classes Missed"]
-          trainee_record.append(col)
-
-          table_id = "locality-" + response["sending_locality"]
-          $("#"+table_id).children("tbody").append(trainee_record)
+          append_response(response)
           update_progress()
-
 
           if (attendance_records.length == trainee_ids.length){
             console.log("complete")
+            $("#navigation_bar").show()
+            $(".tab-content").show()
+            $(".progress-bar").removeClass("active")
           }
         },
       })
@@ -81,6 +101,18 @@ $( document ).ready(() => {
 	trainee_ids.forEach(function(element) {
 		get_trainee_record(element);
 	});
+  $("#navigation_bar").hide()
+  $(".tab-content").hide()
+  $("#zip_download_link").click(function(){
+    $.ajax({
+      type: "GET",
+      url: "{% url 'reports:zip-attendance-report' %}",
+      data: JSON.stringify(attendance_records),
+      success: function(response){
+        window.location = response;
+      }
+    })
+  })
 
 
 });
@@ -96,33 +128,68 @@ $( document ).ready(() => {
 
 {% block content %}
 
-<div class="progress" id="progressbar">
+<div id="progressbar" class="progress">
   <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;">0%
   </div>
 </div>
 
-{% for locality in localities %}
+<ul id="navigation_bar" class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active"><a href="#sending_locality" role="tab" data-toggle="tab">By Locality</a></li>
+  <li role="presentation"><a href="#serving_team" role="tab" data-toggle="tab">By Team</a></li>
+  <li role="presentation"><a id="zip_download_link" href="#zip_download" role="tab" data-toggle="tab">Download Zip File</a></li>
+</ul>
 
-<div class="panel-body">
-  <table id="locality-{{locality.id}}" class="table table-striped">
-    <h2> {{ locality.name }} Sending Locality Generated Report from {{date_from}} to {{date_to}} </h2>
-    <thead><tr>
-      <th>Trainee</th>
-      <th>TA</th>
-      <th>Term</th>
-      <th>Team</th>
-      <th>Gender</th>
-      <th>% Unex. Abs.</th>
-      <th>% Tardy</th>
-      <th>% Sickness</th>
-      <th>% Classess Missed</th>
+<div class="tab-content">
+  <div id="sending_locality" class="tab-pane active" role="tabpanel" >
 
-    </tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
-{% endfor %}
+    {% for locality in localities %}
+    <div class="panel-body">
+      <h2><span class="locality-name">{{ locality.name }}</span> Sending Locality Generated Report from {{date_from}} to {{date_to}} </h2>
+      <table id="locality-{{locality.id}}" class="table table-striped">
+        <thead><tr>
+          <th>Trainee</th>
+          <th>TA</th>
+          <th>Term</th>
+          <th>Team</th>
+          <th>Gender</th>
+          <th>% Unex. Abs.</th>
+          <th>% Tardy</th>
+          <th>% Sickness</th>
+          <th>% Classess Missed</th>
 
-{% endblock %}
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <div id="serving_team" class="tab-pane active" role="tabpanel" >
+    {% for team in teams %}
+    <div class="panel-body">
+      <table id="team-{{team}}" class="table table-striped">
+        <h2> {{ team }} Team Generated Report from {{date_from}} to {{date_to}} </h2>
+        <thead><tr>
+          <th>Trainee</th>
+          <th>TA</th>
+          <th>Term</th>
+          <th>Sending Locality</th>
+          <th>Gender</th>
+          <th>% Unex. Abs.</th>
+          <th>% Tardy</th>
+          <th>% Sickness</th>
+          <th>% Classess Missed</th>
+
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div id="zip_download" class="tab-pane active" role="tabpanel" >
+  </div>
+  {% endblock %}
 
 
