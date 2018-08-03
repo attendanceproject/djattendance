@@ -40,19 +40,19 @@ function append_response(trainee_info){
   trainee_record.append(col)
 
   col = document.createElement("td");
-  col.innerHTML = trainee_info["% Unex. Abs."]
+  col.innerHTML = trainee_info["unexcused_absences_percentage"]
   trainee_record.append(col)
 
   col = document.createElement("td");
-  col.innerHTML = trainee_info["% Tardy"]
+  col.innerHTML = trainee_info["tardy_percentage"]
   trainee_record.append(col)
 
   col = document.createElement("td");
-  col.innerHTML = trainee_info["% Sickness"]
+  col.innerHTML = trainee_info["sickness_percentage"]
   trainee_record.append(col)
 
   col = document.createElement("td");
-  col.innerHTML = trainee_info["% Classes Missed"]
+  col.innerHTML = trainee_info["classes_missed_percentage"]
   trainee_record.append(col)
 
   table_id = "locality-" + trainee_info["sending_locality"]
@@ -79,8 +79,6 @@ function get_trainee_record(trainee_id){
       url: "{% url 'reports:attendance-report-individual-trainee' %}",
       data: {
       	t_id: trainee_id,
-      	date_from: date_from,
-      	date_to: date_to,
       },
       success: function(response){
           attendance_records.push(response)
@@ -97,25 +95,29 @@ function get_trainee_record(trainee_id){
       })
 };
 
+function generate_pdf(){
+  // $.ajax({
+  //     type: "GET",
+  //     url: "{% url 'reports:zip-attendance-report' %}",
+  //     success: function(response){
+  //       window.location = response;
+  //     },
+  //   })
+  window.open("{% url 'reports:zip-attendance-report' %}", '_blank')
+}
+
 $( document ).ready(() => {
 	trainee_ids.forEach(function(element) {
 		get_trainee_record(element);
 	});
   $("#navigation_bar").hide()
   $(".tab-content").hide()
-  $("#zip_download_link").click(function(){
-    $.ajax({
-      type: "GET",
-      url: "{% url 'reports:zip-attendance-report' %}",
-      data: JSON.stringify(attendance_records),
-      success: function(response){
-        window.location = response;
-      }
-    })
+  $( "body" ).on('click', '#zip_download_link', function(){
+    generate_pdf();
   })
+})
 
 
-});
 
 </script>
 {% endblock %}
