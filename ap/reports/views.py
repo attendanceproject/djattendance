@@ -1,31 +1,25 @@
 import copy
-import json
 import os
 import pickle
 
-from collections import OrderedDict, Counter
+from collections import Counter
 from datetime import datetime
 from StringIO import StringIO
 from zipfile import ZipFile
 
-from aputils.utils import render_to_pdf, timeit, timeit_inline
+from aputils.utils import render_to_pdf
 from aputils.eventutils import EventUtils
 from braces.views import GroupRequiredMixin, LoginRequiredMixin
 
-from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse, JsonResponse
 from django.views.generic.base import TemplateView
-from django.views.generic.edit import FormView
-from django.views.generic.list import ListView
 
 from accounts.models import Trainee
 from terms.models import Term
 from attendance.models import Roll
 from leaveslips.models import GroupSlip, IndividualSlip
 from localities.models import Locality
-from schedules.models import Event, Schedule
 from lifestudies.models import Discipline
-from teams.models import Team
 
 from .forms import ReportGenerateForm
 
