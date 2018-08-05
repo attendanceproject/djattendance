@@ -42,6 +42,8 @@ class AttendanceReport(TemplateView):
     attendance_report_records = list()
     date_range = list()
 
+    # below is used to resolve duplicate city names for localities, eg: Richmond, Canada vs Richmond, VA
+    # using foreign key links from the trainees ensures that we don't pull localities or teams that don't have any trainees
     context = self.get_context_data()
     trainees = Trainee.objects.filter(is_active=True, current_term=2)
     context['trainee_ids'] = list(trainees.order_by('lastname').values_list('pk', flat=True))

@@ -12,6 +12,11 @@ var date_from = "{{date_from}}";
 var date_to = "{{date_to}}";
 var trainee_ids = {{trainee_ids}};
 
+var average_uap = 0
+var average_sp = 0
+var average_tp = 0
+var average_cmp = 0
+
 function update_progress(){
   var compute_percentage = Math.round(attendance_records.length / trainee_ids.length * 100)
   $("#progressbar").children().attr("aria-valuenow", compute_percentage).css("width", compute_percentage + "%").text(compute_percentage + "% Complete");
@@ -73,6 +78,9 @@ function append_team(constructed_row, trainee_info){
 
 }
 
+function send_averages(){
+}
+
 function get_trainee_record(trainee_id){
 	$.ajax({
       type: "GET",
@@ -84,8 +92,37 @@ function get_trainee_record(trainee_id){
           attendance_records.push(response)
           append_response(response)
           update_progress()
+          average_uap = average_uap + parseFloat(response['unexcused_absences_percentage'])
+          average_sp = average_sp + parseFloat(response['sickness_percentage'])
+          average_tp = average_tp + parseFloat(response['tardy_percentage'])
+          average_cmp = average_cmp + parseFloat(response['classes_missed_percentage'])
 
           if (attendance_records.length == trainee_ids.length){
+            average_uap = (Math.round((average_uap / attendance_records.length) * 100) / 100).toFixed(2) + "%"
+            average_sp = (Math.round((average_sp / attendance_records.length) * 100) / 100).toFixed(2) + "%"
+            average_tp = (Math.round((average_tp / attendance_records.length) * 100) / 100).toFixed(2) + "%"
+            average_cmp = (Math.round((average_cmp / attendance_records.length) * 100) / 100).toFixed(2) + "%"
+
+            var list = document.createElement("ul")
+            var item1 = document.createElement("li")
+            item1.innerHTML = "average unexcused absences: " + average_uap
+            list.append(item1)
+
+            var item2 = document.createElement("li")
+            item2.innerHTML = "average sickness: " + average_sp
+            list.append(item2)
+
+            var item3 = document.createElement("li")
+            item3.innerHTML = "average tardy: " + average_tp
+            list.append(item3)
+
+            var item4 = document.createElement("li")
+            item4.innerHTML = "average classes missed: " + average_cmp
+            list.append(item4)
+
+            $("#averages").append(list)
+            send_averages()
+
             console.log("complete")
             $("#navigation_bar").show()
             $(".tab-content").show()
@@ -94,6 +131,8 @@ function get_trainee_record(trainee_id){
         },
       })
 };
+
+
 
 $( document ).ready(() => {
 	trainee_ids.forEach(function(element) {
@@ -123,6 +162,10 @@ $( document ).ready(() => {
   <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;">0%
   </div>
 </div>
+
+<div id="averages">
+</div>
+
 
 <ul id="navigation_bar" class="nav nav-tabs" role="tablist">
   <li role="presentation" class="active"><a href="#sending_locality" role="tab" data-toggle="tab">By Locality</a></li>
