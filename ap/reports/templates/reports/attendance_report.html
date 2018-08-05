@@ -95,17 +95,6 @@ function get_trainee_record(trainee_id){
       })
 };
 
-function generate_pdf(){
-  // $.ajax({
-  //     type: "GET",
-  //     url: "{% url 'reports:zip-attendance-report' %}",
-  //     success: function(response){
-  //       window.location = response;
-  //     },
-  //   })
-  window.open("{% url 'reports:zip-attendance-report' %}", '_blank')
-}
-
 $( document ).ready(() => {
 	trainee_ids.forEach(function(element) {
 		get_trainee_record(element);
@@ -113,7 +102,7 @@ $( document ).ready(() => {
   $("#navigation_bar").hide()
   $(".tab-content").hide()
   $( "body" ).on('click', '#zip_download_link', function(){
-    generate_pdf();
+    window.open("{% url 'reports:zip-attendance-report' %}", '_blank')
   })
 })
 
