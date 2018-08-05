@@ -1,13 +1,25 @@
 {% load bootstrap3 %}
 {% block content %}
 
-<h2><span>{{ locality }}</span> Sending Locality Generated Report from {{date_range.0}} to {{date_range.1}} </h2>
+<h2>
+  {% if locality %}
+    {{ locality }} Sending Locality
+  {% elif team %}
+    {{ team }} Team
+  {% endif %}
+  Generated Report from {{date_range.0}} to {{date_range.1}}
+</h2>
+
 <table class="table table-striped">
   <thead><tr>
     <th>Trainee</th>
     <th>TA</th>
     <th>Term</th>
-    <th>Team</th>
+    {% if locality %}
+      <th>Team</th>
+    {% elif team %}
+      <th>Locality</th>
+    {% endif %}
     <th>Gender</th>
     <th>% Unex. Abs.</th>
     <th>% Tardy</th>
@@ -20,17 +32,18 @@
       <td>{{trainee.lastname}}, {{trainee.firstname}}</td>
       <td>{{trainee.ta}}</td>
       <td>{{trainee.term}}</td>
-      <td>{{trainee.team}}</td>
+      {% if locality %}
+        <td>{{trainee.team}}</td>
+      {% elif team %}
+        <td>{{trainee.sending_locality}}</td>
+      {% endif %}
       <td>{{trainee.gender}}</td>
       <td>{{trainee.unexcused_absences_percentage}}</td>
       <td>{{trainee.tardy_percentage}}</td>
       <td>{{trainee.sickness_percentage}}</td>
       <td>{{trainee.classes_missed_percentage}}</td>
-
     </tr>
     {% endfor %}
-
   </tbody>
-
 </table>
 {% endblock %}

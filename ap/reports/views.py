@@ -29,10 +29,6 @@ from teams.models import Team
 
 from .forms import ReportGenerateForm
 
-attendance_report_records = list()
-date_range = list()
-localities_global = None
-
 # input view for generating generic attendance report
 class GenerateAttendanceReport(TemplateView):
   template_name = 'reports/generate_attendance_report.html'
@@ -48,10 +44,12 @@ class AttendanceReport(TemplateView):
   template_name = 'reports/attendance_report.html'
 
   def post(self, request, *args, **kwargs):
+    global attendance_report_records, date_range, localities_global, trainees, teams
     attendance_report_records = list()
+    date_range = list()
 
     context = self.get_context_data()
-    trainees = Trainee.objects.filter(is_active=True, current_term=1)
+    trainees = Trainee.objects.filter(is_active=True, current_term=2)
     context['trainee_ids'] = list(trainees.order_by('lastname').values_list('pk', flat=True))
     locality_ids = set(trainees.values_list('locality__id', flat=True).distinct())
     localities = [{'id': loc_id, 'name': Locality.objects.get(pk=loc_id).city.name} for loc_id in locality_ids]
@@ -66,9 +64,12 @@ class AttendanceReport(TemplateView):
     except:
       pass
 
-    localities_global = localities
+    localities_global = copy.deepcopy(localities)
     context['localities'] = localities
+
+    teams = set(trainees.values_list('team__code', flat=True))
     context['teams'] = set(trainees.values_list('team__code', flat=True))
+
     context['date_from'] = request.POST.get("date_from")
     context['date_to'] = request.POST.get("date_to")
 
@@ -78,22 +79,18 @@ class AttendanceReport(TemplateView):
     return super(AttendanceReport, self).render_to_response(context)
 
 def generate_zip(request):
-  print attendance_report_records
   in_memory = StringIO()
   zfile = ZipFile(in_memory, "a")
 
   records_duplicate = copy.deepcopy(attendance_report_records)
-  trainees = Trainee.objects.filter(is_active=True, current_term=1)
-  locality_ids = set(trainees.values_list('locality__id', flat=True).distinct())
-  localities = [{'id': loc_id, 'name': Locality.objects.get(pk=loc_id).city.name} for loc_id in locality_ids]
-  for locality in localities:
-    print locality
+
+  context = dict()
+  context['date_range'] = date_range
+
+  for locality in localities_global:
     locality_trainees = [record for record in records_duplicate if record["sending_locality"] == locality["id"]]
-    print locality_trainees
-    context = dict()
-    context['trainee_records'] =locality_trainees
+    context['trainee_records'] = locality_trainees
     context['locality'] = locality["name"]
-    context['date_range'] = date_range
 
     pdf_file = render_to_pdf("reports/template_report.html", context)
     path = locality["name"] + '.pdf'
@@ -103,21 +100,26 @@ def generate_zip(request):
     zfile.write(path)
     os.remove(path)
 
-  # for ld in list(context['team_data']):
-  #   ld_ctx = copy.deepcopy(context)
-  #   ld_ctx.pop('loc_data')
-  #   for none_ld in list(ld_ctx['team_data']):
-  #     if none_ld != ld:
-  #       print none_ld
-  #       ld_ctx['team_data'].pop(none_ld)
+  context = dict()
+  context['date_range'] = date_range
 
-  #   pdf_file = render_to_pdf("reports/template_report.html", ld_ctx)
-  #   path = ld + '.pdf'
+  for record in records_duplicate:
+    locality_id = record['sending_locality']
+    locality_name = filter(lambda locality: locality['id'] == locality_id, localities_global)
+    record['sending_locality'] = locality_name[0]['name']
 
-  #   with open(path, 'w+') as f:
-  #     f.write(pdf_file.content)
-  #   zfile.write(path)
-  #   os.remove(path)
+  for team in teams:
+    team_trainees = [record for record in records_duplicate if record["team"] == team]
+    context['trainee_records'] = team_trainees
+    context['team'] = team
+
+    pdf_file = render_to_pdf("reports/template_report.html", context)
+    path = team + '.pdf'
+
+    with open(path, 'w+') as f:
+      f.write(pdf_file.content)
+    zfile.write(path)
+    os.remove(path)
 
   # fix for Linux zip files read in Windows
   for zf in zfile.filelist:
