@@ -1,25 +1,22 @@
 import copy
 import os
 import pickle
-
 from collections import Counter
 from datetime import datetime
 from StringIO import StringIO
 from zipfile import ZipFile
 
-from aputils.utils import render_to_pdf
+from accounts.models import Trainee
 from aputils.eventutils import EventUtils
+from aputils.utils import render_to_pdf
+from attendance.models import Roll
 from braces.views import GroupRequiredMixin, LoginRequiredMixin
-
 from django.http import HttpResponse, JsonResponse
 from django.views.generic.base import TemplateView
-
-from accounts.models import Trainee
-from terms.models import Term
-from attendance.models import Roll
 from leaveslips.models import GroupSlip, IndividualSlip
-from localities.models import Locality
 from lifestudies.models import Discipline
+from localities.models import Locality
+from terms.models import Term
 
 from .forms import ReportGenerateForm
 
@@ -27,6 +24,7 @@ attendance_report_records = list()
 date_range = list()
 localities_global = list()
 teams = list()
+
 
 # input view for generating generic attendance report
 class GenerateAttendanceReport(TemplateView):
@@ -61,8 +59,7 @@ class AttendanceReport(TemplateView):
       for locality in localities:
         if locality['id'] == dup_locality.id:
           locality['name'] = "Richmond, VA"
-
-    except:
+    except (Locality.DoesNotExist, KeyError):
       pass
 
     localities_global = copy.deepcopy(localities)
@@ -78,6 +75,7 @@ class AttendanceReport(TemplateView):
     date_range.append(datetime.strptime(request.POST.get("date_to"), '%m/%d/%Y').date())
 
     return super(AttendanceReport, self).render_to_response(context)
+
 
 def generate_zip(request):
   global attendance_report_records, date_range, localities_global, teams
@@ -135,6 +133,7 @@ def generate_zip(request):
   response.write(in_memory.read())
 
   return response
+
 
 # given a list or rolls and groupslips, return rolls that are not excused by rolls
 def rolls_excused_by_groupslips(rolls, groupslips):

@@ -2,6 +2,22 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 
+{% block title %}Attendance Reports{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+  $(".datepicker").datetimepicker({
+    timepicker: false,
+    format: "m/d/Y",
+    formatDate: "m/d/Y",
+    defaultSelect: true
+  });
+});
+
+</script>
+{% endblock %}
+
 {% block content %}
 
 <h2>Generate Attendance Reports </h2>
