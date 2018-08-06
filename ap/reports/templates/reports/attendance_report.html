@@ -12,53 +12,29 @@ var date_from = "{{date_from}}";
 var date_to = "{{date_to}}";
 var trainee_ids = {{trainee_ids}};
 
-var average_uap = 0
-var average_sp = 0
-var average_tp = 0
-var average_cmp = 0
+// define headers and computed values to calculate averages
+var average_headers = ['unexcused_absences_percentage', 'sickness_percentage', 'tardy_percentage', 'classes_missed_percentage'];
+var average_values = []
+for (var i =0; i<average_headers.length; i++){
+  average_values.push(0)
+}
 
+// dynamically adjust the progress bar as ajax requets are being completed
 function update_progress(){
   var compute_percentage = Math.round(attendance_records.length / trainee_ids.length * 100)
   $("#progressbar").children().attr("aria-valuenow", compute_percentage).css("width", compute_percentage + "%").text(compute_percentage + "% Complete");
 }
 
+// making a a single row record of HTML to append first for localities by listing only the serving teams
 function append_response(trainee_info){
   var trainee_record = document.createElement("tr");
-  var col = document.createElement("td");
-  col.innerHTML = trainee_info["lastname"] + ', ' + trainee_info["firstname"]
-  trainee_record.append(col)
+  var column_headers = ["name", "ta", "term", "team", "gender", "unexcused_absences_percentage", "tardy_percentage", "sickness_percentage", "classes_missed_percentage"]
 
-  col = document.createElement("td");
-  col.innerHTML = trainee_info["ta"]
-  trainee_record.append(col)
-
-  col = document.createElement("td");
-  col.innerHTML = trainee_info["term"]
-  trainee_record.append(col)
-
-  col = document.createElement("td");
-  col.innerHTML = trainee_info["team"]
-  trainee_record.append(col)
-
-  col = document.createElement("td");
-  col.innerHTML = trainee_info["gender"]
-  trainee_record.append(col)
-
-  col = document.createElement("td");
-  col.innerHTML = trainee_info["unexcused_absences_percentage"]
-  trainee_record.append(col)
-
-  col = document.createElement("td");
-  col.innerHTML = trainee_info["tardy_percentage"]
-  trainee_record.append(col)
-
-  col = document.createElement("td");
-  col.innerHTML = trainee_info["sickness_percentage"]
-  trainee_record.append(col)
-
-  col = document.createElement("td");
-  col.innerHTML = trainee_info["classes_missed_percentage"]
-  trainee_record.append(col)
+  for (var i = 0; i< column_headers.length; i++){
+    var col = document.createElement("td");
+    col.innerHTML = trainee_info[column_headers[i]]
+    trainee_record.append(col)
+  }
 
   table_id = "locality-" + trainee_info["sending_locality"]
   $("#"+table_id).children("tbody").append(trainee_record)
@@ -67,6 +43,7 @@ function append_response(trainee_info){
 
 }
 
+// adjust the record made for localities and adjust it for teams by changing the serving teams to sending localities
 function append_team(constructed_row, trainee_info){
   l_id = trainee_info["sending_locality"]
   locality = $("#locality-"+l_id).prev().children().first().text()
@@ -81,6 +58,8 @@ function append_team(constructed_row, trainee_info){
 function send_averages(){
 }
 
+// single ajax request for a single trainee based upon trainee id
+// using this to do parallel processing for trainee information by utilizing client-server infrastructure
 function get_trainee_record(trainee_id){
 	$.ajax({
       type: "GET",
@@ -92,33 +71,24 @@ function get_trainee_record(trainee_id){
           attendance_records.push(response)
           append_response(response)
           update_progress()
-          average_uap = average_uap + parseFloat(response['unexcused_absences_percentage'])
-          average_sp = average_sp + parseFloat(response['sickness_percentage'])
-          average_tp = average_tp + parseFloat(response['tardy_percentage'])
-          average_cmp = average_cmp + parseFloat(response['classes_missed_percentage'])
 
+          // used for computing the averages by first obtaining the sum for each one
+          for (var i = 0; i < average_headers.length; i++) {
+            average_values[i] = average_values[i] + parseFloat(response[average_headers[i]])
+          };
+
+          // once all the ajax requests are completed, compute the averages and render it
+          // also show the content of the now completed attendance report
           if (attendance_records.length == trainee_ids.length){
-            average_uap = (Math.round((average_uap / attendance_records.length) * 100) / 100).toFixed(2) + "%"
-            average_sp = (Math.round((average_sp / attendance_records.length) * 100) / 100).toFixed(2) + "%"
-            average_tp = (Math.round((average_tp / attendance_records.length) * 100) / 100).toFixed(2) + "%"
-            average_cmp = (Math.round((average_cmp / attendance_records.length) * 100) / 100).toFixed(2) + "%"
-
             var list = document.createElement("ul")
-            var item1 = document.createElement("li")
-            item1.innerHTML = "average unexcused absences: " + average_uap
-            list.append(item1)
 
-            var item2 = document.createElement("li")
-            item2.innerHTML = "average sickness: " + average_sp
-            list.append(item2)
+            for (var i = 0; i < average_headers.length; i++) {
+              var item = document.createElement("li")
+              avg_value = (Math.round((average_values[i] / attendance_records.length) * 100) / 100).toFixed(2) + "%"
+              item.innerHTML = average_headers[i] + ": " + avg_value
+              list.append(item)
 
-            var item3 = document.createElement("li")
-            item3.innerHTML = "average tardy: " + average_tp
-            list.append(item3)
-
-            var item4 = document.createElement("li")
-            item4.innerHTML = "average classes missed: " + average_cmp
-            list.append(item4)
+            };
 
             $("#averages").append(list)
             send_averages()

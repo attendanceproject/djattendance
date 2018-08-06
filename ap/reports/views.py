@@ -23,6 +23,11 @@ from lifestudies.models import Discipline
 
 from .forms import ReportGenerateForm
 
+attendance_report_records = list()
+date_range = list()
+localities_global = list()
+teams = list()
+
 # input view for generating generic attendance report
 class GenerateAttendanceReport(TemplateView):
   template_name = 'reports/generate_attendance_report.html'
@@ -38,14 +43,14 @@ class AttendanceReport(TemplateView):
   template_name = 'reports/attendance_report.html'
 
   def post(self, request, *args, **kwargs):
-    global attendance_report_records, date_range, localities_global, trainees, teams
+    global attendance_report_records, date_range, localities_global, teams
     attendance_report_records = list()
     date_range = list()
 
     # below is used to resolve duplicate city names for localities, eg: Richmond, Canada vs Richmond, VA
     # using foreign key links from the trainees ensures that we don't pull localities or teams that don't have any trainees
     context = self.get_context_data()
-    trainees = Trainee.objects.filter(is_active=True, current_term=2)
+    trainees = Trainee.objects.filter(is_active=True)
     context['trainee_ids'] = list(trainees.order_by('lastname').values_list('pk', flat=True))
     locality_ids = set(trainees.values_list('locality__id', flat=True).distinct())
     localities = [{'id': loc_id, 'name': Locality.objects.get(pk=loc_id).city.name} for loc_id in locality_ids]
@@ -75,6 +80,8 @@ class AttendanceReport(TemplateView):
     return super(AttendanceReport, self).render_to_response(context)
 
 def generate_zip(request):
+  global attendance_report_records, date_range, localities_global, teams
+
   in_memory = StringIO()
   zfile = ZipFile(in_memory, "a")
 
@@ -156,14 +163,14 @@ def rolls_excused_by_groupslips(rolls, groupslips):
 # could potentially explore more optimized runtine by reducing duplicate computation
 def attendance_report_trainee(request):
 
+  global attendance_report_records, date_range
   data = request.GET
   res = dict()
 
   t_id = int(data["t_id"])
   trainee = Trainee.objects.get(pk=t_id)
   res["trainee_id"] = t_id
-  res["firstname"] = trainee.firstname
-  res["lastname"] = trainee.lastname
+  res["name"] = trainee.lastname + ", " + trainee.firstname
   res["sending_locality"] = trainee.locality.id
   res["term"] = trainee.current_term
   res["team"] = trainee.team.code
