@@ -1,6 +1,5 @@
 import copy
 import os
-import pickle
 from collections import Counter
 from datetime import datetime
 from StringIO import StringIO
@@ -10,20 +9,15 @@ from accounts.models import Trainee
 from aputils.eventutils import EventUtils
 from aputils.utils import render_to_pdf
 from attendance.models import Roll
-from braces.views import GroupRequiredMixin, LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.views.generic.base import TemplateView
-from leaveslips.models import GroupSlip, IndividualSlip
-from lifestudies.models import Discipline
+from leaveslips.models import GroupSlip
 from localities.models import Locality
 from terms.models import Term
 
-from .forms import ReportGenerateForm
+from .utils import Stash
 
-attendance_report_records = list()
-date_range = list()
-localities_global = list()
-teams = list()
+stash = Stash()
 
 
 # input view for generating generic attendance report
@@ -41,10 +35,6 @@ class AttendanceReport(TemplateView):
   template_name = 'reports/attendance_report.html'
 
   def post(self, request, *args, **kwargs):
-    global attendance_report_records, date_range, localities_global, teams
-    attendance_report_records = list()
-    date_range = list()
-
     # below is used to resolve duplicate city names for localities, eg: Richmond, Canada vs Richmond, VA
     # using foreign key links from the trainees ensures that we don't pull localities or teams that don't have any trainees
     context = self.get_context_data()
@@ -52,6 +42,7 @@ class AttendanceReport(TemplateView):
     context['trainee_ids'] = list(trainees.order_by('lastname').values_list('pk', flat=True))
     locality_ids = set(trainees.values_list('locality__id', flat=True).distinct())
     localities = [{'id': loc_id, 'name': Locality.objects.get(pk=loc_id).city.name} for loc_id in locality_ids]
+    teams = list(set(trainees.values_list('team__code', flat=True)))
 
     # for localities with duplicate names, process it here
     try:
@@ -62,33 +53,37 @@ class AttendanceReport(TemplateView):
     except (Locality.DoesNotExist, KeyError):
       pass
 
-    localities_global = copy.deepcopy(localities)
+    stash.set_records(list())
+    stash.set_localities(copy.deepcopy(localities))
+    stash.set_teams(copy.deepcopy(teams))
+
     context['localities'] = localities
+    context['teams'] = teams
 
-    teams = set(trainees.values_list('team__code', flat=True))
-    context['teams'] = set(trainees.values_list('team__code', flat=True))
-
-    context['date_from'] = request.POST.get("date_from")
-    context['date_to'] = request.POST.get("date_to")
-
-    date_range.append(datetime.strptime(request.POST.get("date_from"), '%m/%d/%Y').date())
-    date_range.append(datetime.strptime(request.POST.get("date_to"), '%m/%d/%Y').date())
+    request.session['date_from'] = request.POST.get("date_from")
+    request.session['date_to'] = request.POST.get("date_to")
 
     return super(AttendanceReport, self).render_to_response(context)
 
 
 def generate_zip(request):
-  global attendance_report_records, date_range, localities_global, teams
-
+  date_from = datetime.strptime(request.session.get("date_from"), '%m/%d/%Y').date()
+  date_to = datetime.strptime(request.session.get("date_to"), '%m/%d/%Y').date()
+  localities = stash.get_localities()
+  teams = stash.get_teams()
+  records_duplicate = copy.deepcopy(stash.get_records())
+  date_range = [date_from, date_to]
   in_memory = StringIO()
   zfile = ZipFile(in_memory, "a")
-
-  records_duplicate = copy.deepcopy(attendance_report_records)
-
   context = dict()
+
+  context['unexcused_absences_percentage'] = request.GET.get('unexcused_absences_percentage')
+  context['tardy_percentage'] = request.GET.get('tardy_percentage')
+  context['classes_missed_percentage'] = request.GET.get('classes_missed_percentage')
+  context['sickness_percentage'] = request.GET.get('sickness_percentage')
   context['date_range'] = date_range
 
-  for locality in localities_global:
+  for locality in localities:
     locality_trainees = [record for record in records_duplicate if record["sending_locality"] == locality["id"]]
     context['trainee_records'] = locality_trainees
     context['locality'] = locality["name"]
@@ -102,11 +97,15 @@ def generate_zip(request):
     os.remove(path)
 
   context = dict()
+  context['unexcused_absences_percentage'] = request.GET.get('unexcused_absences_percentage')
+  context['tardy_percentage'] = request.GET.get('tardy_percentage')
+  context['classes_missed_percentage'] = request.GET.get('classes_missed_percentage')
+  context['sickness_percentage'] = request.GET.get('sickness_percentage')
   context['date_range'] = date_range
 
   for record in records_duplicate:
     locality_id = record['sending_locality']
-    locality_name = filter(lambda locality: locality['id'] == locality_id, localities_global)
+    locality_name = filter(lambda locality: locality['id'] == locality_id, localities)
     record['sending_locality'] = locality_name[0]['name']
 
   for team in teams:
@@ -162,11 +161,11 @@ def rolls_excused_by_groupslips(rolls, groupslips):
 # could potentially explore more optimized runtine by reducing duplicate computation
 def attendance_report_trainee(request):
 
-  global attendance_report_records, date_range
-  data = request.GET
+  date_from = datetime.strptime(request.session.get("date_from"), '%m/%d/%Y').date()
+  date_to = datetime.strptime(request.session.get("date_to"), '%m/%d/%Y').date()
+  t_id = int(request.GET["traineeId"])
   res = dict()
 
-  t_id = int(data["t_id"])
   trainee = Trainee.objects.get(pk=t_id)
   res["trainee_id"] = t_id
   res["name"] = trainee.lastname + ", " + trainee.firstname
@@ -176,8 +175,6 @@ def attendance_report_trainee(request):
   res["ta"] = trainee.TA.full_name
   res["gender"] = trainee.gender
 
-  date_from = date_range[0]
-  date_to = date_range[1]
   ct = Term.objects.get(current=True)
   if date_from < ct.start:
     date_from = ct.start
@@ -217,7 +214,6 @@ def attendance_report_trainee(request):
 
   res["tardy_percentage"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
-
   # CALCULATE %CLASSES MISSED
   possible_class_rolls_count = sum(count[ev] for ev in count if ev.monitor == 'AM' and ev.type == 'C')
   missed_classes = rolls.filter(event__monitor='AM', event__type='C')
@@ -242,7 +238,7 @@ def attendance_report_trainee(request):
   unexcused_absences = rolls_excused_by_groupslips(unexcused_absences, group_slips)
   res["unexcused_absences_percentage"] = str(round(unexcused_absences.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
-  attendance_report_records.append(res)
+  stash.append_records(res)
   return JsonResponse(res)
 
 #     # averages of fields

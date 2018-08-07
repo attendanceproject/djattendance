@@ -12,14 +12,36 @@
 //var date_to = "{{date_to}}";
 
 $( document ).ready(() => {
-  let postUrl = "{% url 'reports:attendance-report-individual-trainee' %}";
-  let trainee_ids = {{trainee_ids}};
+  const postUrl = "{% url 'reports:attendance-report-individual-trainee' %}";
+  const trainee_ids = {{trainee_ids}};
+  let zipUrl = "{% url 'reports:zip-attendance-report' %}";
   getAttendanceRecord(trainee_ids, postUrl);
   $("#navigation_bar").hide();
   $(".tab-content").hide();
   $( "body" ).on('click', '#zip_download_link', function(){
-    window.open("{% url 'reports:zip-attendance-report' %}", '_blank');
-  })
+    const averages = getAverageValues();
+    zipUrl += "?";
+    for (let key in averages) {
+      if (averages.hasOwnProperty(key)) {
+        zipUrl += key + "=" + averages[key] + "&";
+      }
+    }
+    zipUrl = zipUrl.slice(0, -1);
+    window.open(zipUrl, '_blank');
+
+    // $.ajax({
+    //   type: "GET",
+    //   url: "{% url 'reports:zip-attendance-report' %}",
+    //   data: getAveragevalues(),
+    //   success: function(data){
+    //     // var win = window.open();
+    //     // win.document.write(data);
+    //     //window.open("{% url 'reports:zip-attendance-report' %}", '_blank');
+    //     ///reports/attendance-report-zip/?unexcused_absences_percentage=6245.94&sickness_percentage=8931.820000000012&tardy_percentage=2566.8800000000037&classes_missed_percentage=10800.019999999997
+    //   }
+    // });
+
+  });
 });
 
 
