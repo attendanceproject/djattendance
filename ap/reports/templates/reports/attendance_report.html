@@ -29,18 +29,6 @@ $( document ).ready(() => {
     zipUrl = zipUrl.slice(0, -1);
     window.open(zipUrl, '_blank');
 
-    // $.ajax({
-    //   type: "GET",
-    //   url: "{% url 'reports:zip-attendance-report' %}",
-    //   data: getAveragevalues(),
-    //   success: function(data){
-    //     // var win = window.open();
-    //     // win.document.write(data);
-    //     //window.open("{% url 'reports:zip-attendance-report' %}", '_blank');
-    //     ///reports/attendance-report-zip/?unexcused_absences_percentage=6245.94&sickness_percentage=8931.820000000012&tardy_percentage=2566.8800000000037&classes_missed_percentage=10800.019999999997
-    //   }
-    // });
-
   });
 });
 
