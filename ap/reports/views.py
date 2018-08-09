@@ -95,7 +95,6 @@ def generate_csv(request):
     cfile.writerow(trainee)
 
   path = 'Attendance_Report_' + date_to_str(date_from) + '_to_' + date_to_str(date_to) + '.csv'
-  print path
   
   response = HttpResponse(content_type='text/csv')
   response['Content-Disposition'] = 'attachment; filename='+path
