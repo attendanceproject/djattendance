@@ -71,12 +71,12 @@ def date_to_str(date):
   day = str(date.day)
   year = str(date.year)
 
-  if len(month) < 0:
+  if len(month) < 2:
     month = '0'+month
-  if len(day) < 0:
+  if len(day) < 2:
     day = '0'+day
 
-  return month+day+year
+  return month+'_'+day+'_'+year
 
 def generate_csv(request):
   in_memory = StringIO()
@@ -94,11 +94,11 @@ def generate_csv(request):
     trainee = tuple([each[field] for field in fields])
     cfile.writerow(trainee)
 
-  path = 'Attendance_Report_' + date_to_str(date_from) + '_' + date_to_str(date_to) + '.csv'
+  path = 'Attendance_Report_' + date_to_str(date_from) + '_to_' + date_to_str(date_to) + '.csv'
   print path
   
   response = HttpResponse(content_type='text/csv')
-  response['Content-Dispositoin'] = 'attachment; filename=Attendance_Report.csv'
+  response['Content-Disposition'] = 'attachment; filename='+path
   in_memory.seek(0)
   response.write(in_memory.read())
 
