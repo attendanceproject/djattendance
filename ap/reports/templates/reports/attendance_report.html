@@ -15,9 +15,21 @@ $( document ).ready(() => {
   const postUrl = "{% url 'reports:attendance-report-individual-trainee' %}";
   const trainee_ids = {{trainee_ids}};
   let zipUrl = "{% url 'reports:zip-attendance-report' %}";
+  let csvUrl = "{% url 'reports:csv-attendance-report' %}";
   getAttendanceRecord(trainee_ids, postUrl);
   $("#navigation_bar").hide();
   $(".tab-content").hide();
+  $( "body" ).on('click', '#csv_download_link', function(){
+    const averages = getAverageValues();
+    csvUrl += "?";
+    for (let key in averages) {
+      if (averages.hasOwnProperty(key)) {
+        csvUrl += key + "=" + averages[key] + "&";
+      }
+    }
+    csvUrl = csvUrl.slice(0, -1);
+    window.open(csvUrl, '_blank');
+  });
   $( "body" ).on('click', '#zip_download_link', function(){
     const averages = getAverageValues();
     zipUrl += "?";
@@ -28,7 +40,6 @@ $( document ).ready(() => {
     }
     zipUrl = zipUrl.slice(0, -1);
     window.open(zipUrl, '_blank');
-
   });
 });
 
@@ -58,6 +69,7 @@ $( document ).ready(() => {
   <li role="presentation" class="active"><a href="#sending_locality" role="tab" data-toggle="tab">By Locality</a></li>
   <li role="presentation"><a href="#serving_team" role="tab" data-toggle="tab">By Team</a></li>
   <li role="presentation"><a id="zip_download_link" href="#zip_download" role="tab" data-toggle="tab">Download Zip File</a></li>
+  <li role="presentation"><a id="csv_download_link" href="#csv_download" role="tab" data-toggle="tab">Download CSV File</a></li>
 </ul>
 
 <div class="tab-content">

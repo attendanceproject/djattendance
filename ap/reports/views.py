@@ -4,6 +4,7 @@ from collections import Counter
 from datetime import datetime
 from StringIO import StringIO
 from zipfile import ZipFile
+import csv
 
 from accounts.models import Trainee
 from aputils.eventutils import EventUtils
@@ -65,6 +66,43 @@ class AttendanceReport(TemplateView):
 
     return super(AttendanceReport, self).render_to_response(context)
 
+def date_to_str(date):
+  month = str(date.month)
+  day = str(date.day)
+  year = str(date.year)
+
+  if len(month) < 0:
+    month = '0'+month
+  if len(day) < 0:
+    day = '0'+day
+
+  return month+day+year
+
+def generate_csv(request):
+  in_memory = StringIO()
+  cfile = csv.writer(in_memory)
+
+  date_from = datetime.strptime(request.session.get("date_from"), '%m/%d/%Y').date()
+  date_to = datetime.strptime(request.session.get("date_to"), '%m/%d/%Y').date()
+  date_range = [date_from, date_to]
+  all_trainees = copy.deepcopy(stash.get_records())
+
+  #Change this list if want to add or remove fields
+  fields = ['name','ta','term','gender','unexcused_absences_percentage','tardy_percentage','sickness_percentage','classes_missed_percentage']
+  
+  for each in sorted(all_trainees,key=lambda each:each['name']):
+    trainee = tuple([each[field] for field in fields])
+    cfile.writerow(trainee)
+
+  path = 'Attendance_Report_' + date_to_str(date_from) + '_' + date_to_str(date_to) + '.csv'
+  print path
+  
+  response = HttpResponse(content_type='text/csv')
+  response['Content-Dispositoin'] = 'attachment; filename=Attendance_Report.csv'
+  in_memory.seek(0)
+  response.write(in_memory.read())
+
+  return response
 
 def generate_zip(request):
   date_from = datetime.strptime(request.session.get("date_from"), '%m/%d/%Y').date()
