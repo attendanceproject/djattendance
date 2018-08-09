@@ -90,6 +90,7 @@ def generate_csv(request):
   #Change this list if want to add or remove fields
   fields = ['name','ta','term','gender','unexcused_absences_percentage','tardy_percentage','sickness_percentage','classes_missed_percentage']
   
+  cfile.writerow(tuple(fields))
   for each in sorted(all_trainees,key=lambda each:each['name']):
     trainee = tuple([each[field] for field in fields])
     cfile.writerow(trainee)
