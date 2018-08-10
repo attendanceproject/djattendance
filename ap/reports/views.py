@@ -1,15 +1,16 @@
 import copy
+import csv
 import os
 from collections import Counter
 from datetime import datetime
 from StringIO import StringIO
 from zipfile import ZipFile
-import csv
 
 from accounts.models import Trainee
 from aputils.eventutils import EventUtils
 from aputils.utils import render_to_pdf
 from attendance.models import Roll
+from braces.views import GroupRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.views.generic.base import TemplateView
 from leaveslips.models import GroupSlip
@@ -22,8 +23,9 @@ stash = Stash()
 
 
 # input view for generating generic attendance report
-class GenerateAttendanceReport(TemplateView):
+class GenerateAttendanceReport(GroupRequiredMixin, TemplateView):
   template_name = 'reports/generate_attendance_report.html'
+  group_required = ['training_assistant']
 
 
 # initial attendance report base that results in may ajax queries being generated
@@ -32,8 +34,9 @@ class GenerateAttendanceReport(TemplateView):
 # on computing the attendance record for trainees
 # client requests to server would become easier to implement
 # rather than running parallel processing via the backend
-class AttendanceReport(TemplateView):
+class AttendanceReport(GroupRequiredMixin, TemplateView):
   template_name = 'reports/attendance_report.html'
+  group_required = ['training_assistant']
 
   def post(self, request, *args, **kwargs):
     # below is used to resolve duplicate city names for localities, eg: Richmond, Canada vs Richmond, VA
@@ -66,17 +69,19 @@ class AttendanceReport(TemplateView):
 
     return super(AttendanceReport, self).render_to_response(context)
 
+
 def date_to_str(date):
   month = str(date.month)
   day = str(date.day)
   year = str(date.year)
 
   if len(month) < 2:
-    month = '0'+month
+    month = '0' + month
   if len(day) < 2:
-    day = '0'+day
+    day = '0' + day
 
-  return month+'_'+day+'_'+year
+  return month + '_' + day + '_' + year
+
 
 def generate_csv(request):
   in_memory = StringIO()
@@ -84,25 +89,26 @@ def generate_csv(request):
 
   date_from = datetime.strptime(request.session.get("date_from"), '%m/%d/%Y').date()
   date_to = datetime.strptime(request.session.get("date_to"), '%m/%d/%Y').date()
-  date_range = [date_from, date_to]
   all_trainees = copy.deepcopy(stash.get_records())
 
-  #Change this list if want to add or remove fields
-  fields = ['name','ta','term','gender','unexcused_absences_percentage','tardy_percentage','sickness_percentage','classes_missed_percentage']
-  
+  # Change this list if want to add or remove fields
+  fields = ['name', 'ta', 'term', 'gender', 'unexcused_absences_percentage', 'tardy_percentage',
+            'sickness_percentage', 'classes_missed_percentage']
+
   cfile.writerow(tuple(fields))
-  for each in sorted(all_trainees,key=lambda each:each['name']):
+  for each in sorted(all_trainees, key=lambda each: each['name']):
     trainee = tuple([each[field] for field in fields])
     cfile.writerow(trainee)
 
   path = 'Attendance_Report_' + date_to_str(date_from) + '_to_' + date_to_str(date_to) + '.csv'
-  
+
   response = HttpResponse(content_type='text/csv')
-  response['Content-Disposition'] = 'attachment; filename='+path
+  response['Content-Disposition'] = 'attachment; filename=' + path
   in_memory.seek(0)
   response.write(in_memory.read())
 
   return response
+
 
 def generate_zip(request):
   date_from = datetime.strptime(request.session.get("date_from"), '%m/%d/%Y').date()
@@ -246,9 +252,10 @@ def attendance_report_trainee(request):
   # currently counts rolls excused by individual and group slips
   # comment this part out to not count those rolls
   # exclude tardy rolls excused by individual slips
-  tardy_rolls = tardy_rolls.exclude(leaveslips__status='A')
+  # tardy_rolls = tardy_rolls.exclude(leaveslips__status='A')
+
   # exclude tardy rolls excused by group slips
-  tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips)
+  # tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips)
 
   res["tardy_percentage"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
@@ -258,10 +265,11 @@ def attendance_report_trainee(request):
 
   # currently counts rolls excused by individual and group slips
   # comment this part out to not count those rolls
-  # exclude tardy rolls excused by individual slips
-  missed_classes = missed_classes.exclude(leaveslips__status='A')
-  # exclude tardy rolls excused by group slips
-  missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips)
+  # exclude absent rolls excused by individual slips
+  # missed_classes = missed_classes.exclude(leaveslips__status='A')
+
+  # exclude absent rolls excused by group slips
+  # missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips)
 
   res["classes_missed_percentage"] = str(round(missed_classes.count() / float(possible_class_rolls_count) * 100, 2)) + "%"
 

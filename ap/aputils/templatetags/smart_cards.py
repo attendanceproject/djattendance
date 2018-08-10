@@ -119,6 +119,7 @@ def generate_cards(context):
             CardLink(title="Class Notes", url=reverse('classnotes:classnotes_report')),
             CardLink(title="Bible Reading", url=reverse('bible_tracker:report')),
             CardLink(title="Service", url=reverse('services:services_schedule')),
+            CardLink(title="Generate Attendance Report", url=reverse('reports:generate-attendance-report')),
         ]
     )
 
