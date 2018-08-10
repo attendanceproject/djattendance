@@ -10,8 +10,8 @@ from braces.views import GroupRequiredMixin
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q
+from django.shortcuts import redirect, get_object_or_404
 from django.http import HttpResponse
-from django.shortcuts import redirect
 from django.views import generic
 from rest_framework import filters
 from rest_framework.renderers import JSONRenderer
@@ -36,7 +36,9 @@ class LeaveSlipUpdate(GroupRequiredMixin, generic.UpdateView):
     ctx.update(react_attendance_context(trainee, request_params=kwargs))
     ctx['Today'] = self.get_object().get_date().strftime('%m/%d/%Y')
     ctx['SelectedEvents'] = listJSONRenderer.render(AttendanceEventWithDateSerializer(self.get_object().events, many=True).data)
-    ctx['default_transfer_ta'] = self.request.user.TA or self.get_object().TA
+    ctx['default_transfer_ta'] = trainee.TA_secondary if (self.request.user.gender == 'S') else self.get_object().TA
+    ctx['assigned_TA'] = self.get_object().TA
+    ctx['sister'] = self.request.user.gender == 'S'
     return ctx
 
 
@@ -174,9 +176,6 @@ class TALeaveSlipList(GroupRequiredMixin, generic.TemplateView):
     if status != "-1":
       si_slips = IndividualSlip.objects.none()
       sg_slips = GroupSlip.objects.none()
-      if status == 'P':
-        si_slips = i_slips.filter(status='S')
-        sg_slips = g_slips.filter(status='S')
       i_slips = i_slips.filter(status=status) | si_slips
       g_slips = g_slips.filter(status=status) | sg_slips
 
@@ -223,15 +222,44 @@ def modify_status(request, classname, status, id):
     model = GroupSlip
   list_link = modify_model_status(model, reverse_lazy('leaveslips:ta-leaveslip-list'))(
       request, status, id, lambda obj: "%s's %s was %s" % (obj.requester_name, obj._meta.verbose_name, obj.get_status_for_message())
-  )
+    )
   if "update" in request.META.get('HTTP_REFERER'):
-    next_ls = IndividualSlip.objects.filter(status__in=['P', 'S'], TA=request.user).first()
+    next_ls = IndividualSlip.objects.filter(status__in=['P'], TA=request.user).first()
     if next_ls:
       return redirect(reverse_lazy('leaveslips:individual-update', kwargs={'pk': next_ls.pk}))
-    next_ls = GroupSlip.objects.filter(status__in=['P', 'S'], TA=request.user).first()
+    next_ls = GroupSlip.objects.filter(status__in=['P'], TA=request.user).first()
     if next_ls:
       return redirect(reverse_lazy('leaveslips:group-update', kwargs={'pk': next_ls.pk}))
   return list_link
+
+
+@group_required(('training_assistant',), raise_exception=True)
+def ta_sister_actions(request, classname, status, ls_id):
+  model = IndividualSlip
+  if classname == "group":
+    model = GroupSlip
+  obj = get_object_or_404(model, pk=ls_id)
+  if status in ('L', 'I'):
+    obj.ta_sister_approved = True
+    if (status == 'L'):
+      obj.TA = obj.trainee.TA_secondary
+    obj.save()
+    message = "%s's %s was marked as TA-sister-approved and transferred to %s" % (obj.requester_name, obj._meta.verbose_name, obj.TA.full_name)
+    messages.add_message(request, messages.SUCCESS, message)
+  if (status == 'K'):
+    obj.TA = obj.trainee.TA_secondary
+    obj.save()
+    message = "%s's %s was transferred to %s" % (obj.requester_name, obj._meta.verbose_name, obj.TA.full_name)
+    messages.add_message(request, messages.SUCCESS, message)
+
+  if status in ('I', 'T'):
+    next_ls = IndividualSlip.objects.filter(status__in=['P'], TA=request.user).first()
+    if next_ls:
+      return redirect(reverse_lazy('leaveslips:individual-update', kwargs={'pk': next_ls.pk}))
+    next_ls = GroupSlip.objects.filter(status__in=['P'], TA=request.user).first()
+    if next_ls:
+      return redirect(reverse_lazy('leaveslips:group-update', kwargs={'pk': next_ls.pk}))
+  return redirect(reverse_lazy('leaveslips:ta-leaveslip-list'))
 
 
 @group_required(('training_assistant',), raise_exception=True)

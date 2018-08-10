@@ -270,6 +270,7 @@ class User(AbstractBaseUser, PermissionsMixin):
   date_end = models.DateField(null=True, blank=True)
 
   TA = models.ForeignKey('self', related_name='training_assistant', null=True, blank=True, on_delete=models.SET_NULL)
+  TA_secondary = models.ForeignKey('self', related_name='secondary_training_assistant', null=True, blank=True, on_delete=models.SET_NULL)
   mentor = models.ForeignKey('self', related_name='mentee', null=True, blank=True, on_delete=models.SET_NULL)
 
   locality = models.ForeignKey(Locality, null=True, blank=True, on_delete=models.SET_NULL)

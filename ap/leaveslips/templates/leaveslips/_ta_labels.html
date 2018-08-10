@@ -1,5 +1,5 @@
-{% if leaveslip.status == 'S'%}
-  <span class="label label-info">{{leaveslip.get_status_display}}</span>
+{% if leaveslip.ta_sister_approved %}
+  <span class="label label-info">TA sister approved</span>
 {% endif %}
 {% if leaveslip.status == 'F'%}
   <span class="label label-warning">{{leaveslip.get_status_display}}</span>

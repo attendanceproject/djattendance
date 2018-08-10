@@ -9,6 +9,8 @@
   {{ block.super }}
   {% include 'attendance/_attendance_data.html' %}
 <script type="text/javascript">
+
+
   $(document).ready(() => {
     const action_description = $('#action_description');
     $("#id_TA").val({{default_transfer_ta.id}});
@@ -21,6 +23,20 @@
       status = e.currentTarget.dataset.status;
       $('form').submit();
     });
+    let clicked = false;
+    $('.ta-sister-actions').click((e) => {
+      setTimeout(function() {
+       $('form').submit();
+      }, 1000);
+    });
+    $('.dont-save-ta').click((e) => {
+      $('#id_TA').val({{assigned_TA.id}});
+      $('form').submit();
+      setTimeout(function() {
+        $('#id_TA').val({{default_transfer_ta.id}});
+      }, 1500);
+    });
+
     let redirect = $('#ajax-redirect').attr('href');
     $('form').on('submit', (e) => {
       {% block onsubmit %}{% endblock %}
@@ -28,7 +44,7 @@
       let form = $(e.currentTarget);
       let postData = form.serialize();
       if (status) {
-        postData += "&status=" + status
+        postData += "&status=" + status;
       }
       $.ajax({
         url: form.attr('action'),
@@ -84,8 +100,13 @@
         {% csrf_token %}
         {% block trainee_display %}{% endblock %}
         {% bootstrap_form form %}
-        {% include 'leaveslips/_ta_actions.html' with selected_ta=view.request.user %}
-        <button type="submit" class="btn-lg btn-primary btn-save">Save</button>
+        <p>
+          <a href="{% url 'leaveslips:ta_sister_actions' leaveslip.classname 'T' leaveslip.id %}" class="ta-sister-actions">
+            <button type="button" class="btn-lg btn-primary btn-save">Transfer</button>
+          </a>
+          <button type="submit" class="btn-lg btn-primary btn-save dont-save-ta">Save</button>
+        </p>
+        {% include 'leaveslips/_ta_actions.html' with selected_ta=view.request.user detail=True %}
       </form>
     </div>
     <div class="col-md-7 col-xs-12">

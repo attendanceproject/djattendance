@@ -132,7 +132,7 @@ def tv_page_reservations(request):
   for r in rooms:
     reservations = []
     # Include recurring events
-    reservations.extend(RoomReservation.objects.filter(room=r, frequency='Term', status='A'))
+    reservations.extend(RoomReservation.objects.filter(room=r, frequency='Term', date__lte=date.today(), date__gte=Term.current_term().monday_start, status='A'))
     # Include non recurring events
     reservations.extend(RoomReservation.objects.filter(room=r, date=date.today(), status='A'))
     res = []

@@ -246,11 +246,11 @@
         <tr>
           <th>ID</th>
           <th>Name(s)</th>
-          <th>Period</th>          
+          <th>Period</th>
           <th>Reason</th>
           <th>Date</th>
           <th>Description</th>
-          <th>Private TA Comments</th>          
+          <th>Private TA Comments</th>
           <th>Status</th>
           <th>Tags</th>
           <th>Actions</th>
@@ -268,7 +268,7 @@
                 <td>{{leaveslip.id}}</td>
                 <td class="trainee-name">
                   <i title="Group leave slip" class="fa fa-users fa-lg" aria-hidden="true"></i>&nbsp;
-                  {{ leaveslip.trainees.all|join:", " }}  
+                  {{ leaveslip.trainees.all|join:", " }}
                 </td>
             {% endif %}
             <td>{{leaveslip.period}}</td>
@@ -281,13 +281,13 @@
             {% endif %}
             </td>
             <td>{{leaveslip.description|truncatechars:100}}</td>
-            <td>{{leaveslip.private_TA_comments|truncatechars:100}}</td>            
+            <td>{{leaveslip.private_TA_comments|truncatechars:100}}</td>
             <td>{{leaveslip.get_status_display}}</td>
             <td>
               {% include "leaveslips/_ta_labels.html" %}
             </td>
             <td>
-              {% include 'leaveslips/_ta_actions.html' %}
+              {% include 'leaveslips/_ta_actions.html' with detail=False %}
             </td>
             <td>
               <a class="leaveslip_detail" href="{{leaveslip.get_ta_update_url}}">Details</a>
