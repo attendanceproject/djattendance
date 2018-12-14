@@ -119,7 +119,7 @@ class GospelStatisticsView(TemplateView):
       stat.save()
       index += 13
     ## Fix returning to current week instead of remaining in selected week
-    return redirect(reverse('gospel_statistics:gospel-statistics-view'))
+    return redirect(reverse('gospel_statistics:gospel-statistics-view') + str(current_week))
 
   def get_context_data(self, **kwargs):
     current_user = self.request.user
