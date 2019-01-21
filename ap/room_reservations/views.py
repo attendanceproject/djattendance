@@ -123,7 +123,7 @@ class RoomReservationTVView(TemplateView):
 
 def weather_api(request):
   ANAHEIM_WEATHER = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22anaheim%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys"
-  try: 
+  try:
     response = requests.get(ANAHEIM_WEATHER)
     weather_info = str(response.text)
     condition_index = weather_info.find('condition')
