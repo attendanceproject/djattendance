@@ -1,6 +1,7 @@
 import json
 from datetime import date
 
+import warnings
 import requests
 from accounts.models import User
 from announcements.models import Announcement
@@ -133,6 +134,7 @@ def weather_api(request):
     weather['forecast'] = json.loads(weather_info[weather_info.find('[', forecast_index):weather_info.find(']', forecast_index)+1])
     return JsonResponse(weather, safe=False)
   except:
+    warnings.warn("Weather Not Found")
     return HttpResponseNotFound("Weather Not Found")
 
 
