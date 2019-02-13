@@ -7,6 +7,7 @@ from graduation.utils import grad_forms
 from form_manager.utils import user_forms
 from hc.utils import hc_surveys, hc_recommendations
 from semi.utils import semi_form_available
+from services.utils import has_designated_service
 
 
 # Type Declarations
@@ -57,7 +58,7 @@ def generate_menu(context):
           SubMenuItem(name='Personal Attendance', url='attendance:attendance-submit', condition=True),
           SubMenuItem(name='Semi Annual Location and Study Attendance', url='semi:semi-base', condition=semi_form_available()),
           SubMenuItem(name='Roll Entry Seating Chart', permission='attendance.add_roll', url='attendance:class-rolls', condition=user.has_group(['attendance_monitors'])),
-          SubMenuItem(name='Designated Service Hours', permission='services.add_designated_service_hours', url='services:designated_service_hours', condition=user.has_group(['designated_service'])),
+          SubMenuItem(name='Designated Service Hours', permission='services.add_designated_service_hours', url='services:designated_service_hours', condition=has_designated_service(user)),
       ],
       common=[
           SubMenuItem(name='Roll Entry Table', permission='attendance.add_roll', url='attendance:house-rolls', condition=user.has_group(['attendance_monitors', 'training_assistant'])),

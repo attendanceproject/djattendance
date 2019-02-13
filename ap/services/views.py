@@ -22,7 +22,7 @@ from rest_framework_bulk import BulkModelViewSet
 from terms.models import FIRST_WEEK, LAST_WEEK, Term
 
 from .forms import (AddExceptionForm, ServiceAttendanceForm,
-                    ServiceCategoryAnalyzerForm, ServiceRollForm,
+                    ServiceCategoryAnalyzerForm, ServiceForm, ServiceRollForm,
                     SingleTraineeServicesForm)
 from .models import (Assignment, Category, Prefetch, SeasonalServiceSchedule,
                      Service, ServiceAttendance, ServiceException, ServiceRoll,
@@ -252,7 +252,7 @@ def generate_signin(request, k=False, r=False, o=False):
       kitchen.append(merge_assigns(assigns))
     # Add empty dicts until len(kitchen) is a multiple of 4 so zip() doesn't cut off any service printouts
     if (len(kitchen) % 4) != 0:
-      for i in range(0,4-(len(kitchen)%4)):
+      for i in range(0, 4 - (len(kitchen) % 4)):
         kitchen.append([])
     kitchen = zip(kitchen[::4], kitchen[1::4], kitchen[2::4], kitchen[3::4])
     ctx['kitchen'] = kitchen
@@ -286,8 +286,8 @@ def generate_signin(request, k=False, r=False, o=False):
     # Add empty tuples of (None,[]) (DUMMY VALUE) until len(items) is a multiple of 2 so no service printouts get cut off
     items = sorted(lunches.items(), key=lambda i: (i[0] + 6) % 7)
     if (len(items) % 2) != 0:
-      for i in range(0,2-(len(items)%2)):
-        items.append((None,[]))
+      for i in range(0, 2 - (len(items) % 2)):
+        items.append((None, []))
     for i, item in enumerate(items[::2]):
       index = i * 2
       if len(items) == 1:
@@ -353,30 +353,26 @@ class ExceptionActiveViewSet(BulkModelViewSet):
   serializer_class = ExceptionActiveSerializer
 
 
-class ServiceHours(GroupRequiredMixin, UpdateView):
+class ServiceHours(UpdateView):
   model = ServiceAttendance
   template_name = 'services/service_hours.html'
   form_class = ServiceAttendanceForm
-  group_required = ['designated_service']
   service = None
-  designated_assignments = None
+  w_designated_services = None
   service_id = 0  # from ajax
   week = 0  # from ajax
 
   def get_object(self, queryset=None):
     term = Term.current_term()
     worker = trainee_from_user(self.request.user).worker
-    self.designated_assignments = worker.assignments.all().filter(service__designated=True).exclude(service__name__icontains="Breakfast")
-    try:
-      self.week = self.kwargs['week']
-    except KeyError:
+    self.w_designated_services = worker.designated.all()
+    self.week = self.kwargs.get('week', None)
+    self.service_id = self.kwargs.get('service_id', None)
+    if not self.week:
       self.week = term.term_week_of_date(datetime.now().date())
 
-    # get service
-    try:
-      self.service_id = self.kwargs['service_id']
-    except KeyError:
-      self.service_id = self.designated_assignments[0].service.id
+    if not self.service_id:
+      self.service_id = self.w_designated_services.first().id
 
     self.service = Service.objects.get(id=self.service_id)
 
@@ -391,11 +387,9 @@ class ServiceHours(GroupRequiredMixin, UpdateView):
 
   def dispatch(self, request, *args, **kwargs):
     if request.method == 'GET':
-      try:
-        self.kwargs['week']
-        self.kwargs['service_id']
-      except KeyError:
-        self.get_object()
+      kwarg_keys = self.kwargs.keys()
+      if ('week' not in kwarg_keys) or ('service_id' not in kwarg_keys):
+        self.get_object()  # gives values to self.service_id, self.week
         return redirect(reverse('services:designated_service_hours', kwargs={'service_id': self.service_id, 'week': self.week}))
     return super(ServiceHours, self).dispatch(request, *args, **kwargs)
 
@@ -736,6 +730,34 @@ class ServiceCategoryCountsViewer(FormView):
 
     context['count_list'] = count_list
 
+    return context
+
+
+class DesignatedServiceAdderViewer(FormView):
+  template_name = 'services/add_trainee_service_form.html'
+  form_class = ServiceForm
+
+  def get_success_url(self):
+    return reverse('services:services_form')
+
+  def form_valid(self, form):
+    if form.is_valid():
+      form.save()
+      workers = form.cleaned_data.get('workers')
+      service = form.cleaned_data.get('designated_service')
+      ct = Term.current_term()
+      week_range = range(0, ct.term_week_of_date(date.today()))
+      for worker in workers:
+        for week in week_range:
+          sa, created = ServiceAttendance.objects.get_or_create(worker=worker, designated_service=service, term=ct, week=week)
+          if created:
+            sa.excused = True
+            sa.save()
+    return super(DesignatedServiceAdderViewer, self).form_valid(form)
+
+  def get_context_data(self, **kwargs):
+    context = super(DesignatedServiceAdderViewer, self).get_context_data(**kwargs)
+    context['page_title'] = "Add Trainees to Designated Service"
     return context
 
 
