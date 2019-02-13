@@ -16,7 +16,7 @@
     "@babel/preset-react": "^7.0.0",
     "autosize": "^3.0.20",
     "babel-loader": "^8.0.0-beta.0",
-    "bootstrap-sass": "^3.4.0",
+    "bootstrap-sass": "^3.4.1",
     "bootstrap-toggle": "^2.2.2",
     "countable": "^3.0.0",
     "css-loader": "^2.0.2",
