@@ -1,4 +1,4 @@
-import yup from 'yup'
+import * as yup from 'yup'
 
 import { TA_IS_INFORMED, TA_EMPTY} from '../constants'
 
