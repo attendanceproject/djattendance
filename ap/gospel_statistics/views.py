@@ -60,9 +60,11 @@ class GospelStatisticsView(TemplateView):
     for p in gospel_pairs:
       entry = dict()
       entry['gospel_pair'] = p
-      stat = gospel_statistics.filter(gospelpair=p, week=current_week).values(*_attributes).first()
-      for _att in _attributes:
-        entry[_att] = stat.get(_att)
+      stats = gospel_statistics.filter(gospelpair=p, week=current_week).values(*_attributes)
+      if stats.exists():
+        stat = stats.first()
+        for _att in _attributes:
+          entry[_att] = stat.get(_att)
       data.append(entry)
     return data
 
@@ -74,7 +76,7 @@ class GospelStatisticsView(TemplateView):
       entry['gospel_pair'] = p
       stats = gospel_statistics.filter(gospelpair=p).values(*_attributes)
       for _att in _attributes:
-        entry[_att] = stats.aggregate(Sum(_att))
+        entry[_att] = stats.aggregate(Sum(_att)).get(_att + "__sum")
       data.append(entry)
     return data
 
@@ -128,6 +130,7 @@ class GospelStatisticsView(TemplateView):
     # All 20 week stat
     ctx['all_stat'] = self.get_all_stats_list(ctx['gospel_pairs'], GospelStat.objects.filter(gospelpair__in=ctx['gospel_pairs']))
     return ctx
+
 
 class GenerateReportView(GroupRequiredMixin, TemplateView):
   template_name = "gospel_statistics/generate_report.html"
