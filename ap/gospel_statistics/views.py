@@ -5,6 +5,7 @@ from datetime import *
 
 from accounts.models import Trainee
 from django.core.urlresolvers import reverse
+from django.db.models import Sum
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from django.http import HttpResponse
@@ -33,6 +34,9 @@ _attributes = [
     'second_appointment', 'regular_appointment', 'minutes_on_gospel', 'minutes_in_appointment',
     'bible_study', 'small_group', 'district_meeting', 'conference'
 ]
+
+_att_len = len(_attributes)
+
 ctx = dict()
 for i in _attributes:
   ctx[i] = 0
@@ -56,9 +60,9 @@ class GospelStatisticsView(TemplateView):
     for p in gospel_pairs:
       entry = dict()
       entry['gospel_pair'] = p
-      stat = gospel_statistics.filter(gospelpair=p, week=current_week)[0]
-      for i in _attributes:
-        entry[i] = eval('stat.' + i)
+      stat = gospel_statistics.filter(gospelpair=p, week=current_week).values(*_attributes).first()
+      for _att in _attributes:
+        entry[_att] = stat.get(_att)
       data.append(entry)
     return data
 
@@ -68,24 +72,9 @@ class GospelStatisticsView(TemplateView):
     for p in gospel_pairs:
       entry = dict()
       entry['gospel_pair'] = p
-      for i in _attributes:
-        entry[i] = 0
-      stats = gospel_statistics.filter(gospelpair=p)
-      # Aggregate all the stats from all the different weeks
-      for stat in stats:
-        entry[_attributes[0]] += stat.tracts_distributed
-        entry[_attributes[1]] += stat.bibles_distributed
-        entry[_attributes[2]] += stat.contacted_30_sec
-        entry[_attributes[3]] += stat.led_to_pray
-        entry[_attributes[4]] += stat.baptized
-        entry[_attributes[5]] += stat.second_appointment
-        entry[_attributes[6]] += stat.regular_appointment
-        entry[_attributes[7]] += stat.minutes_on_gospel
-        entry[_attributes[8]] += stat.minutes_in_appointment
-        entry[_attributes[9]] += stat.bible_study
-        entry[_attributes[10]] += stat.small_group
-        entry[_attributes[11]] += stat.district_meeting
-        entry[_attributes[12]] += stat.conference
+      stats = gospel_statistics.filter(gospelpair=p).values(*_attributes)
+      for _att in _attributes:
+        entry[_att] = stats.aggregate(Sum(_att))
       data.append(entry)
     return data
 
@@ -163,7 +152,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
     weeks = request.POST.getlist('weeks')
     # 1 = Full Report, 2 = Week & Total, 3 = Total Only
     report_type = int(request.POST.get('report_type'))
-    ctx['reporttype']=report_type
+    ctx['reporttype'] = report_type
     save_type = request.POST.get('save_type')
     if len(teams) < 1:
       return render(request, "gospel_statistics/generate_report.html", self.get_context_data())
@@ -183,19 +172,20 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
           for trainee in pair.trainees.all():
             if len(names) > 0:
               names += ', '
-            names += trainee.firstname+' '+trainee.lastname
-          one_pair = [[names]+attributes]
+            names += trainee.firstname + ' ' + trainee.lastname
+          one_pair = [[names] + attributes]
           for week in weeks:
-            one = GospelStat.objects.filter(gospelpair=pair, week=week)[0]
-            one_pair.append(['Week '+week]+[eval('one.'+att) for att in _attributes])
-            for i in range(len(_attributes)):
-              pair_total[i]+=eval('one.'+_attributes[i])
-          one_pair.append(['GP Total']+pair_total)
-          pairs.append(one_pair)
+            stats = GospelStat.objects.filter(gospelpair=pair, week=week).values_list(*_attributes)
+            one = list(stats.first())
+            one_pair.append(['Week ' + week] + one)
+            for i, _att in enumerate(one):
+              pair_total[i] += _att
+            one_pair.append(['GP Total'] + pair_total)
+            pairs.append(one_pair)
         ctx['pairs'] = pairs
-  
+
       if report_type < 3:
-        # Weekly
+        # pair_total
         weekly = []
         weekly_total = ['Weekly Total']+[0 for i in range(len(_attributes))]
         for week in weeks:

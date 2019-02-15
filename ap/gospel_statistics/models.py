@@ -48,6 +48,6 @@ class GospelStat(models.Model):
   def __unicode__(self):
     try:
       result = self.gospelpair.__unicode__()
-      return result+"; Week:%d" % (self.week)
+      return result + "; Week:%d" % (self.week)
     except AttributeError as e:
       return str(self.id) + ": " + str(e)
