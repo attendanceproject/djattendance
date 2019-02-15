@@ -50,7 +50,6 @@ GROUP_PERMISSIONS = [
     ('team_monitors', ['attendance']),
     ('ypc_monitors', ['attendance']),
     ('xb_trainees', []),
-    ('designated_service', []),
     ('special_projects', []),
     ('office_support', []),
     ('badges', ['badges']),

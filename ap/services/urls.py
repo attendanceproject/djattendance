@@ -26,4 +26,5 @@ urlpatterns = [
   url(r'^service_category_not_done_viewer/(?P<category_id>\d+)', views.ServiceCategoryNotDoneViewer.as_view(), name='service_category_not_done_viewer_selected'),
   url(r'^service_category_counts_viewer$', views.ServiceCategoryCountsViewer.as_view(), name='service_category_counts_viewer'),
   url(r'^service_category_counts_viewer/(?P<category_id>\d+)', views.ServiceCategoryCountsViewer.as_view(), name='service_category_counts_viewer_selected'),
+  url(r'^add_trainees_services/$', views.DesignatedServiceAdderViewer.as_view(), name='services_form')
 ]

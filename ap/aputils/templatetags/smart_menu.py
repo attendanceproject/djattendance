@@ -7,6 +7,7 @@ from graduation.utils import grad_forms
 from form_manager.utils import user_forms
 from hc.utils import hc_surveys, hc_recommendations
 from semi.utils import semi_form_available
+from services.utils import has_designated_service
 
 
 # Type Declarations
@@ -57,7 +58,7 @@ def generate_menu(context):
           SubMenuItem(name='Personal Attendance', url='attendance:attendance-submit', condition=True),
           SubMenuItem(name='Semi Annual Location and Study Attendance', url='semi:semi-base', condition=semi_form_available()),
           SubMenuItem(name='Roll Entry Seating Chart', permission='attendance.add_roll', url='attendance:class-rolls', condition=user.has_group(['attendance_monitors'])),
-          SubMenuItem(name='Designated Service Hours', permission='services.add_designated_service_hours', url='services:designated_service_hours', condition=user.has_group(['designated_service'])),
+          SubMenuItem(name='Designated Service Hours', permission='services.add_designated_service_hours', url='services:designated_service_hours', condition=has_designated_service(user)),
       ],
       common=[
           SubMenuItem(name='Roll Entry Table', permission='attendance.add_roll', url='attendance:house-rolls', condition=user.has_group(['attendance_monitors', 'training_assistant'])),
@@ -148,6 +149,14 @@ def generate_menu(context):
       trainee_only=[SubMenuItem(name=f.menu_title(), url=f.get_absolute_url()) for f in grad_forms(user)]
   )
 
+  hi_menu = MenuItem(
+      name="House Inspection",      
+      common=[ # change to specific
+          SubMenuItem(name='FAQ', url='house_inspection:house_inspection_faq'),
+          SubMenuItem(name='Manage Inspectors', url='house_inspection:manage_inspectors')
+      ]
+  )
+
   # For every 'current' item that needs to appear in the side-bar, ie exams to be taken, iterim intentions form, exit interview, etc, the context variable needs to be added to the context, and the menu item can be added here as follows
   current_menu = MenuItem(
       name='Current',
@@ -159,7 +168,7 @@ def generate_menu(context):
       ] + [SubMenuItem(name=pf.name, url='/forms/view/' + pf.slug) for pf in user_forms(user)],
   )
 
-  user_menu = [attendance_menu, discipline_menu, requests_menu, exam_menu, misc_menu, HC_menu, current_menu, grad_menu]
+  user_menu = [attendance_menu, discipline_menu, requests_menu, exam_menu, misc_menu, HC_menu, current_menu, grad_menu, hi_menu]
 
   # check for usertype TA and only in one group, maintenance or kitchen
   if user.type == 'T' and user.has_group(['facility_maintenance']) and user.groups.all().count() == 1:

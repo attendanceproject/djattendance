@@ -76,10 +76,9 @@ class IndividualSlipUpdate(LeaveSlipUpdate):
     if request.POST.get('events'):
       update['events'] = json.loads(request.POST.get('events'))
     # 'on' is the POSTed value for checked checkboxes, 'off' for unchecked
-    if request.POST.get('ta_sister_approved'):
-      update['ta_sister_approved'] = True if request.POST.get('ta_sister_approved') == 'on' else False
-    if request.POST.get('texted'):
-      update['texted'] = True if request.POST.get('texted') == 'on' else False
+    update['ta_sister_approved'] = request.POST.get('ta_sister_approved') == 'on'
+    update['texted'] = request.POST.get('texted') == 'on'
+    update['does_not_count'] = request.POST.get('does_not_count') == 'on'
 
     IndividualSlipSerializer().update(self.get_object(), update)
     return HttpResponse('ok')
@@ -109,10 +108,9 @@ class GroupSlipUpdate(LeaveSlipUpdate):
   def post(self, request, **kwargs):
     update = request.POST.dict()
     # 'on' is the POSTed value for checked checkboxes, 'off' for unchecked
-    if request.POST.get('ta_sister_approved'):
-      update['ta_sister_approved'] = True if request.POST.get('ta_sister_approved') == 'on' else False
-    if request.POST.get('texted'):
-      update['texted'] = True if request.POST.get('texted') == 'on' else False
+    update['ta_sister_approved'] = request.POST.get('ta_sister_approved') == 'on'
+    update['texted'] = request.POST.get('texted') == 'on'
+    update['does_not_count'] = request.POST.get('does_not_count') == 'on'
 
     GroupSlipSerializer().update(self.get_object(), update)
     return HttpResponse('ok')

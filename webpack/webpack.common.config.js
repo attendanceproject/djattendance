@@ -62,7 +62,7 @@ module.exports = {
         test: /\.woff2?$|\.ttf$|\.eot$|\.svg$|\.png$|\.gif$/,
         loader: [
           {
-            loader: 'url-loader',
+            loader: 'file-loader',
             options: {
               name: '[name]-[hash].[ext]'
             }

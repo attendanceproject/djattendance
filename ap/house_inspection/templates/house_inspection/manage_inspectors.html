@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+
+{% block content %}
+<!-- first_name, last_name, term, prefect -->
+<h1>Manage Inspectors</h1>
+<br>
+<div>
+	<form action="" method="POST">
+    	{% csrf_token %}
+    		<div class="form-group">
+    			<label for="last_name">Last Name</label>
+    			<input type="text" name="last_name" class="form-control" required>
+    		</div>
+    		<div class="form-group">
+    			<label for="first_name">First Name</label>
+    			<input type="text" name="first_name" class="form-control" required>
+    		</div>
+    		<div class="form-group">
+    			<label for="term">Term</label>
+    			<input type="text" name="term" class="form-control" required>
+    		</div>
+    		<div class="form-group">
+    			<label for="prefect_number">Prefect Number</label>
+    			<input type="text" name="prefect_number" class="form-control" required>
+    		</div>            
+            <input type="submit" value="addInspector" class="btn btn-secondary btn-block">
+    </form>
+</div>
+<br>
+<div>
+	<table>
+		<tr>
+			<th> Last </th>
+			<th> First </th>
+			<th> Term </th>
+			<th> Prefect </th>
+		</tr>
+		{% for inspector in inspectors %}			
+			<tr>							
+				<td>{{ inspector.last_name }}</td>
+				<td>{{ inspector.first_name }}</td>
+				<td>{{ inspector.term }}</td>
+				<td>{{ inspector.prefect_number }}</td>				
+			</tr>
+		{% endfor %}
+	</table>
+
+</div>
+
+{% endblock %}

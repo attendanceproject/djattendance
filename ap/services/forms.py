@@ -1,13 +1,17 @@
-from django.contrib import admin
-from django import forms
-
-from services.models import Service, ServiceException, ServiceRoll, ServiceAttendance, SeasonalServiceSchedule, Qualification, Worker, WorkerGroup, Assignment, Category
-from aputils.widgets import DatetimePicker, DatePicker, MultipleSelectFullCalendar
-from aputils.custom_fields import CSIMultipleChoiceField
-from aputils.queryfilter import QueryFilterService
 from accounts.models import Trainee
 from accounts.widgets import TraineeSelect2MultipleInput
+from aputils.custom_fields import CSIMultipleChoiceField
+from aputils.queryfilter import QueryFilterService
+from aputils.widgets import (DatePicker, DatetimePicker,
+                             MultipleSelectFullCalendar)
+from django import forms
+from django.contrib import admin
+from django.contrib.auth.models import Group
 from django_select2.forms import ModelSelect2Widget
+from services.models import (Assignment, Category, Qualification,
+                             SeasonalServiceSchedule, Service,
+                             ServiceAttendance, ServiceException, ServiceRoll,
+                             Worker, WorkerGroup)
 
 
 # This is written to improve query performance on admin backend
@@ -40,10 +44,7 @@ class ServiceAttendanceForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     worker = kwargs.pop('worker')
     super(ServiceAttendanceForm, self).__init__(*args, **kwargs)
-    service_ids = []
-    for assignment in worker.assignments.all().filter(service__designated=True).exclude(service__name__contains='Breakfast'):
-      service_ids.append(assignment.service.id)
-    self.fields['designated_service'].queryset = Service.objects.filter(id__in=service_ids)
+    self.fields['designated_service'].queryset = worker.designated.all()
     self.fields['designated_service'].required = True
     self.fields['week'].required = False
 
@@ -145,3 +146,47 @@ class ServiceCategoryAnalyzerForm(forms.Form):
       search_fields=['name__icontains'],
     ),
   )
+
+
+class ServiceForm(forms.Form):
+  # Add trainees to services and set them into groups
+  designated_service = forms.ModelChoiceField(
+    label='Services',
+    queryset=Service.objects.filter(designated=True).exclude(name__contains='Prep'),
+    required=True
+  )
+
+  workers = forms.ModelMultipleChoiceField(
+    label='Trainees',
+    queryset=Worker.objects.all(),
+    required=True
+  )
+
+  groups = forms.ModelMultipleChoiceField(
+    label='Groups',
+    queryset=Group.objects.exclude(name__icontains='assistant'),
+    required=False,
+    help_text='Please contact an AP trainee, if you are unsure which group they need.'
+  )
+
+  def save(self, commit=True):
+    designated_service_cleaned = self.cleaned_data['designated_service']
+    workers_cleaned = self.cleaned_data['workers']
+    groups_cleaned = self.cleaned_data['groups']
+
+    # add to worke group, designated services should have only one worker group
+    workergroup = designated_service_cleaned.worker_groups.all().first()
+    workergroup.workers.add(*list(workers_cleaned))
+
+    # add service to workers
+    for w in workers_cleaned:
+      w.designated.add(designated_service_cleaned)
+
+    for group in groups_cleaned:
+      group.user_set.add(*list(Trainee.objects.filter(worker__in=workers_cleaned)))
+
+  def __init__(self, *args, **kwargs):
+    super(ServiceForm, self).__init__(*args, **kwargs)
+    self.fields['designated_service'].widget.attrs['class'] = 'select-fk'
+    self.fields['workers'].widget.attrs['class'] = 'select-fk'
+    self.fields['groups'].widget.attrs['class'] = 'select-fk'
