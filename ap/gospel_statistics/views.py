@@ -152,7 +152,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
         # Each Pair
         pairs = []
         for pair in gospelpairs:
-          pair_total = [0 for i in range(_att_len)]
+          pair_total = [0] * _att_len
           names = ''
           for trainee in pair.trainees.all():
             if len(names) > 0:
@@ -172,7 +172,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       if report_type < 3:
         # pair_total
         weekly = []
-        weekly_total = ['Weekly Total'] + [0 for i in range(_att_len)]
+        weekly_total = ['Weekly Total'] + [0] * _att_len
         for week in weeks:
           one_week = GospelStat.objects.filter(gospelpair__in=gospelpairs, week=week).values_list(*_attributes)
           for every in one_week:
@@ -210,7 +210,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       ctx['total'] = total
       ctx['page_title'] = 'Gospel Statistics Report'
       ctx['attributes'] = attributes
-      ctx['weeks'] = [i for i in range(20)]
+      ctx['weeks'] = range(20)
       ctx['team'] = team.name
       ctx['term'] = C_TERM
       ctx['stats'] = GospelStat.objects.filter(gospelpair__in=gospelpairs)
@@ -246,23 +246,18 @@ class NewGospelPairView(TemplateView):
     # Retrieve the selected trainees
     list_of_trainee_id = request.POST.getlist('inputs')
     # Do not create empty gospel pairs
-    if len(list_of_trainee_id) == 0:
-        return redirect(reverse('gospel_statistics:gospel-statistics-view'))
-    list_of_trainees = []
-    for each in list_of_trainee_id:
-      list_of_trainees.extend(Trainee.objects.filter(id=each))
-    # Create a new empty gospel pair
+    if not len(list_of_trainee_id):
+      return redirect(reverse('gospel_statistics:gospel-statistics-view'))
+    trainees = Trainee.objects.filter(id__in=list_of_trainee_id)
     gospelpair = GospelPair(team=current_team, term=C_TERM)
     gospelpair.save()
-    # Add the trainees
-    for each in list_of_trainees:
-      gospelpair.trainees.add(each)
-    # Check for duplicate
-    for each in GospelPair.objects.filter(team=current_team, term=C_TERM):
-      if each.id is not gospelpair.id and set(each.trainees.all()) == set(gospelpair.trainees.all()):
-        ## Need to add an alert for duplicate gospel pair
-        gospelpair.delete()
-        return redirect(reverse('gospel_statistics:gospel-statistics-view'))
+    gospelpair.set(trainees)
+    duplicate_gps = GospelPair.objects.exclude(id=gospelpair.id).filter(team=current_team, term=C_TERM, gospelpair__trainees=trainees)
+    if duplicate_gps.exists():
+      # Need to add an alert for duplicate gospel pair
+      gospelpair.delete()
+      return redirect(reverse('gospel_statistics:gospel-statistics-view'))
+
     # Create 20 week GospelStats for the new gospelpair
     for week in range(0, 20):
       GospelStat(gospelpair=gospelpair, week=week).save()
