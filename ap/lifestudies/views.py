@@ -58,7 +58,14 @@ class DisciplineListView(ListView):
           summary = Summary(book=gen, chapter=1)
           summary.submitting_paper_copy = True
           summary.discipline = discipline
+          print "before save"
+          print summary.discipline
+          print summary.date_submitted
           summary.save()
+          print "after save"
+          print summary.discipline
+          print summary.date_submitted
+        print discipline.summary_set.all()
         discipline.approve_all_summary()
       messages.success(request, "Checked Life-study(s) Hard-copy Approved!")
     if 'delete' in request.POST:
