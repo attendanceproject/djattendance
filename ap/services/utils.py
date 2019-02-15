@@ -443,6 +443,8 @@ def unfinalized_service(user):
   # return list of service_id and week
   if has_designated_service(user):
     current_term = Term.current_term()
+    if date.today() < current_term.start:
+      return None
     # current week = up to week we want to access + 1
     current_week = Term.reverse_date(current_term, datetime.date.today())[0]
     worker = trainee_from_user(user).worker
