@@ -162,7 +162,7 @@ def weather_api(request):
   request.add_header('Authorization', auth_header)
   request.add_header('Yahoo-App-Id', app_id)
   weather_info = urllib2.urlopen(request).read()
-  
+
   condition_index = weather_info.find('condition')
   weather = {}
   weather['condition'] = json.loads(weather_info[weather_info.find('{', condition_index):weather_info.find('}', condition_index)+1])
