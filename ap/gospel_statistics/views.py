@@ -45,6 +45,7 @@ def get_week():
     if C_TERM.startdate_of_week(i) <= date.today() \
       and C_TERM.enddate_of_week(i) >= date.today():
       return i
+  return 0
 
 
 class GospelStatisticsView(TemplateView):
