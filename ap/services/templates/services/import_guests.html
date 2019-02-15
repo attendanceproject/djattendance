@@ -10,45 +10,45 @@
   $(document).ready(function() {
     var bulkSelect = {};
 
-    function select(selected, wRow) {
+    function select(selected, wRow, dict) {
       var id = wRow[0].id;
       if (selected) {
         wRow.addClass("selected");
-        bulkSelect[id] = 'selected';
+        dict[id] = 'selected';
       } else {
         wRow.removeClass("selected");
-        delete bulkSelect[id]
+        delete dict[id]
       }
 
-      if (Object.keys(bulkSelect).length > 1) {
+      if (Object.keys(dict).length > 1) {
         $(".bulk-actions").show();
       }
-      if (Object.keys(bulkSelect).length <= 1) {
+      if (Object.keys(dict).length <= 1) {
         $(".bulk-actions").hide();
       }
     }
 
     $('#workers-table .worker-row').click(function() {
       if ($(this).hasClass('selected')) {
-        select(false, $(this));
+        select(false, $(this), bulkSelect);
       }
       else {
-        select(true, $(this));
+        select(true, $(this), bulkSelect);
       }
     });
 
 
     $("#checkall").click(function () {
+      var sel = false;
       if ($("#checkall").is(':checked')) {
-        $("#workers-table .worker-row").each(function () {
-          select(true, $(this));
-        });
-      } else {
-        $("#workers-table .worker-row").each(function () {
-          select(false, $(this));
-        });
-        $(".bulk-actions").hide();
+        sel = true;
       }
+
+      $("#workers-table .worker-row").each(function () {
+        if ($(this).css('display') != 'none') {
+          select(sel, $(this), bulkSelect);
+        }
+      });
     });
 
     $("#bulk-deactivate").click(function() {
@@ -66,7 +66,7 @@
 
             new Notification(Notification.SUCCESS, "Workers successfully deleted").show();
             $(".bulk-actions").hide();
-            bulkSelect = [];
+            bulkSelect = {};
           },
           error: function(xhr, textStatus, errorThrown) {
             alert(errorThrown);
@@ -74,6 +74,8 @@
         })
       }
     });
+
+    $('#checkall').prop('checked', false);
 
     let cols = {{columns|safe}};
     $("#workers-table").DataTable({
@@ -83,7 +85,7 @@
     $(".ind-danger").click(function() {
       if (confirm('Are you sure you want to deactivate this worker?')) {
         $.ajax({
-          type: "POST",
+          method: "POST",
           url: $(this).attr('value'),
           success: (data) => {
             if (data.success) {
@@ -91,6 +93,7 @@
             } else {
               alert('Error.');
             }
+            bulkSelect = {};
           },
         });
       }
