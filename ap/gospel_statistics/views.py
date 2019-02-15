@@ -9,9 +9,9 @@ from zipfile import ZipFile
 
 from braces.views import GroupRequiredMixin
 from django.core.urlresolvers import reverse
-from django.db.models import Sum
+from django.db.models import Count, Sum
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView
 
 from accounts.models import Trainee
@@ -241,6 +241,14 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
 class NewGospelPairView(TemplateView):
   template_name = "gospel_statistics/new_pair.html"
 
+  @staticmethod
+  def find_duplicate(query_set, m2m_field, ids):
+    query = query_set.annotate(
+        count=Count(m2m_field)).filter(count=len(ids))
+    for _id in ids:
+      query = query.filter(**{m2m_field: _id})
+    return query
+
   def post(self, request, *args, **kwargs):
     current_team = self.request.user.team
     # Retrieve the selected trainees
@@ -251,8 +259,10 @@ class NewGospelPairView(TemplateView):
     trainees = Trainee.objects.filter(id__in=list_of_trainee_id)
     gospelpair = GospelPair(team=current_team, term=C_TERM)
     gospelpair.save()
-    gospelpair.set(trainees)
-    duplicate_gps = GospelPair.objects.exclude(id=gospelpair.id).filter(team=current_team, term=C_TERM, gospelpair__trainees=trainees)
+    gospelpair.trainees.set(trainees)
+    duplicate_gps = self.find_duplicate(
+        GospelPair.objects.filter(team=current_team, term=C_TERM).exclude(id=gospelpair.id),
+        'trainees', list(trainees.values_list('id')))
     if duplicate_gps.exists():
       # Need to add an alert for duplicate gospel pair
       gospelpair.delete()
@@ -271,12 +281,13 @@ class NewGospelPairView(TemplateView):
     ctx['members'] = Trainee.objects.filter(team=current_user.team)
     return ctx
 
+
 def delete_pair(request):
   # Get the current pair
   current_id = request.POST['pair_id']
-  pair = GospelPair(id=current_id)
+  pair = get_object_or_404(GospelPair, id=current_id)
   # Delete the pair
-  ## Add a warning for deleting a gospel pair
+  # Add a warning for deleting a gospel pair
   pair.delete()
   return redirect(reverse('gospel_statistics:gospel-statistics-view'))
 
