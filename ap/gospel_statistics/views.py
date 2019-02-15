@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import *
-
-from accounts.models import Trainee
-from django.core.urlresolvers import reverse
-from django.db.models import Sum
-from django.shortcuts import redirect, render
-from django.views.generic import TemplateView
-from django.http import HttpResponse
-from terms.models import Term
-from aputils.decorators import group_required
-from braces.views import GroupRequiredMixin
-
-from .models import GospelPair, GospelStat
-from teams.models import Team
-
 # Import for generate
 import os
-from aputils.utils import render_to_pdf
-from zipfile import ZipFile
+from datetime import *
 from StringIO import StringIO
+from zipfile import ZipFile
+
+from braces.views import GroupRequiredMixin
+from django.core.urlresolvers import reverse
+from django.db.models import Sum
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.views.generic import TemplateView
+
+from accounts.models import Trainee
+from aputils.decorators import group_required
+from aputils.utils import render_to_pdf
+from teams.models import Team
+from terms.models import Term
+
+from .models import GospelPair, GospelStat
 
 # ctx[cols] = attributes
 attributes = [
@@ -42,13 +42,6 @@ for i in _attributes:
   ctx[i] = 0
 
 C_TERM = Term.current_term()
-
-
-def get_week():
-  for i in range(0, 20):
-    if C_TERM.startdate_of_week(i) <= date.today() \
-      and C_TERM.enddate_of_week(i) >= date.today():
-      return i
 
 
 class GospelStatisticsView(TemplateView):
@@ -123,7 +116,7 @@ class GospelStatisticsView(TemplateView):
 
 class GenerateReportView(GroupRequiredMixin, TemplateView):
   template_name = "gospel_statistics/generate_report.html"
-  ## Need to check
+  # Need to check
   group_required = ['training_assistant']
 
   def get_context_data(self, **kwargs):
@@ -145,11 +138,11 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
     # 1 = Full Report, 2 = Week & Total, 3 = Total Only
     report_type = int(request.POST.get('report_type'))
     ctx['reporttype'] = report_type
-    save_type = request.POST.get('save_type')
+    # save_type = request.POST.get('save_type')
     if len(teams) < 1:
       return render(request, "gospel_statistics/generate_report.html", self.get_context_data())
 
-    ## Generate Report here
+    # Generate Report here
     in_memory = StringIO()
     zfile = ZipFile(in_memory, "a")
     for team in teams:
@@ -159,7 +152,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
         # Each Pair
         pairs = []
         for pair in gospelpairs:
-          pair_total = [0 for i in range(len(_attributes))]
+          pair_total = [0 for i in range(_att_len)]
           names = ''
           for trainee in pair.trainees.all():
             if len(names) > 0:
@@ -192,24 +185,28 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
         ctx['weekly'] = weekly
 
       # Total
+      totals = [0] * _att_len
       stats = GospelStat.objects.filter(gospelpair__in=gospelpairs)
-      totals = [0 for i in range(len(_attributes))]
-      for stat in stats:
-        for i in range(len(_attributes)):
-          totals[i] += eval('stat.'+_attributes[i])
-      total = [['All '+code+' GP Pair Totals Added Together']+totals]
-      all_pairs = GospelPair.objects.filter(term=C_TERM)
-      alls = GospelStat.objects.filter(gospelpair__in=all_pairs)
-      grand = [0 for i in range(len(_attributes))]
-      for each in alls:
-        for i in range(len(_attributes)):
-          grand[i] += eval('each.'+_attributes[i])
+      if stats.exists():
+        aggr = stats.aggregate(*[Sum(_att) for _att in _attributes])
+        for i, _att in enumerate(_attributes):
+          totals[i] = aggr.get(_att * "__sum")
+        total = [['All ' + code + ' GP Pair Totals Added Together'] + totals]
 
-      total.append(['FTTA Grand Total (Campus/Community Teams)']+grand)
-      ## Fix next two append
-      #total.append([code+' Average Across Weeks ('+str(len(weeks))+' Week Range)']+[])
-      #total.append(['FTTA Total Average Across Weeks ('+str(len(weeks))+' Week Range)']+[])
-      total.append([code+' GP Pair Team Average']+["{0:.2f}".format(each/max(1,float(len(gospelpairs)))) for each in totals])
+      all_pairs = GospelPair.objects.filter(term=C_TERM)
+      all_stats = GospelStat.objects.filter(gospelpair__in=all_pairs)
+      term_totals = [0] * _att_len
+      if all_stats.exists():
+        aggr = all_stats.aggregate(*[Sum(_att) for _att in _attributes])
+        for i, _att in enumerate(_attributes):
+          term_totals[i] = aggr.get(_att + "__sum")
+
+      total.append(['FTTA Grand Total (Campus/Community Teams)'] + term_totals)
+      # Fix next two append
+      # total.append([code+' Average Across Weeks ('+str(len(weeks))+' Week Range)']+[])
+      # total.append(['FTTA Total Average Across Weeks ('+str(len(weeks))+' Week Range)']+[])
+      averages = ["{0:.2f}".format(each / max(1, float(len(gospelpairs)))) for each in totals]
+      total.append([code + ' GP Pair Team Average'] + averages)
       ctx['total'] = total
       ctx['page_title'] = 'Gospel Statistics Report'
       ctx['attributes'] = attributes
@@ -217,10 +214,10 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       ctx['team'] = team.name
       ctx['term'] = C_TERM
       ctx['stats'] = GospelStat.objects.filter(gospelpair__in=gospelpairs)
-      ## Make it downloadable
-      #return render(request, 'gospel_statistics/gospel_statistics_report_base.html', ctx)
+      # Make it downloadable
+      # return render(request, 'gospel_statistics/gospel_statistics_report_base.html', ctx)
       pdf_file = render_to_pdf('gospel_statistics/gospel_statistics_report_base.html', ctx)
-      path = team.name+'.pdf'
+      path = team.name + '.pdf'
 
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
@@ -238,7 +235,8 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
     response.write(in_memory.read())
 
     return response
-    #return render(request, "gospel_statistics/generate_report.html", self.get_context_data())
+    # return render(request, "gospel_statistics/generate_report.html", self.get_context_data())
+
 
 class NewGospelPairView(TemplateView):
   template_name = "gospel_statistics/new_pair.html"
