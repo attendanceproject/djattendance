@@ -3,7 +3,7 @@ import { changeTraineeView } from '../actions'
 import PropTypes from 'prop-types'
 import Select from 'react-select'
 import { isAM } from '../constants'
-import yup from 'yup'
+import * as yup from 'yup'
 
 //client side validation
 let modelSchema = (props) => {
