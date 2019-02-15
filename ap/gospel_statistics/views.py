@@ -84,7 +84,9 @@ class GospelStatisticsView(TemplateView):
     # Retreive the updated stat values
     list_of_pairs = request.POST.getlist('pairs')
     list_of_stats = request.POST.getlist('inputs')
-    current_week = get_week()
+    print list_of_pairs
+    print list_of_stats
+    current_week = C_TERM.term_week_of_date(date.today())
     if 'week' in self.kwargs:
       current_week = self.kwargs['week']
     index = 0
