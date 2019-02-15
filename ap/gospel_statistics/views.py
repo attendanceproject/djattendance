@@ -75,8 +75,9 @@ class GospelStatisticsView(TemplateView):
       entry = dict()
       entry['gospel_pair'] = p
       stats = gospel_statistics.filter(gospelpair=p).values(*_attributes)
+      totals = stats.aggregate(*[Sum(_att) for _att in _attributes])
       for _att in _attributes:
-        entry[_att] = stats.aggregate(Sum(_att)).get(_att + "__sum")
+        entry[_att] = totals.get(_att + "__sum")
       data.append(entry)
     return data
 
@@ -109,7 +110,7 @@ class GospelStatisticsView(TemplateView):
     ctx['cols'] = attributes
     ctx['current'] = []
     ctx['atts'] = _attributes
-    week = get_week()
+    week = C_TERM.term_week_of_date(date.today())
     if 'week' in self.kwargs:
       week = self.kwargs['week']
     ctx['week'] = week
@@ -178,19 +179,18 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       if report_type < 3:
         # pair_total
         weekly = []
-        weekly_total = ['Weekly Total']+[0 for i in range(len(_attributes))]
+        weekly_total = ['Weekly Total'] + [0 for i in range(_att_len)]
         for week in weeks:
-          one_week = GospelStat.objects.filter(gospelpair__in=gospelpairs, week=week)
-          weeklys = ['Week '+week]+[0 for i in range(len(_attributes))]
+          one_week = GospelStat.objects.filter(gospelpair__in=gospelpairs, week=week).values_list(*_attributes)
           for every in one_week:
-            for i in range(len(_attributes)):
-              val = eval('every.'+_attributes[i])
-              weeklys[i+1] += val
-              weekly_total[i+1] += val
+            weeklys = ['Week ' + week] + list(every)
           weekly.append(weeklys)
-        weekly.append(weekly_total)
+          totals = one_week.aggregate(*[Sum(_att) for _att in _attributes])
+          for i, _att in enumerate(_attributes):
+            weekly_total[i + 1] = totals.get(_att + "__sum")
+          weekly.append(weekly_total)
         ctx['weekly'] = weekly
-      
+
       # Total
       stats = GospelStat.objects.filter(gospelpair__in=gospelpairs)
       totals = [0 for i in range(len(_attributes))]
