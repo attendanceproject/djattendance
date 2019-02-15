@@ -190,7 +190,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       if stats.exists():
         aggr = stats.aggregate(*[Sum(_att) for _att in _attributes])
         for i, _att in enumerate(_attributes):
-          totals[i] = aggr.get(_att * "__sum")
+          totals[i] = aggr.get(_att + "__sum")
         total = [['All ' + code + ' GP Pair Totals Added Together'] + totals]
 
       all_pairs = GospelPair.objects.filter(term=C_TERM)
@@ -295,45 +295,42 @@ def delete_pair(request):
 @group_required(['training_assistant'])
 def TAGospelStatisticsView(request):
   # Campus trainees
-  campus = Team.objects.filter(type='CAMPUS')
-  campus_pairs = GospelPair.objects.filter(team__in=campus)
-  campus_trainees=0
-  for i in campus_pairs:
-    campus_trainees+=len(i.trainees.all())
-  campus_all = GospelStat.objects.filter(gospelpair__in=campus_pairs)
-  campus_total = [0 for i in range(len(_attributes))]
-  if len(campus_all)>0:
-    for index in range(len(campus_all)):
-      for i in range(len(_attributes)):
-        campus_total[i]+=eval('campus_all['+str(index)+'].'+_attributes[i])
+  campus_pairs = GospelPair.objects.filter(team__type='CAMPUS')
+  campus_trainees = campus_pairs.aggregate(Count('trainees')).get('trainees__count')
+
+  campus_stats = GospelStat.objects.filter(gospelpair__team__type='CAMPUS')
+  campus_totals = [0] * _att_len
+  if campus_stats.exists():
+    aggr = campus_stats.aggregate(*[Sum(_att) for _att in _attributes])
+    for i, _att in enumerate(_attributes):
+      campus_totals[i] = aggr.get(_att + '__sum')
 
   # Community trainees
-  community = Team.objects.filter(type='COM')
-  community_pairs = GospelPair.objects.filter(team__in=community)
-  community_all = GospelStat.objects.filter(gospelpair__in=community_pairs)
-  community_trainees=0
-  for i in community_pairs:
-    community_trainees+=len(i.trainees.all())
-  community_total = []
-  community_total = [0 for i in range(len(_attributes))]
-  if len(community_all)>0:
-    for index in range(len(community_all)):
-      for i in range(len(_attributes)):
-        community_total[i]+=eval('community_all['+str(index)+'].'+_attributes[i])
+  community_pairs = GospelPair.objects.filter(team__type='COM')
+  community_trainees = community_pairs.aggregate(Count('trainees')).get('trainees__count')
+
+  community_stats = GospelStat.objects.filter(gospelpair__team__type='COM')
+  community_totals = [0] * _att_len
+  if community_stats.exists():
+    aggr = community_stats.aggregate(*[Sum(_att) for _att in _attributes])
+    for i, _att in enumerate(_attributes):
+      community_totals[i] = aggr.get(_att + '__sum')
 
   campus_average = []
   community_average = []
-  for i in campus_total:
-    campus_average.append("{0:.2f}".format(i/max(float(campus_trainees),1)))
-  for i in community_total:
-    community_average.append("{0:.2f}".format(i/max(float(community_trainees),1)))
+  for total in campus_totals:
+    average = "{0:.2f}".format(total / max(float(campus_trainees), 1))
+    campus_average.append(average)
+  for total in community_totals:
+    average = "{0:.2f}".format(total / max(float(community_trainees), 1))
+    community_average.append(average)
 
-  #ctx = GospelStat.objects.filter(gospelpair__in=pairs)
+  # ctx = GospelStat.objects.filter(gospelpair__in=pairs)
   ctx = {
     'page_title': 'Team Statistics Summary',
     'attributes': attributes,
-    'campus_total': campus_total,
-    'community_total': community_total,
+    'campus_total': campus_totals,
+    'community_total': community_totals,
     'campus_average': campus_average,
     'community_average': community_average,
   }
