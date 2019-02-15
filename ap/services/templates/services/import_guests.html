@@ -8,12 +8,79 @@
 {% block scripts %}
 <script type="text/javascript">
   $(document).ready(function() {
+    var bulkSelect = {};
+
+    function select(selected, wRow) {
+      var id = wRow[0].id;
+      if (selected) {
+        wRow.addClass("selected");
+        bulkSelect[id] = 'selected';
+      } else {
+        wRow.removeClass("selected");
+        delete bulkSelect[id]
+      }
+
+      if (Object.keys(bulkSelect).length > 1) {
+        $(".bulk-actions").show();
+      }
+      if (Object.keys(bulkSelect).length <= 1) {
+        $(".bulk-actions").hide();
+      }
+    }
+
+    $('#workers-table .worker-row').click(function() {
+      if ($(this).hasClass('selected')) {
+        select(false, $(this));
+      }
+      else {
+        select(true, $(this));
+      }
+    });
+
+
+    $("#checkall").click(function () {
+      if ($("#checkall").is(':checked')) {
+        $("#workers-table .worker-row").each(function () {
+          select(true, $(this));
+        });
+      } else {
+        $("#workers-table .worker-row").each(function () {
+          select(false, $(this));
+        });
+        $(".bulk-actions").hide();
+      }
+    });
+
+    $("#bulk-deactivate").click(function() {
+      var check = confirm("Do you want to deactivate these " + Object.keys(bulkSelect).length.toString() + " workers?");
+      if (check) {
+        $.ajax({
+          url: "/services/deactivate-guest/bulk",
+          method: "POST",
+          data: bulkSelect,
+          success: function(data, textStatus, xhr) {
+            for (var key in bulkSelect) {
+              var id = "#" + key;
+              $(id).fadeOut(1000);
+            }
+
+            new Notification(Notification.SUCCESS, "Workers successfully deleted").show();
+            $(".bulk-actions").hide();
+            bulkSelect = [];
+          },
+          error: function(xhr, textStatus, errorThrown) {
+            alert(errorThrown);
+          }
+        })
+      }
+    });
+
     let cols = {{columns|safe}};
     $("#workers-table").DataTable({
       paging: false,
       autoWidth: true,
     });
-    $(".btn-danger").click(function() {
+    $(".ind-danger").click(function() {
       if (confirm('Are you sure you want to deactivate this worker?')) {
         $.ajax({
           type: "POST",
@@ -47,6 +114,24 @@
 </script>
 {% endblock %}
 
+{% block references %}
+  <style type="text/css">
+    .bulk-actions {
+      float: left;
+      position: fixed;
+      left: 0;
+      bottom: 50%;
+      display: none;
+    }
+    input[type=checkbox] {
+      margin-left: 10px;
+      transform: scale(2);
+      -ms-transform: scale(2);
+      -webkit-transform: scale(2);
+      padding-bottom: 10px;
+    }
+  </style>
+{% endblock %}
 
 {% block content %}
 <h1>{{page_title}}</h1>
@@ -60,6 +145,7 @@
 </div>
 
 <h2>Current Workers</h2>
+<span>Select all: </span><input id="checkall" type="checkbox">
 <div class="data-table-container">
   <table id="workers-table" class="table table-striped table-bordered">
     <thead>
@@ -73,16 +159,22 @@
     </thead>
     <tbody>
       {% for w in workers %}
-      <tr>
+      <tr id="{{w.id}}" class="worker-row">
         <td>{{w.trainee.firstname}}</td>
         <td>{{w.trainee.lastname}}</td>
         <td>{{w.trainee.house.name}}</td>
         <td>{{w.trainee.gender}}</td>
-        <td><button value="{% url 'services:deactivate-guest' w.id %}" class="btn btn-danger" title="Clear"/><span class="glyphicon glyphicon-trash"></td>
+        <td><button value="{% url 'services:deactivate-guest' w.id %}" class="btn btn-danger ind-danger" title="Clear"/><span class="glyphicon glyphicon-trash"></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-
+<div class="bulk-actions">
+  <div>
+    <button type="button" title="Deactivate" class="btn btn-danger" id="bulk-deactivate">
+      <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+    </button>
+  </div>
+</div>
 {% endblock %}

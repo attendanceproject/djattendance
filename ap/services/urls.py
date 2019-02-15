@@ -15,6 +15,7 @@ urlpatterns = [
   url(r'^generate_signino$', views.generate_signin, {'o': True}, name='oservices_signin'),
   url(r'^import-guests$', views.ImportGuestsView.as_view(), name='import-guests'),
   url(r'^deactivate-guest/(?P<pk>\d+)$', views.deactivate_guest, name='deactivate-guest'),
+  url(r'^deactivate-guest/bulk$', views.bulk_deactivate_guests, name="bulk-deactivate-guests"),
   url(r'^process-guests$', views.process_guests, name='process-guests'),
   url(r'^designated_service_hours/(?P<service_id>\d+)/(?P<week>\d+)', views.ServiceHours.as_view(), name='designated_service_hours'),
   url(r'^designated_service_hours$', views.ServiceHours.as_view(), name='designated_service_hours'),
