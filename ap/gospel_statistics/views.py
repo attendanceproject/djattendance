@@ -84,34 +84,20 @@ class GospelStatisticsView(TemplateView):
     # Retreive the updated stat values
     list_of_pairs = request.POST.getlist('pairs')
     list_of_stats = request.POST.getlist('inputs')
-    print list_of_pairs
-    print list_of_stats
     current_week = C_TERM.term_week_of_date(date.today())
     if 'week' in self.kwargs:
       current_week = self.kwargs['week']
-    index = 0
+    start_index = 0
+    end_index = _att_len
     for i in list_of_pairs:
       pair = GospelPair.objects.filter(id=i)
-      stat = GospelStat.objects.filter(gospelpair=pair, week=current_week)[0]
-      ## Why doesn't this work?
-      # for i in range(13):
-      #  eval('stat.'+_attributes[i]+' = list_of_stats['+str(index+i)+']')
-      stat.tracts_distributed = list_of_stats[index]
-      stat.bibles_distributed = list_of_stats[index + 1]
-      stat.contacted_30_sec = list_of_stats[index + 2]
-      stat.led_to_pray = list_of_stats[index + 3]
-      stat.baptized = list_of_stats[index + 4]
-      stat.second_appointment = list_of_stats[index + 5]
-      stat.regular_appointment = list_of_stats[index + 6]
-      stat.minutes_on_gospel = list_of_stats[index + 7]
-      stat.minutes_in_appointment = list_of_stats[index + 8]
-      stat.bible_study = list_of_stats[index + 9]
-      stat.small_group = list_of_stats[index + 10]
-      stat.district_meeting = list_of_stats[index + 11]
-      stat.conference = list_of_stats[index + 12]
-      stat.save()
-      index += 13
-    ## Fix returning to current week instead of remaining in selected week
+      stats = GospelStat.objects.filter(gospelpair=pair, week=current_week)
+      if stats.exists():
+        target_values = dict(zip(_attributes, list_of_stats[start_index:end_index]))
+        stats.update(**target_values)
+        start_index += _att_len
+        end_index += _att_len
+    # Fix returning to current week instead of remaining in selected week
     return redirect(reverse('gospel_statistics:gospel-statistics-view') + str(current_week))
 
   def get_context_data(self, **kwargs):
