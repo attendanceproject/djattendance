@@ -7,6 +7,117 @@
 
 {% block references %}
 <style type="text/css">
+
+  h2 {
+    margin: 42px 0px;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 162px 65px 162px;
+    grid-template-rows: repeat(3, 22px, 22px, 17px) 25px repeat(2, 22px, 22px, 17px);
+    align-items: end;
+  }
+  label[for=first-name-text] {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+  }
+
+  #first-name-text {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+  }
+
+  label[for=last-name-text] {
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+  }
+
+  #last-name-text {
+    grid-column: 3 / 4;
+    grid-row: 2 / 3;
+  }
+
+  label[for=id_cell_phone] {
+    grid-column: 1 / 2;
+    grid-row: 4 / 5;
+  }
+
+  #id_cell_phone {
+    grid-column: 1 / 2;
+    grid-row: 5 / 6;
+  }
+
+  label[for=id_home_phone] {
+    grid-column: 3 / 4;
+    grid-row: 4 / 5;
+  }
+
+  #id_home_phone {
+    grid-column: 3 / 4;
+    grid-row: 5 / 6;
+  }
+
+  label[for=id_email] {
+    grid-column: 1 / 2;
+    grid-row: 7 / 8;
+  }
+
+  #id_email {
+    grid-column: 1 / 2;
+    grid-row: 8 / 9;
+  }
+
+  label[for=id_home_locality] {
+    grid-column: 3 / 4;
+    grid-row: 7 / 8;
+  }
+
+  #id_home_locality {
+    grid-column: 3 / 4;
+    grid-row: 8 / 9;
+  }
+
+  label[for=id_home_address] {
+    grid-column: 1 / 2;
+    grid-row: 11 / 12;
+  }
+
+  #id_home_address {
+    grid-column: 1 / 2;
+    grid-row: 12 / 13;
+  }
+
+  label[for=id_home_city] {
+    grid-column: 3 / 4;
+    grid-row: 11 / 12;
+  }
+
+  #id_home_city {
+    grid-column: 3 / 4;
+    grid-row: 12 / 13;
+  }
+
+  label[for=id_home_state] {
+    grid-column: 1 / 2;
+    grid-row: 14 / 15;
+  }
+
+  #id_home_state {
+    grid-column: 1 / 2;
+    grid-row: 15 / 16;
+  }
+
+  label[for=id_home_zip] {
+    grid-column: 3 / 4;
+    grid-row: 14 / 15;
+  }
+
+  #id_home_zip {
+    grid-column: 3 / 4;
+    grid-row: 15 / 16;
+  }
+
   #submit{
     display: inline-block;
     float: left;
@@ -186,82 +297,56 @@ $(document).ready(() => {
 
 <form id="id_interim_intentions_form" method="post" action="">
   {% csrf_token %}
-  <div class="panel">
-    <h4>Contact Information:</h4>
-    <p>Please verify that your contact information is up to date.</p><br>
 
-    <div class="row">
-      <div class="col-md-2">
-        First Name:
-      </div>
-      <div class="col-md-4">
-        <strong>{{request.user.firstname}}</strong>
-      </div>
-      <div class="col-md-2">
-        Last Name:
-      </div>
-      <div class="col-md-4">
-        <strong>{{request.user.lastname}}</strong>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.cell_phone.label}}:
-      </div>
-      <div class="col-md-4">
-        {{form.cell_phone}}
-      </div>
-      <div class="col-md-2">
-        {{form.home_phone.label}}:
-      </div>
-      <div class="col-md-4">
-        {{form.home_phone}}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.email.label}}:
-      </div>
-      <div class="col-md-4">
-        {{form.email}}
-      </div>
-      <div class="col-md-2">
-        {{form.home_locality.label}}:
-      </div>
-      <div class="col-md-4">
-        {{form.home_locality}}
-      </div>
-    </div>
-    <hr>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.home_address.label}}:
-      </div>
-      <div class="col-md-10">
-        {{form.home_address}}
+  <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 30px">
+    <li role="presentation" class="active"><a href="#contact-info" aria-controls="home" role="tab" data-toggle="tab">Contact Information</a></li>
+    <li role="presentation"><a href="#int-itin" aria-controls="profile" role="tab" data-toggle="tab">Interim Itinerary</a></li>
+  </ul>
+
+  <div class="tab-content">
+
+    <div id="contact-info" class="tab-pane active" role="tabpanel">
+      <p>Please verify that your contact information is up to date.</p>
+
+      <div class="contact-grid">
+        <label for="first-name-label">First Name:</label>
+        <div id="first-name-text">{{request.user.firstname}}</div>
+
+        <label for="last-name-text">Last Name:</label>
+        <div id="last-name-text">{{request.user.lastname}}</div>
+
+        {{ form.cell_phone.label_tag }}
+        {{ form.cell_phone }}
+
+        {{ form.home_phone.label_tag }}
+        {{ form.home_phone }}
+
+        {{ form.email.label_tag }}
+        {{ form.email }}
+
+        {{ form.home_locality.label_tag }}
+        {{ form.home_locality }}
+
+        {{ form.home_address.label_tag }}
+        {{ form.home_address }}
+
+        {{ form.home_city.label_tag }}
+        {{ form.home_city }}
+
+        {{ form.home_state.label_tag }}
+        {{ form.home_state }}
+
+        {{ form.home_zip.label_tag }}
+        {{ form.home_zip }}
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.home_city.label}}:
-      </div>
-      <div class="col-md-2">
-        {{form.home_city}}
-      </div>
-      <div class="col-md-2">
-        {{form.home_state.label}}:
-      </div>
-      <div class="col-md-2">
-        {{form.home_state}}
-      </div>
-      <div class="col-md-2">
-        {{form.home_zip.label}}:
-      </div>
-      <div class="col-md-2">
-        {{form.home_zip}}
-      </div>
+
+    <div id="int-itin" class="tab-pane" role="tabpanel">
+
     </div>
+
   </div>
+
   <div class="panel">
     <h4>Interim Itinerary:</h2>
     <p>Please be thorough in filling out the schedule below and include brief descriptions, locations with pertinent addresses, phone numbers, etc. for our ease in contacting you. The following return dates have been set to help you have a smooth transition into the next term, to give you additional time to unpack and settle into your house before pre-training, and to prepare your house for incoming trainees.<br/>
