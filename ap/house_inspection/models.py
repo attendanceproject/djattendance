@@ -45,16 +45,29 @@ class Scores(models.Model):
 '''
 
 class Inspectors(models.Model):
+	trainee = models.ForeignKey('accounts.Trainee', on_delete=models.SET_NULL, null=True)
 	last_name = models.CharField(max_length=200)
 	first_name = models.CharField(max_length=200)
 	term = models.IntegerField(
-		validators=[MinValueValidator(1), MaxValueValidator(4)]
+		validators=[MinValueValidator(1), MaxValueValidator(4)],
+		default=1,
+		null=False
 		)
 	prefect_number = models.IntegerField(
-		validators= [MaxValueValidator(999)]
+		validators= [MaxValueValidator(999)],
+		default=0,
+		null=False
 		)
 	def __str__(self):
-		return '%s %s' % (self.first_name, self.last_name)
+		return '%s' % (self.last_name)#(self.first_name, self.last_name)
+
+class InspectableHouses(models.Model):
+	residence = models.ForeignKey('houses.House', null=True)
+	residence_type = models.CharField(max_length=10)
+	uninspectable = models.BooleanField(default=False)
+	def __str__(self):
+		return '%s' % (self.residence)
+
 
 '''
 class Listing(models.Model):

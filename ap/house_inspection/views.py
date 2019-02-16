@@ -8,9 +8,13 @@ from django.http import HttpResponse
 from django.views import View
 from django.views.generic import TemplateView
 from django.views.generic.list import ListView
-from house_inspection.models import FAQ, Inspectors
+from house_inspection.models import FAQ, Inspectors, InspectableHouses
 from aputils.decorators import group_required
 from accounts.models import Trainee
+from django.contrib import messages
+from django.shortcuts import redirect
+from houses.models import House
+
 
 '''
 class HouseInspectionFaq(TemplateView):
@@ -37,77 +41,56 @@ def houseInspectionFaq(request):
   return render(request, 'house_inspection/faq.html', context)
 
 def manageInspectors(request):
-  inspectors = Inspectors.objects.order_by('-last_name')
-  print inspectors
+  inspectors = Inspectors.objects.order_by('-last_name')  
   context = {
     'inspectors': inspectors
   }
-  return render(request, 'house_inspection/manage_inspectors.html', context)
-
-def addInspector(request):
-  if request.method == 'POST':
-    # Get form values
+  if request.method == 'POST':   
+    # Get form values    
     last_name = request.POST['last_name']
-    first_name = request.POST['first_name']
-    term = request.POST['term']
+    first_name = request.POST['first_name']        
     prefect_number = request.POST['prefect_number']
-    # Use a manual form do a search for a trainee to connect it. Actually change the whole model.
-    # good
+    # Use a manual form do a search for a trainee to connect it. Actually change the whole model.    
     if not Trainee.objects.filter(lastname=last_name,firstname=first_name).exists():
-        # Error
+        # Error        
         messages.error(request, 'That trainee does not exist')
-        return redirect('house_inspection/manage_inspectors.html')
-    else:    
-      trainee = Trainee.objects.get(lastname=last_name,firstname=first_name)
-      term = trainee.first().current_term
-      inspector = Inspector.objects.create(last_name=last_name, first_name=first_name, term=term, prefect_number=prefect_number)
+        return redirect('house_inspection:manage_inspectors')
+    elif Inspectors.objects.filter(last_name=last_name,first_name=first_name).exists():      
+      messages.error(request, 'The Inspector already exists')
+      return redirect('house_inspection:manage_inspectors')
+    else:          
+      trainee = Trainee.objects.get(lastname=last_name,firstname=first_name)      
+      term = trainee.current_term  
+      last_name = trainee.lastname
+      first_name = trainee.firstname
+      inspector = Inspectors.objects.create(trainee=trainee, last_name=last_name, first_name=first_name,term=term,prefect_number=prefect_number)
+      inspector.save()
+  
   return render(request, 'house_inspection/manage_inspectors.html', context)
 
-'''
-def register(request):
+def manageInspectableHouses(request):
+  houses = House.objects.all()  
+  for house in houses:
+    #create this in admin
+    if not InspectableHouses.objects.filter(residence=house).exists():
+      inspectableHouse = InspectableHouses.objects.create(residence=house, residence_type=house.gender, uninspectable=False)
+  inspectableHouses = InspectableHouses.objects.order_by('-residence')
+  context = {
+    'inspectableHouses': inspectableHouses
+  }
   if request.method == 'POST':
-    # Get form values
-    first_name = request.POST['first_name']
-    last_name = request.POST['last_name']
-    username = request.POST['username']
-    email = request.POST['email']
-    password = request.POST['password']
-    password2 = request.POST['password2']
-
-    # Check if passwords match
-    if password == password2:
-      # Check username
-      if User.objects.filter(username=username).exists():
-        # Error
-        messages.error(request, 'That username is taken')
-        return redirect('register')
-      else:
-        # Check Email
-        if User.objects.filter(email=email).exists():
-          # Error
-          messages.error(request, 'That email is being used')
-          return redirect('register')
-        else:
-          # good
-          user = User.objects.create_user(username=username, 
-            password=password, email=email, first_name=first_name, last_name=last_name)
-          # Login after register example
-          # auth.login(request, user)
-          # messages.success(request, 'You are now logged in')
-          user.save()
-          messages.success(request, 'You are now registered and can log in')
-          return redirect('login')
-    else:
-      # error
-      messages.error(request, 'Passwords do not match')
-      return redirect('register')
-  else:   
-    return render (request, 'accounts/register.html')
-'''
-
-
-
-
+    # Get Uninspectable
+    # Get the house
+    print 'HOUSE CHANGE'
+    list_of_checks = request.POST.getlist('checks[]')
+    print list_of_checks
+    for house_id in list_of_checks:
+      print house_id
+      house = InspectableHouses.objects.get(id=house_id)
+      print house
+      house.uninspectable = True
+      house.save()
+  return render(request, 'house_inspection/manage_inspectable_houses.html', context)
 
 '''
 class MyFormView(View):

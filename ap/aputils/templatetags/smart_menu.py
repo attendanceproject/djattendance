@@ -153,7 +153,8 @@ def generate_menu(context):
       name="House Inspection",      
       common=[ # change to specific
           SubMenuItem(name='FAQ', url='house_inspection:house_inspection_faq'),
-          SubMenuItem(name='Manage Inspectors', url='house_inspection:manage_inspectors')
+          SubMenuItem(name='Manage Inspectors', url='house_inspection:manage_inspectors'),
+          SubMenuItem(name='Manage Inspectable Houses', url='house_inspection:manage_inspectable_houses')
       ]
   )
 
