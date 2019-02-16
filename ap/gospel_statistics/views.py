@@ -8,6 +8,7 @@ from StringIO import StringIO
 from zipfile import ZipFile
 
 from braces.views import GroupRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Sum
 from django.http import HttpResponse
@@ -16,7 +17,7 @@ from django.views.generic import TemplateView
 
 from accounts.models import Trainee
 from aputils.decorators import group_required
-from aputils.utils import render_to_pdf
+from aputils.utils import render_to_pdf, timeit_inline
 from teams.models import Team
 from terms.models import Term
 
@@ -54,23 +55,24 @@ class GospelStatisticsView(TemplateView):
     for p in gospel_pairs:
       entry = dict()
       entry['gospel_pair'] = p
-      stat = stats.filter(gospelpair=p)
-      if stat.exists():
-        stat = stat.first()
+      try:
+        stat = stats.get(gospelpair=p)
         for _att in _attributes:
           entry[_att] = stat.get(_att)
+      except ObjectDoesNotExist:
+        for _att in _attributes:
+          entry[_att] = 0
       data.append(entry)
     return data
 
   @staticmethod
   def get_all_stats_list(gospel_pairs):
     data = []
-    stats = GospelStat.objects.filter(gospelpair__in=ctx['gospel_pairs']).values(*_attributes)
+    stats = GospelStat.objects.filter(gospelpair__in=gospel_pairs)
     for p in gospel_pairs:
       entry = dict()
       entry['gospel_pair'] = p
-      stats = stats.filter(gospelpair=p)
-      totals = stats.aggregate(*[Sum(_att) for _att in _attributes])
+      totals = stats.filter(gospelpair=p).aggregate(*[Sum(_att) for _att in _attributes])
       for _att in _attributes:
         entry[_att] = totals.get(_att + "__sum")
       data.append(entry)
@@ -128,7 +130,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       'attributes': attributes,
       'campuses': Team.objects.filter(type='CAMPUS'),
       'communities': Team.objects.filter(type='COM'),
-      'weeks': [i for i in range(20)]
+      'weeks': range(20)
     }
     return ctx
 
@@ -148,10 +150,15 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
     # Generate Report here
     in_memory = StringIO()
     zfile = ZipFile(in_memory, "a")
+
+    term_stats = GospelStat.objects.filter(gospelpair__term=C_TERM).prefetch_related('gospelpair')
     for team in teams:
       code = team.code
+      team_stats = term_stats.filter(gospelpair__team=team)
       gospelpairs = GospelPair.objects.filter(team=team, term=C_TERM)
       if report_type < 2:
+        t = timeit_inline("type 2 %s" % team)
+        t.start()
         # Each Pair
         pairs = []
         for pair in gospelpairs:
@@ -162,8 +169,9 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
               names += ', '
             names += trainee.firstname + ' ' + trainee.lastname
           one_pair = [[names] + attributes]
+          pair_stats = team_stats.filter(gospelpair=pair).values_list(*_attributes)
           for week in weeks:
-            stats = GospelStat.objects.filter(gospelpair=pair, week=week).values_list(*_attributes)
+            stats = pair_stats.filter(week=week)
             one = list(stats.first())
             one_pair.append(['Week ' + week] + one)
             for i, _att in enumerate(one):
@@ -171,13 +179,17 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
             one_pair.append(['GP Total'] + pair_total)
             pairs.append(one_pair)
         ctx['pairs'] = pairs
+        t.end()
 
       if report_type < 3:
+        t = timeit_inline("type 3 %s" % team)
+        t.start()
         # pair_total
         weekly = []
         weekly_total = ['Weekly Total'] + [0] * _att_len
+        all_stats = team_stats.filter(gospelpair__in=gospelpairs).values_list(*_attributes)
         for week in weeks:
-          one_week = GospelStat.objects.filter(gospelpair__in=gospelpairs, week=week).values_list(*_attributes)
+          one_week = all_stats.filter(gospelpair__in=gospelpairs, week=week)
           for every in one_week:
             weeklys = ['Week ' + week] + list(every)
           weekly.append(weeklys)
@@ -186,23 +198,25 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
             weekly_total[i + 1] = totals.get(_att + "__sum")
           weekly.append(weekly_total)
         ctx['weekly'] = weekly
+        t.end()
 
       # Total
+      t = timeit_inline("team totals")
+      t.start()
       totals = [0] * _att_len
-      stats = GospelStat.objects.filter(gospelpair__in=gospelpairs)
-      if stats.exists():
-        aggr = stats.aggregate(*[Sum(_att) for _att in _attributes])
-        for i, _att in enumerate(_attributes):
-          totals[i] = aggr.get(_att + "__sum")
-        total = [['All ' + code + ' GP Pair Totals Added Together'] + totals]
+      aggr = team_stats.aggregate(*[Sum(_att) for _att in _attributes])
+      for i, _att in enumerate(_attributes):
+        totals[i] = aggr.get(_att + "__sum")
+      total = [['All ' + code + ' GP Pair Totals Added Together'] + totals]
+      t.end()
 
-      all_pairs = GospelPair.objects.filter(term=C_TERM)
-      all_stats = GospelStat.objects.filter(gospelpair__in=all_pairs)
+      t = timeit_inline("term totals")
+      t.start()
       term_totals = [0] * _att_len
-      if all_stats.exists():
-        aggr = all_stats.aggregate(*[Sum(_att) for _att in _attributes])
-        for i, _att in enumerate(_attributes):
-          term_totals[i] = aggr.get(_att + "__sum")
+      aggr = term_stats.aggregate(*[Sum(_att) for _att in _attributes])
+      for i, _att in enumerate(_attributes):
+        term_totals[i] = aggr.get(_att + "__sum")
+      t.end()
 
       total.append(['FTTA Grand Total (Campus/Community Teams)'] + term_totals)
       # Fix next two append
@@ -219,6 +233,8 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       ctx['stats'] = GospelStat.objects.filter(gospelpair__in=gospelpairs)
       # Make it downloadable
       # return render(request, 'gospel_statistics/gospel_statistics_report_base.html', ctx)
+      t = timeit_inline("pdf generation")
+      t.start()
       pdf_file = render_to_pdf('gospel_statistics/gospel_statistics_report_base.html', ctx)
       path = team.name + '.pdf'
 
@@ -226,7 +242,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
         f.write(pdf_file.content)
       zfile.write(path)
       os.remove(path)
-
+      t.end()
     # fix for Linux zip files read in Windows
     for zf in zfile.filelist:
       zf.create_system = 0
@@ -236,7 +252,6 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
     response['Content-Disposition'] = 'attachment; filename=Gospel_Statistics_Report.zip'
     in_memory.seek(0)
     response.write(in_memory.read())
-
     return response
     # return render(request, "gospel_statistics/generate_report.html", self.get_context_data())
 
