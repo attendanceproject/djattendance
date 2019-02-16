@@ -48,26 +48,28 @@ class GospelStatisticsView(TemplateView):
   template_name = "gospel_statistics/gospel_statistics.html"
 
   @staticmethod
-  def get_stats_list(gospel_pairs, gospel_statistics, current_week):
+  def get_stats_list(gospel_pairs, current_week):
     data = []
+    stats = GospelStat.objects.filter(gospelpair__in=gospel_pairs, week=current_week).values(*_attributes)
     for p in gospel_pairs:
       entry = dict()
       entry['gospel_pair'] = p
-      stats = gospel_statistics.filter(gospelpair=p, week=current_week).values(*_attributes)
-      if stats.exists():
-        stat = stats.first()
+      stat = stats.filter(gospelpair=p)
+      if stat.exists():
+        stat = stat.first()
         for _att in _attributes:
           entry[_att] = stat.get(_att)
       data.append(entry)
     return data
 
   @staticmethod
-  def get_all_stats_list(gospel_pairs, gospel_statistics):
+  def get_all_stats_list(gospel_pairs):
     data = []
+    stats = GospelStat.objects.filter(gospelpair__in=ctx['gospel_pairs']).values(*_attributes)
     for p in gospel_pairs:
       entry = dict()
       entry['gospel_pair'] = p
-      stats = gospel_statistics.filter(gospelpair=p).values(*_attributes)
+      stats = stats.filter(gospelpair=p)
       totals = stats.aggregate(*[Sum(_att) for _att in _attributes])
       for _att in _attributes:
         entry[_att] = totals.get(_att + "__sum")
@@ -97,9 +99,10 @@ class GospelStatisticsView(TemplateView):
   def get_context_data(self, **kwargs):
     current_user = self.request.user
     ctx = super(GospelStatisticsView, self).get_context_data(**kwargs)
+    team = current_user.team
     ctx['page_title'] = 'Team Statistics'
-    ctx['team'] = current_user.team
-    ctx['gospel_pairs'] = GospelPair.objects.filter(team=current_user.team, term=C_TERM)
+    ctx['team'] = team
+    ctx['gospel_pairs'] = GospelPair.objects.filter(team=team, term=C_TERM)
     ctx['cols'] = attributes
     ctx['current'] = []
     ctx['atts'] = _attributes
@@ -108,9 +111,9 @@ class GospelStatisticsView(TemplateView):
       week = self.kwargs['week']
     ctx['week'] = week
     # Current week stat
-    ctx['current'] = self.get_stats_list(ctx['gospel_pairs'], GospelStat.objects.filter(gospelpair__in=ctx['gospel_pairs']), week)
+    ctx['current'] = self.get_stats_list(ctx['gospel_pairs'], week)
     # All 20 week stat
-    ctx['all_stat'] = self.get_all_stats_list(ctx['gospel_pairs'], GospelStat.objects.filter(gospelpair__in=ctx['gospel_pairs']))
+    ctx['all_stat'] = self.get_all_stats_list(ctx['gospel_pairs'])
     return ctx
 
 
