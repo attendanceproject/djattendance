@@ -20,6 +20,7 @@ from aputils.decorators import group_required
 from aputils.utils import render_to_pdf, timeit_inline
 from teams.models import Team
 from terms.models import Term
+from django.db.models import Prefetch
 
 from .models import GospelPair, GospelStat
 
@@ -137,43 +138,48 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
   def post(self, request, *args, **kwargs):
     ctx = super(GenerateReportView, self).get_context_data(**kwargs)
     teams_id = request.POST.getlist('teams')
-    teams = Team.objects.filter(id__in=teams_id)
+    teams = Team.objects.filter(id__in=teams_id).values('id', 'code', 'name')
     weeks = []
     weeks = request.POST.getlist('weeks')
     # 1 = Full Report, 2 = Week & Total, 3 = Total Only
     report_type = int(request.POST.get('report_type'))
     ctx['reporttype'] = report_type
     # save_type = request.POST.get('save_type')
-    if len(teams) < 1:
+    if not teams.exists():
       return render(request, "gospel_statistics/generate_report.html", self.get_context_data())
 
     # Generate Report here
     in_memory = StringIO()
     zfile = ZipFile(in_memory, "a")
 
-    term_stats = GospelStat.objects.filter(gospelpair__term=C_TERM).prefetch_related('gospelpair')
+    selected_fields = _attributes + ['week']
+    term_stats = GospelStat.objects.filter(gospelpair__term=C_TERM).prefetch_related('gospelpair').values_list(*selected_fields)
+    gospelpairs = GospelPair.objects.filter(term=C_TERM).prefetch_related(
+        Prefetch('trainees', queryset=Trainee.objects.only('firstname', 'lastname')),
+        Prefetch('gospelstat_set', queryset=GospelStat.objects.all())
+    )
     for team in teams:
-      code = team.code
-      team_stats = term_stats.filter(gospelpair__team=team)
-      gospelpairs = GospelPair.objects.filter(team=team, term=C_TERM)
+      code = team.get('code')
+      gospelpairs.filter(team__id=team.get('id'))
       if report_type < 2:
-        t = timeit_inline("type 2 %s" % team)
+        t = timeit_inline("type 2 %s" % team.get('name'))
         t.start()
         # Each Pair
         pairs = []
         for pair in gospelpairs:
           pair_total = [0] * _att_len
           names = ''
-          for trainee in pair.trainees.all():
+          for trainee in pair.trainees.values('firstname', 'lastname'):
             if len(names) > 0:
               names += ', '
-            names += trainee.firstname + ' ' + trainee.lastname
+            names += trainee.get('firstname') + ' ' + trainee.get('lastname')
           one_pair = [[names] + attributes]
-          pair_stats = team_stats.filter(gospelpair=pair).values_list(*_attributes)
-          for week in weeks:
-            stats = pair_stats.filter(week=week)
-            one = list(stats.first())
-            one_pair.append(['Week ' + week] + one)
+          fields = _attributes + ['week']
+          pair_stats = list(pair.gospelstat_set.order_by('week').values(*fields))
+          for stat in pair_stats:
+            week = stat.pop('week')
+            one = [v for v in stat.values()]
+            one_pair.append(['Week ' + str(week)] + one)
             for i, _att in enumerate(one):
               pair_total[i] += _att
             one_pair.append(['GP Total'] + pair_total)
@@ -182,14 +188,15 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
         t.end()
 
       if report_type < 3:
-        t = timeit_inline("type 3 %s" % team)
+        t = timeit_inline("type 3 %s" % team.get('name'))
         t.start()
         # pair_total
+        team_stats = term_stats.filter(gospelpair__team__id=team.get('id'))
         weekly = []
         weekly_total = ['Weekly Total'] + [0] * _att_len
         all_stats = team_stats.filter(gospelpair__in=gospelpairs).values_list(*_attributes)
         for week in weeks:
-          one_week = all_stats.filter(gospelpair__in=gospelpairs, week=week)
+          one_week = all_stats.filter(week=week)
           for every in one_week:
             weeklys = ['Week ' + week] + list(every)
           weekly.append(weeklys)
@@ -228,11 +235,12 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       ctx['page_title'] = 'Gospel Statistics Report'
       ctx['attributes'] = attributes
       ctx['weeks'] = range(20)
-      ctx['team'] = team.name
+      ctx['team'] = team.get('name')
       ctx['term'] = C_TERM
       ctx['stats'] = GospelStat.objects.filter(gospelpair__in=gospelpairs)
       # Make it downloadable
       # return render(request, 'gospel_statistics/gospel_statistics_report_base.html', ctx)
+      return render(request, "gospel_statistics/generate_report.html", self.get_context_data())
       t = timeit_inline("pdf generation")
       t.start()
       pdf_file = render_to_pdf('gospel_statistics/gospel_statistics_report_base.html', ctx)
