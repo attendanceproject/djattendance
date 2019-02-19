@@ -75,12 +75,9 @@
   {% endfor %}
   <h3>General Information</h3>
   <select class="select-fk" name="general" multiple="multiple">
-    <option value="term" {% if 'term' in chosen_general %} selected="selected" {% endif %}>Term</option>
-    <option value="gender" {% if 'gender' in chosen_general %} selected="selected" {% endif %}>Gender</option>
-    <option value="locality" {% if 'locality' in chosen_general %} selected="selected" {% endif %}>Locality</option>
-    <option value="phone" {% if 'phone' in chosen_general %} selected="selected" {% endif %}>Phone</option>
-    <option value="email" {% if 'email' in chosen_general %} selected="selected" {% endif %}>Email</option>
-    <option value="birthdate" {% if 'birthdate' in chosen_general %} selected="selected" {% endif %}>Birthdate</option>
+    {% for k, v in general_options.items %}
+    <option value="{{k}}" {% if k in chosen_general %} selected="selected" {% endif %}>{{v}}</option>
+    {% endfor %}
   </select>
   <button class="btn btn-primary btn-save" type="submit">Submit</button>
 </form>
@@ -90,7 +87,6 @@
     <thead>
       <tr>
         <th>Clear Application</th>
-        <th>Trainee Contact</th>
         <th>Trainee</th>
         <th>Destination</th>
         {% for q in questions %}
@@ -105,7 +101,6 @@
       {% for trainee in trainees %}
         <tr>
           <th><button value="{% url 'gospel_trips:admin-clear-app' request.resolver_match.kwargs.pk trainee.id %}" class="btn btn-danger" title="Clear"/><span class="glyphicon glyphicon-trash"></span></button></th>
-          <td>{% if trainee.team_contact %} Yes {% endif %}</td>
           <td>{{trainee.name}}</td>
           <td>{{trainee.destination.name}}</td>
           {% for response in trainee.responses %}
@@ -124,7 +119,6 @@
     <tfoot>
       <tr>
         <th>Clear Application</th>
-        <th>Team Contact</th>
         <th>Trainee</th>
         <th>Destination</th>
         {% for q in questions %}

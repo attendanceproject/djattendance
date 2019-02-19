@@ -53,7 +53,7 @@ let pluginStr = "advlist autolink autosave link image lists charmap print previe
 let pluginList = pluginStr.split(" ");
 
 require.context(
-  "file-loader?name=[path][name].[ext]&context=node_modules/tinymce!tinymce/skins",
+  "url-loader?name=[path][name].[ext]&context=node_modules/tinymce!tinymce/skins",
   true,
   /.*/
 );

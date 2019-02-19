@@ -7,7 +7,7 @@ from django.contrib.postgres.fields import HStoreField
 from django.core.urlresolvers import reverse
 from django.db import models
 
-from .constants import HELP_TEXT
+from .constants import DESTINATION_FIELDS, HELP_TEXT
 
 
 class GospelTrip(models.Model):
@@ -54,21 +54,30 @@ class Destination(models.Model):
 
   gospel_trip = models.ForeignKey(GospelTrip, on_delete=models.CASCADE)
 
-  team_contacts = models.ManyToManyField(Trainee, related_name='team_contacts')
+  trainee_contacts = models.ManyToManyField(Trainee, related_name='trainee_contacts')
+
+  finance_coords = models.ManyToManyField(Trainee, related_name='finance_coord')
+
+  media_coords = models.ManyToManyField(Trainee, related_name='media_coord')
+
+  stat_coords = models.ManyToManyField(Trainee, related_name='stat_coord')
 
   trainees = models.ManyToManyField(Trainee, related_name='destination')
 
-  def set_team_contact(self, trainee, is_contact=True):
-    if is_contact:
-      self.team_contacts.add(trainee)
-    else:
-      if trainee in self.team_contacts.all():
-        self.team_contacts.remove(trainee)
-    self.save()
+  def set_trainee_as(self, trainee, field, set_to=True):
+    if field in DESTINATION_FIELDS:
+      attr = getattr(self, field)
+      if set_to:
+        attr.add(trainee)
+      else:
+        if trainee in attr.all():
+          attr.remove(trainee)
+      self.save()
 
   def remove_trainee(self, trainee):
     self.trainees.remove(trainee)
-    self.set_team_contact(trainee, False)
+    for field in DESTINATION_FIELDS:
+      self.set_trainee_contact(trainee, field, False)
 
   def __unicode__(self):
     try:

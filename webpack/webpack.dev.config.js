@@ -6,6 +6,7 @@ var merge = require('webpack-merge')
 var commonConfig = require('./webpack.common.config')
 
 var devConfig = {
+  mode: 'development',
   entry: {
     main: [
       'webpack-dev-server/client?http://localhost:3000',
