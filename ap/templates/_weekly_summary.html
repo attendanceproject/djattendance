@@ -1,0 +1,95 @@
+{% load common_tags %}
+<div class="col-md-8 ml-auto">
+    <div class="row">
+      <form>
+        <div class="col-sm-1">
+          Week:
+        </div>
+        <div class="col-sm-4">
+          <!-- Pick a week of a term -->
+          <select id="week-select" class="form-control" name="week" size="0">
+            {% for i, week in weeks %}
+            <option value="{{i}}" {% if i > current_week %} disabled {% endif %}>{{week}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
+    <br />
+
+    <table class="table table-bordered-wkly-sum" id="front-table" name='front-table'>
+      <thead>
+        <tr>
+          <th scope="col" class="col-md-1"></th>
+          {% for day in 0|get_weekday_codes %}
+          <th scope="col" class="col-md-1">{{day}}</th>
+          {% endfor %}
+          <th scope="col" class="col-md-1"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="service-row">
+          <th>SERVICE</th>
+        </tr>
+        <!-- COMMENT OUT: GOSPEL STATS ROW --
+        <tr>
+          <th>GOSPEL STATISTICS</th>
+          {% for i in "xxxxxxx" %}
+          <td></td>
+          {% endfor %}
+          <td><a href="#">Input Stats</a></td>
+        </tr>
+        -->
+        <tr>
+          <form class="form-group bibleDropDown" id="bibleDropDown" method="post">
+            <th rowspan="2">BIBLE READING PROGRESS</th>
+            {% for day in 0|get_weekday_codes %}
+            <td class="bibleReadingRow">
+              <select class="bible-selector" id="bibleDropDown_{{day}}" data-day="{{day}}">
+                <option value="_">_</option>
+                <br />
+                <option value="C">C</option>
+                <br />
+                <option value="M">M</option>
+                <br />
+                <option value="N">N</option>
+                <br />
+              </select>
+            </td>
+            {% endfor %}
+            <td>
+              <input class="bt-button" type="submit" name="save" Value="Save" id='bt-button'></input>
+            </td>
+          </form>
+        </tr>
+        <tr>
+          <td class="td-remove-indent" colspan="7">
+            <div class="row">
+              <div class="col-10 col-sm-6 col-md-10 progress-style">
+                <div class="homepage-progress">
+                  <a class="bt-update" href="{% if user.current_term == 1 or user.current_term == 2%}
+                    {% url 'bible_tracker:index' %}#first-year-bible-reading
+                    {% elif user.current_term == 3 or user.current_term == 4 %}
+                    {% url 'bible_tracker:index' %}#second-year-bible-reading {% endif %}">
+                    <div class="homepage-progress-bar" role="progressbar" aria-valuenow="{{bible_reading_progress}}" aria-valuemin="0" aria-valuemax="100"
+                      style="width: {{bible_reading_progress}}%">
+                    </div>
+                  </a>
+                </div>
+              </div>
+              <div class="col-2 col-md-2 percent">
+                {{bible_reading_progress}}%
+              </div>
+            </div>
+          </td>
+          <td>
+            <a class="bt-update" href="{% if user.current_term == 1 or user.current_term == 2%}
+            {% url 'bible_tracker:index' %}#first-year-bible-reading
+            {% elif user.current_term == 3 or user.current_term == 4 %}
+            {% url 'bible_tracker:index' %}#second-year-bible-reading {% endif %}">Update</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

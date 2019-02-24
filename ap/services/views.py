@@ -306,7 +306,7 @@ def changeWeek(request):
   designated_list = []
 
   if request.is_ajax():
-    week_id = request.GET['week']    
+    week_id = request.GET['week']
     current_week = int(week_id)
     current_week = current_week if current_week < LAST_WEEK else LAST_WEEK
     current_week = current_week if current_week > FIRST_WEEK else FIRST_WEEK
@@ -316,9 +316,12 @@ def changeWeek(request):
     current_week = ct.term_week_of_date(date.today())
     cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
 
-  worker_assignments = Worker.objects.select_related('trainee').prefetch_related(
-    Prefetch('assignments', queryset=Assignment.objects.filter(week_schedule=cws).select_related('service').order_by('service__weekday'), to_attr='week_assignments'))
-  
+  worker_assignments = Worker.objects.select_related('trainee').prefetch_related(Prefetch(
+      'assignments',
+      queryset=Assignment.objects.filter(week_schedule=cws).select_related('service').order_by('service__weekday'),
+      to_attr='week_assignments')
+  )
+
   # Find services related to the user
   for current_worker in worker_assignments:
     trainee = str(trainee)
@@ -331,8 +334,6 @@ def changeWeek(request):
           service_db.setdefault(a.service.name, a.service.weekday)
 
   service_data = json.dumps(service_db)
-  print service_data
-  
   return HttpResponse(service_data, content_type='application/json')
 
 
