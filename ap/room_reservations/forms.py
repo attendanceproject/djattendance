@@ -54,6 +54,17 @@ class RoomReservationForm(forms.ModelForm):
     if data_date <= todays_date and data_start < current_time:
       raise forms.ValidationError("The given reservation is being made in the past.")
 
+    # Based on a first-come, first-serve principle, do not allow trainees to submit a pending room reservation
+    # if there is already a pending room reservation waiting to be approved or denied.
+    PendingRoomReservations = RoomReservation.objects.filter(status='P', room=data_room)  # pull Pending Room Reservations data
+    for r in PendingRoomReservations:
+      if r.end > data_start and r.start < data_end and r.date.weekday() == data_date.weekday():
+        if r.frequency == 'Once' and r.date < data_date:
+          continue
+        if r.date > data_date and data_frequency == 'Once':
+          continue
+        raise forms.ValidationError('There is a pending room reservation with "' + r.group + '" on ' + r.date.strftime("%m-%d-%Y") + ' from ' + r.start.strftime("%I:%M%p") + ' - ' + r.end.strftime("%I:%M%p.") + ' Please choose a different room or time.')
+
     # Logic with verbose error messages for checking room reservation conflicts.
     # ARR = ApprovedRoomReservation, NRR = NewRoomReservation
     ApprovedRoomReservations = RoomReservation.objects.filter(status='A', room=data_room)  # pull Approved Room Reservations data

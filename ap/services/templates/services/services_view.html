@@ -466,7 +466,13 @@ Service Scheduling
 
   <!-- Assignments Tab -->
   <div role="tabpanel" class="tab-pane" id="assignments">
-    <div class="clear">&nbsp;</div>
+    <div class="clear">&nbsp;</div>    
+    <h4>
+      <div class="col-xs-6 pull-left" style="width: 318px;">
+          <a href="{% url 'services:services_form' %}" class="btn btn-default">Add Trainees</a>
+      </div>
+    </h4>
+    <br/><br/>
     <div class="alert alert-info" role="alert">
       Note - # of trainees for designated services are automatically calculated based on trainees selected in worker group
     </div>

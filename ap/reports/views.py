@@ -257,15 +257,8 @@ def attendance_report_trainee(request):
 
   # CALCULATE %TARDY
   total_possible_rolls_count = sum(count[ev] for ev in count if ev.monitor is not None)
-  tardy_rolls = rolls.exclude(status='A')
-
-  # currently counts rolls excused by individual and group slips
-  # comment this part out to not count those rolls
-  # exclude tardy rolls excused by individual slips
-  # tardy_rolls = tardy_rolls.exclude(leaveslips__status='A')
-
-  # exclude tardy rolls excused by group slips
-  # tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips)
+  tardy_rolls = rolls.exclude(status='A').filter(~(Q(leaveslips__does_not_count=True) & Q(leaveslips__status='A')))
+  tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips.filter(does_not_count=True))
 
   res["tardy_percentage"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
@@ -278,11 +271,10 @@ def attendance_report_trainee(request):
   # exclude absent rolls excused by individual slips
   # missed_classes = missed_classes.exclude(leaveslips__status='A')
 
-  IGNORE_LS_TYPES = ['SERV', 'CONF', 'TTRIP', 'FWSHP']  # leave slips types that don't affect attendance
-  missed_classes = missed_classes.filter(~(Q(leaveslips__type__in=IGNORE_LS_TYPES) & Q(leaveslips__status='A')))
+  missed_classes = missed_classes.filter(~(Q(leaveslips__does_not_count=True) & Q(leaveslips__status='A')))
 
   # exclude absent rolls excused by group slips
-  missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips.filter(type__in=IGNORE_LS_TYPES))
+  missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips.filter(does_not_count=True))
 
   res["classes_missed_percentage"] = str(round(missed_classes.count() / float(possible_class_rolls_count) * 100, 2)) + "%"
 
