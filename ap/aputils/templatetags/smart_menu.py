@@ -150,7 +150,7 @@ def generate_menu(context):
   )
 
   hi_menu = MenuItem(
-      name="House Inspection",      
+      name="House Inspection",
       specific=[ # change to specific
           SubMenuItem(name='FAQ', url='house_inspection:house_inspection_faq', condition=user.has_group(['house_inspectors', 'training_assistant'])),
           #SubMenuItem(name='Manage Inspectors', url='house_inspection:manage_inspectors'),

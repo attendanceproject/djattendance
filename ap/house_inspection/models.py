@@ -1,14 +1,12 @@
 
 
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 # unsure of import ValidationError
 
 
-class FAQ(models.Model):    
-	
+class FAQ(models.Model):
     question = models.TextField(null=True, blank=True)
     answer = models.TextField(null=True, blank=True)
     isAnswered = models.BooleanField(default=False)
@@ -96,4 +94,3 @@ class Listing(models.Model):
 	# we need a main field to be displayed.
 	def __str__(self):
 		return self.title
-'''
