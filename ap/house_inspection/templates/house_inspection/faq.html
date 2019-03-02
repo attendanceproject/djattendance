@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+
+{% block content %}
+<h1>{{page_title}}</h1>
+
+  <br>
+  <div>
+  	<p>
+<br>		<b>Q:</b> If the closet door in a master bedroom is not latched, what would be the appropriate grade?
+<br>		A: If closed but not latched, no grade needed. If not closed/latched, then A, P, or U depending on how far open the door is.		
+<br>		<br>
+<br>		<b>Q:</b> What do I do with two coffee pots?
+<br>		A: Two coffee pots are okay, as long as they are clean and there is no coffee in the pots. 
+<br>		<br>
+<br>		<b>Q:</b> What do I do if there is a sick trainee in the room?
+<br>		A: Do not inspect the room. There should be a sick trainee sign on the door of the room and on one bathroom door.
+<br>		<br>
+<br>		<b>Q:</b> What if the sheet is uneven?
+<br>		A: Try to smooth the sheet with your hand. If it cannot be smoothed out, then do not assign a grade. If it can be smoothed out easily, then assign a grade based on the degree of unevenness. 
+<br>		<br>
+<br>		<b>Q:</b> Emergency SMEP sheet not displayed 
+<br>		A: Give U but fellowship with HC why It was not displayed and where it has been displayed 
+<br>		<br>
+<br>		<b>Q:</b> Two bathrooms closed for sick trainee?
+<br>		A: In most cases, there should be only one bathroom closed regardless of the number of sick trainees. However, if one sick trainee is upstairs and one is downstairs, two bathrooms can be closed. Also, if one sick trainee is in a master bedroom with an attached bathroom and the other is not, two bathrooms can be closed. 
+<br>		<br> 
+<br>		<b>Q:</b> Shower door open
+<br>		A: Give an A. Should be closed unless not enough room for airflow.
+<br>		<br>
+<br>		<b>Q:</b> No towel
+<br>		A: Assume the towel is being laundered. Note it on the report for the next weeks inspector to see. The following weeks inspector can then see if the towel is back in place. If it is not in place the second week, a "U" grade should be assigned. 
+<br>		<br>
+<br>		<b>Q:</b> Towel edges not aligned
+<br>		A: Grade according to the degree of misalignment. Most warrant only a "G", unless misalignment is particularly pronounced in which case a "A" or "P" may be appropriate. 
+<br>		<br>
+<br>		<b>Q:</b> Shower door open more than handwidth
+<br>		A: Note it on the report and grade it in the second week if not rectified. 
+<br>		<br>
+<br>		<b>Q:</b> Bottom bunk missing linens and hospitality set
+<br>		A: All unused bunks should have a hospitality set. 
+<br>		<br>
+<br>		<b>Q:</b> Cell phone cord sticking out from underneath the bed
+<br>		A: Assign a "A" grade for disorderly item.
+<br>		<br>
+<br>		<b>Q:</b> Chairs or drawers not pushed in all the way
+<br>		A: If carelessly closed and slightly ajar, assign a "A" grade. If not closed at all, a "U" grade is appropriate. 
+<br>		<br>
+<br>		<b>Q:</b> Room door closed with no sick trainee
+<br>		A: Assign a "U" for the closed door. Open the door and inspect the room if it has been cleaned. If it has not been cleaned, leave only the "U" grade and assign no grades for the remainder of the room. 
+<br>		<br>
+<br>		<b>Q:</b> Books stacked vertically instead of horizontally
+<br>		A: On a desk, they should be vertical with bookends. Assign a "A" grade and let the trainees fellowship about exceptions. 
+<br>		<br>
+<br>		<b>Q:</b> What if the liner does not fully cover the trash can, what grade do we give?
+<br>		A: Give a U for it.
+<br>		<br> Andrew Sun
+<br>		<b>Q:</b> Items left on table or bedside dresser
+<br>		A: Misplaced items warrant U grade. 
+<br>		<br>
+<br>		<b>Q:</b> Can there be shampoo and conditioner in each of the four corners of the shower?
+<br>		A: Yes, if neatly stacked. 
+<br>		<br>
+<br>		<b>Q:</b> In a grace house where there is not an official kitchen, there are 3 appliances left on a drawer and 3 appliances left on a brown table. Are they okey to be left out since they do not have proper storage area? 
+<br>		A: Yes, for those houses it is ok for them to be left out as long as they are neat and clean. 
+<br>		<br>
+<br>		<b>Q:</b> When a bathroom door is half way closed, what will be the grade? 
+<br>		A: Check to see if the door can be fully opened. If not, then no grade needed. If so, then half way closed would warrant A or P. 
+<br>		<br>
+<br>		<b>Q:</b> Do we need to mark out when the end of toilet paper roll is flipped up? If so what grade? 
+<br>		A: Is the paper hanging neatly? If so, no grade. If it is not neat, then a G grade is appropriate.
+<br>		<br>
+<br>		<b>Q:</b> When a fan on the ceiling is left on in a bedroom, do we mark it our? If so what grade? 
+<br>		A: Yes, assign a U grade per the information manual. 
+<br>		<br>
+<br>		<b>Q:</b> In a couple's housing, a shampoo bottle is left on the shower room floor since there is no more space in their shampoo rack. Do we mark it our? If so what grade should we give? 
+<br>		A: Shampoo bottles can be stored on the shower floor if there is no room on the rack. The bottle needs to be clean and neat.
+<br>		<br>
+<br>		<b>Q:</b> There is no bathmat outside of shower room. What grade should we give? 
+<br>		A: Each shower should have a bathmat. Assign an A grade unless marked on a previous report, in which case you would assign one grade lower than the previous report.
+<br>		<br>
+<br>		<b>Q:</b> If a dresser cannot not be closed properly do we need to mark it our? Do trainees need to request for maintenance support? 
+<br>		A: If the dresser cannot be closed, do not mark anything. You can suggest a maintenance request be submitted to rectify the problem. 
+<br>		<br>
+<br>		<b>Q:</b> Inside of a coffee pot is wet. Do need to mark it out? 
+<br>		A: No, wet is ok. 
+<br>		<br>
+<br>		<b>Q:</b> If a desk is missing a lamp, do you mark down on uniformity? Or do you just leave a note?
+<br>		A: Yes, grade a U for uniformity and the HC can come to fellowship if there was a particular issue. 
+<br>		<br>
+<br>		<b>Q:</b> Are we allowed to have more than one sink to be wet, so that the trainees can wash their hands after cleaning? 
+<br>		A: Yes, more than one sink can be wet so as to facilitate multiple trainees washing their hands in a short period of time. 
+<br>		<br>
+<br>		<b>Q:</b> In the bathroom trash there were yogurt land containers and banana peels, but still below halfway mark. To me it looked dirty but because below halfway mark I don't know what grade to give them.
+<br>		A: Food items that may attract pests (e.g. banana peels) should not be left in bedroom trash cans. A note is sufficient, no grade needed.
+<br>		<br>
+<br>		<b>Q:</b> Gum wrapper on floor?
+<br>		A: Grade as a large particle on the floor. 
+<br>		<br>
+<br>		<b>Q:</b> What if a top bunk is missing a mattress?
+<br>		A: Mark a U for uniformity. The HC can fellowship with the office if permission has been granted, and the score can be adjusted. 
+<br>		<br>
+<br>		<b>Q:</b> What if the upstairs window is open, and it is not the bathroom window?
+<br>		A: Currently, only bathroom windows can be left open. This is not only a security matter, but also for the sake of heating/cooling. Mark a U grade. 
+<br>		<br>
+<br>		<b>Q:</b> What if there is a soda can, drink inside the bedroom? Does "no food in bedrooms" include drinks?
+<br>		A: Yes, we want to preserve the carpet. 
+<br>		<br>
+<br>		<b>Q:</b> Are standalone armoires/wardrobe inspectable?
+<br>		A: Yes, as a closet. 
+<br>		<br>
+<br>		<b>Q:</b> What should I score a room door left half open instead of completely open?
+<br>		A: Half open would warrant an A or P grade. 
+<br>		<br>
+<br>		<b>Q:</b> What is the mark given for Bowl-O-Cherry left in the toilet?
+<br>		A: Mark it as you would a sticky substance or particle in the toilet. These harsh chemicals can be harmful to the fixtures. 
+<br>		<br>
+<br>		<b>Q:</b> Should you grade a house down if they do not have a sick trainee sign outside on the front door, but they have a sick trainee sign on a door inside the house?
+<br>		A: For sisters houses, they need to have a note on the outside door as well as on the inside door(s). Give a grade and the HC can come to fellowship if needed. 
+<br>		<br>
+<br>		<b>Q:</b> In a house with a sick trainee, there were two bedroom doors closed, only one with a sign on it. One bathroom was closed with sick trainee sign but another was only half cleaned. How should this be marked?
+<br>		A: Go ahead and inspect the bedroom without a sign. Also inspect the bathroom without the sick trainee sign. The HCs can come fellowship if an exception needs to be made.
+<br>		<br> 
+<br>		<b>Q:</b> Concerning cubbies: Toothbrush/paste/mouthwash?
+<br>		A: These items should not be stored in the cubbies.
+<br>		<br> 
+<br>		<b>Q:</b> How do I proceed if there is no towel on a labeled towel bar?
+<br>		A: Mark it, but do not assign a grade. The following week, the inspector should give a grade if the towel is still not present. 
+<br>		<br> 
+<br>		<b>Q:</b> When there is a sick trainee bathroom, do we grade the towels for the corresponding bunks?
+<br>		A: No grade should be assigned for towels in a sick traine bathroom. 
+<br>		<br> 
+<br>		<b>Q:</b> Do we allow personal items to be stored in trainees' personal cubby space?
+<br>		A: Books, laptop, notebooks, etc. are ok, but other items (cell phone, tea bags, etc) should be kept in their bag which can be stored below the cubby.
+<br>		<br> 
+<br>		<b>Q:</b> Can we inspect early in the morning (7:30-8:30)?
+<br>		A: As a general rule, inspectors should not leave before 7:55 a.m. Some exeptions may be granted per fellowship with the training office.
+<br>		<br> 
+<br>		<b>Q:</b> What should we mark if the toilet seat is up?
+<br>		A: If the toilet is clean and there are no other errors, give the toilet an A grade.
+<br>		<br> 
+<br>		<b>Q:</b> What kind of grade do we assign if the door to the laundry door is locked?
+<br>		A: Give a U grade, and note that the HC can come in for fellowship with a TA if needed. 
+<br>		<br> 
+<br>		<b>Q:</b> Can there be a toothbrush charging left out on the sink?
+<br>		A: Yes, as long as the charger and brush are clean and neatly placed. 
+<br>		<br> 
+<br>		<b>Q:</b> What if there is no trash bin in the laundry room?
+<br>		A: Mark a U and have the house request a trash bin.
+<br>		<br> 
+<br>		<b>Q:</b> What is the mark for an extractor fan left on in a bathroom?
+<br>		A: Grade "U" because it wastes electricity.
+<br>		<br> 
+<br>		<b>Q:</b> Do towels need to be hung up on the bars, or can they be hung up on hooks?
+<br>		A: If the hooks are in the bathroom, that’s fine. Preferred on the bars if bars are available since towels dry better on bars. 
+<br>		<br> 
+<br>		<b>Q:</b> Can shoe laces be tied on top of the shoes and not be tucked in?
+<br>		A: They can be tied, but need to be tucked in.
+<br>		<br> 
+<br>		<b>Q:</b> If a bathroom have 4 towel bars, and all of them have both towels and washcloth except for one towel bar that only has a towel, do you mark it off?
+<br>		A: No need to mark off. No washcloth required.
+<br>		<br> 
+<br>		<b>Q:</b> What if the trainee's bed has a whole hospitality set on it. The bunk above also has a whole hospitality set.
+<br>		A: This is fine.
+<br>		<br> 
+<br>		<b>Q:</b> If a sick trainee is home but not in his room, do we still inspect as usual? What if this trainee has personal items out around the house?
+<br>		A: The room gets a "U" grade and the personal items around the house get graded as out of place items. 
+<br>		<br> 
+<br>		<b>Q:</b> What grade should be given if entire shower curtain is pushed to one side?
+<br>		A: GRADE "A" FIRST OFFENSE, ONE GRADE LOWER GRADE EACH SUBSEQUENT OFFENSE
+<br>		<br> 
+<br>		<b>Q:</b> What if the house uses a side porch as their main entrance, and their front door porch (which they don't use for entrance) is messy. Should we mark that?
+<br>		A: It should be swept and tidy. Use a similar grading system as you would the porch. 
+<br>		<br> 
+<br>		<b>Q:</b> There is sick trainee and sign on the bedroom door, but no sick trainee sign on the front door 
+<br>		A: Just make a note on the inspection report to remind them to put a sign on the front door if there is a sick trainee. 
+<br>		<br> 
+<br>		<b>Q:</b> I've noticed in several houses that large bibles are being left out of desks in an orderly fashion. Is this allowed? There is no room for the bibles to be stored on the bookshelf.
+<br>		A: Bibles and laptops can be left out on their desk
+<br>		<br> 
+<br>		<b>Q:</b> What do with trash above halfway in the laundry room?
+<br>		A: a "U" grade for laundry room
+<br>		<br> 
+<br>		<b>Q:</b> Are empty mugs/thermos ok in cubby?
+<br>		A: If they are empty, clean and dry.
+<br>		<br> 
+<br>		<b>Q:</b> Are lap desks ok in cubby? or on bottom shelf?
+<br>		A: Lap desks should be on the bottom shelf. 
+<br>		<br> 
+<br>		<b>Q:</b> What if there is no toilet paper left on the roll, but the brown cardboard is still there?
+<br>		A: Mark as “A” for first offense warning. There should always be toilet paper.
+<br>		<br> 
+<br>		<b>Q:</b> Can there be a sponge left on the sink?
+<br>		A: Yes, if it is orderly.
+<br>		<br> 
+<br>		<b>Q:</b> How should we grade a laundry hamper that is partially covered? (there was an attempt to cover it but the cover was obviously too small)
+<br>		A: GIVE AN "A" AND LEAVE A SPECIFIC COMMENT THAT HAMPER SHOULD BE FULLY COVERED.
+<br>		<br> 
+<br>		<b>Q:</b> Towels are on the towel bars, but there is no label, thus we don't know which bunk it belonged to. What should be the grade?
+<br>		A: Put a reminder on their inspection report. if the next week it is not fixed then grade down. 
+<br>		<br> 
+<br>		<b>Q:</b> What if there is a trash can missing a liner?
+<br>		A: "U" grade
+<br>		<br> 
+<br>		<b>Q:</b> Should the oven door interior be cleaned?
+<br>		A: Yes. Monday cleaning item. Grade as such.
+<br>		<br> 
+<br>		<b>Q:</b> Are stuff on top of the very top bunk (on top of the top bunk bookshelf) ok?
+<br>		A: No, they should be stored elsewhere. Top of the bottom bookshelf is ok (the empty area between the 2 bunks).
+<br>		<br> 
+<br>		<b>Q:</b> Are plants ok on window sill?
+<br>		A: Yes
+<br>		<br> 
+<br>		<b>Q:</b> Some sisters' houses have their own mirror in their closet (personal, not training owned), and they are very dirty. Do we grade these mirrors?
+<br>		A: They should at least look clean, does not have to be spotless like the bathroom or hallway mirrors. Give first offense warning. If they repeat it, then give a "G" and grade down from there. Grade it as a part of the overall appearance of a closet.
+<br>		<br> 
+<br>		<b>Q:</b> Are other things allowed to be on the bookshelf on the bed? It doesn't say anything about it in the info manual. I've been seeing loose papers, face care and also magazines there
+<br>		A: Only books can be stored on the bookshelf. Other items are not ok.
+<br>		<br> 
+<br>		<b>Q:</b> How to grade couples' houses that has no full kitchen? There's only fridge, microwave, dining table.
+<br>		A: Give a grade under counters only. No grade for other categories.
+<br>		<br> 
+<br>		<b>Q:</b> If an broken window (meaning that it is not able to lock) is unlocked, does that also count as an automatic U? 
+<br>		A: No grade. Make a note for the HC to put in a maintenance request.
+<br>		<br> 
+<br>		<b>Q:</b> Can trainees have more than one blanket on their bed?
+<br>		A: YES, as long as they are neatly folded and properly centered.
+<br>		<br> 
+<br>		<b>Q:</b> What do we give if we see power strips? 
+<br>		A: Power strips that have been installed by FTTA maintenance are allowed.
+<br>		<br> 
+<br>		<b>Q:</b> What if there is a sick trainee eating/using in the kitchen when we inspect?
+<br>		A: Give them time to clean up after themselves and tell them to stay in their room until inspection is done.
+<br>		<br> 
+<br>		<b>Q:</b> Are personal items (ukulele, lap desks, bags) allowed on the top shelf? Does this count as using cubby area not assigned to you?
+<br>		A: NO PERSONAL ITEMS SHOULD BE STORED ON SHELVES THAT ARE NOT ASSIGNED EXCEPT FOR BOOKBAGS IN THE BOTTOM SHELVES.
+<br>		<br> 
+<br>		<b>Q:</b> Glow in the dark stars on ceiling?
+<br>		A: SHOULD BE REMOVED BY MAINTENANCE PERSONNEL
+<br>		<br> 
+<br>		<b>Q:</b> If there are two trash cans in the kitchen, one with trash bag, the other not, shall we mark down the grade with the one without trash bag? Btw, that trash can is pretty dirty. 
+<br>		A: ONLY ONE TRASH CAN IS NEEDED. RECYCLE BINS SHOULD BE STORED IN THE GARAGE.
+<br>		<br> 
+<br>		<b>Q:</b> If the master bedroom (which includes a bathroom) is closed upstairs due to a sick trainee in the master bedroom, can the bathroom downstairs be closed due to a sick trainee that is in the bedroom downstairs? 
+<br>		A: Yes.
+<br>		<br> 
+<br>		<b>Q:</b> If there's a care package in their cubby, do you mark it as an offense?
+<br>		A: Give them a note that it should be removed ASAP.
+<br>		<br> 
+<br>		<b>Q:</b> Books stacked horizontally on the bookshelf.
+<br>		A: Books should be stored vertically unless they are too tall to stand vertically in the bookcase, in which case they can be stored horizontally either in the bookcase or stored vertically on the desk.
+<br>		<br> 
+<br>		<b>Q:</b> If there is no sick trainee, but there is an sick trainee sticker on the bathroom door, how to grade it?
+<br>		A: Give one "U" for that bathroom. The HC can come for fellowship if needed. 
+<br>		<br> 
+<br>		<b>Q:</b> If a bunk is immediately against a wall, can the major fold of the blanket be facing the walkway between two bunks instead of facing the wall?
+<br>		A: Yes
+<br>		<br> 
+<br>		<b>Q:</b> What if a sick trainee is in his room, but the door is open, and there is no sick trainee sign, and the light is on, and his stuff is out, how should we grade it?
+<br>		A: Just give one "U" for the lack of a sign and the door being open. 
+<br>		<br> 
+<br>		<b>Q:</b> If the window ledges are not dirty but the inside of the window crevices (channel/sliding part) is dusty and full of bugs, do we mark?
+<br>		A: Give them a G and put a note that they should clean it on Monday. Let the next inspector know that it should be checked again with a lower letter grade given each inspection period until the problem is resolved. 
+<br>		<br> 
+<br>		<b>Q:</b> Do we give a mark if we see rust in the shower? If we do mark it, what would be the grade?
+<br>		A: No grade, but put a note that a maintenance request should be submitted. 
+<br>		<br> 
+<br>		<b>Q:</b> does the hamper need to go in the closet? or can it be in the room?
+<br>		A: Unless they have asked for an exception, it should be in the closet or under the bed. 
+<br>		<br> 
+<br>		<b>Q:</b> What if there is no trash can in the bedroom?
+<br>		A: Mark a "U" and put a note that a trash can can be obtained from the housing supply closet. 
+<br>		<br> 
+<br>		<b>Q:</b> What if fruit is left on the kitchen counter?
+<br>		A: Fruit is ok as long as it is in a container (bowl, etc.) and is not rotting, attracting insects, or leaking. 
+<br>		<br> 
+<br>		<b>Q:</b> Does the door to the garage from the inside of the house needs to be locked?
+<br>		A: No
+<br>		<br> 
+<br>		<b>Q:</b> What grade should we give when the correct side of the blankets and pillows are not facing the eye of the inspector?
+<br>		A: -1 grade for each or set of items not facing the proper direction.
+<br>		<br> 
+<br>		<b>Q:</b> In 2108, there is a bedroom downstairs adjacent to the kitchen that has two doors. One door was left open, but the one that opened into the kitchen was left closed. Is that okay?
+<br>		A: Yes
+<br>		<br> 
+<br>		<b>Q:</b> Do all the blankets need to have the same number of folds?
+<br>		A: NO, it is fine as long as the big fold (the "U") is facing the same direction and all are in a similar size.
+<br>		<br> 
+<br>		<b>Q:</b> Is it ok to put the electronic keyboards in the living room of the house?
+<br>		A: still in fellowship but ok for now 
+<br>		<br> 
+<br>		<b>Q:</b> How do you grade a walk in closet that uses their closet for a large amount of toiletries, I.e. Shampoo, toothbrush, facial items and hairs products etc.
+<br>		A: As long as the items will not damage the wood it is ok. It should be organized. 
+<br>		<br> 
+<br>		<b>Q:</b> How should we grade if the closet is not according to configuration?
+<br>		A: 1 major error = 1 grade deduction. Minor errors, note only.
+<br>		<br> 
+<br>		<b>Q:</b> What grade should we give if one bed does not have a fitted sheet?
+<br>		A: U, but HC can come fellowship if a request has been submitted.
+<br>		<br> 
+<br>		<b>Q:</b> How to grade food in the bedroom trash can 
+<br>		A: A note is sufficient. No grade needed unless it is a repeated offense, then 1 letter grade deduction.
+<br>		<br> 
+<br>		<b>Q:</b> How to grade two pairs of shoes left on the outside mat of the house 
+<br>		A: U for out of place item. Shoes should be stored on shoe racks or in bedrooms.
+<br>		<br> 
+<br>		<b>Q:</b> What are the specification in grading trash cans?
+<br>		A: Trash above halfway = U. Small particles or hairs do not count.
+<br>		<br> 
+<br>		<b>Q:</b> There is a water bottle left on the counter in the kitchen, is it ok? How do I grade it? 
+<br>		A: Misplaced items warrant U grade.
+<br>		<br> 
+<br>		<b>Q:</b> If facial cleanser, cup, toothbrush, and toothpaste are left on the sink, how should I grade? 
+<br>		A: Misplaced items warrant U grade.
+<br>		<br> 
+<br>		<b>Q:</b> Are books allowed in the closet?
+<br>		A: Books are allowed in the closet as long as they are neat and stacked tallest to shortest left to right (as indicated in the info manual).
+<br>		<br> 
+<br>		<b>Q:</b> Are shoes allowed on the shelves of the closet? (stuffed in shelf but there is a lot of floor space)
+<br>		A: Shoes are allowed on the shelf as long as laces are tucked in.
+<br>		<br> 
+<br>		<b>Q:</b> Can a plant be left on the desk?
+<br>		A: Yes, as long as the pot and plant are well kept. 
+<br>		<br> 
+<br>		<b>Q:</b> On which side of the clothes must the empty hangers be?
+<br>		A: They can be on either side.
+<br>		<br> 
+<br>		<b>Q:</b> Hospitality sets - pillows?
+<br>		A: Pillows are considered as part of the hospitality set. Hospitality sets are no longer required, but if they are out, they are inspectable.
+<br>		<br> 
+<br>		<b>Q:</b> If a house doesn't have a RIC posted, should it be graded as a 'missing item' or is a note sufficient?
+<br>		A: A note is sufficient on the first offense. For subsequent offenses, a "U" grade in Uniformity should be assigned.
+<br>		<br> 
+<br>		<b>Q:</b> <b>Q:</b> Towels on a different towel bar than bunk number.
+<br>		A: Grade the towel according to towel bar #. 
+<br>		<br> 
+<br>		<b>Q:</b> Laptop left on top of dresser (not desk)
+<br>		A: Laptops can only be left on a desk. Grade as a "G" and one grade lower each week until repositioned.
+<br>		<br> 
+<br>		<b>Q:</b> Is it ok that only one towel bar has two towels and other towel bars only have one towel?
+<br>		A: It is ok as long as they are organized neatly, folded uniformly.
+<br>		<br> 
+<br>		<b>Q:</b> Is it ok for the bed no having pillow on it, only blanket?
+<br>		A: Trainees who are attending conference are allowed to bring pillows and blankets out of their bunks. Make sure the missing items are for conference attendances. Otherwise, the missing pillow is a missing item. 
+<br>		<br> 
+<br>		<b>Q:</b> For a Grace couple, the door between the laundry room and the garage is not fully closed but the door between the garage and the side patio is closed and locked - how should that be graded?
+<br>		A: For Grace couples house, the exterior side-door entryway should be locked, the garage should be closed but not necessary to be locked. The couples curtain should be pulled closed, the living room door should be closed but not locked.
+<br>		<br> 
+<br>		<b>Q:</b> Is it ok for both the hand soap dispenser and the dish soap dispenser to be left on the kitchen sink?
+<br>		A: Yes, but all of them have to be inspectable. They should be clean, neat and organized. 
+<br>		<br> 
+<br>		<b>Q:</b> Is it ok that the Bible put in the front of the books?
+<br>		A: Bible in front of books is ok if it looks neat.
+<br>		<br> 
+<br>		<b>Q:</b> Can sponge be left on the kitchen counter?
+<br>		A: Yes as long as the sponge is clean and neatly placed
+<br>		<br> 
+<br>		<b>Q:</b> Can soap bar, dish detergent be left on the kitchen counter?
+<br>		A: Yes, but all of them have to be inspectable. They should be clean, neat and organized. 
+<br>		<br> 
+<br>		<b>Q:</b> Can a bowl of fresh fruit be left on the dining table?
+<br>		A: Yes, but they should be free from attracting insects or roaches. 
+<br>		<br> 
+<br>		<b>Q:</b> Is back patio of Founder Square’s houses inspectable?
+<br>		A: Yes, it is inspectable as a LD morning cleaning item
+<br>		<br> 
+<br>		<b>Q:</b> Is empty room, unused bathroom inspectable?
+<br>		A: No, the empty room, unused bathroom is not inspectable unless they are using it. 
+<br>		<br> 
+<br>		<b>Q:</b> Is trash liner needed for a recycle trash bin? 
+<br>		A: Yes, a trash liner is needed in the recycle trash bin. 
+<br>		<br> 
+<br>		<b>Q:</b> Can a non-electric toothbrush and toothpaste be left out on the bathroom counter if they are placed in a container/holder?
+<br>		A: yes, but they need to be neat and clean
+<br>		<br> 
+<br>		<b>Q:</b> If a bathroom fan is left on (not automatic) is this considered "light on" and graded as a "U"?
+<br>		A: Yes
+<br>		<br> 
+<br>		<b>Q:</b> Can I type and grade Grace 2112 with electronic form with inspection sheet? Cause they have 4 bathroom, can I make a change of the form and the score will be given automatically?
+<br>		A: Yes. Insert a column to add the extra bathroom. The score will calculate automaticlly
+<br>		<br> 
+  	</p>
+<!--
+  </div>  
+  <br>
+  <div>
+  	{% for item in list_questions %}
+  	  <p><b>{{item.id}}</b> {{item.question}} <br>
+  	    {{item.answer}} 
+  	  </p>  	  
+  	{% endfor %}
+  </div>
+ -->
+
+{% endblock %}

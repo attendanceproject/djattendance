@@ -17,7 +17,7 @@ cd $DATABACK
 if [ -f $lockfile ] ; then
     rm $lockfile
 fi
-pg_dump -U postgres -a -T django_migrations djattendance > ap_data.sql
+pg_dump -U postgres djattendance > ap_data.sql --exclude-table=django_migrations
 pg_dump -U postgres djattendance > ap_full.sql
 pg_dump -U postgres -s djattendance > ap_schema.sql
 git add -A

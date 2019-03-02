@@ -14,7 +14,7 @@ from terms.models import Term
 from .forms import (AssignmentAdminForm, ExceptionAdminForm, QualificationForm,
                     SeasonalServiceScheduleForm, WorkGroupAdminForm)
 
-NONSERVICE_GROUPS = ['training_assistant', 'regular_training_assistant', 'saturday_training_assistant', 'grad_committee', 'HC', 'team_monitors', 'ypc_monitors', 'designated_service', 'PSRP_facilitator']
+NONSERVICE_GROUPS = ['training_assistant', 'regular_training_assistant', 'saturday_training_assistant', 'grad_committee', 'HC', 'team_monitors', 'ypc_monitors', 'PSRP_facilitator']
 
 
 class ReadonlyException(object):

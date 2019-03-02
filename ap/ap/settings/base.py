@@ -111,6 +111,7 @@ MIDDLEWARE = (
     # AP middleware
     'ap.middleware.LoginRequiredMiddleware',
     'bible_tracker.middleware.BibleReadingMiddleware',
+    'services.middleware.DesignatedServiceHoursMiddleware'
 )
 
 ROOT_URLCONF = 'ap.urls'
@@ -210,6 +211,7 @@ APPS = (
     'verse_parse',  # parse outlines for PSRP verses
     'web_access',
     'xb_application',
+    'house_inspection',
 
     # fobi-core
     'fobi',

@@ -83,6 +83,8 @@ class LeaveSlip(models.Model, RequestMixin):
 
   texted = models.BooleanField(default=False, verbose_name='texted attendance number')  # for sisters only
 
+  does_not_count = models.BooleanField(default=False, verbose_name='does not count against perfect attendance')  # whether leaveslip counts against perfect attendance
+
   informed = models.BooleanField(blank=True, default=False, verbose_name='informed TA')  # informed TA
   # let's keep this old informed field for now and delete it after we migrate
   # @property

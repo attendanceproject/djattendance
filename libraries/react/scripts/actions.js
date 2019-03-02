@@ -320,6 +320,7 @@ export const postLeaveSlip = (values) => {
     "host_name": values.hostName,
     "host_phone": values.hostPhone,
     "hc_notified": values.hcNotified,
+    "does_not_count": values.slipType.id == 'CONF' || values.slipType.id == 'FWSHP' || values.slipType.id == 'SERV' || values.slipType.id == 'TTRIP',
     ...taInformedToServerFormat(values.ta_informed),
   };
 
@@ -471,6 +472,7 @@ export const postGroupSlip = (gSlip) => {
     "TA_informed": TA_informed,
     "trainee": gSlip.traineeView.id,
     "trainees": gSlip.trainees.map(t => t.id),
+    "does_not_count": gSlip.slipType.id == 'CONF' || gSlip.slipType.id == 'FWSHP' || gSlip.slipType.id == 'SERV' || gSlip.slipType.id == 'TTRIP',
     ...taInformedToServerFormat(gSlip.ta_informed),
   }
 
