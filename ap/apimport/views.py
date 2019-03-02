@@ -122,7 +122,8 @@ class ProcessCsvData(SuperuserRequiredMixin, TemplateView):
     context = super(ProcessCsvData, self).get_context_data(**kwargs)
 
     localities, teams, residences = check_csvfile(self.request.session['file_path'])
-
+    file_path = self.request.session['file_path']
+    print( file_path + ' path after getting context data.')
     if localities or teams or residences:
       initial_locality = []
       for locality in localities:
@@ -160,6 +161,7 @@ def process_row(request):
   if request.method == "POST" and request.is_ajax():
     row_number = request.POST['rowNumber']
     file_path = request.POST['filePath']
+    print(str(file_path) + ' path & rn ' + str(row_number))
     try:
       row = get_row_from_csvfile(file_path, int(row_number))
       name = row['stName'] + ' ' + row['lastName']

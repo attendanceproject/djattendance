@@ -21,9 +21,10 @@
       url: "{% url 'apimport:process-row' %}",
       data: {
         rowNumber: rowNumber,
-        filePath: "{{file_path}}",
+        filePath: "{{file_path|safe}}",
       },
       success: function(response){
+        console.log("{{file_path|safe}}" + 'this is the filePATH passed in from ajax')
         update_progress(rowNumber, TOTAL_ROWS);
         if (response.success){
           $(".processed-list").append( '<li>' + response.name + '</li>' );
