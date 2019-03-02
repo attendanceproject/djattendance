@@ -18,7 +18,7 @@ from .models import GroupSlip, IndividualSlip, Roll
 
 COMMON_FIELDS = ('id', 'type', 'status', 'ta_sister_approved', 'TA', 'TA_informed', 'informed',
                   'trainee', 'submitted', 'finalized', 'description', 'comments', 'private_TA_comments',
-                  'texted', 'classname', 'periods', 'late', 'last_modified')
+                  'texted', 'does_not_count', 'classname', 'periods', 'late', 'last_modified')
 INDIVIDUAL_FIELDS = COMMON_FIELDS + ('location', 'host_name', 'host_phone', 'hc_notified', 'events')
 GROUP_FIELDS = COMMON_FIELDS + ('start', 'end', 'trainees', 'service_assignment', 'trainee_list')
 CURRENT_TERM = Term.current_term()
@@ -92,6 +92,7 @@ class IndividualSlipSerializer(BulkSerializerMixin, ModelSerializer):
     instance.host_name = validated_data.get('host_name', instance.host_name)
     instance.host_phone = validated_data.get('host_phone', instance.host_phone)
     instance.hc_notified = validated_data.get('hc_notified', instance.hc_notified)
+    instance.does_not_count = validated_data.get('does_not_count', instance.does_not_count)
     commonLeaveSlipUpdate(instance, validated_data)
     return instance
 
@@ -147,7 +148,7 @@ class IndividualSlipFilter(filters.FilterSet):
 
   class Meta:
     model = IndividualSlip
-    fields = ['id', 'type', 'status', 'submitted', 'last_modified', 'finalized', 'description', 'comments', 'texted', 'TA', 'TA_informed', 'informed', 'trainee', 'rolls']
+    fields = ['id', 'type', 'status', 'submitted', 'last_modified', 'finalized', 'description', 'comments', 'texted', 'does_not_count', 'TA', 'TA_informed', 'informed', 'trainee', 'rolls']
 
 
 class GroupSlipSerializer(BulkSerializerMixin, ModelSerializer):
@@ -185,6 +186,7 @@ class GroupSlipSerializer(BulkSerializerMixin, ModelSerializer):
 
     instance.service_assignment = validated_data.get('service_assignment', instance.service_assignment)
     instance.trainee_list = validated_data.get('trainee_list', instance.trainee_list)
+    instance.does_not_count = validated_data.get('does_not_count', instance.does_not_count)
     commonLeaveSlipUpdate(instance, validated_data)
     return instance
 
@@ -213,4 +215,4 @@ class GroupSlipFilter(filters.FilterSet):
 
   class Meta:
     model = GroupSlip
-    fields = ['id', 'type', 'status', 'submitted', 'last_modified', 'finalized', 'description', 'comments', 'texted', 'TA_informed', 'TA', 'informed', 'trainee', 'trainees']
+    fields = ['id', 'type', 'status', 'submitted', 'last_modified', 'finalized', 'description', 'comments', 'texted', 'does_not_count', 'TA_informed', 'TA', 'informed', 'trainee', 'trainees']

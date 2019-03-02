@@ -5,7 +5,7 @@ const TAComments = (props) => {
   return (<div>
     {
       props.comments &&
-      <Alert bsStyle="comment">
+      <Alert bsStyle="info">
         <b>TA comments:</b> {props.comments}
       </Alert>
     }

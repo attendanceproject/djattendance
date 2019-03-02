@@ -39,6 +39,13 @@ def seattables(request):
   enddate = request.POST['enddate']
 
   trainees = Trainee.objects.all().filter(gender=genderchoice).order_by(filterchoice).exclude(id__in=get_exclude_list())
+  #date_of_birth will sort by year by default, so the following code will make it order by month,day
+  if filterchoice == 'date_of_birth':
+	trainees = Trainee.objects.all().filter(gender=genderchoice).extra(select={
+        'birth_date_month': 'EXTRACT(MONTH FROM date_of_birth)',
+        'birth_date_day': 'EXTRACT(DAY FROM date_of_birth)'
+    },
+    order_by=['birth_date_month','birth_date_day']).exclude(id__in=get_exclude_list())
   seating_list = seatinglist(trainees, genderchoice)
   if seating_list is None:
     messages.error(request, 'Not enough seats available!')
@@ -69,10 +76,11 @@ def seatinglist(genderlist, gender):
     traineenum = 0
     tablenum = 0
     totalcapacity = 0
+    traineecount = len(genderlist)
     for x in Table.objects.all().filter(gender=gender).values("capacity"):
       totalcapacity += x["capacity"]
-    if (len(genderlist) > totalcapacity):
-      print "cannot seat ", len(genderlist), " trainees. Current capacity is: ", totalcapacity
+    if (traineecount > totalcapacity):
+      print "cannot seat ", traineecount, " trainees. Current capacity is: ", totalcapacity
       return None
     else:
       # Make columns have max 55 trainees.
@@ -80,8 +88,6 @@ def seatinglist(genderlist, gender):
       mealCols = []
       mealRows = []
       maxRowPerCol = 55
-      # determines which set of 55 elements in mealRows to append to mealCols.
-      rowElementPartition = 0
       for trainee in genderlist:
         meal_seating = {}
         if traineenum == tables[tablenum].capacity:
@@ -91,11 +97,17 @@ def seatinglist(genderlist, gender):
         meal_seating["last_name"] = trainee.lastname
         meal_seating["table"] = tables[tablenum]
         mealRows.append(meal_seating)
-        if (len(mealRows) % maxRowPerCol) == 0:
-          rowElementPartition = len(mealRows) / maxRowPerCol
-          mealCols.append(mealRows[maxRowPerCol * (rowElementPartition - 1):maxRowPerCol * rowElementPartition])
         traineenum += 1
-      mealCols.append(mealRows[maxRowPerCol * rowElementPartition:len(mealRows)])
+      sortedMealRows = sorted(mealRows, key=lambda k: (k["last_name"],k["first_name"]))
+      #numCols is how many columns resulting table will have
+      numCols = traineecount/maxRowPerCol + 1
+      #the rare case that maxRowPerCol divides traineecount
+      if (traineecount % maxRowPerCol) == 0:
+          numCols -= 1
+      colNum = 1
+      while colNum <= numCols :
+          mealCols.append(sortedMealRows[maxRowPerCol * (colNum - 1):maxRowPerCol * colNum])
+          colNum += 1
       return mealCols
 
 

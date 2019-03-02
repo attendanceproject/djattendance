@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load interim_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block references %}
+
+<style type="text/css">
+
+	table {
+		border-collapse: separate;
+		cellspacing: 0;
+	}
+
+	.headcol {
+		width: 200px;
+		position: -webkit-sticky;
+	  position: sticky;
+	  left: 0px;
+	  text-align: center;
+	  background-color: #095F80;
+	  color: white;
+	  z-index: 2;
+	}
+
+	.othercol {
+		width: 100px;
+	}
+
+	.headrow {
+		z-index: 1;
+		position: -webkit-sticky;
+		position: sticky;
+		top: 40px;
+	}
+
+	td {
+		text-align: left;
+		width: 100px;
+	}
+
+	.form-control {
+		width: 156px;
+		display: inline-block;
+	}
+
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+	function search_names() {
+	  // Declare variables
+	  var input, headcol, row, i;
+	  input = $("#input_search").val().toUpperCase();
+	  headcol = $(".headcol");
+
+	  // Loop through all table rows, and hide those who don't match the search query
+	  for (i = 1; i < headcol.length; i++) {
+	  	row = headcol[i]
+	  	if (row) {
+	  		if (row.innerHTML.toUpperCase().indexOf(input) > -1) {
+	  			row.parentElement.style.display = "";
+	  		} else {
+	  			row.parentElement.style.display = "none";
+	  		}
+	  	}
+	  }
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+{% if subtitle %}
+	<h4>{{ subtitle }}</h4>
+
+{% else %}
+
+	<p style="margin-bottom: 5px">
+		<div style="float: right">Search by Trainee: <input type="text" id="input_search" class="form-control" onkeyup="search_names()"></div>
+		For best functionality, view on Firefox
+	</p>
+	<br>
+	<ul class="nav-tabs"></ul>
+
+	<table class="table table-striped table-bordered" style="table-layout: fixed">
+		<tr class="headrow">
+			<th class="headcol" style="color:#095F80">Trainee</th>
+			{% for date in date_list %}
+				<th class="othercol">{{date}}</th>
+			{% endfor %}
+		</tr>
+
+	  {% for trainee in trainees %}
+	    <tr>
+	      <th class="headcol">{{trainee.name}}</th>
+      	{% if trainee.intention.interimitinerary_set.all %}
+      		{% for itin in trainee.intention.interimitinerary_set.all %}
+      			<td colspan="{{ itin.start|itinerary_length_in_days:itin.end }}">{{itin.comments}}</td>
+      		{% endfor %}
+    		{% else %}
+    			<td colspan="{{interim_length}}"><i>No itinerary specified</i></td>
+      	{% endif %}
+ 			</tr>
+	  {% endfor %}
+	</table>
+
+{% endif %}
+
+{% endblock %}

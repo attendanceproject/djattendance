@@ -113,7 +113,7 @@ class AnswerForm(forms.ModelForm):
         self.fields['response'] = forms.DateField(widget=DatePicker())
 
       elif answer_type == 'datetime':
-        self.fields['response'] = forms.DateField(widget=DatetimePicker())
+        self.fields['response'] = forms.DateTimeField(widget=DatetimePicker())
 
       elif answer_type == 'airports':
         self.fields['response'].widget.attrs = {'class': 'airport-field'}

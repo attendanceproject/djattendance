@@ -109,6 +109,8 @@ class AnnouncementsRead(generic.ListView):
   def get_queryset(self):
     trainee = self.request.user
     announcements = Announcement.objects.filter(trainees_read=trainee)
+    announcements |= Announcement.objects.filter(is_popup=False, trainees_show=trainee)
+    announcements |= Announcement.objects.filter(type='SERVE', is_popup=False, all_trainees=True)
     return announcements
 
 

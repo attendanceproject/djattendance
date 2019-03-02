@@ -13,11 +13,6 @@
     float: left;
   }
 
-  #delete_row{
-    display: inline-block;
-    float: right;
-  }
-
   #add_row{
     display: inline-block;
     float: right;
@@ -29,30 +24,54 @@
 {% block scripts %}
 {{ block.super }}
 <script type="text/javascript">
+var hcrs = {{ hcrs|safe }};
 $(document).ready(() => {
-  const size = $("#id_recommended_hc > option").length - 2;
+  const SIZE = $("#id_recommended_hc > option").length - 2;
+  const NULL_HCR = {"recommended_hc": null,
+                    "choice": null,
+                    "recommendation": null};
 
-  $("#add_row").click(() => {
+  function addRow(values) {
     let val = $("tr:last").attr('id').split("_").pop();
 
-    if (val < size) {
-      $("tr:last").clone().appendTo("#table");
+    if (val < SIZE) {
       val++;
+      var newRow = $("#row_0").clone();
+      $.each(newRow.children(), function(index, child) {
+        child.children[0].value = values[child.children[0].name];
+        child.children[0].setAttribute("name", child.children[0].name + "_" + val);
+      });
+      newRow.appendTo("#table");
       $("tr:last").attr("id","row_" + val);
     } else {
       new Notification(Notification.SUCCESS, 'Not enough people').show();
     }
-  })
+  }
 
+  var hcr_1 = $("id_recommended_hc").val();
 
-  $("#delete_row").click(() => {
-    let val = $("tr:last").attr('id').split("_").pop();
-    if (val != 0){
-      $("tr:last").remove();
+  if (!hcr_1) {
+    $("#id_recommended_hc").val(hcrs[hcrs.length-1]["recommended_hc"])
+    $("#id_choice").val(hcrs[hcrs.length-1]["choice"])
+    $("#id_choice").attr("required", true);
+    $("#id_recommendation").val(hcrs[hcrs.length-1]["recommendation"])
+    $("#id_recommendation").attr("required", true);
+    hcrs.pop();
+  }
+
+  if (hcrs) {
+    for (var i = 0; i < hcrs.length; i++) {
+      if (hcrs[i]["recommended_hc"] != hcr_1 && hcrs[i] != NULL_HCR) {
+        addRow(hcrs[i]);
+      }
     }
-  })
+  }
 
-})
+  $("#add_row").click(() => {
+    addRow(NULL_HCR);
+  });
+
+});
 
 {% if read_only %}
   $('#id_hc_recommendation_form *').attr("disabled", true);
@@ -84,8 +103,8 @@ $(document).ready(() => {
 <p>Notes:</p>
 <ol type="1">
   <li>Pray with your co-HC before filling out this form.</li>
-  <li>List all second and third termers (only) in your house.</li>
-  <li>With the help of the following cirteria, please consider each trainee and indicate whether or not you would recommend him or her as an HC.
+  <li>Fill out the form for each person in the drop-down list (2nd and 3rd termers only).</li>
+  <li>With the help of the following criteria, please consider each trainee and indicate whether or not you would recommend him or her as an HC.
     <ol type="a">
       <li>Are they able and willing to take care of others in the house?</li>
       <li>Do they get along generally well with the others in the house?</li>
@@ -94,7 +113,7 @@ $(document).ready(() => {
       <li>Do they follow the rules and regulations of the training?</li>
     </ol>
   </li>
-  <li>As much as possible please add succint comments to indicate why you would or would not recommend the trainee as an HC. List your concerns even if they are not part of the above list of questions.</li>
+  <li>As much as possible please add succinct comments to indicate why you would or would not recommend the trainee as an HC. List your concerns even if they are not part of the above list of questions.</li>
 </ol>
 
 <b>House:</b> {{house}} <br>
@@ -119,7 +138,6 @@ $(document).ready(() => {
 
     <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
   </form>
-  <button class="btn btn-primary" id="delete_row">Delete</button>
   <button class="btn btn-primary" id="add_row">Add</button>
 
 {% endblock %}

@@ -21,7 +21,11 @@
       <p>{{summary.content}}</p>
       <div>
         <span class="badge alert-info">{{ summary.date_submitted }}</span>
-        <span class="badge alert-info">{{ summary_wc }} words</span>
+        {% if not summary.submitting_paper_copy %}
+          <span class="badge alert-info">{{ summary_wc }} words</span>
+        {% else %}
+          <span class="badge alert-info">submitted paper copy</span>
+        {% endif %}
         {% if summary.approved %}
         <span class="badge alert-success">approved</span>
         {% else %}

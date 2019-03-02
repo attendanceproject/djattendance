@@ -1,6 +1,7 @@
-from semi.models import SemiAnnual
-from semi.utils import ROLL_STATUS, LOCATIONS, REQUEST_STATUS
 from django import forms
+from semi.models import SemiAnnual
+from semi.utils import LOCATIONS, REQUEST_STATUS, ROLL_STATUS
+
 
 class AttendanceForm(forms.Form):
 
@@ -32,7 +33,6 @@ class LocationForm(forms.ModelForm):
     if not is_TA:
       self.fields['status'].disabled = True
       self.fields['ta_comments'].disabled = True
-
 
   location = forms.ChoiceField(choices=LOCATIONS, widget=forms.RadioSelect)
   other_location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'location'}))

@@ -2,7 +2,7 @@
 //selectors take state and make it usable by components (selectors turn state into props)
 //reselect is a library that memoizes selectors so that it is memory efficient to do so
 import { createSelector } from 'reselect'
-import { startOfWeek, endOfWeek, differenceInWeeks, addDays, getDay }from 'date-fns'
+import { startOfWeek, endOfWeek, differenceInWeeks, addDays, getDay, isWithinRange }from 'date-fns'
 
 //set manipulations used to do array computations quickly & easily from https://www.npmjs.com/package/set-manipulator
 import { union, intersection, difference, complement, equals } from 'set-manipulator';
@@ -181,8 +181,7 @@ export const getLeaveSlipsforPeriod = createSelector(
   (ls, dates) => {
     return ls.filter(slip => {
         return slip.events.some(ev =>
-            dates.firstStart <= new Date(ev.date) &&
-            dates.secondEnd >= new Date(ev.date))
+            isWithinRange(ev.start_datetime, dates.firstStart, dates.secondEnd))
     })
   }
 )

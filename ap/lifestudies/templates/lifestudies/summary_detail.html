@@ -6,7 +6,22 @@
 {% block title %}Life-study{% endblock %}
 
 {% block scripts %}
-    <script src="{% static 'lifestudies/js/summary-wordcount.js' %}"></script>
+  <script src="{% static 'lifestudies/js/summary-wordcount.js' %}"></script>
+  <script>
+    $(document).ready(() => {
+      if ($("#id_submitting_paper_copy").prop("checked")) {
+        $("#id_content").prop("disabled", true);
+      }
+
+      $("#id_submitting_paper_copy").on('click', function(ev) {
+        if ($("#id_content").prop("disabled")) {
+          $("#id_content").prop("disabled", false)
+        } else {
+          $("#id_content").prop("disabled", true)
+        }
+      });
+    });
+  </script>
 {% endblock %}
 
 {% block lifestudies_content %}

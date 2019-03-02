@@ -75,8 +75,8 @@ class OutlineView(CreateUpdateView):
   # instead of using a form invalid as a hack
   def form_invalid(self, form):
     obj = self.object
-    obj.speaking_section = form.cleaned_data['speaking_section']
-    obj.speaking = form.cleaned_data['speaking']
+    obj.speaking_section = form.cleaned_data.get('speaking_section')
+    obj.speaking = form.cleaned_data.get('speaking')
     obj.save()
     return redirect('graduation:outline-view')
 
@@ -143,6 +143,13 @@ class GradAdminView(GroupRequiredMixin, UpdateView):
     ctx['page_title'] = "Grad Admin"
     ctx['button_label'] = 'Save'
     ctx['4th_count'] = Misc.objects.filter(grad_admin=GradAdmin.objects.get(term=Term.objects.filter(current=True).first()), trainee__in=Trainee.objects.filter(current_term=4)).count()
+    # speaking
+    speaking_trainees = GradAdmin.objects.get(term=term).speaking_trainees.all()
+    oset = Outline.objects.filter(grad_admin__term=term, trainee__in=speaking_trainees)
+    ctx['speaking_stat'] = {
+      'count': speaking_trainees.count(),
+      'responses': len(filter(lambda o: o.speaking or o.speaking, oset))
+    }
     # xb form
     xba = XBAdmin.objects.filter(term=term)
     if xba:
@@ -211,7 +218,7 @@ class SpeakingReport(ReportView):
   def get_context_data(self, **kwargs):
     context = super(SpeakingReport, self).get_context_data(**kwargs)
     speaking_trainees = GradAdmin.objects.get(term=term).speaking_trainees.all()
-    context['data'] = Outline.objects.filter(trainee__in=speaking_trainees)
+    context['data'] = Outline.objects.filter(grad_admin__term=term, trainee__in=speaking_trainees)
     context['title'] = 'Speaking Report'
 
     return context

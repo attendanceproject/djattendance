@@ -5,7 +5,7 @@
   {% for option in question.options|get_letter_ordered_options %}
     <li class="OptionMC">
       <label>
-      <input type="checkbox" name="{{ question.question_number }}" {% if option in response|get_item:question.question_number %}checked{% endif %} value="{{ option }}">
+      <input type="checkbox" name="{{ question.question_number }}" {% if preview is False and option in response|get_item:question.question_number %}checked{% endif %} value="{{ option }}">
       {{ forloop.counter|get_letter_for_multiple_choice_index }}. {{ option|get_multiple_choice_option }}
       </label>
     </li>

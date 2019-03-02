@@ -103,9 +103,6 @@ class HCRecommendation(models.Model):
   # detailed recommendation for the chosen trainee
   recommendation = models.TextField(blank=True, null=True)
 
-  def get_absolute_url(self):
-    return reverse('hc:hc-recommendation-update', kwargs={'pk': self.id})
-
   def __unicode__(self):
     try:
       return "HC Rec.: " + self.house.name

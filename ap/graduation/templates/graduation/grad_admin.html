@@ -111,6 +111,7 @@
   {% for stat, v in stats.items %}
     <p>{{stat}}: {{v}} / {{4th_count}}</p>
   {% endfor %}
+    <p> Speaker responses: {{speaking_stat.responses}} / {{speaking_stat.count}} </p>
   <form id="id_grad_admin_form" action="" method="post">
     {% csrf_token %}
     <div class="row">

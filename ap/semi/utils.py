@@ -3,11 +3,9 @@ from datetime import datetime
 from terms.models import Term
 
 ROLL_STATUS = (
-    ('A', 'Attended'),
+    ('P', 'Present'),
     ('S', 'Service'),
-    ('I', 'Illness'),
-    ('F', 'Fellowship'),
-    ('U', 'Unexcused Absence')
+    ('A', 'Absent')
 )
 
 LOCATIONS = (
@@ -34,7 +32,7 @@ def attendance_stats(semi):
   d = {}
   for code, status in ROLL_STATUS:
     d[status.split(' ')[0]] = count(att, code)
-  d['Absences'] = 5 - d['Attended']
+  d['Absences'] = 5 - d['Present']
   return d
 
 

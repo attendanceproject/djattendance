@@ -8,13 +8,15 @@
 {% block scripts %}
 <script type="text/javascript">
   $(document).ready(() => {
-    $(".team_contact").on("click", function() {
+    $(".assign-role").on("click", function() {
+      let val = $(this).val().split('-');
       $.ajax({
         type: "POST",
-        url: "{% url 'gospel_trips:assign-team-contact' pk=request.resolver_match.kwargs.pk %}",
+        url: "{% url 'gospel_trips:assign-trainee-role' pk=request.resolver_match.kwargs.pk %}",
         data: {
-          'trainee_id': $(this).val(),
-          'is_contact': $(this).prop('checked')
+          'trainee_id': val[1],
+          'is_contact': $(this).prop('checked'),
+          'field': val[0]
         },
         success: function(data){
           if (data.success){
@@ -49,7 +51,10 @@
       <tr>
         <th>Name</th>
         <th>Destination</th>
-        <th>Team Contact</th>
+        <th>Trainee Contact</th>
+        <th>Finance Coordinator</th>
+        <th>Media Coordinator</th>
+        <th>Report/Stats Coordinator</th>
       </tr>
     </thead>
     <tbody>
@@ -57,7 +62,7 @@
       <tr>
         <td>{{trainee.full_name}}</td>
         <td>{{destination.name}}</td>
-        <td>{% if trainee in destination.team_contacts.all %} <i class="glyphicon glyphicon-check"></i> {% endif %}</td>
+        <td>{% if trainee in destination.trainee_contacts.all %} Yes {% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -71,7 +76,7 @@
       <tr>
         <th>Trainee</th>
         <th>Destination</th>
-        <th>Team Contact</th>
+        <th>Trainee Contact</th>
       </tr>
     </thead>
     <tbody>
@@ -79,7 +84,10 @@
         <tr>
           <td>{{trainee.name}}</td>
           <td>{{trainee.destination.name}}</td>
-          <td><input class="team_contact" type="checkbox" name="team_contact_selection" value="{{trainee.id}}" {% if trainee.team_contact %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="trainee_contacts-{{trainee.id}}" {% if trainee.trainee_contact %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="finance_coords-{{trainee.id}}" {% if trainee.finance_coord %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="media_coords-{{trainee.id}}" {% if trainee.media_coord %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="stat_coords-{{trainee.id}}" {% if trainee.stat_coord %}checked="checked"{% endif %}></input></td>
         </tr>
         {% endfor %}
     </tbody>

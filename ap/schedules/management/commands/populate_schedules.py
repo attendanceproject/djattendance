@@ -10,7 +10,7 @@ from datetime import *
 class Command(BaseCommand):
   def _create_schedule(self):
 
-    #Generic Schedule
+    # Generic Schedule
     group_s = Schedule(name='Generic Group Events', season='All', term=Term.current_term(), priority=1, trainee_select='GP', import_to_next_term=True)
     group_s.comments = "Use for group leaveslips"
     group_s.save()
@@ -24,16 +24,16 @@ class Command(BaseCommand):
     group_s.trainees = Trainee.objects.all()
     group_s.save()
 
-    #all trainees
+    # all trainees
     main_s = Schedule(name='Main', season='All', term=Term.current_term(), priority=2, import_to_next_term=True)
     main_s.save()
 
-    main_s.events = Event.objects.filter(Q(type='H')|Q(type='M')|Q(class_type='MAIN'))
+    main_s.events = Event.objects.filter(Q(type='H') | Q(type='M') | Q(class_type='MAIN'))
     main_s.events.add(*Event.objects.filter(code='LANG/CHAR'))
     main_s.trainees = Trainee.objects.all()
     main_s.save()
 
-    #1st year    
+    # 1st year
     oneyear_s = Schedule(name='1st Year', season='All', trainee_select='FY', term=Term.current_term(), priority=2, import_to_next_term=True)
     oneyear_s.save()
 
@@ -68,9 +68,6 @@ class Command(BaseCommand):
     campus_generic.save()
 
   def handle(self, *args, **options):
-    #print("* Populating schedules...")
-    #self._create_schedule()
-    print ("* Looking through schedules... ")
-    self._check_schedules()
-    # self._check_events()
+    print("* Populating schedules...")
+    self._create_schedule()
     print 'pulled on', datetime.now()

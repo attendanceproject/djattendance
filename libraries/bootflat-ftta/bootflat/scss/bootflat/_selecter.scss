@@ -277,4 +277,10 @@ $selecter-item-selected-border-color:  $blue !default;
 			cursor: default;
 		}
 	}
+
+	.bible-selector:hover {
+		background-color: #a5c5d0;
+		color: white;
+		display: block;
+	}
 }

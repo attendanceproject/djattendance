@@ -367,6 +367,15 @@ def get_exam_context_data(context, exam, is_available, session, role, include_an
 
   context['data'] = zip(questions, responses, score_for_responses, comments_for_responses)
 
+  context['preview'] = False
+  return context
+
+
+def get_exam_preview_context_data(context, exam):
+  context['exam'] = exam
+  context['exam_total_score'] = exam.total_score
+  context['questions'] = get_exam_questions(exam, False)
+  context['preview'] = True
   return context
 
 

@@ -11,6 +11,7 @@
       // hide entire row on load
       var missed_service_input = $("#id_missed_service").parent().parent()
       missed_service_input.hide()
+      $('#id_trainees').djangoSelect2({width: '100%'});
 
       $("#id_infraction").change(function(){
         if ($("#id_infraction").val() == 'MS'){
@@ -33,12 +34,12 @@
   <div class="col-md-1"></div>
   <div class="col-md-4"><h3>Assign Life-study to Single Trainee</h3></div>
 </div>
-<form action="" method="post" class="form form-horizontal">
+<form action="{% url 'lifestudies:discipline_create_multiple' %}" method="post" class="form form-horizontal">
   {% csrf_token %}
-  {% bootstrap_form form label_class="col-md-2" field_class="col-md-4" %}
+  {% bootstrap_form form label_class="col-md-2" field_class="col-md-6" %}
   <div class="row">
     <div class="col-md-2"></div>
-    <div class="col-md-4"><button type="submit" class="btn btn-success">Assign</button></div>
+    <div class="col-md-6"><button type="submit" class="btn btn-success">Assign</button></div>
   </div>
 </form>
 

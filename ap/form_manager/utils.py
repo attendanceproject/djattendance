@@ -1,4 +1,5 @@
 import json  # fobi user json for form_elements not Django models
+
 from fobi.models import FormEntry
 
 ALL_ACCESS = "*"

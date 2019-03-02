@@ -17,3 +17,5 @@ ANSWER_TYPES = ['destinations', 'text', 'date', 'datetime', 'airports', 'airline
 SHOW_TYPES = ['SHOW', 'HIDE', 'READ ONLY', '']
 
 SHOW_CHOICES = [(x, x) for x in SHOW_TYPES]
+
+DESTINATION_FIELDS = ['trainee_contacts', 'finance_coords', 'media_coords', 'stat_coords']

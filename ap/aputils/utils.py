@@ -1,20 +1,22 @@
 import cStringIO as StringIO
-import xhtml2pdf.pisa as pisa
-import time
 import functools
 import os
-from cgi import escape
+import time
 from datetime import date, datetime
 
+import xhtml2pdf.pisa as pisa
+from cgi import escape
+from django.conf import settings
+from django.contrib import messages
+from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.template.defaulttags import register
 from django.template.loader import get_template
-from django.http import HttpResponse
-from django.conf import settings
-from django.shortcuts import get_object_or_404, redirect
-from django.core.files.storage import FileSystemStorage
-from django.contrib import messages
 
 from .decorators import group_required
+
+
 # !! IMPORTANT: Keep this file free from any model imports to avoid cyclical dependencies!!
 
 
@@ -51,8 +53,12 @@ class OverwriteStorage(FileSystemStorage):
     return super(OverwriteStorage, self).get_available_name(name, max_length)
 
 
-def modify_model_status(model, url):
-  @group_required(['training_assistant'], raise_exception=True)
+def modify_model_status(model, url, groups=None):
+  if groups is None:
+    groups = []
+  groups.append('training_assistant')
+
+  @group_required(groups, raise_exception=True)
   def modify_status(request, status, id, message_func=None):
     obj = get_object_or_404(model, pk=id)
     obj.status = status

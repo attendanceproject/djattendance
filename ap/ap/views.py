@@ -123,3 +123,10 @@ def custom504errorview(request):
     'page_title': 'Gateway Timeout'
   }
   return render(request, 'error.html', context=ctx)
+
+def printerinstructions(request):
+  ctx = {
+    'image_path' : 'img/printer.jpg',
+    'page_title' : 'Printer Instructions',
+  }
+  return render(request, 'printer.html', context=ctx)

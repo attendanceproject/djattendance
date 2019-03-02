@@ -32,10 +32,6 @@ def assign_individual_classnotes(trainee, start, end):
   # Increment absence_counts based on classname (HStore)
   regular_absence_counts = {}
   rolls = trainee.rolls.all().filter(date__gte=start, date__lte=end, status='A', event__type='C').order_by('date').select_related('event')
-  if trainee.self_attendance:
-    rolls = rolls.filter(submitted_by=trainee)
-  else:
-    rolls = rolls.exclude(submitted_by=trainee)
 
   # Afternoon classes
   rolls = rolls.exclude(event__class_type='AFTN')

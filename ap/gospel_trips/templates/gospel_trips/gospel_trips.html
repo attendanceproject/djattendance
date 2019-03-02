@@ -68,6 +68,12 @@
         $(this).val(moment($(this).val()).format("MM/DD/YYYY"));
       }
     });
+
+    $(".datetimepicker").each(function(index) {
+      if ($(this).val()) {
+        $(this).val(moment($(this).val()).format("MM/DD/YYYY h:mm A"));
+      }
+    });
   });
 
   function validateForm() {

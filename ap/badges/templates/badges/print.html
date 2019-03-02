@@ -133,7 +133,7 @@
           <div class="body">
             <div class="name">
               <b class="name-text">{{badge.firstname}} {{badge.lastname}}</b> <br>
-              {{badge.locality}}
+              {{badge.locality|default_if_none:""}}
             </div>
             <img class="badge-pic" src="/media/{{badge.original}}">
           </div>

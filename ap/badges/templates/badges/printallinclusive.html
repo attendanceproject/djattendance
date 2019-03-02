@@ -148,7 +148,7 @@
         <div class="body">
           <div class="name">
             <b class="name-text">{{badge.firstname}} {{badge.lastname}}</b> <br>
-            {{badge.locality}}
+            {{badge.locality|default_if_none:""}}
           </div>
           <img class="badge-pic" src="/media/{{badge.original}}">
         </div>
@@ -162,7 +162,7 @@
         <div class="body">
           <div class="name">
             <b class="name-text">{{badge.firstname}} {{badge.lastname}}</b> <br>
-            <div class="{% if badge.firstname|length >= 11 or badge.lastname|length >= 11 %}locality-text{% endif %}">{{badge.locality}}</div>
+            <div class="{% if badge.firstname|length >= 11 or badge.lastname|length >= 11 %}locality-text{% endif %}">{{badge.locality|default_if_none:""}}</div>
           </div>
           <img class="badge-pic" src="/media/{{badge.original}}">
         </div>
@@ -176,7 +176,7 @@
         <div class="body">
           <div class="name">
             <b class="name-text">{{badge.firstname}} {{badge.lastname}}</b> <br>
-            {{badge.locality}}
+            {{badge.locality|default_if_none:""}}
           </div>
           <img class="badge-pic" src="/media/{{badge.original}}">
         </div>

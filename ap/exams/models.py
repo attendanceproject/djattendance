@@ -102,7 +102,7 @@ class Exam(models.Model):
 
 
 class Section(models.Model):
-  exam = models.ForeignKey(Exam, related_name='sections', on_delete=models.SET_NULL, null=True)
+  exam = models.ForeignKey(Exam, related_name='sections', null=False)
   SECTION_CHOICES = (('MC', 'Multiple Choice'),
                      ('E', 'Essay'),
                      ('M', 'Matching'),
@@ -149,6 +149,10 @@ class Section(models.Model):
     except AttributeError as e:
       return str(self.id) + ": " + str(e)
 
+  class Meta:
+    ordering = ['exam', 'section_index']
+    unique_together = ('exam', 'section_index')
+
   def autograde(self, response):
     if self.section_type != 'E':
       responses = response.responses
@@ -183,8 +187,8 @@ class Section(models.Model):
 
 class Session(models.Model):
 
-  trainee = models.ForeignKey(Trainee, related_name='exam_sessions', null=True, on_delete=models.SET_NULL)
-  exam = models.ForeignKey(Exam, related_name='sessions', on_delete=models.SET_NULL, null=True)
+  trainee = models.ForeignKey(Trainee, related_name='exam_sessions', null=False)
+  exam = models.ForeignKey(Exam, related_name='sessions', null=False)
 
   is_submitted_online = models.BooleanField(default=True)
   is_graded = models.BooleanField(default=False)
@@ -207,8 +211,8 @@ class Session(models.Model):
 
 
 class Responses(models.Model):
-  session = models.ForeignKey(Session, related_name='responses', on_delete=models.SET_NULL, null=True)
-  section = models.ForeignKey(Section, related_name='responses', on_delete=models.SET_NULL, null=True)
+  session = models.ForeignKey(Session, related_name='responses', null=False)
+  section = models.ForeignKey(Section, related_name='responses', null=False)
 
   responses = HStoreField(null=True)
   score = models.DecimalField(max_digits=5, decimal_places=2)
@@ -216,10 +220,14 @@ class Responses(models.Model):
 
   class Meta:
     verbose_name = "response"
+    unique_together = ('session', 'section')
 
 
 # Makeup are deleted upon creation of session.
 class Makeup(models.Model):
-  trainee = models.ForeignKey(Trainee, related_name='exam_makeup', on_delete=models.SET_NULL, null=True)
-  exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True)
+  trainee = models.ForeignKey(Trainee, related_name='exam_makeup', null=False)
+  exam = models.ForeignKey(Exam, null=False)
   time_opened = models.DateTimeField(auto_now_add=True)
+
+  class Meta:
+    unique_together = ('trainee', 'exam')

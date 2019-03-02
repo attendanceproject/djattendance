@@ -14,8 +14,7 @@
     <li {% block tab3 %}{%endblock%} class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Assign Life-study <span class="caret"></span></a>
       <ul class="dropdown-menu" role="menu">
-        <li><a href="{% url 'lifestudies:discipline_create' %}">Assign Life-study to single trainee</a></li>
-        <li><a href="{% url 'lifestudies:discipline_house' %}">Assign Life-study to house</a></li>
+        <li><a href="{% url 'lifestudies:discipline_create' %}">Assign Life-study to trainees</a></li>
         <li><a href="{% url 'lifestudies:attendance_assign' 1 %}">Assign Life-study according to attendance</a></li>
       </ul>
     </li>

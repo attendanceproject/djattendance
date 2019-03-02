@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $(document).ready(function() {
+    let cols = {{columns|safe}};
+    $("#workers-table").DataTable({
+      paging: false,
+      autoWidth: true,
+    });
+    $(".btn-danger").click(function() {
+      if (confirm('Are you sure you want to deactivate this worker?')) {
+        $.ajax({
+          type: "POST",
+          url: $(this).attr('value'),
+          success: (data) => {
+            if (data.success) {
+              $(this).parent().parent().fadeOut();
+            } else {
+              alert('Error.');
+            }
+          },
+        });
+      }
+    });
+    let table = $('#guests-table').DataTable({
+        columns: cols
+    });
+    $("#fileinput").on("change", function(evt) {
+        let f = evt.target.files[0];
+        if (f) {
+            let r = new FileReader();
+            r.onload = function(e) {
+                table.rows.add($.csv.toObjects(e.target.result)).draw();
+            }
+            r.readAsText(f);
+        } else {
+            alert("Failed to load file");
+        }
+    });
+  });
+</script>
+{% endblock %}
+
+
+{% block content %}
+<h1>{{page_title}}</h1>
+<div class="container">
+    <table id="guests-table" class="table table-striped table-bordered" cellspacing="0" width="100%"></table>
+    <form action="{% url 'services:process-guests' %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" id="fileinput" name="fileinput"/>
+      <input type="submit" value="Import">
+    </form>
+</div>
+
+<h2>Current Workers</h2>
+<div class="data-table-container">
+  <table id="workers-table" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Firstname</th>
+        <th>Lastname</th>
+        <th>House</th>
+        <th>Gender</th>
+        <th>Deactivate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for w in workers %}
+      <tr>
+        <td>{{w.trainee.firstname}}</td>
+        <td>{{w.trainee.lastname}}</td>
+        <td>{{w.trainee.house.name}}</td>
+        <td>{{w.trainee.gender}}</td>
+        <td><button value="{% url 'services:deactivate-guest' w.id %}" class="btn btn-danger" title="Clear"/><span class="glyphicon glyphicon-trash"></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
