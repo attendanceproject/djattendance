@@ -14,8 +14,8 @@
 
   .contact-grid {
     display: grid;
-    grid-template-columns: 162px 65px 162px;
-    grid-template-rows: repeat(3, 22px, 22px, 17px) 25px repeat(2, 22px, 22px, 17px);
+    grid-template-columns: 270px 120px 270px;
+    grid-template-rows: repeat(3, 35px, 35px, 20px) 30px repeat(2, 35px, 35px, 20px);
     align-items: end;
   }
   label[for=first-name-text] {
@@ -308,12 +308,12 @@ $(document).ready(() => {
     <div id="contact-info" class="tab-pane active" role="tabpanel">
       <p>Please verify that your contact information is up to date.</p>
 
-      <div class="contact-grid">
-        <label for="first-name-label">First Name:</label>
-        <div id="first-name-text">{{request.user.firstname}}</div>
+      <div class="new-form contact-grid">
+        <label for="first-name-label">First Name</label>
+        <div class="text" id="first-name-text">{{request.user.firstname}}</div>
 
-        <label for="last-name-text">Last Name:</label>
-        <div id="last-name-text">{{request.user.lastname}}</div>
+        <label for="last-name-text">Last Name</label>
+        <div class="text"id="last-name-text">{{request.user.lastname}}</div>
 
         {{ form.cell_phone.label_tag }}
         {{ form.cell_phone }}
