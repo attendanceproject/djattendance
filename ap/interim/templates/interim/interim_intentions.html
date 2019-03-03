@@ -137,6 +137,13 @@
     background-color: #DEDEDE;
   }
 
+  label[for=id_intent_0], label[for=id_intent_1], label[for=id_intent_2], label[for=id_intent_3] {
+    color: #102C38;
+    text-transform: none;
+    font-size: 16px;
+    font-weight: normal;
+  }
+
 </style>
 {% endblock %}
 {% block scripts %}
@@ -342,21 +349,16 @@ $(document).ready(() => {
     </div>
 
     <div id="int-itin" class="tab-pane" role="tabpanel">
+      <p>Please be thorough in filling out the schedule below and include brief descriptions, locations with pertinent addresses, phone numbers, etc. for our ease in contacting you. The following return dates have been set to help you have a smooth transition into the next term, to give you additional time to unpack and settle into your house before pre-training, and to prepare your house for incoming trainees.</p>
 
-    </div>
+      <p>Second year trainees return by <strong>{{admin.date_2yr_return|date:'l, F d'}} at {{admin.date_2yr_return|date:'g:i a'}}</strong><br/>
+      First year trainees return by <strong>{{admin.date_1yr_return|date:'l, F d'}} at {{admin.date_1yr_return|date:'g:i a'}}</strong></p>
 
-  </div>
+      <p>You may arrive as early as <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> but not later than the date and time above. Those who arrive before <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> must be available to serve. The next term of the Training begins on <strong>{{admin.term_begin_date|date:'l, F d'}}</strong>.</p>
 
-  <div class="panel">
-    <h4>Interim Itinerary:</h2>
-    <p>Please be thorough in filling out the schedule below and include brief descriptions, locations with pertinent addresses, phone numbers, etc. for our ease in contacting you. The following return dates have been set to help you have a smooth transition into the next term, to give you additional time to unpack and settle into your house before pre-training, and to prepare your house for incoming trainees.<br/>
+      <div class="new-form">
 
-    Second year trainees return by <strong>{{admin.date_2yr_return|date:'l, F d'}} at {{admin.date_2yr_return|date:'g:i a'}}</strong><br/>
-    First year trainees return by <strong>{{admin.date_1yr_return|date:'l, F d'}} at {{admin.date_1yr_return|date:'g:i a'}}</strong><br/></p>
-
-    <p>You may arrive as early as <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> but not later than the date and time above. Those who arrive before <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> must be available to serve. The next term of the Training begins on <strong>{{admin.term_begin_date|date:'l, F d'}}</strong>.</p>
-    <div class="row">
-      <div class="col-md-12">
+        <div class="itin-grid">
         <table class="table table-bordered" id="id_itinerary_table">
           <tr>
             <th>Start Date</th>
@@ -375,35 +377,37 @@ $(document).ready(() => {
       <div class="col-md-12">
         <button type="button" class="btn btn-primary" id="delete_row">Delete</button>
         <button type="button" class="btn btn-primary" id="add_row">Add</button>
-      </div>
-    </div>
-  </div>
-  <div class="panel">
-    <h4>{{form.intent.label}}:</h4>
-    <div class="row">
-      <div class="col-md-12">
+
+
+        </div>
+
+        <label for="id_intent" style="margin-top: 30px">Intent to Return</label><br>
         {% for c in form.intent %}
-          {{c}}&nbsp;
+          {{c}}&nbsp;&nbsp;
         {% endfor %}
+
+        <div class="row">
+          <div class="col-md-2">
+            {{form.post_training_intentions.label_tag}}
+          </div>
+          <div class="col-md-2">
+            {{form.post_training_intentions}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-2">
+            {{form.post_intent_comments.label_tag}}
+          </div>
+          <div class="col-md-2">
+            {{form.post_intent_comments}}
+          </div>
+        </div>
+
       </div>
+
     </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.post_training_intentions.label_tag}}
-      </div>
-      <div class="col-md-2">
-        {{form.post_training_intentions}}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.post_intent_comments.label_tag}}
-      </div>
-      <div class="col-md-2">
-        {{form.post_intent_comments}}
-      </div>
-    </div>
-  </div>
+
+<br>
     <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
   </form>
 {% endblock %}
