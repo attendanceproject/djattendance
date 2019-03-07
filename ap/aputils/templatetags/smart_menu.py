@@ -126,6 +126,7 @@ def generate_menu(context):
           SubMenuItem(name='Meal Seating', permission='meal_seating.add_table', url='meal_seating:new-seats', condition=user.has_group(['kitchen'])),
           SubMenuItem(name='Seating Chart', permission='seating.add_chart', url='seating:chart_list', condition=user.has_group(['attendance_monitors'])),
           SubMenuItem(name='Audio Upload', permission='audio.add_audiofile', url='audio:audio-upload', condition=user.has_group(['av'])),
+          SubMenuItem(name='House Inspection FAQ', url='house_inspection:house_inspection_faq', condition=user.has_group(['house_inspectors', 'training_assistant'])),
       ]
   )
 
@@ -149,14 +150,14 @@ def generate_menu(context):
       trainee_only=[SubMenuItem(name=f.menu_title(), url=f.get_absolute_url()) for f in grad_forms(user)]
   )
 
-  hi_menu = MenuItem(
-      name="House Inspection",
-      specific=[ # change to specific
-          SubMenuItem(name='FAQ', url='house_inspection:house_inspection_faq', condition=user.has_group(['house_inspectors', 'training_assistant'])),
-          #SubMenuItem(name='Manage Inspectors', url='house_inspection:manage_inspectors'),
-          #SubMenuItem(name='Manage Inspectable Houses', url='house_inspection:manage_inspectable_houses')
-      ]
-  )
+#  hi_menu = MenuItem(
+#      name="House Inspection",
+#      specific=[ # change to specific
+#          SubMenuItem(name='FAQ', url='house_inspection:house_inspection_faq', condition=user.has_group(['house_inspectors', 'training_assistant'])),
+#          #SubMenuItem(name='Manage Inspectors', url='house_inspection:manage_inspectors'),
+#          #SubMenuItem(name='Manage Inspectable Houses', url='house_inspection:manage_inspectable_houses')
+#      ]
+#  )
 
   # For every 'current' item that needs to appear in the side-bar, ie exams to be taken, iterim intentions form, exit interview, etc, the context variable needs to be added to the context, and the menu item can be added here as follows
   current_menu = MenuItem(
@@ -169,7 +170,7 @@ def generate_menu(context):
       ] + [SubMenuItem(name=pf.name, url='/forms/view/' + pf.slug) for pf in user_forms(user)],
   )
 
-  user_menu = [attendance_menu, discipline_menu, requests_menu, exam_menu, misc_menu, HC_menu, current_menu, grad_menu, hi_menu]
+  user_menu = [attendance_menu, discipline_menu, requests_menu, exam_menu, misc_menu, HC_menu, current_menu, grad_menu]
 
   # check for usertype TA and only in one group, maintenance or kitchen
   if user.type == 'T' and user.has_group(['facility_maintenance']) and user.groups.all().count() == 1:
