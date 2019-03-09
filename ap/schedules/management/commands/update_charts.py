@@ -15,4 +15,4 @@ class Command(BaseCommand):
 
   def handle(self, *args, **options):
     print("* Updating charts...")
-    self._update_charts()  	
+    self._update_charts()
