@@ -6,7 +6,7 @@ td:nth-of-type(1) {
   position: sticky;
   left: 0;
   background-color: white;
-  z-index: 1000;
+  z-index: 1;
 }
 
 tr:nth-child(even) {
