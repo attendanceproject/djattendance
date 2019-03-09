@@ -211,6 +211,7 @@ APPS = (
     'verse_parse',  # parse outlines for PSRP verses
     'web_access',
     'xb_application',
+    'house_inspection',
 
     # fobi-core
     'fobi',
