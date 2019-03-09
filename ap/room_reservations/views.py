@@ -3,7 +3,6 @@ from datetime import date
 import time, uuid, urllib, urllib2
 import hmac, hashlib
 from base64 import b64encode
-import secret
 
 import requests
 from accounts.models import User
@@ -131,7 +130,7 @@ def weather_api(request):
   method = 'GET'
   app_id = "z5oSnQ36"
   consumer_key = "dj0yJmk9OTF3VmpRUXJSamNzJnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTYz"
-  consumer_secret = secret.secret
+  consumer_secret = "12cb50a55ffb4c0ac515dd56c81de357044b968c"
   concat = '&'
   query = {'location': 'anaheim,ca', 'format': 'json'}
   oauth = {
