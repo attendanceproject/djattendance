@@ -73,6 +73,7 @@ urlpatterns = [
   url(r'^xb/', include('xb_application.urls', namespace="xb")),
   url(r'^interim/', include('interim.urls', namespace="interim")),
   url(r'^gospel-statistics/', include('gospel_statistics.urls', namespace="gospel_statistics")),
+  url(r'^house_inspection/', include('house_inspection.urls', namespace='house_inspection')),
   # admin urls
   url(r'^adminactions/', include('adminactions.urls')),  # django-adminactions pluggable app
   url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
