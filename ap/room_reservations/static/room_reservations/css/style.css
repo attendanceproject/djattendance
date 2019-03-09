@@ -3,9 +3,9 @@ td {
 }
 
 td:nth-of-type(1) {
-  position: sticky;
-  left: 0;
   background-color: white;
+  left: 0;
+  position: sticky;
   z-index: 1;
 }
 
