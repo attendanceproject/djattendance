@@ -148,7 +148,24 @@
   }
 
   .itin-grid {
-    
+    display: grid;
+    grid-template-rows: 35px 25px;
+    grid-row-gap: 8px;
+    row-gap: 8px;
+    grid-auto-flow: row;
+    margin-top: 30px;
+  }
+
+  .itin-row {
+    display: grid;
+    grid-template-columns: 140px 140px 350px;
+    grid-column-gap: 18px;
+    column-gap: 18px;
+  }
+
+  #post_intent_comments_label {
+    margin-top: 10px;
+    margin-bottom: 0px;
   }
 
 </style>
@@ -187,13 +204,17 @@ $(document).ready(() => {
 
   function show_hide_post_interim(){
     if($('#id_intent_1, #id_intent_2, #id_intent_3').is(':checked')) {
-      $("#id_post_intent_comments").parent().parent().show();
-      $("#id_post_training_intentions").parent().parent().show();
+      $('#post_intent_comments_label').show();
+      $("#id_post_intent_comments").show();
+      $('label[for=id_post_training_intentions]').show();
+      $("#id_post_training_intentions").show();
       $("#id_post_training_intentions").attr("required", true);
       $("#id_post_intent_comments").attr("required", true);
     } else {
-      $("#id_post_intent_comments").parent().parent().hide();
-      $("#id_post_training_intentions").parent().parent().hide();
+      $('#post_intent_comments_label').hide();
+      $("#id_post_intent_comments").hide();
+      $('label[for=id_post_training_intentions]').hide();
+      $("#id_post_training_intentions").hide();
       $("#id_post_training_intentions").attr("required", false);
       $("#id_post_intent_comments").attr("required", false);
     }
@@ -204,18 +225,18 @@ $(document).ready(() => {
 
     text = "Please explain:"
     if (intent == "USC" || intent == "OCC") {
-      text = "Please enter the campus and approximate date available to go:"
+      text = "Please enter the campus and approximate date available to go"
     } else if (intent == "LSM") {
-      text = "Please enter the section of service:"
+      text = "Please enter the section of service"
     } else if (intent == "XB" || intent == "BFA") {
-      text = "Comments:"
+      text = "Comments"
     } else if (intent == "JOB") {
-      text = "Please enter the locality in which you'll be working:"
+      text = "Please enter the locality in which you'll be working"
     } else if (intent == "SCH") {
-      text = "Please enter the locality, name of school, and program entering:"
+      text = "Please enter the locality, name of school, and program entering"
     }
 
-    $('label[for=id_post_intent_comments]').text(text)
+    $('#post_intent_comments_label').text(text)
   }
 
 
@@ -331,8 +352,6 @@ $(document).ready(() => {
         <label for="last-name-text">Last Name</label>
         <div class="text" id="last-name-text">{{request.user.lastname}}</div>
 
-        <div id="test"></div>
-
         {{ form.cell_phone.label_tag }}
         {{ form.cell_phone }}
 
@@ -371,16 +390,18 @@ $(document).ready(() => {
 
         <div class="itin-grid">
 
-        <label for="start_date">Start Date</label>
-        <label for="end_date">End Date</label>
-        <label for="notes_comments">Notes/Comments</label>
+        <div class="itin-row">
+          <label for="start_date">Start Date</label>
+          <label for="end_date">End Date</label>
+          <label for="notes_comments">Notes/Comments</label>
+        </div>
 
           {% for itin_form in itinerary_forms %}
-          <tr id="row_{{forloop.counter0}}">
-            <td>{{itin_form.start}}</td>
-            <td>{{itin_form.end}}</td>
-            <td>{{itin_form.comments}}</td>
-          </tr>
+          <div class="itin-row">
+            {{itin_form.start}}
+            {{itin_form.end}}
+            {{itin_form.comments}}
+          </div>
           {% endfor %}
       </div>
       <!-- class="col-md-12">
@@ -395,29 +416,21 @@ $(document).ready(() => {
           {{c}}&nbsp;&nbsp;
         {% endfor %}<br>
 
-        <!-- TODO!!! -->
-        <div class="row">
-          <div class="col-md-2">
+        <div class="itin-grid">
             {{form.post_training_intentions.label_tag}}
-          </div>
-          <div class="col-md-2">
             {{form.post_training_intentions}}
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-2">
-            {{form.post_intent_comments.label_tag}}
-          </div>
-          <div class="col-md-2">
+            <p id="post_intent_comments_label">
+              {{ form.post_intent_comments.label }}
+            </p>
             {{form.post_intent_comments}}
-          </div>
         </div>
 
       </div>
 
     </div>
+  </div>
 
-<br>
-    <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
-  </form>
+  <br>
+  <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
+</form>
 {% endblock %}
