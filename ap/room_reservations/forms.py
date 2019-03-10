@@ -57,6 +57,8 @@ class RoomReservationForm(forms.ModelForm):
     # Based on a first-come, first-serve principle, do not allow trainees to submit a pending room reservation
     # if there is already a pending room reservation waiting to be approved or denied.
     PendingRoomReservations = RoomReservation.objects.filter(status='P', room=data_room)  # pull Pending Room Reservations data
+    if self.instance.id:
+      PendingRoomReservations = PendingRoomReservations.exclude(id=self.instance.id)
     for r in PendingRoomReservations:
       if r.end > data_start and r.start < data_end and r.date.weekday() == data_date.weekday():
         if r.frequency == 'Once' and r.date < data_date:
