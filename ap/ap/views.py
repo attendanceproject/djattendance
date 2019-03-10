@@ -81,8 +81,10 @@ def home(request):
     designated_list = list(worker_assignments.filter(service__category__name="Designated Services").values_list('service__name', flat=True))
     assigned_list = list(worker_assignments.exclude(service__category__name="Designated Services").values_list('service__name', flat=True))
     service_day = list(worker_assignments.exclude(service__category__name="Designated Services").values_list('service__weekday', flat=True))
-
+    
     print designated_list
+    # for a in assigned_list:
+      # print a
     print assigned_list
     print service_day
 

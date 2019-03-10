@@ -24,21 +24,34 @@
     var assignedDesignated = "{{designated_list|safe}}";
     var serviceDays = "{{service_day|safe}}";
 
-    function processServices(services, days){
+    function initProcessServices(){
 
-      var designated_list = assignedDesignated;
+      // regex to get services from string
+      var regex = /'(.*?)'/gm;
+      var services = assignedServices.match(regex);
+      regex = /\d+/gm;
+      var days = serviceDays.match(regex);
 
-      // for service week row
-      console.log(services, days, days.length);
+      processServices(services, days);
 
-      var numCols = $("#front-table").find('tr')[1].cells.length;
-      console.log(numCols);
-      var row = document.getElementById("service-row");
-      var cell;
+    }
+
+    function processServices(services, services_day){
+
+      // HTML inserts
       var urlInsert = "<a href=\"{% url 'services:designated_service_hours' %}\">Hours</a>";
       var htmlInitInsert = "<span id=\"service-tooltip\" data-toggle=\"tooltip\" title=\"";
-      var htmlLastInsert = "\" class=\"glyphicon glyphicon-ok\"></span>";
-      var colIndex = 0;
+      var htmlLastInsert = "\"class=\"glyphicon glyphicon-ok\"></span>";
+
+      var regex = /'(.*?)'/gm;
+      var designated = assignedDesignated.match(regex);
+      console.log(services, services_day, designated);
+
+      // for service week row
+      var numCols = $("#front-table").find('tr')[1].cells.length;
+      var row = document.getElementById("service-row");
+      var cell;
+      var tableIndex = 0;
       var colCount = 1;
       var reverseColCount = 8;
       var serviceIndex;
@@ -54,19 +67,19 @@
       if (colCount < 8){
         while(colCount < 8){
           cell = row.insertCell(colCount);
-          for (serviceIndex = 0, len = days.length; serviceIndex<len; serviceIndex++) {
-            if (colIndex == days[serviceIndex]){
+          for (serviceIndex = 0, len = services_day.length; serviceIndex<len; serviceIndex++) {
+            if (tableIndex == services_day[serviceIndex]){
               cell.innerHTML = htmlInitInsert + services[serviceIndex] + htmlLastInsert;
             }
           }
-          colIndex++;
+          tableIndex++;
           colCount++;
         }
       }
 
       // redirect to designated hours if the trainee has designated service
       cell = row.insertCell(colCount++);
-      (designated_list !== null) ? cell.innerHTML = urlInsert : cell.innerHTML = "";
+      (designated !== null) ? cell.innerHTML = urlInsert : cell.innerHTML = "";
     }
 
     function changeServiceWeek(){
@@ -99,11 +112,7 @@
     $(document).ready(function () {
       $("#week-select option[value='{{current_week}}']").attr("selected", "selected");
 
-      // regex string data for display
-      var service_list = assignedServices;
-      var serviceDay_list = serviceDays;
-
-      processServices(service_list, serviceDay_list);
+      initProcessServices();
       changetoFinalize();
       getWeeklyStatus();
 
