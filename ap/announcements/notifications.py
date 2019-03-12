@@ -123,7 +123,6 @@ def hc_reminder(trainee):
         last_unreported_roster = Roster.objects.filter(unreported_houses=trainee.house).latest('date')
         days_difference = (today - last_unreported_roster.date).days
         last_unreported = last_unreported_roster.date.strftime('%A')
-        
         if last_unreported == "Monday":
            if 1 < days_difference < 4:
                day = 'on ' + last_unreported_roster.date.strftime('%b %d')
