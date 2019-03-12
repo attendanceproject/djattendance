@@ -128,8 +128,7 @@ def hc_reminder(trainee):
            if 1 < days_difference < 4:
                day = 'on ' + last_unreported_roster.date.strftime('%b %d')
                message = "Your house didn't submit a house attendance {day}, please remember do so. This message will disappear if your house submits house attendance for three consecutive days. "
-               return [(messages.WARNING, message.format(day=day))]
-    
+               return [(messages.WARNING, message.format(day=day))]    
         elif last_unreported == "Sunday":
            if 0 < days_difference < 4:
                if days_difference == 1:
@@ -138,7 +137,6 @@ def hc_reminder(trainee):
                     day = 'on ' + last_unreported_roster.date.strftime('%b %d')
                message = "Your house didn't submit a house attendance {day}, please remember do so. This message will disappear if your house submits house attendance for three consecutive days."
                return [(messages.WARNING, message.format(day=day))]
-
         else:
             if days_difference < 4:
                 if days_difference == 0:
