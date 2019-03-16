@@ -67,10 +67,9 @@ class WebAccessUpdate(WebAccessMixin, generic.UpdateView):
 
 
 class WebAccessDelete(WebAccessMixin, generic.DeleteView):
-  def get_success_url(self):
-    if self.get_object().trainee:
-      return self.success_url
-    return reverse_lazy('login')
+  model = WebRequest
+  success_url = reverse_lazy('web_access:web_access-list')
+
 
 
 class WebAccessDetail(generic.DetailView):
