@@ -23,7 +23,9 @@ def valid_audiofile_name(name):
 
 
 def validate_audiofile_name(name):
+  name = str(name)
   if not valid_audiofile_name(name):
+    print ('i\n')*10
     raise forms.ValidationError('Invalid audio file name format')
 
 
