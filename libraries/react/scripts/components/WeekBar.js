@@ -21,7 +21,7 @@ const WeekBar = ({isFirst, firstStart, firstEnd, secondStart, secondEnd, period,
                 PERIOD { disablePeriodSelect ?
                   period
                 :
-                  <Select className="weekbar__period" clearable={false} options={periodChoices} value={selectedPeriod} onChange={selectPeriod}/>
+                  <Select className="weekbar__period" isClearable={false} options={periodChoices} value={selectedPeriod} onChange={selectPeriod}/>
                 }
               </div>
               <div className="col-md-7">

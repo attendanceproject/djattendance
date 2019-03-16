@@ -26,6 +26,8 @@ class ServiceAttendance(models.Model):
 
   week = models.IntegerField(default=0, choices=CHOICES)
 
+  excused = models.BooleanField(default=False)  # True will excuse LS discipline and not trigger force page for that week
+
   class Meta:
     unique_together = ('worker', 'designated_service', 'term', 'week')
 

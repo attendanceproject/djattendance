@@ -26,7 +26,7 @@ django-fobi==0.12.2
 
 # Django admin docs
 docutils==0.12
-requests==2.19.1
+requests==2.21.0
 
 # PDF
 xhtml2pdf==0.2b1
