@@ -65,7 +65,7 @@ function displayTicker(ans) {
 }
 
 function loadTicker() {
-  $.getJSON(TICKER,displayTicker)
+  $.getJSON(TICKER, displayTicker)
   .fail(function() {
     displayTicker(oldAns);
   });
@@ -204,7 +204,7 @@ $(document).ready(function() {
         location.reload(true);
       }
     });
-  }, 60*1000);
+  }, 60*60*1000);
   $.get(PAGE_VERSION, function(data) {
     pageVersion = data;
   });

@@ -20,7 +20,7 @@ from terms.models import Term
 
 from .forms import ExamCreateForm, ExamReportForm
 from .models import Exam, Section, Session, Responses, Makeup
-from .utils import get_exam_questions, save_exam_creation, get_exam_context_data, makeup_available, save_responses, trainee_can_take_exam, save_grader_scores_and_comments, is_float
+from .utils import get_exam_questions, save_exam_creation, get_exam_context_data, get_exam_preview_context_data, makeup_available, save_responses, trainee_can_take_exam, save_grader_scores_and_comments, is_float
 
 from accounts.models import Trainee
 from classes.models import Class
@@ -249,13 +249,13 @@ class SingleExamGradesListView(GroupRequiredMixin, TemplateView):
 
         sessions = trainee.current_sessions
         # Save grades for trainees who use paper submission
-        session = Session(
-            exam=exam,
-            trainee=trainee,
-            is_submitted_online=False,
-            time_finalized=datetime.now(),
-            is_graded=True,
-            grade=float(grades[index]))
+        session, created = Session.objects.update_or_create(
+          exam=exam,
+          trainee=trainee)
+        session.is_submitted_online=False
+        session.time_finalized=datetime.now()
+        session.is_graded=True
+        session.grade=float(grades[index])
         session.save()
 
       grades2 = P.getlist('session-id-grade')
@@ -403,13 +403,7 @@ class PreviewExamView(GroupRequiredMixin, SuccessMessageMixin, ListView):
 
   def get_context_data(self, **kwargs):
     context = super(PreviewExamView, self).get_context_data(**kwargs)
-    return get_exam_context_data(
-        context,
-        self._get_exam(),
-        self._exam_available(),
-        self._get_session(),
-        "Take",
-        False)
+    return get_exam_preview_context_data(context, self._get_exam())
 
 
 class TakeExamView(SuccessMessageMixin, CreateView):

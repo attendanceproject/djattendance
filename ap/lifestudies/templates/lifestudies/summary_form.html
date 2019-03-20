@@ -33,8 +33,17 @@
       }
     });
 
-    var minCount = $('#id_minimum_words').get(0).value;
-    $('form').append('<div id="wc-warning" class="alert alert-info">Not enough words to submit summary (need ' + minCount + ').</div>');
+    if ($("#id_submitting_paper_copy").prop("checked")) {
+      $("#id_content").prop("disabled", true);
+    }
+
+    $("#id_submitting_paper_copy").on('click', function(ev) {
+      if ($("#id_content").prop("disabled")) {
+        $("#id_content").prop("disabled", false)
+      } else {
+        $("#id_content").prop("disabled", true)
+      }
+    });
   });
   </script>
 {% endblock %}
@@ -44,6 +53,7 @@
   <form action="" method="post">
     {% bootstrap_form form %}
     {% csrf_token %}
+    <em>A minimum of 250 words are needed to submit class notes. Or you may submit as a paper copy.<br></em>
     <button type="submit" disabled="true" id="summary_submit" name="attendance_assign" class="btn btn-success">Submit</button>
   </form>
 {% endblock %}

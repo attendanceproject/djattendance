@@ -18,57 +18,11 @@
         $("#id_TA").val("{{ default_transfer_ta.id }}");
         var transferField = document.getElementById("id_TA").parentNode;
         var form = transferField.parentNode;
-        if (document.getElementById("approve-ls")) {form.insertBefore(document.getElementById("approve-ls"), transferField);}
-        if (document.getElementById("deny-ls")) {form.insertBefore(document.getElementById("deny-ls"), transferField);}
         if (document.getElementById("fellowship-ls")) {form.insertBefore(document.getElementById("fellowship-ls"), transferField);}
         if (document.getElementById("unfellowship-ls")) {form.insertBefore(document.getElementById("unfellowship-ls"), transferField);}
         if (document.getElementById("delete-ls")) {form.insertBefore(document.getElementById("delete-ls"), transferField);}
         if (document.getElementById("save-ls")) {form.insertBefore(document.getElementById("save-ls"), transferField);}
       }
-
-      let redirect = $('#ajax-redirect').attr('href');
-      $(".delete-slip").click(function (e) {
-        var check = confirm("Are you sure you want to delete this leaveslip?");
-        if (check) {
-          $.ajax({
-            type: "DELETE",
-            url: "/api/{{ leaveslip.classname }}slips/{{ leaveslip.id }}",
-            success: function(data, status, jqXHR) {
-              new Notification(Notification.SUCCESS, "Leave slip deleted!").show();
-              window.location.href = redirect;
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-              console.log("Slip delete error!");
-              console.log(jqXHR, textStatus, errorThrown);
-            }
-          });
-        }
-      });
-
-      $("#save-ls").click(function (e) {
-        {% block onsubmit %}{% endblock %}
-        var postData = $("#leaveslip-form").serialize();
-        if ("{{ sister }}" == "True" || !$("#id_TA").val()) {
-          var i = postData.indexOf('TA=');
-          for (i; i < postData.length; i++) {
-            if (postData[i] == '&') {break;}
-          }
-          var postData = postData.substring(0, postData.indexOf('TA=')) + postData.substring(i)
-        }
-        $.ajax({
-          type: "POST",
-          url: "/leaveslips/{{ leaveslip.classname }}/update/{{ leaveslip.id }}",
-          data: postData,
-          success: function(data, status, jqXHR) {
-            new Notification(Notification.SUCCESS, "Saved!").show();
-            window.location.href = redirect;
-          },
-          error: function(jqXHR, textStatus, errorThrown) {
-            console.log("Error saving leaveslip!");
-            console.log(jqXHR, textStatus, errorThrown);
-          }
-        });
-      });
     });
   </script>
   <style>
@@ -86,13 +40,18 @@
     <h2>TA {{leaveslip.classname|title}} Slip View</h2>
     <div class="col-md-5 col-xs-12">
       <p>Leaveslip ID: <a id="ajax-redirect" {% block ls_link %}{% endblock %}>{{leaveslip.id}}</a></p>
+      <p>Submitted: {{leaveslip.submitted}}</p>
       {% include "leaveslips/_ta_labels.html" %}
       <form id="leaveslip-form" action="{{leaveslip.get_ta_update_url}}" method="post">
         {% csrf_token %}
         {% block trainee_display %}{% endblock %}
         {% bootstrap_form form %}
         {% include 'leaveslips/_ta_actions.html' with trainee=leaveslip.trainee %}
-        <button type="button" id="save-ls" class="btn-lg btn-primary btn-save">Save</button>
+        {% if sister %}
+          <button type="button" id="save-ls" data-ls-id="{{leaveslip.id}}" data-ls-type="{{leaveslip.classname}}" data-ls-action="sister-save" class="ls-action btn-lg btn-primary btn-save">Save</button>
+        {% else %}
+          <button type="button" id="save-ls" data-ls-id="{{leaveslip.id}}" data-ls-type="{{leaveslip.classname}}" data-ls-action="brother-save" class="ls-action btn-lg btn-primary btn-save">Save</button>
+        {% endif %}
       </form>
     </div>
     <div class="col-md-7 col-xs-12">

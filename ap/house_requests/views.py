@@ -83,7 +83,7 @@ def MaintenanceReport(request):
 
 modify_maintenance_status = modify_model_status(MaintenanceRequest, reverse_lazy('house_requests:maintenance-list'))
 modify_linens_status = modify_model_status(LinensRequest, reverse_lazy('house_requests:linens-list'))
-modify_framing_status = modify_model_status(FramingRequest, reverse_lazy('house_requests:framing-list'))
+modify_framing_status = modify_model_status(FramingRequest, reverse_lazy('house_requests:framing-list'), ['frames'])
 
 
 class MaintenanceRequestTAComment(generic.UpdateView):

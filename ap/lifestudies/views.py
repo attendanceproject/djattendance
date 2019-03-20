@@ -2,10 +2,13 @@ import logging
 from datetime import datetime, timedelta
 
 from accounts.models import Trainee
+from ap.forms import TraineeSelectForm
 from aputils.trainee_utils import trainee_from_user
 from aputils.utils import timeit_inline
 from attendance.models import Roll
 from attendance.utils import Period
+from braces.views import GroupRequiredMixin
+from books.models import Book
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
@@ -22,8 +25,7 @@ from rest_framework.decorators import permission_classes
 from teams.models import Team
 from terms.models import Term
 
-from .forms import (EditSummaryForm, HouseDisciplineForm, NewDisciplineForm,
-                    NewSummaryForm)
+from .forms import EditSummaryForm, NewDisciplineForm, NewSummaryForm
 from .models import Discipline, Summary
 from .permissions import IsOwner
 from .serializers import SummarySerializer
@@ -47,6 +49,18 @@ class DisciplineListView(ListView):
       for value in request.POST.getlist('selection'):
         Discipline.objects.get(pk=value).approve_all_summary()
       messages.success(request, "Checked Discipline(s) Approved!")
+    if 'hard_copy_approve' in request.POST:
+      for value in request.POST.getlist('selection'):
+        discipline = Discipline.objects.get(pk=value)
+        for num in range(discipline.quantity):
+          # Create dummy summaries to enable the discipline to be approved
+          gen = Book.objects.get(pk=4)
+          summary = Summary(book=gen, chapter=1)
+          summary.submitting_paper_copy = True
+          summary.discipline = discipline
+          summary.save()
+        discipline.approve_all_summary()
+      messages.success(request, "Checked Life-study(s) Hard-copy Approved!")
     if 'delete' in request.POST:
       for value in request.POST.getlist('selection'):
         Discipline.objects.get(pk=value).delete()
@@ -111,6 +125,36 @@ class DisciplineCreateView(SuccessMessageMixin, CreateView):
   success_url = reverse_lazy('lifestudies:discipline_list')
   success_message = "Discipline Assigned to Single Trainee Successfully!"
 
+  def get_context_data(self, **kwargs):
+    context = super(DisciplineCreateView, self).get_context_data(**kwargs)
+    context['trainee_select_form'] = TraineeSelectForm()
+    return context
+
+
+def multipleDisciplineCreateView(request):
+  data = request.body
+  list_data = data.split('&')
+  cleaned_data = {}
+  for field in list_data:
+    key_value = field.split('=')
+    key = key_value[0]
+    value = key_value[1]
+    if key != 'trainee':
+      cleaned_data.setdefault(key, request.POST.get(key))
+    else:
+      trainee_ids = cleaned_data.setdefault(key, [])
+      trainee_ids.append(value)
+
+  cleaned_data.pop('csrfmiddlewaretoken')
+  cleaned_data['quantity'] = int(cleaned_data['quantity'])
+  cleaned_data['due'] = datetime.strptime(str(cleaned_data['due']), '%m/%d/%Y %I:%M %p')
+  trainee_ids = cleaned_data.pop('trainee')
+  for t_id in trainee_ids:
+    cleaned_data['trainee'] = Trainee.objects.get(pk=t_id)
+    Discipline.objects.create(**cleaned_data)
+
+  return HttpResponseRedirect(reverse_lazy('lifestudies:discipline_list'))
+
 
 def post_summary(summary, request):
   if 'fellowship' in request.POST:
@@ -127,10 +171,12 @@ def post_summary(summary, request):
     messages.success(request, "Summary Un-Approved!")
 
 
-class DisciplineDetailView(DetailView):
+class DisciplineDetailView(GroupRequiredMixin, DetailView):
   model = Discipline
   context_object_name = 'discipline'
   template_name = 'lifestudies/discipline_detail.html'
+  group_required = [u'training_assistant']
+  raise_exception = True
 
   def post(self, request, *args, **kwargs):
     if 'summary_pk' in request.POST:
@@ -142,10 +188,14 @@ class DisciplineDetailView(DetailView):
       if 'decrease_penalty' in request.POST:
         self.get_object().decrease_penalty(penalty_num)
         messages.success(request, "Decreased summary by x")
-
       if 'increase_penalty' in request.POST:
         self.get_object().increase_penalty(penalty_num)
         messages.success(request, "Increased Summary by x")
+    if 'offense_type' in request.POST:
+      d = self.get_object()
+      d.offense = request.POST['offense_type']
+      d.save()
+      messages.success(request, "Offense type changed")
 
     return HttpResponseRedirect(reverse_lazy('lifestudies:discipline_list'))
 
@@ -224,40 +274,6 @@ class SummaryUpdateView(SuccessMessageMixin, UpdateView):
     return context
 
 
-class CreateHouseDiscipline(TemplateView):
-  template_name = 'lifestudies/discipline_house.html'
-
-  def get_context_data(self, **kwargs):
-    context = super(CreateHouseDiscipline, self).get_context_data(**kwargs)
-    context['form'] = HouseDisciplineForm()
-    return context
-
-  def post(self, request, *args, **kwargs):
-    """this manually creates Disciplines for each house member"""
-    if request.method == 'POST':
-      form = HouseDisciplineForm(request.POST)
-      if form.is_valid():
-        house = House.objects.get(id=request.POST['House'])
-        listTrainee = Trainee.objects.filter(house=house)
-        for trainee in listTrainee:
-          discipline = Discipline(
-            infraction=form.cleaned_data['infraction'],
-            quantity=form.cleaned_data['quantity'],
-            due=form.cleaned_data['due'],
-            offense=form.cleaned_data['offense'],
-            note=form.cleaned_data['note'],
-            trainee=trainee)
-          try:
-            discipline.save()
-          except IntegrityError:
-            transaction.rollback()
-        messages.success(request, "Disciplines Assigned to House!")
-        return HttpResponseRedirect(reverse_lazy('lifestudies:discipline_list'))
-    else:
-      form = HouseDisciplineForm()
-    return HttpResponseRedirect(reverse_lazy('lifestudies:discipline_list'))
-
-
 class AttendanceAssign(ListView):
   """this view mainly displays trainees, their roll status, and the number
    of summary they are to be assigned. The actual assigning is done by
@@ -267,7 +283,7 @@ class AttendanceAssign(ListView):
   context_object_name = 'trainees'
 
   def get_context_data(self, **kwargs):
-    """this adds outstanding_trainees, a dictionary
+    """this as outstanding_trainees, a dictionary
     {trainee : num_summary} for the template to display the trainees who
     need will have outstanding summaries"""
     context = super(AttendanceAssign, self).get_context_data(**kwargs)
@@ -308,8 +324,6 @@ class AttendanceAssign(ListView):
       t = timeit_inline("summary calculation")
       t.start()
       for trainee in Trainee.objects.all():
-        # print trainee
-        # num_summary += trainee.calculate_summary(period
         num_summary = 0
         num_summary += trainee.calculate_summary(period)
         if num_summary > 0:

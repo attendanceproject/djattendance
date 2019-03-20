@@ -1,3 +1,4 @@
+import ast
 from datetime import datetime
 
 import dateutil.parser
@@ -15,10 +16,40 @@ from terms.models import Term
 
 from .models import GroupSlip, IndividualSlip, Roll
 
-COMMON_FIELDS = ('id', 'type', 'status', 'ta_sister_approved', 'TA', 'TA_informed', 'informed', 'trainee', 'submitted', 'finalized', 'description', 'comments', 'texted', 'classname', 'periods', 'late')
+COMMON_FIELDS = ('id', 'type', 'status', 'ta_sister_approved', 'TA', 'TA_informed', 'informed',
+                  'trainee', 'submitted', 'finalized', 'description', 'comments', 'private_TA_comments',
+                  'texted', 'does_not_count', 'classname', 'periods', 'late', 'last_modified')
 INDIVIDUAL_FIELDS = COMMON_FIELDS + ('location', 'host_name', 'host_phone', 'hc_notified', 'events')
 GROUP_FIELDS = COMMON_FIELDS + ('start', 'end', 'trainees', 'service_assignment', 'trainee_list')
 CURRENT_TERM = Term.current_term()
+
+def commonLeaveSlipUpdate(instance, validated_data):
+  try:
+    # TA detail view posts TA id instead of TA objects like react
+    if isinstance(validated_data.get('TA'), basestring):
+      TA_id = validated_data.get('TA')
+    else:
+      TA_id = validated_data.get('TA', instance.TA).id
+    instance.TA = TrainingAssistant.objects.get(id=TA_id)
+
+    if validated_data.get('TA_informed') is None:
+      TA_informed_id = None
+    elif isinstance(validated_data.get('TA_informed'), basestring):
+      TA_informed_id = validated_data.get('TA_informed')
+    else:
+      TA_informed_id = validated_data.get('TA_informed', instance.TA_informed).id
+    instance.TA_informed = TrainingAssistant.objects.get(id=TA_informed_id) if TA_informed_id else None
+  except TrainingAssistant.DoesNotExist:
+    # id POSTed does not match to a TA, don't update instance.TA
+    pass
+
+  for field in COMMON_FIELDS:
+    if field in ['trainee', 'classname', 'periods', 'last_modified', 'late', 'TA', 'TA_informed']:
+      continue
+    setattr(instance, field, validated_data.get(field, getattr(instance, field)))
+
+  instance.save()
+  return instance
 
 
 class IndividualSlipSerializer(BulkSerializerMixin, ModelSerializer):
@@ -56,41 +87,13 @@ class IndividualSlipSerializer(BulkSerializerMixin, ModelSerializer):
         newroll = Roll.update_or_create(roll_dict)
         instance.rolls.add(newroll)
 
-    try:
-      # TA detail view posts TA id instead of TA objects like react
-      if isinstance(validated_data.get('TA'), basestring):
-        TA_id = validated_data.get('TA')
-      else:
-        TA_id = validated_data.get('TA', instance).id
-      instance.TA = TrainingAssistant.objects.get(id=TA_id)
-
-      if validated_data.get('TA_informed') is None:
-        TA_informed_id = None
-      elif isinstance(validated_data.get('TA_informed'), basestring):
-        TA_informed_id = validated_data.get('TA_informed')
-      else:
-        TA_informed_id = validated_data.get('TA_informed', instance).id
-      instance.TA_informed = TrainingAssistant.objects.get(id=TA_informed_id) if TA_informed_id else None
-    except TrainingAssistant.DoesNotExist:
-      # id POSTed does not match to a TA, don't update instance.TA
-      pass
-
-    instance.type = validated_data.get('type', instance.type)
-    instance.status = validated_data.get('status', instance.status)
-    instance.ta_sister_approved = validated_data.get('ta_sister_approved', instance.ta_sister_approved)
-    instance.submitted = validated_data.get('submitted', instance.submitted)
-    instance.last_modified = validated_data.get('last_modified', instance.last_modified)
-    instance.finalized = validated_data.get('finalized', instance.finalized)
-    instance.description = validated_data.get('description', instance.description)
-    instance.comments = validated_data.get('comments', instance.comments)
-    instance.private_TA_comments = validated_data.get('private_TA_comments', instance.private_TA_comments)
-    instance.texted = validated_data.get('texted', instance.texted)
     instance.informed = validated_data.get('informed', instance.informed)
     instance.location = validated_data.get('location', instance.location)
     instance.host_name = validated_data.get('host_name', instance.host_name)
     instance.host_phone = validated_data.get('host_phone', instance.host_phone)
     instance.hc_notified = validated_data.get('hc_notified', instance.hc_notified)
-    instance.save()
+    instance.does_not_count = validated_data.get('does_not_count', instance.does_not_count)
+    commonLeaveSlipUpdate(instance, validated_data)
     return instance
 
   def create(self, validated_data):
@@ -145,7 +148,7 @@ class IndividualSlipFilter(filters.FilterSet):
 
   class Meta:
     model = IndividualSlip
-    fields = ['id', 'type', 'status', 'submitted', 'last_modified', 'finalized', 'description', 'comments', 'texted', 'TA', 'TA_informed', 'informed', 'trainee', 'rolls']
+    fields = ['id', 'type', 'status', 'submitted', 'last_modified', 'finalized', 'description', 'comments', 'texted', 'does_not_count', 'TA', 'TA_informed', 'informed', 'trainee', 'rolls']
 
 
 class GroupSlipSerializer(BulkSerializerMixin, ModelSerializer):
@@ -163,6 +166,29 @@ class GroupSlipSerializer(BulkSerializerMixin, ModelSerializer):
     internal_value['start'] = dateutil.parser.parse(data['start']).replace(tzinfo=None)
     internal_value['end'] = dateutil.parser.parse(data['end']).replace(tzinfo=None)
     return internal_value
+
+  def update(self, instance, validated_data):
+    if isinstance(validated_data.get('trainees'), basestring):
+      # ast.literal_eval is not optimal, turns a string that has a list in it into a python list
+      instance.trainees = ast.literal_eval(validated_data.get('trainees')) if validated_data.get('trainees') else instance.trainees
+    else:
+      instance.trainees = validated_data.get('trainees', instance.trainees.all())
+
+    if isinstance(validated_data.get('start'), basestring):
+      instance.start = datetime.strptime(validated_data.get('start'), "%m/%d/%Y %I:%M %p") if validated_data.get('start') else instance.start
+    else:
+      instance.start = validated_data.get('start', instance.start)
+
+    if isinstance(validated_data.get('end'), basestring):
+      instance.end = datetime.strptime(validated_data.get('end'), "%m/%d/%Y %I:%M %p") if validated_data.get('end') else instance.end
+    else:
+      instance.end = validated_data.get('end', instance.end)
+
+    instance.service_assignment = validated_data.get('service_assignment', instance.service_assignment)
+    instance.trainee_list = validated_data.get('trainee_list', instance.trainee_list)
+    instance.does_not_count = validated_data.get('does_not_count', instance.does_not_count)
+    commonLeaveSlipUpdate(instance, validated_data)
+    return instance
 
   class Meta(object):
     model = GroupSlip
@@ -189,4 +215,4 @@ class GroupSlipFilter(filters.FilterSet):
 
   class Meta:
     model = GroupSlip
-    fields = ['id', 'type', 'status', 'submitted', 'last_modified', 'finalized', 'description', 'comments', 'texted', 'TA_informed', 'TA', 'informed', 'trainee', 'trainees']
+    fields = ['id', 'type', 'status', 'submitted', 'last_modified', 'finalized', 'description', 'comments', 'texted', 'does_not_count', 'TA_informed', 'TA', 'informed', 'trainee', 'trainees']

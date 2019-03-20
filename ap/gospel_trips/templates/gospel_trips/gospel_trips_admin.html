@@ -39,6 +39,8 @@
         <th>Gospel Trip</th>
         <th>Open Time</th>
         <th>Close Time</th>
+        <th>Keep Open</th>
+        <th>Show Teams</th>
         <th>Report</th>
         <th>Destinations</th>
         <th>Rosters</th>
@@ -51,6 +53,8 @@
         <td>{{trip.name}}</td>
         <td>{{trip.open_time}}</td>
         <td>{{trip.close_time}}</td>
+        <td>{{trip.keep_open}}</td>
+        <td>{{trip.show_teams}}</td>
         <td><a href="{% url 'gospel_trips:report' trip.id %}">Click Here</a></td>
         <td>
           <a href="{% url 'gospel_trips:destination-editor' trip.id %}">Editor</a><br>

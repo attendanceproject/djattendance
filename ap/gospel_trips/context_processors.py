@@ -1,6 +1,6 @@
 from aputils.trainee_utils import is_trainee
 
-from .models import GospelTrip
+from .models import GospelTrip, Destination
 
 
 def gospel_trips_available(request):
@@ -22,3 +22,17 @@ def gospel_trips_available(request):
     return {'gospel_trips_available': False}
   except GospelTrip.DoesNotExist:
     return {'gospel_trips_available': False}
+
+
+def teams_available(request):
+  user = request.user
+  if not hasattr(user, 'type') or not is_trainee(user):
+    return {'teams_available': False}
+  try:
+    admin = next((gt for gt in GospelTrip.objects.order_by('-open_time') if gt.show_teams), None)
+    if admin and Destination.objects.filter(gospel_trip=admin, trainees=user).exists():
+      return {'teams_available': True}
+    else:
+      return {'teams_available': False}
+  except GospelTrip.DoesNotExist:
+    return {'teams_available': False}

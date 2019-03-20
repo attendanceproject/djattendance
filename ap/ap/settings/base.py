@@ -111,6 +111,7 @@ MIDDLEWARE = (
     # AP middleware
     'ap.middleware.LoginRequiredMiddleware',
     'bible_tracker.middleware.BibleReadingMiddleware',
+    'services.middleware.DesignatedServiceHoursMiddleware'
 )
 
 ROOT_URLCONF = 'ap.urls'
@@ -138,6 +139,7 @@ TEMPLATES = [{
             "exams.context_processors.exams_available",
             "interim.context_processors.interim_intentions_available",
             "gospel_trips.context_processors.gospel_trips_available",
+            "gospel_trips.context_processors.teams_available",
             "bible_tracker.context_processors.bible_tracker_forced",
             "announcements.context_processors.class_popup",
 
@@ -209,6 +211,7 @@ APPS = (
     'verse_parse',  # parse outlines for PSRP verses
     'web_access',
     'xb_application',
+    'house_inspection',
 
     # fobi-core
     'fobi',

@@ -34,6 +34,7 @@ from wiki.urls import get_pattern as get_wiki_pattern
 
 from .views import (custom404errorview, custom500errorview, custom502errorview,
                     custom503errorview, custom504errorview, home)
+from . import views
 
 admin.autodiscover()
 
@@ -71,6 +72,7 @@ urlpatterns = [
   url(r'^graduation/', include('graduation.urls', namespace="graduation")),
   url(r'^xb/', include('xb_application.urls', namespace="xb")),
   url(r'^interim/', include('interim.urls', namespace="interim")),
+  url(r'^house_inspection/', include('house_inspection.urls', namespace='house_inspection')),
   # admin urls
   url(r'^adminactions/', include('adminactions.urls')),  # django-adminactions pluggable app
   url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -90,6 +92,7 @@ urlpatterns = [
   url(r'^502/$', custom502errorview),  # for development
   url(r'^503/$', custom503errorview),  # for development
   url(r'^504/$', custom504errorview),  # for development
+  url(r'^printer/$', views.printerinstructions),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 router = BulkRouter()

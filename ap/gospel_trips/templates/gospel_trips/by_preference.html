@@ -9,13 +9,15 @@
 {% with gtpk=request.resolver_match.kwargs.pk %}
 <script type="text/javascript">
   $(document).ready(() => {
-    $(".team_contact").on("click", function() {
+    $(".assign-role").on("click", function() {
+      let val = $(this).val().split('-');
       $.ajax({
         type: "POST",
-        url: "{% url 'gospel_trips:assign-team-contact' pk=gtpk %}",
+        url: "{% url 'gospel_trips:assign-trainee-role' pk=gtpk %}",
         data: {
-          'trainee_id': $(this).val(),
-          'is_contact': $(this).prop('checked')
+          'trainee_id': val[1],
+          'is_contact': $(this).prop('checked'),
+          'field': val[0]
         },
         success: function(data){
           if (data.success){
@@ -34,7 +36,7 @@
     $(".destination_select").on("change", function() {
       let name = $(this).attr('name').split('_');
       let trainee_id = name[name.length - 1];
-      let is_contact = $('.team-contact, [value=' + trainee_id + ']').prop('checked');
+      let is_contact = $('.assign-role, [value=trainee_contacts-' + trainee_id + ']').prop('checked');
       $.ajax({
         type: "POST",
         url: "{% url 'gospel_trips:assign-destination' pk=gtpk %}",
@@ -50,6 +52,16 @@
           }
         }
       });
+    });
+
+    $("#responses_table").DataTable({
+      info: true,
+      paging: false,
+      autoWidth: true,
+      fixedHeader: true,
+      scrollY: '80vh',
+      scrollX: true,
+      scrollCollapse: true
     });
 
   });
@@ -70,7 +82,10 @@
         <th>Preference 2</th>
         <th>Preference 3</th>
         <th>Select Destination</th>
-        <th>Team Contact</th>
+        <th>Trainee Contact</th>
+        <th>Finance Coordinator</th>
+        <th>Media Coordinator</th>
+        <th>Report/Stats Coordinator</th>
       </tr>
     </thead>
     <tbody>
@@ -89,7 +104,10 @@
             {% endfor %}
           </select>
           </td>
-          <td><input class="team_contact" type="checkbox" name="team_contact_selection" value="{{trainee.id}}" {% if trainee.team_contact %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="trainee_contacts-{{trainee.id}}" {% if trainee.trainee_contact %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="finance_coords-{{trainee.id}}" {% if trainee.finance_coord %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="media_coords-{{trainee.id}}" {% if trainee.media_coord %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="stat_coords-{{trainee.id}}" {% if trainee.stat_coord %}checked="checked"{% endif %}></input></td>
         </tr>
         {% endfor %}
     </tbody>

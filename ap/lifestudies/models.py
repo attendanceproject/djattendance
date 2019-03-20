@@ -211,7 +211,7 @@ class Summary(models.Model):
   objects_all = SummaryAllManager()
 
   # the content of the summary (> 250 words)
-  content = models.TextField()
+  content = models.TextField(blank=True)
 
   # the book assigned to summary
   # relationship: many summaries to one book
@@ -240,7 +240,7 @@ class Summary(models.Model):
   minimum_words = models.PositiveSmallIntegerField(default=250)
 
   # hardCopy
-  hard_copy = models.BooleanField(default=False)
+  submitting_paper_copy = models.BooleanField(default=False)
 
   # sort summaries by name
   class Meta:
@@ -279,7 +279,7 @@ class Summary(models.Model):
   def clean(self, *args, **kwargs):
     """Custom validator for word count"""
     wc_list = self.content.split()
-    if len(wc_list) < self.minimum_words and self.hard_copy is False:
+    if len(wc_list) < self.minimum_words and self.submitting_paper_copy is False:
       raise ValidationError("Your word count is less than {count}".format(count=self.minimum_words))
     super(Summary, self).clean(*args, **kwargs)
 

@@ -140,8 +140,8 @@ export function canFinalizeRolls(term, date, finalizedweeks) {
   let day = getDay(now)
   // Sunday 17:45 is when you can begin finalizing
   let startFinalization = setMinutes(setHours(startOfWeek(now), 17), 45)
-  let canFinalizeWeek = !isWeekFinalized && now > startFinalization
-                          && (currentWeek - weekView == 1 || (currentWeek == weekView && isSunday(now))) //can only finalize the previous week
+  let canFinalizeWeek = !isWeekFinalized && (currentWeek > weekView ||
+                          (currentWeek == weekView && isSunday(now) && now > startFinalization))
   return canFinalizeWeek
 }
 

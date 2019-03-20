@@ -44,7 +44,7 @@ class IndividualSlipForm(LeaveslipForm):
   class Meta:
     model = IndividualSlip
     fields = ['type', 'description', 'location', 'host_name', 'host_phone', 'hc_notified',
-              'TA_informed', 'texted', 'comments', 'private_TA_comments', 'TA']
+              'TA_informed', 'texted', 'does_not_count', 'comments', 'private_TA_comments', 'TA']
 
 
 class GroupSlipForm(LeaveslipForm):
@@ -62,7 +62,7 @@ class GroupSlipForm(LeaveslipForm):
 
   class Meta:
     model = GroupSlip
-    fields = ['trainees', 'type', 'description', 'start', 'end', 'TA_informed', 'texted', 'comments', 'private_TA_comments', 'TA']
+    fields = ['trainees', 'type', 'description', 'start', 'end', 'TA_informed', 'texted', 'does_not_count', 'comments', 'private_TA_comments', 'TA']
 
 
 class IndividualSlipAdminForm(forms.ModelForm):

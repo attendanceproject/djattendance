@@ -5,7 +5,7 @@
 <div class="row">
   {% for each in question.prompt|count_occurences_of_blanks %}
     <div id="fitb-answer-{{ forloop.counter }}" class="form-group no-bottom col-sm-2">
-      {% with answer=response|get_item:forloop.parentloop.counter|split_string_list|get_index:forloop.counter0 %}
+      {% if preview is False %}{% with answer=response|get_item:forloop.parentloop.counter|split_string_list|get_index:forloop.counter0 %}{% endif %}
       <textarea name='fitb-textarea-{{ forloop.counter }}' placeholder="answer to ({{ forloop.counter }})">{{ answer }}</textarea>
       {% endwith %}
     </div>

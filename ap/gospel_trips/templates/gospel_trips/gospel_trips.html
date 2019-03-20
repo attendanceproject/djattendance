@@ -6,7 +6,34 @@
 
 {% block title %}{{page_title}}{% endblock %}
 
+{% block references %}
+<style type="text/css">
+  ul.errorlist {
+    margin: 0;
+    padding: 0;
+  }
+
+  .error-div {
+    background-color: red;
+    color: white;
+    display: block;
+    font-weight: bold;
+    margin: 0 0 3px;
+    padding: 4px 5px;
+  }
+
+  .error{
+    margin-top:4px;
+    padding-left:0;
+  }
+</style>
+
+{% endblock %}
+
 {% block scripts %}
+{% for form in answer_forms %}
+  {{form.media}}
+{% endfor %}
 <script type="text/javascript">
   var AIRPORT_CODES = {{AIRPORT_CODES|safe}};
   var AIRLINE_CODES = {{AIRLINE_CODES|safe}};
@@ -35,6 +62,18 @@
       }
     });
     $("[required]").parent().children("label").append(" *").css("color", "red");
+
+    $(".datepicker").each(function(index) {
+      if ($(this).val()) {
+        $(this).val(moment($(this).val()).format("MM/DD/YYYY"));
+      }
+    });
+
+    $(".datetimepicker").each(function(index) {
+      if ($(this).val()) {
+        $(this).val(moment($(this).val()).format("MM/DD/YYYY h:mm A"));
+      }
+    });
   });
 
   function validateForm() {
@@ -80,9 +119,11 @@
 {% for form in answer_forms %}
   {{ form.non_form_errors }}
   {% if form.errors %}
+   <div class="error-div">
     {{form.instance}}
+    {{ form.errors }}
+   </div>
   {% endif %}
-  {{ form.errors }}
 {% endfor %}
 <!-- Navigation Display -->
 <ul class="nav nav-tabs">
@@ -106,7 +147,6 @@
         {%for form in answer_forms %}
           {% if form.prefix == question.id %}
             {% bootstrap_form form %}
-            {{form.media}}
           {% endif %}
         {% endfor %}
       {% endfor %}

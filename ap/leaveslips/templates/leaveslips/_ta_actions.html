@@ -1,28 +1,28 @@
 {# https://stackoverflow.com/questions/19533402/naming-rules-for-html5-custom-data-attributedata #}
 {% if request.user.gender == "S" and leaveslip.trainee.gender == "S" %}
 <div id="ta-sister-actions">
-  <button type="button" data-transfer-ta="{{leaveslip.trainee.TA_secondary.id}}" data-status-action="approve-transfer" data-slip-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="status-action btn-lg btn-primary btn-save">Approve & Transfer</button>
-  <button type="button" data-transfer-ta="{{leaveslip.trainee.TA_secondary.id}}" data-status-action="transfer" data-slip-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="status-action btn-lg btn-primary btn-save">Transfer</button>
+  <button type="button" data-transfer-ta="{{leaveslip.trainee.TA_secondary.id}}" data-ls-action="approve-transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="approve-transfer-ls">Approve & Transfer</button>
+  <button type="button" data-transfer-ta="{{leaveslip.trainee.TA_secondary.id}}" data-ls-action="transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="transfer-ls">Transfer</button>
 </div>
 {% else %}
-  <button type="button" data-status-action="approve" data-slip-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Approve" class="status-action btn-lg btn-success" id="approve-ls">
+  <button type="button" data-ls-action="approve" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Approve" class="ls-action btn-lg btn-success" id="approve-ls">
     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
   </button>
-  <button type="button" data-status-action="deny" data-slip-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Deny" class="status-action btn-lg btn-danger" id="deny-ls">
+  <button type="button" data-ls-action="deny" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Deny" class="ls-action btn-lg btn-danger" id="deny-ls">
     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
   </button>
 {% endif %}
 
 {% if leaveslip.status != 'F'%}
-  <button type="button" data-status-action="fellowship" data-slip-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Mark for fellowship" class="status-action btn-lg btn-warning" id="fellowship-ls">
+  <button type="button" data-ls-action="fellowship" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Mark for fellowship" class="ls-action btn-lg btn-warning" id="fellowship-ls">
     <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
   </button>
 {% else %}
-  <button type="button" data-status-action="unfellowship" data-slip-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Unmark for fellowship" class="status-action btn-lg btn-warning-oppo" id="unfellowship-ls">
+  <button type="button" data-ls-action="unfellowship" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Unmark for fellowship" class="ls-action btn-lg btn-warning-oppo" id="unfellowship-ls">
     <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
   </button>
 {% endif %}
 
-<button type="button" data-status-action="delete" data-slip-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Delete" class="delete-slip btn-lg btn-danger" id="delete-ls">
+<button type="button" data-ls-action="delete" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Delete" class="delete-slip btn-lg btn-danger" id="delete-ls">
   <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
 </button>

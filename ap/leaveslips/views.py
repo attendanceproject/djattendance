@@ -76,10 +76,9 @@ class IndividualSlipUpdate(LeaveSlipUpdate):
     if request.POST.get('events'):
       update['events'] = json.loads(request.POST.get('events'))
     # 'on' is the POSTed value for checked checkboxes, 'off' for unchecked
-    if request.POST.get('ta_sister_approved'):
-      update['ta_sister_approved'] = True if request.POST.get('ta_sister_approved') == 'on' else False
-    if request.POST.get('texted'):
-      update['texted'] = True if request.POST.get('texted') == 'on' else False
+    update['ta_sister_approved'] = request.POST.get('ta_sister_approved') == 'on'
+    update['texted'] = request.POST.get('texted') == 'on'
+    update['does_not_count'] = request.POST.get('does_not_count') == 'on'
 
     IndividualSlipSerializer().update(self.get_object(), update)
     return HttpResponse('ok')
@@ -107,13 +106,13 @@ class GroupSlipUpdate(LeaveSlipUpdate):
     return ctx
 
   def post(self, request, **kwargs):
-    update = {}
-    if request.POST.get('status'):
-      update['status'] = request.POST.get('status')
-    if request.POST.get('ta_sister_approved'):
-      update['ta_sister_approved'] = bool(request.POST.get('ta_sister_approved'))
+    update = request.POST.dict()
+    # 'on' is the POSTed value for checked checkboxes, 'off' for unchecked
+    update['ta_sister_approved'] = request.POST.get('ta_sister_approved') == 'on'
+    update['texted'] = request.POST.get('texted') == 'on'
+    update['does_not_count'] = request.POST.get('does_not_count') == 'on'
+
     GroupSlipSerializer().update(self.get_object(), update)
-    super(GroupSlipUpdate, self).post(request, **kwargs)
     return HttpResponse('ok')
 
 
@@ -212,7 +211,7 @@ class TALeaveSlipList(GroupRequiredMixin, generic.TemplateView):
     ctx['TA_list'] = TrainingAssistant.objects.filter(groups__name='regular_training_assistant')
     ctx['leaveslips'] = slips
     ctx['selected_ta'] = ta
-    ctx['status_list'] = LeaveSlip.LS_STATUS[:-1]  # Removes Sister Approved Choice
+    ctx['status_list'] = LeaveSlip.LS_STATUS  # Removes Sister Approved Choice
     ctx['selected_status'] = status
     ctx['selected_trainee'] = tr
     ctx['trainee_list'] = Trainee.objects.all()

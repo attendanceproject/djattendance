@@ -8,7 +8,7 @@ class NameInputForm(forms.Form, BasePluginForm):
       ("name", "NAME"),
       ("label", "NAME"),
       ("initial", ""),
-      ("required", True)
+      ("required", False)  # Allows to submit as blank (filled in the plugin code)
   ]
 
   name = forms.CharField(label="Name", required=True)

@@ -1,9 +1,17 @@
 import json
-from copy import copy, deepcopy
 from collections import OrderedDict
+from copy import copy, deepcopy
 from datetime import date, datetime, time, timedelta
-import dateutil.parser
 
+import dateutil.parser
+from accounts.models import Trainee, TrainingAssistant
+from accounts.serializers import (TraineeForAttendanceSerializer,
+                                  TraineeRollSerializer,
+                                  TrainingAssistantSerializer)
+from ap.forms import TraineeSelectForm
+from aputils.decorators import group_required
+from aputils.eventutils import EventUtils
+from aputils.trainee_utils import is_trainee, trainee_from_user
 from braces.views import GroupRequiredMixin
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import resolve, reverse_lazy
@@ -14,26 +22,16 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from rest_framework import filters, status
-from rest_framework.renderers import JSONRenderer
-from rest_framework_bulk import BulkModelViewSet
-from rest_framework.response import Response
-
-from accounts.models import Trainee, TrainingAssistant
-from accounts.serializers import (TraineeForAttendanceSerializer,
-                                  TraineeRollSerializer,
-                                  TrainingAssistantSerializer)
-
-from ap.forms import TraineeSelectForm
-from aputils.decorators import group_required
-from aputils.eventutils import EventUtils
-from aputils.trainee_utils import is_trainee, trainee_from_user
 from houses.models import House
 from leaveslips.models import GroupSlip, IndividualSlip
 from leaveslips.serializers import (GroupSlipSerializer,
                                     GroupSlipTADetailSerializer,
                                     IndividualSlipSerializer,
                                     IndividualSlipTADetailSerializer)
+from rest_framework import filters, status
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+from rest_framework_bulk import BulkModelViewSet
 from schedules.constants import WEEKDAYS
 from schedules.models import Event, Schedule
 from schedules.serializers import (AttendanceEventWithDateSerializer,
@@ -47,7 +45,8 @@ from terms.serializers import TermSerializer
 
 from .forms import RollAdminForm
 from .models import Roll, RollsFinalization
-from .serializers import AttendanceSerializer, RollFilter, RollSerializer, RollsFinalizationSerializer
+from .serializers import (AttendanceSerializer, RollFilter, RollSerializer,
+                          RollsFinalizationSerializer)
 
 # universal variable for this term
 CURRENT_TERM = Term.current_term()
@@ -415,12 +414,7 @@ class TableRollsView(GroupRequiredMixin, AttendanceView):
             d = ev.start_datetime.date()
             # Add roll if roll exists for trainee
             if trainee in roll_dict and (ev, d) in roll_dict[trainee]:
-              # if trainee is on self attendance (trainee.self_attendance=True),
-              # only display rolls not submitted by the trainee and modify rolls that are not submitted by the trainee.
-              if trainee.self_attendance and (trainee == roll_dict[trainee][(ev, d)].submitted_by):
-                continue
-              else:
-                ev.roll = roll_dict[trainee][(ev, d)]
+              ev.roll = roll_dict[trainee][(ev, d)]
             evt_list[i] = ev
 
     ctx['event_type'] = event_type
@@ -693,7 +687,7 @@ def finalize_personal(request):
   new_finalizerolls, created = RollsFinalization.objects.get_or_create(trainee=trainee, events_type='EV')
   if new_finalizerolls.weeks == '':
     new_finalizerolls.weeks = str(week)
-  else:
+  elif str(week) not in new_finalizerolls.weeks.split(","):  # prevent duplicates
     new_finalizerolls.weeks = new_finalizerolls.weeks + "," + str(week)
   new_finalizerolls.save()
 

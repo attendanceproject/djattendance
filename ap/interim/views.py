@@ -1,16 +1,16 @@
-from django.views.generic.base import TemplateView
-from django.views.generic.edit import UpdateView
+from datetime import datetime, timedelta
 
 from accounts.models import Trainee
 from aputils.trainee_utils import trainee_from_user
-from interim.models import InterimIntentions, InterimItinerary, InterimIntentionsAdmin
-from interim.forms import InterimIntentionsForm, InterimItineraryForm, InterimIntentionsAdminForm
-from terms.models import Term
-
 from braces.views import GroupRequiredMixin
-
 from dateutil import parser
-from datetime import datetime, timedelta
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import UpdateView
+from interim.forms import (InterimIntentionsAdminForm, InterimIntentionsForm,
+                           InterimItineraryForm)
+from interim.models import (InterimIntentions, InterimIntentionsAdmin,
+                            InterimItinerary)
+from terms.models import Term
 
 
 class InterimIntentionsView(UpdateView):
@@ -43,36 +43,43 @@ class InterimIntentionsView(UpdateView):
     start_list = data.pop('start')
     end_list = data.pop('end')
     commments_list = data.pop('comments')
-    InterimItinerary.objects.filter(interim_intentions=interim_intentions).delete()
+    itins = []
 
     for index in range(len(start_list)):
-      itin = InterimItinerary()
-      itin.interim_intentions = interim_intentions
-      itin.start = parser.parse(start_list[index])
-      itin.end = parser.parse(end_list[index])
-      itin.comments = commments_list[index]
-      itin.save()
+      itins.append(InterimItineraryForm(data={'start':start_list[index], 'end':end_list[index], 'comments':commments_list[index], 'interim_intentions': interim_intentions}))
+    if all(f.is_valid() for f in itins):
+      InterimItinerary.objects.filter(interim_intentions=interim_intentions).delete()
+      for itin in itins:
+        itobj = itin.save(commit=False)
+        itobj.interim_intentions = interim_intentions
+        itobj.save()
+    return itins
+
 
   def get_context_data(self, **kwargs):
     ctx = super(InterimIntentionsView, self).get_context_data(**kwargs)
     admin, created = InterimIntentionsAdmin.objects.get_or_create(term=Term.current_term())
     interim_itineraries_forms = []
-    interim_itineraries = InterimItinerary.objects.filter(interim_intentions=self.get_object()).order_by('start')
-    if interim_itineraries.count() == 0:
-      interim_itineraries_forms.append(InterimItineraryForm())
-    else:
-      for itin in interim_itineraries:
-        interim_itineraries_forms.append(InterimItineraryForm(instance=itin))
+    if self.request.method == 'POST':
+      interim_itineraries_forms = self.update_interim_itinerary(interim_intentions=self.get_object(), data=self.request.POST.copy())
+    elif self.request.method == 'GET':
+      interim_itineraries = InterimItinerary.objects.filter(interim_intentions=self.get_object()).order_by('start')
+      if interim_itineraries.count() == 0:
+        interim_itineraries_forms.append(InterimItineraryForm())
+      else:
+        for itin in interim_itineraries:
+          interim_itineraries_forms.append(InterimItineraryForm(instance=itin))
     ctx['button_label'] = 'Submit'
     ctx['page_title'] = 'Interim Intentions'
     ctx['itinerary_forms'] = interim_itineraries_forms
     ctx['interim_start'] = Term.current_term().end + timedelta(days=1)
     ctx['admin'] = admin
+    ctx['interim_last_day'] = admin.term_begin_date - timedelta(days=1)
 
     return ctx
 
 
-class InterimIntentionsAdminView(UpdateView, GroupRequiredMixin):
+class InterimIntentionsAdminView(GroupRequiredMixin, UpdateView):
   model = InterimIntentionsAdmin
   form_class = InterimIntentionsAdminForm
   template_name = 'interim/interim_intentions_admin.html'
@@ -147,4 +154,32 @@ class InterimIntentionsTAView(TemplateView, GroupRequiredMixin):
 
     ctx['trainees'] = trainees
     ctx['page_title'] = 'Interim Intentions Report'
+    return ctx
+
+
+class InterimIntentionsCalendarView(TemplateView, GroupRequiredMixin):
+  template_name = 'interim/interim_intentions_calendar_view.html'
+  group_required = ['training_assistant']
+
+  def get_context_data(self, **kwargs):
+    ctx = super(InterimIntentionsCalendarView, self).get_context_data(**kwargs)
+    term = Term.current_term()
+
+    interim_start = term.end + timedelta(days=1)
+    if InterimIntentionsAdmin.objects.get(term=term).term_begin_date is None:
+      interim_end = interim_start + timedelta(days=1)
+      ctx['subtitle'] = "Please enter the starting date for next term."
+    else:
+      interim_end = InterimIntentionsAdmin.objects.get(term=term).term_begin_date
+
+    ctx['interim_length'] = (interim_end - interim_start).days
+    ctx['date_list'] = [interim_start + timedelta(days=x) for x in range(0, ctx['interim_length'])]
+
+    ctx['trainees'] = Trainee.objects.values('firstname', 'lastname', 'id')
+
+    for t in ctx['trainees']:
+      t['name'] = unicode(t['firstname'] + ' ' + t['lastname'])
+      t['intention'] = InterimIntentions.objects.filter(trainee__id=t['id'], admin__term=term).first()
+
+    ctx['page_title'] = 'Interim Calendar Report'
     return ctx

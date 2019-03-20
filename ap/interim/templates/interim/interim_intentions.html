@@ -50,19 +50,21 @@ var dt_options = {
   defaultSelect: true,
 };
 var options = {year: 'numeric', month: '2-digit', day: '2-digit' };
-var interim_end = "{{admin.term_begin_date}}"
+var interim_end = "{{interim_last_day}}"
 
 $(document).ready(() => {
 
   var interim_start = "{{interim_start|date:'m/d/Y'}}";
 
   show_hide_post_interim();
+  change_post_intent_comments_labels();
 
   $("#add_row").click(add_row);
 
   $("#delete_row").click(delete_row);
 
   $('input[type=radio][name=intent]').change(show_hide_post_interim);
+  $('#id_post_training_intentions').change(change_post_intent_comments_labels);
 
   if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
     $("#id_start").val(interim_start);
@@ -72,20 +74,19 @@ $(document).ready(() => {
   }
   $("[name='start']").prop( "readonly", true );
   $("[name='start']").addClass('readonly');
-
 });
 
-function show_hide_post_interim(){
+  function show_hide_post_interim(){
     if($('#id_intent_1, #id_intent_2, #id_intent_3').is(':checked')) {
-      $("#id_post_intent_comments").show()
-      $('label[for=id_post_intent_comments]').show();
-      $("#id_post_training_intentions").show()
-      $('label[for=id_post_training_intentions]').show();
+      $("#id_post_intent_comments").parent().parent().show();
+      $("#id_post_training_intentions").parent().parent().show();
+      $("#id_post_training_intentions").attr("required", true);
+      $("#id_post_intent_comments").attr("required", true);
     } else {
-      $("#id_post_intent_comments").hide()
-      $('label[for=id_post_intent_comments]').hide();
-      $("#id_post_training_intentions").hide()
-      $('label[for=id_post_training_intentions]').hide();
+      $("#id_post_intent_comments").parent().parent().hide();
+      $("#id_post_training_intentions").parent().parent().hide();
+      $("#id_post_training_intentions").attr("required", false);
+      $("#id_post_intent_comments").attr("required", false);
     }
   }
 
@@ -119,6 +120,25 @@ function show_hide_post_interim(){
     }
   }
 
+  function change_post_intent_comments_labels() {
+    intent = $('#id_post_training_intentions').val()
+
+    text = "Please explain:"
+    if (intent == "USC" || intent == "OCC") {
+      text = "Please enter the campus and approximate date available to go:"
+    } else if (intent == "LSM") {
+      text = "Please enter the section of service:"
+    } else if (intent == "XB" || intent == "BFA") {
+      text = "Comments:"
+    } else if (intent == "JOB") {
+      text = "Please enter the locality in which you'll be working:"
+    } else if (intent == "SCH") {
+      text = "Please enter the locality, name of school, and program entering:"
+    }
+
+    $('label[for=id_post_intent_comments]').text(text)
+  }
+
 
 
 </script>
@@ -142,6 +162,27 @@ function show_hide_post_interim(){
   </div>
 <!-- /Error messaging -->
 {% endif %}
+
+{% for iform in itinerary_forms %}
+
+{% if iform.errors %}
+<!-- Error messaging -->
+  <div id="errors">
+    <div class="inner">
+      <p>There were some errors in the information you entered. Please correct the following:</p>
+      {{ iform.non_field_errors }}
+      <ul>
+        {% for field in iform %}
+          {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+<!-- /Error messaging -->
+{% endif %}
+
+
+{% endfor %}
 
 <form id="id_interim_intentions_form" method="post" action="">
   {% csrf_token %}

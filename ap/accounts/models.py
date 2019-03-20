@@ -335,8 +335,6 @@ class Trainee(User):
   def current_rolls(self):
     c_term = Term.current_term()
     rolls = self.rolls.filter(date__gte=c_term.start, date__lte=c_term.end)
-    if self.self_attendance:
-      rolls = rolls.filter(submitted_by=self)
     return rolls
 
   def __unicode__(self):
@@ -369,11 +367,6 @@ class Trainee(User):
 
     group_slips = GroupSlip.objects.filter(trainees=self, status__in=['A', 'S'])
 
-    # TODO: It doesn't cover trainees who are also a team monitor
-    if self.self_attendance:
-      rolls = rolls.filter(submitted_by=self)
-    else:
-      rolls = rolls.exclude(submitted_by=self)
     rolls = rolls.order_by('event__id', 'date').distinct('event__id', 'date')  # may not need to order
 
     if period is not None:
@@ -382,7 +375,7 @@ class Trainee(User):
       start_date = p.start(period)
       end_date = p.end(period)
       startdt = datetime.combine(start_date, datetime.min.time())
-      enddt = datetime.combine(end_date, datetime.min.time())
+      enddt = datetime.combine(end_date, datetime.max.time())
       rolls = rolls.filter(date__gte=start_date, date__lte=end_date)  # rolls for current period
       ind_slips = ind_slips.filter(rolls__in=[d['id'] for d in rolls.values('id')])
       group_slips = group_slips.filter(start__lte=enddt, end__gte=startdt)
