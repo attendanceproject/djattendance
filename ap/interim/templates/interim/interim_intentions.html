@@ -126,16 +126,6 @@
     float: left;
   }
 
-  #delete_row{
-    display: inline-block;
-    float: right;
-  }
-
-  #add_row{
-    display: inline-block;
-    float: right;
-  }
-
   .readonly{
     background-color: #DEDEDE;
   }
@@ -240,7 +230,7 @@
   function change_post_intent_comments_labels() {
     intent = $('#id_post_training_intentions').val()
 
-    text = "Please explain:"
+    text = "Please explain"
     if (intent == "USC" || intent == "OCC") {
       text = "Please enter the campus and approximate date available to go"
     } else if (intent == "LSM") {
@@ -254,14 +244,6 @@
     }
 
     $('#post_intent_comments_label').text(text)
-  }
-
-  function add_row() {
-
-  }
-
-  function delete_row() {
-
   }
 
 </script>
@@ -362,29 +344,21 @@
       <p>You may arrive as early as <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> but not later than the date and time above. Those who arrive before <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> must be available to serve. The next term of the Training begins on <strong>{{admin.term_begin_date|date:'l, F d'}}</strong>.</p>
 
       <div class="new-form">
-
         <div class="itin-grid">
-
-        <div class="itin-row">
-          <label for="start_date">Start Date</label>
-          <label for="end_date">End Date</label>
-          <label for="notes_comments">Notes/Comments</label>
-        </div>
+          <div class="itin-row">
+            <label for="start_date">Start Date</label>
+            <label for="end_date">End Date</label>
+            <label for="notes_comments">Notes/Comments</label>
+          </div>
 
           {% for itin_form in itinerary_forms %}
-          <div class="itin-row">
-            {{itin_form.start}}
-            {{itin_form.end}}
-            {{itin_form.comments}}
-          </div>
+            <div class="itin-row">
+              {{itin_form.start}}
+              {{itin_form.end}}
+              {{itin_form.comments}}
+            </div>
           {% endfor %}
-      </div>
-      <!-- class="col-md-12">
-        <button type="button" class="btn btn-primary" id="delete_row">Delete</button>
-        -->
-        <button type="button" class="btn btn-primary" id="add_row">Add</button>
-
-
+        </div>
 
         <label for="id_intent" style="margin-top: 30px">Intent to Return</label><br>
         {% for c in form.intent %}
