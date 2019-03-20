@@ -177,30 +177,47 @@
 
 <script type="text/javascript">
 
-function date_formatter(dt) {
-  date = dt.toLocaleDateString('en-US', options)
-  mon = date.slice(0, 2)
-  dat = date.slice(3, 5)
-  yer = date.slice(6, 10)
-  return mon + "/" + dat + "/" + yer
-}
+  function date_formatter(dt) {
+    date = dt.toLocaleDateString('en-US', options)
+    mon = date.slice(0, 2)
+    dat = date.slice(3, 5)
+    yer = date.slice(6, 10)
+    return mon + "/" + dat + "/" + yer
+  }
 
-var dt_options = {
-  timepicker: false,
-  format: 'm/d/Y',
-  formatDate: 'm/d/Y',
-  defaultSelect: true,
-};
-var options = {year: 'numeric', month: '2-digit', day: '2-digit' };
-var interim_end = "{{interim_last_day}}"
+  var dt_options = {
+    timepicker: false,
+    format: 'm/d/Y',
+    formatDate: 'm/d/Y',
+    defaultSelect: true,
+  };
 
-$(document).ready(() => {
+  var options = {year: 'numeric', month: '2-digit', day: '2-digit' };
+  var interim_end = "{{interim_last_day}}"
 
-  // post-training intent javascript
-  show_hide_post_interim();
-  change_post_intent_comments_labels();
-  $('input[type=radio][name=intent]').change(show_hide_post_interim);
-  $('#id_post_training_intentions').change(change_post_intent_comments_labels);
+  $(document).ready(() => {
+
+    // post-training intent javascript
+    show_hide_post_interim();
+    change_post_intent_comments_labels();
+    $('input[type=radio][name=intent]').change(show_hide_post_interim);
+    $('#id_post_training_intentions').change(change_post_intent_comments_labels);
+
+    // interim itinerary javascript
+    var interim_start = "{{interim_start|date:'m/d/Y'}}";
+    $("#add_row").click(add_row);
+    $("#delete_row").click(delete_row);
+
+    if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
+      $("#id_start").val(interim_start);
+      let dt = new Date(interim_end);
+      dt.setDate(dt.getDate());
+      $("#id_end").val(date_formatter(dt));
+    }
+
+    $("[name='start']").prop( "readonly", true );
+    $("[name='start']").addClass('readonly');
+  });
 
   function show_hide_post_interim(){
     if($('#id_intent_1, #id_intent_2, #id_intent_3').is(':checked')) {
@@ -239,54 +256,12 @@ $(document).ready(() => {
     $('#post_intent_comments_label').text(text)
   }
 
+  function add_row() {
 
-  // interim itinerary javascript
-  var interim_start = "{{interim_start|date:'m/d/Y'}}";
-
-  $("#add_row").click(add_row);
-
-  $("#delete_row").click(delete_row);
-
-
-  if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
-    $("#id_start").val(interim_start);
-    let dt = new Date(interim_end);
-    dt.setDate(dt.getDate());
-    $("#id_end").val(date_formatter(dt));
-  }
-  $("[name='start']").prop( "readonly", true );
-  $("[name='start']").addClass('readonly');
-});
-
-
-  function add_row(){
-    let val = parseInt($("#id_itinerary_table tr:last").attr('id').split("_").pop());
-    let dt_val = $("#id_itinerary_table tr:last #id_end").val()
-
-    if (dt_val != 0 && dt_val != interim_end) {  //TODO: validate, i.e proper format, valid date range
-      let dt = new Date(dt_val);
-      $("#id_itinerary_table tr:last").clone().appendTo("#id_itinerary_table")
-      val++;
-      $("#id_itinerary_table tr:last").attr("id","row_" + val);
-      dt.setDate(dt.getDate() + 1);
-      $("#id_itinerary_table tr:last #id_start").val(date_formatter(dt));
-      let edt = new Date(interim_end)
-      edt.setDate(edt.getDate());
-      $("#id_itinerary_table tr:last #id_end").val(date_formatter(edt));
-      $($("#id_itinerary_table tr:last > td > input")[1]).datetimepicker(dt_options)
-
-    } else if (dt_val === interim_end) {
-      new Notification(Notification.SUCCESS, 'The term begins on {{admin.term_begin_date}}.').show();
-    } else {
-      new Notification(Notification.SUCCESS, 'Please fill out an end time before adding another row.').show();
-    }
   }
 
-  function delete_row(){
-    let val = parseInt($("#id_itinerary_table tr:last").attr('id').split("_").pop());
-    if (val != 0){
-      $("#id_itinerary_table tr:last").remove();
-    }
+  function delete_row() {
+
   }
 
 </script>
