@@ -71,17 +71,13 @@ textarea {
     font-weight: bold;
     display: flex;
     color: $blue-light;
-    & .has-value.Select--single > .Select-control .Select-value .Select-value-label, .has-value.is-pseudo-focused.Select--single > .Select-control .Select-value .Select-value-label {
-      color: $blue-light;
-    }
   }
   &__period {
     display: inline;
-    .Select-control {
-      border: 0;
-      display: inline-flex;
-      width: 40px;
-      position: unset;
+    margin-top: -7px;
+    padding-left: 10px;
+    .css-xp4uvy {
+      color: $blue-light;
     }
     .Select-arrow-zone {
       padding-right: 0px

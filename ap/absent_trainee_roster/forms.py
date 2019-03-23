@@ -29,7 +29,7 @@ class AbsentTraineeForm(forms.ModelForm):
     super(AbsentTraineeForm, self).__init__(*args, **kwargs)
 
     if self.user:
-      absentees = Absentee.objects.filter(is_active=True, house__isnull=False)
+      absentees = Absentee.objects.filter(is_active=True) #, house__isnull=False
       #filter the queryset according to user(house) if the form is used by HCs
       if self.user.groups.filter(name='absent_trainee_roster').exists():
         # get all trainees if on absent_trainee_roster service

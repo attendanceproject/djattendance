@@ -15,6 +15,12 @@
   </a>
 {% endif %}
 
-<button class="btn btn-danger delete-request-button" type="submit" title="Delete" data-url="{{ request.get_delete_url }}" data-id="{{ request.id }}">
+<!-- <button class="btn btn-danger delete-request-button" type="submit" title="Delete" data-url="{{ request.get_delete_url }}" data-id="{{ request.id }}">
   <span class="glyphicon glyphicon-trash"></span>
-</button>
+</button> -->
+
+<a href="{{ request.get_delete_url }}">
+  <button class="btn btn-danger delete-request-button" type="submit" title="Delete"/>
+    <span class="glyphicon glyphicon-trash"></span>
+  </button>
+</a>

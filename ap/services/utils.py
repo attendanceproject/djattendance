@@ -1,5 +1,6 @@
 import datetime
 from collections import Counter, OrderedDict
+from datetime import datetime as dt
 from datetime import date, timedelta
 from itertools import combinations
 
@@ -135,7 +136,7 @@ def assign_leaveslips(service_scheduler, cws):
   assignments = Assignment.objects.filter(week_schedule=cws).select_related('service').prefetch_related('workers')
   # Delete old group leave slips
   GroupSlip.objects.filter(service_assignment__in=assignments).delete()
-  timestamp = datetime.now()
+  timestamp = dt.now()
   bulk_leaveslips_assignments = []
   bulk_groupslip_trainees = []
   for a in assignments.distinct('service'):
