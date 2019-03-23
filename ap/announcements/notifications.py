@@ -17,6 +17,7 @@ from room_reservations.models import RoomReservation
 from terms.models import Term
 from attendance.models import RollsFinalization
 from aputils.trainee_utils import is_trainee, trainee_from_user
+from datetime import timedelta
 
 
 def get_popups(request):
