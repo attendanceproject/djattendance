@@ -196,6 +196,7 @@ APPS = (
     'exams',
     'gospel_trips',
     'graduation',
+    'greek',    # greek helper
     'hc',
     'house_requests',
     'interim',

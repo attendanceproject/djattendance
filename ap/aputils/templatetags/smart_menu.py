@@ -107,7 +107,8 @@ def generate_menu(context):
       common=[
           SubMenuItem(name='Bible Reading Tracker', url='bible_tracker:index'),
           SubMenuItem(name='Class Files', url='classes:index'),
-          SubMenuItem(name='Greek Vocab', url='http://attendance.ftta.lan/ftta/greek/greekVocab.php'),
+          # SubMenuItem(name='Greek Vocab', url='http://attendance.ftta.lan/ftta/greek/greekVocab.php'),
+          SubMenuItem(name='Greek Vocab', url='greek:vocab_list'),
           SubMenuItem(name='TC Printer Instructions', url='/printer')
       ],
       ta_only=[
