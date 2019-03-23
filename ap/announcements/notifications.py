@@ -135,7 +135,7 @@ def hc_reminder(trainee):
         message = "Your house didn't submit a house attendance {day}, please remember to do so. This message will disappear if your house submits house attendance for three consecutive days."
         return [(messages.WARNING, message.format(day=day))]
     else:
-      if days_difference < 4:
+      if 0 <= days_difference < 4:
         if days_difference == 0:
           day = 'today'
         elif days_difference == 1:
