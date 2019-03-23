@@ -183,7 +183,6 @@
   };
 
   var options = {year: 'numeric', month: '2-digit', day: '2-digit' };
-  var interim_end = "{{interim_last_day}}"
 
   $(document).ready(() => {
 
@@ -195,18 +194,16 @@
 
     // interim itinerary javascript
     var interim_start = "{{interim_start|date:'m/d/Y'}}";
-    $("#add_row").click(add_row);
-    $("#delete_row").click(delete_row);
+    var interim_end = "{{interim_end|date:'m/d/Y'}}";
 
     if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
       $("#id_start").val(interim_start);
-      let dt = new Date(interim_end);
-      dt.setDate(dt.getDate());
-      $("#id_end").val(date_formatter(dt));
+      $("#id_end").val(interim_end);
     }
 
     $("[name='start']").prop( "readonly", true );
     $("[name='start']").addClass('readonly');
+    $("[name='start']").datepicker( "option", "disabled", true );
   });
 
   function show_hide_post_interim(){
@@ -304,10 +301,10 @@
 
       <div class="new-form contact-grid">
         <label for="first-name-label">First Name</label>
-        <div class="text" id="first-name-text">{{request.user.firstname}}</div>
+        <div class="text readonly" id="first-name-text">{{request.user.firstname}}</div>
 
         <label for="last-name-text">Last Name</label>
-        <div class="text" id="last-name-text">{{request.user.lastname}}</div>
+        <div class="text readonly" id="last-name-text">{{request.user.lastname}}</div>
 
         {{ form.cell_phone.label_tag }}
         {{ form.cell_phone }}
@@ -352,7 +349,7 @@
           </div>
 
           {% for itin_form in itinerary_forms %}
-            <div class="itin-row">
+            <div class="itin-row row-{{forloop.counter0}}">
               {{itin_form.start}}
               {{itin_form.end}}
               {{itin_form.comments}}

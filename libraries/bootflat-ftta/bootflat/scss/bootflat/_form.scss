@@ -223,7 +223,10 @@ $search-icon-line-height:          30px !default;
 
     & .text, select, textarea, input {
       border: solid 1px $blue-light;
-      background-color: white;
+
+      & .disabled {
+        background-color: $form-disabled-color;
+      }
     }
 
     & select {
