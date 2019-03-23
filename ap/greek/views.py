@@ -9,4 +9,4 @@ def index(request):
 
     }
 
-    return render(request, 'vocab_list.html', context=context)
+    return render(request, 'greek_helper/vocab_list.html', context=context)
