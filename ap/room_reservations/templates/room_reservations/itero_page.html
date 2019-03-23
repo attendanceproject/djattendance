@@ -1,0 +1,113 @@
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load render_bundle from webpack_loader %}
+
+<head style="margin-bottom:100px">
+<title>FTTA Announcements</title>
+  {% render_bundle 'jquery_bootstrap' %}
+  <link rel="stylesheet" href="{% static 'room_reservations/css/font.css' %}" />
+  <link rel="stylesheet" href="{% static 'room_reservations/css/styling.css' %}" />
+  <link rel="stylesheet" href="{% static 'room_reservations/css/weather-icons.min.css' %}" />
+
+  <script type="text/javascript">
+    const WEATHER_API = "{% url 'room_reservations:weather' %}";
+    const PAGE_VERSION = "{% url 'room_reservations:tv-page-version' %}"
+    const RESERVATIONS = "{% url 'room_reservations:tv-page-reservations' %}";
+    const TICKER = "{% url 'room_reservations:tv-page-ticker' %}";
+  </script>
+
+  <script src="{% static 'room_reservations/js/weather.js' %}"></script>
+  <script src="{% static 'room_reservations/js/itero.js' %}"></script>
+</head>
+
+<!-- From https://jaicab.com/localFont/ -->
+<script type="text/javascript">!function(){"use strict";function e(e,t,n){e.addEventListener?e.addEventListener(t,n,!1):e.attachEvent&&e.attachEvent("on"+t,n)}function t(e){return window.localStorage&&localStorage.font_css_cache&&localStorage.font_css_cache_file===e}function n(){if(window.localStorage&&window.XMLHttpRequest)if(t(o))c(localStorage.font_css_cache);else{var n=new XMLHttpRequest;n.open("GET",o,!0),e(n,"load",function(){4===n.readyState&&(c(n.responseText),localStorage.font_css_cache=n.responseText,localStorage.font_css_cache_file=o)}),n.send()}else{var a=document.createElement("link");a.href=o,a.rel="stylesheet",a.type="text/css",document.getElementsByTagName("head")[0].appendChild(a),document.cookie="font_css_cache"}}function c(e){var t=document.createElement("style");t.innerHTML=e,document.getElementsByTagName("head")[0].appendChild(t)}var o="{% static 'room_reservations/css/font.css' %}";window.localStorage&&localStorage.font_css_cache||document.cookie.indexOf("font_css_cache")>-1?n():e(window,"load",n)}();</script><noscript><link rel="stylesheet" href="{% static 'room_reservations/css/font.css' %}"></noscript>
+
+<body style="line-height:1">
+<div id="title" class="text-center">FULL-TIME TRAINING IN ANAHEIM</div>
+<div id="main" class="container">
+  <div class="row">
+
+    <div class="col-sm-7 text-center">
+      <div id="clock-container" class="row">
+        <div class="col-sm-12"><span id="clock"></span><span id="ampm"></span></div>
+      </div>
+      <div id="date-container" class="row">
+        <div class="col-sm-12"><span id="date"></span></div>
+      </div>
+    </div>
+
+    <div class="col-sm-5" style="margin-left: 90px; margin-right: -90px;">
+      <div class="row weather-container">
+
+        <div class="col-sm-4 weather-item">
+          <div class="row">
+            <div class="weather-today col-sm-12 text-center">Today</div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12 text-center"><i id="today-condition"></i></div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6 today-temp-container">
+              <span id="today-temp"></span>
+            </div>
+            <div class="col-sm-7">
+              <div class="row">
+                <div class="col-sm-12"><span id="today-high"></span></div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12"><span id="today-low"></span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-sm-4 weather-item not-today">
+          <div class="row">
+            <div class="weather-not-today col-sm-12 text-center">Tomorrow</div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12 text-center"><i id="tomorrow-condition"></i></div>
+          </div>
+          <div id="tomorrow-low-container" class="row">
+            <div class="col-sm-12 text-center"><span id="tomorrow-high"></span></div>
+          </div>
+          <div id="tomorrow-high-container" class="row">
+            <div class="col-sm-12 text-center"><span id="tomorrow-low"></span></div>
+          </div>
+        </div>
+
+        <div class="col-sm-4 weather-item not-today">
+          <div class="row">
+            <div id="daft" class="weather-not-today col-sm-12 text-center"></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12 text-center"><i id="daft-condition"></i></div>
+          </div>
+          <div id="daft-low-container" class="row">
+            <div class="col-sm-12 text-center"><span id="daft-high"></span></div>
+          </div>
+          <div id="daft-high-container" class="row">
+            <div class="col-m-12 text-center"><span id="daft-low"></span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="row">
+      <hr />
+      <table id="schedule" class="table table-bordered"></table>
+    </div>
+  </div>
+
+  <div id="ticker"></div>
+  <div id="ticker-heading">ANNOUNCEMENTS</div>
+  <div id="ticker-wrap"></div>
+  <div id="ticker-heading-wrap"></div>
+</body>
