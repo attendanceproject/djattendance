@@ -87,7 +87,7 @@ class CreateScheduleForm(BaseScheduleForm):
     for ev in interested_eventsList:
       if ev['events__weekday'] in events_weekday:
         for event in events:
-          if event.start <= ev['events__start'] <= event.end or event.start <= ev['events__end'] <= event.end:
+          if event.start <= ev['events__start'] <= event.end or event.start <= ev['events__end'] <= event.end or (ev['events__start'] <= event.start and ev['events__end'] >= event.end):
             event_ids.append(ev['events__id'])
             break
 
