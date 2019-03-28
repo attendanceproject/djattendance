@@ -126,10 +126,6 @@
     float: left;
   }
 
-  .readonly{
-    background-color: #DEDEDE;
-  }
-
   label[for=id_intent_0], label[for=id_intent_1], label[for=id_intent_2], label[for=id_intent_3] {
     color: #102C38;
     text-transform: none;
@@ -156,6 +152,10 @@
   #post_intent_comments_label {
     margin-top: 10px;
     margin-bottom: 0px;
+  }
+
+  select {
+    background-color: white;
   }
 
 </style>
@@ -201,9 +201,13 @@
       $("#id_end").val(interim_end);
     }
 
-    $("[name='start']").prop( "readonly", true );
-    $("[name='start']").addClass('readonly');
-    $("[name='start']").datepicker( "option", "disabled", true );
+    $("[name='start']").prop( "disabled", true );
+    $("[name='start']").addClass('disabled');
+
+    $(".itin-row #id_end").change(function(eventData) {
+      // TODO
+    });
+
   });
 
   function show_hide_post_interim(){
