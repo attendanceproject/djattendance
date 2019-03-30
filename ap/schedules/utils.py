@@ -1,8 +1,112 @@
 from datetime import datetime, timedelta
 
+from django.db.models import Count
+from accounts.models import Trainee
+from attendance.models import Roll
+from schedules.models import Event, Schedule
 from terms.models import Term
 
-from .models import Schedule
+from aputils.eventutils import EventUtils
+
+def afternoon_class_transfer(trainee_ids, event_id, start_week):
+  # assume that existing schedules for each of the afternoon class for the full term already exists
+  # this util methods takes a list of trainee ids and the event id for the intended transfer along with the start week
+  # identifies the potential rolls that may needs to be transferred
+  # then moves the trainees onto their new schedule along with their rolls
+  # this is a specifica case of schedule update with strict known paramter settings that allows rolls update with relative certainty
+
+  # rolls that needs to be transferred onto their new schedule
+  ct = Term.current_term()
+  trainees = Trainee.objects.filter(id__in=trainee_ids)
+  rolls = Roll.objects.filter(trainee__in=trainees, event__class_type='AFTN', event__weekday__in=[1, 3], event__monitor='AM', date__gte=ct.startdate_of_week(start_week))
+
+  ev = Event.objects.get(id=event_id)
+  potential_sch = ev.schedules.order_by('priority')
+  new_sch = potential_sch.first()
+
+
+  # check to make sure there's only two events on the new schedule and they match the afternoon class criteria
+  check1 = new_sch.events.all().count() == 2
+  check2 = new_sch.events.filter(class_type='AFTN', monitor='AM').count() == 2
+  if not(check1 and check2):
+    return "Transfer unsuccessful. Problem with new schedule."
+
+  # look for possibly already created schedule for transfer
+  # identifies by starting week
+  found = False
+  for sch in potential_sch.exclude(id=new_sch.id):
+    startWeek = int(sch.weeks.split(',')[0])
+    if start_week == startWeek and sch.events.count() == 2:
+      events = sch.events.all()
+      if events[0].class_type == 'AFTN' and events[1].class_type == 'AFTN':
+        new_sch = sch
+        found = True
+
+  # if not found, then create, else just use the one that's found
+  all_names = ''
+  if not found:
+
+    old_sch = potential_sch.first()
+    new_sch.pk = None
+    new_sch.save()
+
+    new_sch.priority = old_sch.priority
+    new_sch.import_to_next_term = False
+    new_sch.name = new_sch.name + ' - transfer'
+    new_sch.comments = old_sch.comments + ' // used for transfers'
+    weeks = ''
+
+    # includes service week (week 18)
+    for i in range(start_week, 19):
+      weeks = weeks + str(i) + ','
+    new_sch.weeks = weeks[:-1]
+    new_sch.save()
+
+    for event in old_sch.events.all():
+      new_sch.events.add(event)
+    new_sch.save()
+
+  # # priority calculation and recalibration
+  afternoon_schs = Schedule.objects.annotate(ev_count=Count('events')).filter(ev_count=2, events__weekday=1, events__monitor='AM')
+  afternoon_schs_ids = set(afternoon_schs.values_list('id', flat=True))
+  check_sch_ids = set()
+  for trainee in trainees:
+    intersect = afternoon_schs_ids.intersection(set(trainee.active_schedules.values_list('id', flat=True)))
+    check_sch_ids = check_sch_ids.union(intersect)
+
+  new_sch.priority = afternoon_schs.filter(id__in=check_sch_ids).order_by('-priority').first().priority + 1
+  new_sch.save()
+
+  # regardless of found or not, add the trainees to their new schedule and make string of names to render
+  for trainee in trainees:
+    new_sch.trainees.add(trainee)
+    all_names = all_names + trainee.full_name + ', '
+  new_sch.save()
+  all_names = all_names[0:-2]
+
+  # move rolls that are attached to the old schedule
+  rolls.filter(event__weekday=1).update(event=new_sch.events.get(weekday=1))
+  rolls.filter(event__weekday=3).update(event=new_sch.events.get(weekday=3))
+
+  return "Successfully moved " + all_names + " to " + str(ev.name) + " starting from week " + str(start_week) + "."
+
+# takes the given list of schedules along with trainee_set and weeks and uses the EventUtils method to create an OrderedDict that represents trainee's chedule
+# the same method is used for the backend feed for the personal attendance, that way we keep everything consistent
+# the rolls are then checked against that huge OrderedDict to see if everything aligns, anything that stands out is a ghost roll and needs to be reconciled
+def validate_rolls_to_schedules(schedules, trainee_set, weeks, rolls):
+  roll_ids = []
+
+  current_term = Term.current_term()
+  w_tb = EventUtils.collapse_priority_event_trainee_table(weeks, schedules, trainee_set)
+  potential_rolls = rolls.order_by('date', 'event__start')
+  for roll in potential_rolls:
+    key = current_term.reverse_date(roll.date)
+    evs = w_tb[key]
+    if roll.event not in evs or (roll.event in evs and roll.trainee not in evs[roll.event] ):
+      roll_ids.append(roll.id)
+
+  invalid_rolls = Roll.objects.filter(id__in=roll_ids)
+  return invalid_rolls
 
 
 def next_dow(d, day):
@@ -42,7 +146,6 @@ def should_split_schedule(schedule, week):
 
 
 def split_schedule(schedule, week):
-  from schedules.models import Schedule
   """ If the schedule needs to split, returns a tuple of schedules--the parent schedule
     (which may or may not be the schedule that was passed in), the earlier split of the
     schedule, and the later split of the schedule.  Both of the splits will contain
