@@ -104,6 +104,7 @@ class GospelStatisticsView(TemplateView):
       ## Why doesn't this work?
       # for i in range(13):
       #  eval('stat.'+_attributes[i]+' = list_of_stats['+str(index+i)+']')
+      ## Make sure type is int
       stat.tracts_distributed = list_of_stats[index]
       stat.bibles_distributed = list_of_stats[index + 1]
       stat.contacted_30_sec = list_of_stats[index + 2]
@@ -117,7 +118,9 @@ class GospelStatisticsView(TemplateView):
       stat.small_group = list_of_stats[index + 10]
       stat.district_meeting = list_of_stats[index + 11]
       stat.conference = list_of_stats[index + 12]
-      stat.save()
+      try:
+        stat.save()
+
       index += 13
     ## Fix returning to current week instead of remaining in selected week
     return redirect(reverse('gospel_statistics:gospel-statistics-view') + str(current_week))
