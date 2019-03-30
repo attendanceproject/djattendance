@@ -3,12 +3,12 @@
  ***************************/
 var NUM_ROWS = 5;
 
-var TIMELIST = ['5:30', '6:00', '6:15', '6:30', '7:00', '7:30', '8:00', 
-'8:30', '9:00', '9:30', '10:00', '10:15','10:45', '11:00', '11:15', '11:45', 
-'12:00', '12:30', '12:45', '13:00', '13:30', '14:00',
-'14:30', '15:00', '15:30', '15:50', '16:00', '16:10', '16:55', '17:15', '17:25', '17:35','17:45', '18:00',
-'18:40', '19:00', '19:30', '19:45', '20:00','20:30', '21:00', '21:30', '22:00', 
-'22:30', '23:00'];
+var TIMELIST = ["5:30", "6:00", "6:15", "6:30", "7:00", "7:30", "8:00", 
+"8:30", "9:00", "9:30", "10:00", "10:15","10:45", "11:00", "11:15", "11:45", 
+"12:00", "12:30", "12:45", "13:00", "13:30", "14:00",
+"14:30", "15:00", "15:30", "15:50", "16:00", "16:10", "16:55", "17:15", "17:25", "17:35","17:45", "18:00",
+"18:40", "19:00", "19:30", "19:45", "20:00","20:30", "21:00", "21:30", "22:00", 
+"22:30", "23:00"];
 
 var ROW_STYLES = {
   "6:30": "background-color: lightgrey; color: black",
@@ -22,7 +22,7 @@ var ROW_STYLES = {
 
 var SERVICE_GROUPS = {
 /*** Thursday ***/
-  '3/23/2019': [
+  "3/23/2019": [
     {
       "name": "Events and Tasks",
       "color": "White",
@@ -36,104 +36,104 @@ var SERVICE_GROUPS = {
       "color": "lightPink",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Prep roll call"},{"time": "13:30-14:00","content": "Roll In Trainees"},{"time": "14:00-17:45","content": "Oversee, help AUX"},{"time": "17:45-18:40","content": "Roll Out Trainees"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Oversee"},{"time": "21:30-20:30","content": "Oversee"},{"time": "20:30-21:00","content": "Roll Out Trainees"},{"time": "21:00-22:00","content": "Oversee"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Aux",
       "color": "#ffe4b2",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Lead truck unloading, coordinate with INV, check invoice of each team"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Continue truck unloading"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Secure Carts for TEA BAR"},{"time": "21:30-20:30","content": "Secure Carts for TEA BAR"},{"time": "20:30-21:00","content": "Help TEA BAR"},{"time": "21:00-22:00","content": "Help TEA BAR"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Dinner",
       "color": "lightyellow",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Help INV"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "DINNER prep"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "DINNER prep"},{"time": "21:30-20:30","content": "DINNER prep"},{"time": "20:30-21:00","content": "DINNER prep"},{"time": "21:00-22:00","content": "DINNER prep"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Dishes",
       "color": "lightgreen",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Help AUX"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Help TEA BAR"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Help TEA BAR, SL"},{"time": "21:30-20:30","content": "Help TEA BAR, SL"},{"time": "20:30-21:00","content": "Help TEA BAR"},{"time": "21:00-22:00","content": "Help TEA BAR"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Drivers",
       "color": "lightblue",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Help AUX"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Help INV"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Help INV"},{"time": "21:30-20:30","content": "Help INV"},{"time": "20:30-21:00","content": "Help TEA BAR"},{"time": "21:00-22:00","content": "Help TEA BAR"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Inventory",
       "color": "#EAADEA",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Lead mapping truck, inventory"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Prep. L&T"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Finish L&T, finalize inventory"},{"time": "21:30-20:30","content": "Finish L&T, finalize inventory"},{"time": "20:30-21:00","content": "Finish L&T, finalize inventory"},{"time": "21:00-22:00","content": "Finish L&T, finalize inventory"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Sack Lunch",
       "color": "lightpink",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Prep for SL area, drop non-perishables"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "SL Assembly, drop non-perishables"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Continue SL assembly"},{"time": "21:30-20:30","content": "Continue SL assembly"},{"time": "20:30-21:00","content": "Continue SL assembly"},{"time": "21:00-22:00","content": "Continue SL assembly"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Setup",
       "color": "#ffe4b2",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Help INV"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Table prep"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Lunch Set-up"},{"time": "21:30-20:30","content": "Lunch Set-up"},{"time": "20:30-21:00","content": "Lunch Set-up"},{"time": "21:00-22:00","content": "Lunch Set-up"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Tea Bar",
       "color": "lightyellow",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Finish stations, help INV"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Fill urns, bins, distribute water"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Set up carts, stations"},{"time": "21:30-20:30","content": "Set up carts, stations"},{"time": "20:30-21:00","content": "Finish, leave ASAP"},{"time": "21:00-22:00","content": "Finish, leave ASAP"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Trash",
       "color": "lightGreen",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Help AUX"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Trash can set-up"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Finish trash and recycle bins"},{"time": "21:30-20:30","content": "Finish trash and recycle bins"},{"time": "20:30-21:00","content": "Help TEA BAR"},{"time": "21:00-22:00","content": "Help TEA BAR"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Special",
       "color": "lightblue",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Help INV"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Set up snack bar"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Help SETUP"},{"time": "21:30-20:30","content": "Help SETUP"},{"time": "20:30-21:00","content": "Help SL"},{"time": "21:00-22:00","content": "Help SL"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Cook",
       "color": "#EAADEA",
       "res": [
 {"time": "11:45-12:30","content": "POW WOW/Lunch"},{"time": "12:30-13:30","content": "Set up breakfast items"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-17:45","content": "Help INV"},{"time": "17:45-18:40","content": "KC Dinner"},{"time": "18:40-19:00","content": "POW WOW"},{"time": "19:00-19:30","content": "Roll in Trainees"},{"time": "19:30-21:30","content": "Pack dinner, arrange assembly"},{"time": "21:30-20:30","content": "Pack dinner, arrange assembly"},{"time": "20:30-21:00","content": "Talk with sister Ann"},{"time": "21:00-22:00","content": "Talk with sister Ann"},{"time": "22:00-22:30","content": "POW WOW"}
-	  ]
+    ]
     }
   ],
 /*** Friday ***/
-  '3/31/2017': [
+  "3/31/2017": [
     {
       "name": "ITERO",
       "color": "lightblue",
       "res": [
-	  {"time": "7:00-8:30","content": "Registration "},{"time": "8:30-10:15","content": "SESSION 1"},{"time": "10:15-10:45","content": "BREAK"},{"time": "10:45-12:30","content": "SESSION 2"},{"time": "12:30-13:00","content": "LUNCH"},{"time": "13:00-15:45","content": "BREAK"},{"time": "15:45-16:00","content": "TRAVEL"},{"time": "16:00-18:00","content": "STUDY"},{"time": "18:00-19:00","content": "DINNER"},{"time": "19:00-21:00","content": "MEETING"}
+    {"time": "7:00-8:30","content": "Registration "},{"time": "8:30-10:15","content": "SESSION 1"},{"time": "10:15-10:45","content": "BREAK"},{"time": "10:45-12:30","content": "SESSION 2"},{"time": "12:30-13:00","content": "LUNCH"},{"time": "13:00-15:45","content": "BREAK"},{"time": "15:45-16:00","content": "TRAVEL"},{"time": "16:00-18:00","content": "STUDY"},{"time": "18:00-19:00","content": "DINNER"},{"time": "19:00-21:00","content": "MEETING"}
       ]
     },
 
@@ -150,104 +150,104 @@ var SERVICE_GROUPS = {
       "color": "lightPink",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Oversee"},{"time": "8:30-9:00","content": "Oversee"},{"time": "9:00-9:30","content": "Help SL"},{"time": "9:30-10:15","content": "Help SL"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Oversee"},{"time": "11:00-11:15","content": "Oversee"},{"time": "11:15-11:45","content": "Oversee"},{"time": "11:45-12:00","content": "Oversee"},{"time": "12:00-12:30","content": "Oversee"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Roll in Trainees"},{"time": "14:00-15:30","content": "Oversee"},{"time": "15:30-15:50","content": "Oversee"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Roll in Trainees"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Roll in Trainees"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "Roll Out Trainees"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Aux",
       "color": "#ffe4b2",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Help SL"},{"time": "9:30-10:15","content": "Help SL"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Help SL"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Dinner",
       "color": "lightyellow",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "Help TB"},{"time": "7:30-8:30","content": "Help TB"},{"time": "8:30-9:00","content": "DINNER prep"},{"time": "9:00-9:30","content": "DINNER prep"},{"time": "9:30-10:15","content": "DINNER prep"},{"time": "10:15-10:45","content": "Help TB"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "DINNER prep"},{"time": "15:30-15:50","content": "Captain and Overseer orientation"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Lead Dinner Service"},{"time": "17:15-17:25","content": "Lead Dinner Service"},{"time": "17:25-17:35","content": "Lead Dinner Service"},{"time": "17:35-17:45","content": "Lead Dinner Service"},{"time": "17:45-18:00","content": "Lead Dinner Service"},{"time": "18:00-18:40","content": "Lead Dinner Service"},{"time": "18:40-19:00","content": "Lead"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Dishes",
       "color": "lightgreen",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Unload lettuce, wash cooking pans"},{"time": "8:30-9:00","content": "Unload lettuce, wash cooking pans"},{"time": "9:00-9:30","content": "Help TEA BAR"},{"time": "9:30-10:15","content": "Help TEA BAR"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Fill bottles"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Wash"},{"time": "17:15-17:25","content": "Wash"},{"time": "17:25-17:35","content": "Wash"},{"time": "17:35-17:45","content": "Wash"},{"time": "17:45-18:00","content": "Dispense food to service groups"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Wash"},{"time": "19:45-21:30","content": "Wash"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Drivers",
       "color": "lightblue",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Help SL"},{"time": "9:30-10:15","content": "Help SL"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL, prep for transport"},{"time": "11:00-11:15","content": "Deliver SL"},{"time": "11:15-11:45","content": "Deliver SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Help SL"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Transport to REG"},{"time": "17:45-18:00","content": "Transport to REG"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup SL"},{"time": "19:45-21:30","content": "Cleanup SL"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Inventory",
       "color": "#EAADEA",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Prepare L&T"},{"time": "8:30-9:00","content": "Prepare L&T"},{"time": "9:00-9:30","content": "L&T"},{"time": "9:30-10:15","content": "L&T"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Salad prep"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Unload and Organize Reg Dinners"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Sack Lunch",
       "color": "lightpink",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Prepare for SL assembly"},{"time": "8:30-9:00","content": "Prepare for SL assembly"},{"time": "9:00-9:30","content": "SL assembly"},{"time": "9:30-10:15","content": "SL assembly"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "FTTA SL assembly"},{"time": "11:00-11:15","content": "Arrange Floor"},{"time": "11:15-11:45","content": "Arrange Floor"},{"time": "11:45-12:00","content": "Arrange Floor"},{"time": "12:00-12:30","content": "Arrange Floor"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "SL assembly"},{"time": "15:30-15:50","content": "SL breakdown"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Setup",
       "color": "#ffe4b2",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "Help TB"},{"time": "7:30-8:30","content": "Help TB"},{"time": "8:30-9:00","content": "Finalize set up"},{"time": "9:00-9:30","content": "bags, baskets, utensils (setup for DINNER)"},{"time": "9:30-10:15","content": "bags, baskets, utensils (setup for DINNER)"},{"time": "10:15-10:45","content": "Help TB"},{"time": "10:45-11:00","content": "Help TEA BAR"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Setup tables"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Eat Dinner"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Lead Cleanup"},{"time": "19:45-21:30","content": "Lead Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Tea Bar",
       "color": "lightyellow",
       "res": [
 {"time": "5:30-6:15","content": "Arrive"},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "On floor during registration"},{"time": "7:30-8:30","content": "On floor during registration"},{"time": "8:30-9:00","content": "Restock"},{"time": "9:00-9:30","content": "Restock carts"},{"time": "9:30-10:15","content": "Restock carts"},{"time": "10:15-10:45","content": "Monitor Stations"},{"time": "10:45-11:00","content": "Restock carts"},{"time": "11:00-11:15","content": "Restock Carts"},{"time": "11:15-11:45","content": "Restock Carts"},{"time": "11:45-12:00","content": "Restock Carts"},{"time": "12:00-12:30","content": "Restock Carts"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Restock carts"},{"time": "15:30-15:50","content": "Restock, sanitize and inventory"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Restock, sanitize and inventory"},{"time": "16:10-16:55","content": "Restock, sanitize and inventory"},{"time": "16:55-17:15","content": "Restock, sanitize and inventory"},{"time": "17:15-17:25","content": "Restock, sanitize and inventory"},{"time": "17:25-17:35","content": "Restock, sanitize and inventory"},{"time": "17:35-17:45","content": "Restock, sanitize and inventory"},{"time": "17:45-18:00","content": "Restock, sanitize and inventory"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Eat dinner"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Trash",
       "color": "lightGreen",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Transport cardboard, help TB"},{"time": "8:30-9:00","content": "Transport cardboard, help TB"},{"time": "9:00-9:30","content": "Help TEA BAR"},{"time": "9:30-10:15","content": "Help TEA BAR"},{"time": "10:15-10:45","content": "Help TB"},{"time": "10:45-11:00","content": "1st Trash Run"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Trash Run"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Eat Dinner"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Lead Cleanup"},{"time": "19:45-21:30","content": "Lead Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Special",
       "color": "lightblue",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Prepare Snack bar"},{"time": "9:30-10:15","content": "Prepare Snack bar"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Help SL"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Cook",
       "color": "#EAADEA",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Cook"},{"time": "8:30-9:00","content": "Cook"},{"time": "9:00-9:30","content": "Cook"},{"time": "9:30-10:15","content": "Cook"},{"time": "10:15-10:45","content": "Cook"},{"time": "10:45-11:00","content": "Cook"},{"time": "11:00-11:15","content": "Cook"},{"time": "11:15-11:45","content": "Cook"},{"time": "11:45-12:00","content": "Cook"},{"time": "12:00-12:30","content": "Cook"},{"time": "12:30-12:45","content": "Break"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Cook"},{"time": "14:00-15:30","content": "Cook"},{"time": "15:30-15:50","content": "Cook"},{"time": "15:50-16:00","content": "Cook"},{"time": "16:00-16:10","content": "Cook"},{"time": "16:10-16:55","content": "Cook"},{"time": "16:55-17:15","content": "Put out Food"},{"time": "17:15-17:25","content": "Lead food assembly"},{"time": "17:25-17:35","content": "Lead food assembly"},{"time": "17:35-17:45","content": "Oversee and Refill"},{"time": "17:45-18:00","content": "Oversee and Refill"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "CLEANUP"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Prep"},{"time": "19:45-21:30","content": "Prep"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     }
   ], 
 /*** Saturday ***/  
-   '4/1/2017': [
+   "4/1/2017": [
     {
       "name": "ITERO",
       "color": "lightblue",
       "res": [
-	  {"time": "7:00-8:30","content": "Registration "},{"time": "8:30-10:15","content": "SESSION 1"},{"time": "10:15-10:45","content": "BREAK"},{"time": "10:45-12:30","content": "SESSION 2"},{"time": "12:30-13:00","content": "LUNCH"},{"time": "13:00-15:45","content": "BREAK"},{"time": "15:45-16:00","content": "TRAVEL"},{"time": "16:00-18:00","content": "STUDY"},{"time": "18:00-19:00","content": "DINNER"},{"time": "19:00-21:00","content": "MEETING"}
+      {"time": "7:00-8:30","content": "Registration "},{"time": "8:30-10:15","content": "SESSION 1"},{"time": "10:15-10:45","content": "BREAK"},{"time": "10:45-12:30","content": "SESSION 2"},{"time": "12:30-13:00","content": "LUNCH"},{"time": "13:00-15:45","content": "BREAK"},{"time": "15:45-16:00","content": "TRAVEL"},{"time": "16:00-18:00","content": "STUDY"},{"time": "18:00-19:00","content": "DINNER"},{"time": "19:00-21:00","content": "MEETING"}
       ]
     },
 
@@ -264,100 +264,100 @@ var SERVICE_GROUPS = {
       "color": "lightpink",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Oversee"},{"time": "8:30-9:00","content": "Oversee"},{"time": "9:00-9:30","content": "Help SL"},{"time": "9:30-10:15","content": "Help SL"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Oversee"},{"time": "11:00-11:15","content": "Oversee"},{"time": "11:15-11:45","content": "Oversee"},{"time": "11:45-12:00","content": "Oversee"},{"time": "12:00-12:30","content": "Oversee"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Roll in Trainees"},{"time": "14:00-15:30","content": "Oversee"},{"time": "15:30-15:50","content": "Oversee"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Roll in Trainees"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Roll in Trainees"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "Roll Out Trainees"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Aux",
       "color": "#ffe4b2",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Help SL"},{"time": "9:30-10:15","content": "Help SL"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Help SL"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Dinner",
       "color": "lightyellow",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "Help TB"},{"time": "7:30-8:30","content": "Help TB"},{"time": "8:30-9:00","content": "DINNER prep"},{"time": "9:00-9:30","content": "DINNER prep"},{"time": "9:30-10:15","content": "DINNER prep"},{"time": "10:15-10:45","content": "Help TB"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "DINNER prep"},{"time": "15:30-15:50","content": "Captain and Overseer orientation"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Lead Dinner Service"},{"time": "17:15-17:25","content": "Lead Dinner Service"},{"time": "17:25-17:35","content": "Lead Dinner Service"},{"time": "17:35-17:45","content": "Lead Dinner Service"},{"time": "17:45-18:00","content": "Lead Dinner Service"},{"time": "18:00-18:40","content": "Lead Dinner Service"},{"time": "18:40-19:00","content": "Lead"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Dishes",
       "color": "lightgreen",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Unload lettuce, wash cooking pans"},{"time": "8:30-9:00","content": "Unload lettuce, wash cooking pans"},{"time": "9:00-9:30","content": "Help TEA BAR"},{"time": "9:30-10:15","content": "Help TEA BAR"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Fill bottles"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Wash"},{"time": "17:15-17:25","content": "Wash"},{"time": "17:25-17:35","content": "Wash"},{"time": "17:35-17:45","content": "Wash"},{"time": "17:45-18:00","content": "Dispense food to service groups"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Wash"},{"time": "19:45-21:30","content": "Wash"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Drivers",
       "color": "lightblue",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Help SL"},{"time": "9:30-10:15","content": "Help SL"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL, prep for transport"},{"time": "11:00-11:15","content": "Deliver SL"},{"time": "11:15-11:45","content": "Deliver SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Help SL"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Transport to REG"},{"time": "17:45-18:00","content": "Transport to REG"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup SL"},{"time": "19:45-21:30","content": "Cleanup SL"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Inventory",
       "color": "#EAADEA",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Prepare L&T"},{"time": "8:30-9:00","content": "Prepare L&T"},{"time": "9:00-9:30","content": "L&T"},{"time": "9:30-10:15","content": "L&T"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Salad prep"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Unload and Organize Reg Dinners"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Sack Lunch",
       "color": "lightpink",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Prepare for SL assembly"},{"time": "8:30-9:00","content": "Prepare for SL assembly"},{"time": "9:00-9:30","content": "SL assembly"},{"time": "9:30-10:15","content": "SL assembly"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "FTTA SL assembly"},{"time": "11:00-11:15","content": "Arrange Floor"},{"time": "11:15-11:45","content": "Arrange Floor"},{"time": "11:45-12:00","content": "Arrange Floor"},{"time": "12:00-12:30","content": "Arrange Floor"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "SL assembly"},{"time": "15:30-15:50","content": "SL breakdown"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Setup",
       "color": "#ffe4b2",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "Help TB"},{"time": "7:30-8:30","content": "Help TB"},{"time": "8:30-9:00","content": "Finalize set up"},{"time": "9:00-9:30","content": "bags, baskets, utensils (setup for DINNER)"},{"time": "9:30-10:15","content": "bags, baskets, utensils (setup for DINNER)"},{"time": "10:15-10:45","content": "Help TB"},{"time": "10:45-11:00","content": "Help TEA BAR"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Setup tables"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Eat Dinner"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Lead Cleanup"},{"time": "19:45-21:30","content": "Lead Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Tea Bar",
       "color": "lightyellow",
       "res": [
 {"time": "5:30-6:15","content": "Arrive"},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "On floor during registration"},{"time": "7:30-8:30","content": "On floor during registration"},{"time": "8:30-9:00","content": "Restock"},{"time": "9:00-9:30","content": "Restock carts"},{"time": "9:30-10:15","content": "Restock carts"},{"time": "10:15-10:45","content": "Monitor Stations"},{"time": "10:45-11:00","content": "Restock carts"},{"time": "11:00-11:15","content": "Restock Carts"},{"time": "11:15-11:45","content": "Restock Carts"},{"time": "11:45-12:00","content": "Restock Carts"},{"time": "12:00-12:30","content": "Restock Carts"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Restock carts"},{"time": "15:30-15:50","content": "Restock, sanitize and inventory"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Restock, sanitize and inventory"},{"time": "16:10-16:55","content": "Restock, sanitize and inventory"},{"time": "16:55-17:15","content": "Restock, sanitize and inventory"},{"time": "17:15-17:25","content": "Restock, sanitize and inventory"},{"time": "17:25-17:35","content": "Restock, sanitize and inventory"},{"time": "17:35-17:45","content": "Restock, sanitize and inventory"},{"time": "17:45-18:00","content": "Restock, sanitize and inventory"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Eat dinner"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Trash",
       "color": "lightgreen",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Transport cardboard, help TB"},{"time": "8:30-9:00","content": "Transport cardboard, help TB"},{"time": "9:00-9:30","content": "Help TEA BAR"},{"time": "9:30-10:15","content": "Help TEA BAR"},{"time": "10:15-10:45","content": "Help TB"},{"time": "10:45-11:00","content": "1st Trash Run"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Trash Run"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Eat Dinner"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Lead Cleanup"},{"time": "19:45-21:30","content": "Lead Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Special",
       "color": "lightblue",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Prepare Snack bar"},{"time": "9:30-10:15","content": "Prepare Snack bar"},{"time": "10:15-10:45","content": "Bag drop for ITERO Lunches"},{"time": "10:45-11:00","content": "Help SL"},{"time": "11:00-11:15","content": "Help SL"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Orientation"},{"time": "14:00-15:30","content": "Help SL"},{"time": "15:30-15:50","content": "Break"},{"time": "15:50-16:00","content": "Break"},{"time": "16:00-16:10","content": "Orientation"},{"time": "16:10-16:55","content": "Dinner Orientation"},{"time": "16:55-17:15","content": "Help DINNER"},{"time": "17:15-17:25","content": "Help DINNER"},{"time": "17:25-17:35","content": "Help DINNER"},{"time": "17:35-17:45","content": "Help DINNER"},{"time": "17:45-18:00","content": "Help DINNER"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "Help DINNER"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Cleanup"},{"time": "19:45-21:30","content": "Cleanup"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Cook",
       "color": "#EAADEA",
       "res": [
 {"time": "5:30-6:15","content": ""},{"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Cook"},{"time": "8:30-9:00","content": "Cook"},{"time": "9:00-9:30","content": "Cook"},{"time": "9:30-10:15","content": "Cook"},{"time": "10:15-10:45","content": "Cook"},{"time": "10:45-11:00","content": "Cook"},{"time": "11:00-11:15","content": "Cook"},{"time": "11:15-11:45","content": "Cook"},{"time": "11:45-12:00","content": "Cook"},{"time": "12:00-12:30","content": "Cook"},{"time": "12:30-12:45","content": "Break"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:00","content": "Cook"},{"time": "14:00-15:30","content": "Cook"},{"time": "15:30-15:50","content": "Cook"},{"time": "15:50-16:00","content": "Cook"},{"time": "16:00-16:10","content": "Cook"},{"time": "16:10-16:55","content": "Cook"},{"time": "16:55-17:15","content": "Put out Food"},{"time": "17:15-17:25","content": "Lead food assembly"},{"time": "17:25-17:35","content": "Lead food assembly"},{"time": "17:35-17:45","content": "Oversee and Refill"},{"time": "17:45-18:00","content": "Oversee and Refill"},{"time": "18:00-18:40","content": "Dinner Service"},{"time": "18:40-19:00","content": "CLEANUP"},{"time": "19:00-19:30","content": "KC Dinner, POW WOW"},{"time": "19:30-19:45","content": "Prep"},{"time": "19:45-21:30","content": "Prep"},{"time": "21:30-22:00","content": "POWOW"},{"time": "22:00-22:30","content": "Finish"}
-	  ]
+    ]
     }
   ],
 /*** Lord's Day ***/
 
-  '4/2/2017': [
+  "4/2/2017": [
     {
       "name": "ITERO",
       "color": "lightblue",
@@ -379,95 +379,95 @@ var SERVICE_GROUPS = {
       "color": "lightpink",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Oversee"},{"time": "8:30-9:00","content": "Oversee"},{"time": "9:00-9:30","content": "Oversee"},{"time": "9:30-10:15","content": "Oversee"},{"time": "10:15-10:45","content": "Oversee"},{"time": "10:45-11:15","content": "Oversee"},{"time": "11:15-11:45","content": "Oversee"},{"time": "11:45-12:00","content": "Oversee"},{"time": "12:00-12:30","content": "Oversee"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Roll in Trainees"},{"time": "14:15-17:00","content": "Oversee"},{"time": "17:00-18:00","content": "Roll Out Trainees"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Aux",
       "color": "#ffe4b2",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Cleanup"},{"time": "9:30-10:15","content": "Cleanup"},{"time": "10:15-10:45","content": "Cleanup"},{"time": "10:45-11:15","content": "Cleanup"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Dinner",
       "color": "lightyellow",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "Help TB"},{"time": "7:30-8:30","content": "Help TB"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Cleanup"},{"time": "9:30-10:15","content": "Cleanup"},{"time": "10:15-10:45","content": "Cleanup"},{"time": "10:45-11:15","content": "Cleanup"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Dishes",
       "color": "lightgreen",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Wash"},{"time": "8:30-9:00","content": "Unload Lettuce"},{"time": "9:00-9:30","content": "Cleanup"},{"time": "9:30-10:15","content": "Cleanup"},{"time": "10:15-10:45","content": "Cleanup"},{"time": "10:45-11:15","content": "Cleanup"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Drivers",
       "color": "lightblue",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Cleanup"},{"time": "9:30-10:15","content": "Cleanup"},{"time": "10:15-10:45","content": "Cleanup"},{"time": "10:45-11:15","content": "Cleanup"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Inventory",
       "color": "#EAADEA",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Prepare L&T"},{"time": "8:30-9:00","content": "Prepare L&T"},{"time": "9:00-9:30","content": "Cleanup"},{"time": "9:30-10:15","content": "Cleanup"},{"time": "10:15-10:45","content": "Cleanup"},{"time": "10:45-11:15","content": "Cleanup"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Sack Lunch",
       "color": "lightpink",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Prepare for SL assembly"},{"time": "8:30-9:00","content": "Prepare for SL assembly"},{"time": "9:00-9:30","content": "Cleanup"},{"time": "9:30-10:15","content": "Cleanup"},{"time": "10:15-10:45","content": "Cleanup"},{"time": "10:45-11:15","content": "Cleanup"},{"time": "11:15-11:45","content": "Arrange floor"},{"time": "11:45-12:00","content": "Arrange floor"},{"time": "12:00-12:30","content": "Arrange Floor"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Setup",
       "color": "#ffe4b2",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "Help TB"},{"time": "7:30-8:30","content": "Help TB"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Help TB"},{"time": "9:30-10:15","content": "Help TB"},{"time": "10:15-10:45","content": "Help TB"},{"time": "10:45-11:15","content": "Help TB"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Tea Bar",
       "color": "lightyellow",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "Breakfast"},{"time": "7:00-7:30","content": "On floor"},{"time": "7:30-8:30","content": "On floor"},{"time": "8:30-9:00","content": "Restock carts"},{"time": "9:00-9:30","content": "Restock carts"},{"time": "9:30-10:15","content": "Restock carts"},{"time": "10:15-10:45","content": "Restock carts"},{"time": "10:45-11:15","content": "Restock carts"},{"time": "11:15-11:45","content": "Restock carts"},{"time": "11:45-12:00","content": "Restock carts"},{"time": "12:00-12:30","content": "Restock Carts"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Trash",
       "color": "lightgreen",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Breakdown cardboard"},{"time": "8:30-9:00","content": "Breakdown cardboard"},{"time": "9:00-9:30","content": "Breakdown cardboard"},{"time": "9:30-10:15","content": "Breakdown cardboard"},{"time": "10:15-10:45","content": "Breakdown cardboard"},{"time": "10:45-11:15","content": "1st Trash Run"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Special",
       "color": "lightblue",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Cleanup"},{"time": "9:30-10:15","content": "Cleanup"},{"time": "10:15-10:45","content": "Cleanup"},{"time": "10:45-11:15","content": "Cleanup"},{"time": "11:15-11:45","content": "Help SL"},{"time": "11:45-12:00","content": "Help SL"},{"time": "12:00-12:30","content": "Help SL"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+    ]
     },
-	
-	{
+  
+  {
       "name": "Cook",
       "color": "#EAADEA",
       "res": [
 {"time": "6:15-6:30","content": "Personal Morning Revival"},{"time": "6:30-7:00","content": "POW WOW"},{"time": "7:00-7:30","content": "Breakfast"},{"time": "7:30-8:30","content": "Help SL"},{"time": "8:30-9:00","content": "Help SL"},{"time": "9:00-9:30","content": "Cleanup"},{"time": "9:30-10:15","content": "Cleanup"},{"time": "10:15-10:45","content": "Cleanup"},{"time": "10:45-11:15","content": "Cleanup"},{"time": "11:15-11:45","content": "Cleanup"},{"time": "11:45-12:00","content": "Cleanup"},{"time": "12:00-12:30","content": "Cleanup"},{"time": "12:30-12:45","content": "Distribute Itero Lunch"},{"time": "12:45-13:30","content": "KC Lunch"},{"time": "13:30-14:15","content": "Cleanup"},{"time": "14:15-17:00","content": "Cleanup"},{"time": "17:00-18:00","content": "POWOW"},{"time": "18:00-18:30","content": "Finish"}
-	  ]
+  ]
     }
   ]
 
@@ -478,9 +478,21 @@ var SERVICE_GROUPS = {
  * CODE *
  ********/
 
+function currentTime() {
+  var date = new Date();
+  return parseTime(date.getHours() + ":" + date.getMinutes());
+}
+
+function parseTime(time) {
+  var timeSplit = time.split(":");
+  var hour = parseInt(timeSplit[0]);
+  var minute = parseInt(timeSplit[1]);
+  return {"hour": hour, "minute": minute};
+}
+
 function loadTable() {
-  var schedule = $('#schedule');
-  schedule.html('');
+  var schedule = $("#schedule");
+  schedule.html("");
 
   var times = TIMELIST.filter(function(t) {
     var cTime = currentTime();
@@ -488,45 +500,47 @@ function loadTable() {
     return compareTime(parseTime(t), cTime) >= 0;
   });
 
-  var service_groups = SERVICE_GROUPS[new Date().toLocaleString().split(',')[0]];
-  if (!service_groups) {
+  var serviceGroups = SERVICE_GROUPS[new Date().toLocaleString().split(",")[0]];
+  if (!serviceGroups ) {
     return;
   }
   for (var row=0; row<NUM_ROWS + 1 && row<=times.length; row++) {
     var time = times[row-1];
-    var table_row = $('<tr></tr>', {'style': ROW_STYLES[time]});
+    var tableRow = $("<tr></tr>", {"style": ROW_STYLES[time]});
     // offset by 1 for row and col for time and group name
-    for (var col=0; col<service_groups.length+1; col++) {
-      var service_group = service_groups[col - 1];
-      var table_cell = $('<td></td>');
+    for (var col=0; col<serviceGroups.length+1; col++) {
+      var serviceGroup = serviceGroups[col - 1];
+      var tableCell = $("<td></td>");
       if (row === 0 && col === 0) {
-        table_cell.text('TIME');
+        tableCell.text("TIME");
       } else if (col === 0) {
-        table_cell.text(printTime(parseTime(time)));
+        tableCell.text(printTime(parseTime(time)));
       } else if (row === 0) {
-        table_cell.text(service_group.name);
+        tableCell.text(serviceGroup.name);
       } else {
-        for (var i=0; i<service_group.res.length; i++) {
-          var res = service_group.res[i];
+        var i = 0;
+        for (i = 0; i<serviceGroup.res.length; i++) {
+          var res = serviceGroup.res[i];
           if (timeInTimeRange(parseTime(time), res.time)) {
             if (res.content.length >= 35) {
               var t = new Date();
-              table_cell.text((t.getSeconds() % 6) > 2 ? res.content.substr(0, 35) : res.content.substr(35));
+              tableCell.text((t.getSeconds() % 6) > 2 ? res.content.substr(0, 35) : res.content.substr(35));
             } else {
-              table_cell.text(res.content);
+              tableCell.text(res.content);
             }
           }
         }
       }
-      table_row.append(table_cell);
+      tableRow.append(tableCell);
     }
-    schedule.append(table_row);
+    schedule.append(tableRow);
   }
 
-  var cols = $('<colgroup></colgroup>');
-  cols.append($('<col></col>', {'style': 'background-color:white'}));
-  for (var i=0; i<service_groups.length; i++) {
-    cols.append($('<col></col>', {'style': 'background-color:' + service_groups[i].color}));
+  var cols = $("<colgroup></colgroup>");
+  cols.append($("<col></col>", {"style": "background-color:white"}));
+  var i = 0;
+  for (i = 0; i<serviceGroups.length; i++) {
+    cols.append($("<col></col>", {"style": "background-color:" + serviceGroups[i].color}));
   }
   schedule.append(cols);
 
@@ -535,23 +549,10 @@ function loadTable() {
 function printTime(time) {
   var hours = time.hour % 12;
   var hours = hours == 0 ? 12 : hours;
-  var minutes = time.minute < 10 ? '0' + time.minute : time.minute;
-  var ampm = time.hour >= 12 ? 'PM' : 'AM';
-  return hours + ':' + minutes + ampm;
+  var minutes = time.minute < 10 ? "0" + time.minute : time.minute;
+  var ampm = time.hour >= 12 ? "PM" : "AM";
+  return hours + ":" + minutes + ampm;
 }
-
-function currentTime() {
-  var date = new Date();
-  return parseTime(date.getHours() + ":" + date.getMinutes());
-}
-
-function parseTime(time) {
-  var timeSplit = time.split(':');
-  var hour = parseInt(timeSplit[0]);
-  var minute = parseInt(timeSplit[1]);
-  return {"hour": hour, "minute": minute};
-}
-
 function compareTime(a, b) {
   if (a.hour > b.hour) {
     return 1;
@@ -564,7 +565,7 @@ function compareTime(a, b) {
 }
 
 function timeInTimeRange(t, timeRange) {
-  var rangeSplit = timeRange.split('-');
+  var rangeSplit = timeRange.split("-");
   var start = parseTime(rangeSplit[0]);
   var end = parseTime(rangeSplit[1]);
   if (compareTime(t, start) >= 0 && compareTime(t, end) < 0) {
@@ -604,7 +605,8 @@ function displayTicker(ans) {
     $("#ticker-heading").fadeOut();
     $("#ticker-heading-wrap").fadeOut();
   }
-  for (var i = 0; i < anslen; i++) {
+  var i = 0;
+  for (i = 0; i < anslen; i++) {
     //Format ticker announcements here
     temp.append("<b></b>" + ans[i]);
     if (i+1 !== anslen) {
