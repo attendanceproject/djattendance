@@ -478,18 +478,6 @@ var SERVICE_GROUPS = {
  * CODE *
  ********/
 
-function currentTime() {
-  var date = new Date();
-  return parseTime(date.getHours() + ":" + date.getMinutes());
-}
-
-function parseTime(time) {
-  var timeSplit = time.split(":");
-  var hour = parseInt(timeSplit[0]);
-  var minute = parseInt(timeSplit[1]);
-  return {"hour": hour, "minute": minute};
-}
-
 function loadTable() {
   var schedule = $("#schedule");
   schedule.html("");
@@ -500,47 +488,45 @@ function loadTable() {
     return compareTime(parseTime(t), cTime) >= 0;
   });
 
-  var serviceGroups = SERVICE_GROUPS[new Date().toLocaleString().split(",")[0]];
-  if (!serviceGroups ) {
+  var service_groups = SERVICE_GROUPS[new Date().toLocaleString().split(",")[0]];
+  if (!service_groups) {
     return;
   }
   for (var row=0; row<NUM_ROWS + 1 && row<=times.length; row++) {
     var time = times[row-1];
-    var tableRow = $("<tr></tr>", {"style": ROW_STYLES[time]});
+    var table_row = $("<tr></tr>", {"style": ROW_STYLES[time]});
     // offset by 1 for row and col for time and group name
-    for (var col=0; col<serviceGroups.length+1; col++) {
-      var serviceGroup = serviceGroups[col - 1];
-      var tableCell = $("<td></td>");
+    for (var col=0; col<service_groups.length+1; col++) {
+      var service_group = service_groups[col - 1];
+      var table_cell = $("<td></td>");
       if (row === 0 && col === 0) {
-        tableCell.text("TIME");
+        table_cell.text("TIME");
       } else if (col === 0) {
-        tableCell.text(printTime(parseTime(time)));
+        table_cell.text(printTime(parseTime(time)));
       } else if (row === 0) {
-        tableCell.text(serviceGroup.name);
+        table_cell.text(service_group.name);
       } else {
-        var i = 0;
-        for (i = 0; i<serviceGroup.res.length; i++) {
-          var res = serviceGroup.res[i];
+        for (var i=0; i<service_group.res.length; i++) {
+          var res = service_group.res[i];
           if (timeInTimeRange(parseTime(time), res.time)) {
             if (res.content.length >= 35) {
               var t = new Date();
-              tableCell.text((t.getSeconds() % 6) > 2 ? res.content.substr(0, 35) : res.content.substr(35));
+              table_cell.text((t.getSeconds() % 6) > 2 ? res.content.substr(0, 35) : res.content.substr(35));
             } else {
-              tableCell.text(res.content);
+              table_cell.text(res.content);
             }
           }
         }
       }
-      tableRow.append(tableCell);
+      table_row.append(table_cell);
     }
-    schedule.append(tableRow);
+    schedule.append(table_row);
   }
 
   var cols = $("<colgroup></colgroup>");
   cols.append($("<col></col>", {"style": "background-color:white"}));
-  var i = 0;
-  for (i = 0; i<serviceGroups.length; i++) {
-    cols.append($("<col></col>", {"style": "background-color:" + serviceGroups[i].color}));
+  for (var i=0; i<service_groups.length; i++) {
+    cols.append($("<col></col>", {"style": "background-color:" + service_groups[i].color}));
   }
   schedule.append(cols);
 
@@ -553,6 +539,19 @@ function printTime(time) {
   var ampm = time.hour >= 12 ? "PM" : "AM";
   return hours + ":" + minutes + ampm;
 }
+
+function currentTime() {
+  var date = new Date();
+  return parseTime(date.getHours() + ":" + date.getMinutes());
+}
+
+function parseTime(time) {
+  var timeSplit = time.split(":");
+  var hour = parseInt(timeSplit[0]);
+  var minute = parseInt(timeSplit[1]);
+  return {"hour": hour, "minute": minute};
+}
+
 function compareTime(a, b) {
   if (a.hour > b.hour) {
     return 1;
@@ -605,8 +604,7 @@ function displayTicker(ans) {
     $("#ticker-heading").fadeOut();
     $("#ticker-heading-wrap").fadeOut();
   }
-  var i = 0;
-  for (i = 0; i < anslen; i++) {
+  for (var i = 0; i < anslen; i++) {
     //Format ticker announcements here
     temp.append("<b></b>" + ans[i]);
     if (i+1 !== anslen) {
