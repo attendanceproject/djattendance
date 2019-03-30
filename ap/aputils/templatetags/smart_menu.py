@@ -114,11 +114,13 @@ def generate_menu(context):
           SubMenuItem(name='Daily Announcements', url='announcements:announcement-list'),
           SubMenuItem(name='Designated Services Trainees', url='services:designated_services_viewer'),
           SubMenuItem(name='Designated Services Hours', url='services:service_hours_ta_view'),
+          SubMenuItem(name='Gospel Statistics', url='gospel_statistics:ta-gospel-statistics-view'),
           # SubMenuItem(name='HC Forms Admin', url='hc:hc-admin'),
           SubMenuItem(name='Manage Custom Forms', url='fobi.dashboard')
       ],
       trainee_only=[
           SubMenuItem(name='View Read Announcements', url='announcements:announcements-read'),
+          SubMenuItem(name='Gospel Statistics', url='gospel_statistics:gospel-statistics-view'),
       ],
       specific=[
           SubMenuItem(name='Service Scheduling', permission='services.add_service', url='services:services_view', condition=user.has_group(['service_schedulers'])),
