@@ -3,14 +3,14 @@ from django.db import models
 class Vocab(models.Model):
     
     PARSING_CODES = (
-        ('N1D', 'Noun (1D)'),
-        ('N2D', 'Noun (2D)'),
-        ('N3D', 'Noun (3D)'),
-        ('P', 'Participle'),
-        ('Adj', 'Adjective'),
-        ('V', 'Verb'),
-        ('Vs', 'Verb (stem-changing)'),
-        ('M', 'Misc'),
+        ('1', 'Noun (1D)'),
+        ('2', 'Noun (2D)'),
+        ('3', 'Noun (3D)'),
+        ('4', 'Participle'),
+        ('5', 'Adjective'),
+        ('6', 'Verb'),
+        ('7', 'Verb (stem-changing)'),
+        ('8', 'Misc'),
     )
 
     greek = models.CharField(max_length=200)

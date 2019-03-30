@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from greek.models import Vocab
+
+admin.site.register(Vocab)
