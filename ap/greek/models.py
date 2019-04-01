@@ -13,8 +13,21 @@ class Vocab(models.Model):
         ('8', 'Misc'),
     )
 
+    # actual greek word
     greek = models.CharField(max_length=200)
+
+    # english translation
     english = models.CharField(max_length=500)
+
+    # chapter in the book "Greek Grammar"
     chapter = models.IntegerField()
+
+    # parsing category greek word belongs to
     parsing = models.CharField(max_length=5, choices=PARSING_CODES)
+
+    def __unicode__(self):
+        try:
+            return self.id
+        except AttributeError as e:
+            return str(self.id) + ": " + str(e)
 
