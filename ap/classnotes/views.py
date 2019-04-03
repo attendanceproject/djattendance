@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-from accounts.models import Trainee
+from accounts.models import Trainee, TrainingAssistant
 from aputils.trainee_utils import trainee_from_user
 from audio.models import AudioFile
 from classnotes.utils import assign_classnotes
@@ -97,11 +97,15 @@ class ClassnotesListView(ListView):
       # term = Term.current_term()
       assign_classnotes()
       messages.success(request, "Class notes assigned according to attendance!")
+
     return self.get(request, *args, **kwargs)
 
   def get_context_data(self, **kwargs):
     context = super(ClassnotesListView, self).get_context_data(**kwargs)
+    ta = self.request.GET.get('classnotes_ta_list')
     user = self.request.user
+    if ta != None:
+      ta = int(ta)
     if user.type in ['R', 'C']:
       classnotes = Classnotes.objects.filter(trainee=user)
       context['classnotes'] = classnotes.exclude(status='A')
@@ -110,7 +114,12 @@ class ClassnotesListView(ListView):
       context['classnotes_pending'] = classnotes.filter(status='P')
       context['classnotes_unsubmitted'] = classnotes.filter(status='U')
     elif user.type == 'T':
-      context['classnotes_list'] = Classnotes.objects.all()
+      context['TA_list'] = TrainingAssistant.objects.filter(groups__name='regular_training_assistant')
+      if ta == -1 or ta == None:
+        context['classnotes_list'] = Classnotes.objects.all()
+      else:
+        context['classnotes_list'] = Classnotes.objects.filter(trainee__TA=ta)
+      context['selected_ta'] = ta
     return context
 
 

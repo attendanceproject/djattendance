@@ -43,7 +43,7 @@
             <td>{{badge.type}}</td>
             <td>{{badge.firstname}} {{badge.middlename}} {{badge.lastname}}</td>
             <td>{{badge.term_created}}</td>
-            <td>{{badge.locality}}</td>
+            <td>{{badge.locality|default_if_none:""}}</td>
             <td><a href="{% url 'badges:badge_detail' badge.pk %}" class="list-group-item-active">Edit</td>
             <td><a href="{% url 'badges:badge_delete' badge.pk %}" class="list-group-item-active">Delete</td>
           </tr>

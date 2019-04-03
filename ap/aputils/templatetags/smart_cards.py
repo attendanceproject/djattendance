@@ -106,6 +106,7 @@ def generate_cards(context):
             CardLink(title="Designated Services Hours", url=reverse('services:service_hours_ta_view')),
             CardLink(title="Interim Intentions", url=reverse('interim:interim_intentions_admin')),
             CardLink(title="Gospel Trips", url=reverse('gospel_trips:admin-create')),
+            CardLink(title='Custom Forms', url=reverse('fobi.dashboard'))
         ]
     )
 

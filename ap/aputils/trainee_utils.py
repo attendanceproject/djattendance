@@ -1,8 +1,6 @@
 from accounts.models import Trainee
 
 
-
-
 def is_trainee(user):
   """
   >>> from accounts.models import User
@@ -23,8 +21,11 @@ def is_trainee(user):
   False
   """
 
-  t = user.type
-  return t in ('R', 'C', 'S')
+  try:
+    t = user.type
+    return t in ('R', 'C', 'S')
+  except AttributeError:
+    return False
 
 
 def is_TA(user):

@@ -40,6 +40,7 @@
     <h2>TA {{leaveslip.classname|title}} Slip View</h2>
     <div class="col-md-5 col-xs-12">
       <p>Leaveslip ID: <a id="ajax-redirect" {% block ls_link %}{% endblock %}>{{leaveslip.id}}</a></p>
+      <p>Submitted: {{leaveslip.submitted}}</p>
       {% include "leaveslips/_ta_labels.html" %}
       <form id="leaveslip-form" action="{{leaveslip.get_ta_update_url}}" method="post">
         {% csrf_token %}

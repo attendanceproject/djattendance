@@ -43,6 +43,7 @@ import 'datatables.net-fixedheader'; import 'datatables.net-fixedheader-bs/css/f
 import 'datatables.net-fixedcolumns'; import 'datatables.net-fixedcolumns-bs/css/fixedColumns.bootstrap.css'
 import 'datatables.net-scroller'; import 'datatables.net-scroller-bs/css/scroller.bootstrap.css'
 import 'fullcalendar/dist/fullcalendar.css'
+import 'jquery-csv/src/jquery.csv.min'
 import 'jquery-ui'; import 'jquery-ui/themes/base/all.css'
 import 'jquery-ui/ui/widgets/datepicker'
 import 'jquery-datetimepicker/jquery.datetimepicker.css'

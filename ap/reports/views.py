@@ -44,7 +44,7 @@ class AttendanceReport(GroupRequiredMixin, TemplateView):
     # below is used to resolve duplicate city names for localities, eg: Richmond, Canada vs Richmond, VA
     # using foreign key links from the trainees ensures that we don't pull localities or teams that don't have any trainees
     context = self.get_context_data()
-    trainees = Trainee.objects.filter(is_active=True)
+    trainees = Trainee.objects.exclude(type="S")
     context['trainee_ids'] = list(trainees.order_by('lastname').values_list('pk', flat=True))
     locality_ids = set(trainees.values_list('locality__id', flat=True).distinct())
     localities = [{'id': loc_id, 'name': Locality.objects.get(pk=loc_id).city.name} for loc_id in locality_ids]
@@ -257,15 +257,8 @@ def attendance_report_trainee(request):
 
   # CALCULATE %TARDY
   total_possible_rolls_count = sum(count[ev] for ev in count if ev.monitor is not None)
-  tardy_rolls = rolls.exclude(status='A')
-
-  # currently counts rolls excused by individual and group slips
-  # comment this part out to not count those rolls
-  # exclude tardy rolls excused by individual slips
-  # tardy_rolls = tardy_rolls.exclude(leaveslips__status='A')
-
-  # exclude tardy rolls excused by group slips
-  # tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips)
+  tardy_rolls = rolls.exclude(status='A').filter(~(Q(leaveslips__does_not_count=True) & Q(leaveslips__status='A')))
+  tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips.filter(does_not_count=True))
 
   res["tardy_percentage"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
@@ -278,11 +271,10 @@ def attendance_report_trainee(request):
   # exclude absent rolls excused by individual slips
   # missed_classes = missed_classes.exclude(leaveslips__status='A')
 
-  IGNORE_LS_TYPES = ['SERV', 'CONF', 'TTRIP', 'FWSHP']  # leave slips types that don't affect attendance
-  missed_classes = missed_classes.filter(~(Q(leaveslips__type__in=IGNORE_LS_TYPES) & Q(leaveslips__status='A')))
+  missed_classes = missed_classes.filter(~(Q(leaveslips__does_not_count=True) & Q(leaveslips__status='A')))
 
   # exclude absent rolls excused by group slips
-  missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips.filter(type__in=IGNORE_LS_TYPES))
+  missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips.filter(does_not_count=True))
 
   res["classes_missed_percentage"] = str(round(missed_classes.count() / float(possible_class_rolls_count) * 100, 2)) + "%"
 

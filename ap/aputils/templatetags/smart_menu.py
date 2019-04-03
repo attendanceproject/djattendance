@@ -7,6 +7,7 @@ from graduation.utils import grad_forms
 from form_manager.utils import user_forms
 from hc.utils import hc_surveys, hc_recommendations
 from semi.utils import semi_form_available
+from services.utils import has_designated_service
 
 
 # Type Declarations
@@ -57,7 +58,7 @@ def generate_menu(context):
           SubMenuItem(name='Personal Attendance', url='attendance:attendance-submit', condition=True),
           SubMenuItem(name='Semi Annual Location and Study Attendance', url='semi:semi-base', condition=semi_form_available()),
           SubMenuItem(name='Roll Entry Seating Chart', permission='attendance.add_roll', url='attendance:class-rolls', condition=user.has_group(['attendance_monitors'])),
-          SubMenuItem(name='Designated Service Hours', permission='services.add_designated_service_hours', url='services:designated_service_hours', condition=user.has_group(['designated_service'])),
+          SubMenuItem(name='Designated Service Hours', permission='services.add_designated_service_hours', url='services:designated_service_hours', condition=has_designated_service(user)),
       ],
       common=[
           SubMenuItem(name='Roll Entry Table', permission='attendance.add_roll', url='attendance:house-rolls', condition=user.has_group(['attendance_monitors', 'training_assistant'])),
@@ -107,14 +108,14 @@ def generate_menu(context):
           SubMenuItem(name='Bible Reading Tracker', url='bible_tracker:index'),
           SubMenuItem(name='Class Files', url='classes:index'),
           SubMenuItem(name='Greek Vocab', url='http://attendance.ftta.lan/ftta/greek/greekVocab.php'),
-          SubMenuItem(name='TC Printer Instructions', url='http://attendance.ftta.lan/ftta/printers.php')
+          SubMenuItem(name='TC Printer Instructions', url='/printer')
       ],
       ta_only=[
           SubMenuItem(name='Daily Announcements', url='announcements:announcement-list'),
           SubMenuItem(name='Designated Services Trainees', url='services:designated_services_viewer'),
           SubMenuItem(name='Designated Services Hours', url='services:service_hours_ta_view'),
           # SubMenuItem(name='HC Forms Admin', url='hc:hc-admin'),
-          # SubMenuItem(name='Manage Custom Forms', url='fobi.dashboard')
+          SubMenuItem(name='Manage Custom Forms', url='fobi.dashboard')
       ],
       trainee_only=[
           SubMenuItem(name='View Read Announcements', url='announcements:announcements-read'),
@@ -125,6 +126,7 @@ def generate_menu(context):
           SubMenuItem(name='Meal Seating', permission='meal_seating.add_table', url='meal_seating:new-seats', condition=user.has_group(['kitchen'])),
           SubMenuItem(name='Seating Chart', permission='seating.add_chart', url='seating:chart_list', condition=user.has_group(['attendance_monitors'])),
           SubMenuItem(name='Audio Upload', permission='audio.add_audiofile', url='audio:audio-upload', condition=user.has_group(['av'])),
+          SubMenuItem(name='House Inspection FAQ', url='house_inspection:house_inspection_faq', condition=user.has_group(['house_inspectors', 'training_assistant'])),
       ]
   )
 
