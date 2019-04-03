@@ -1,0 +1,324 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=9" />
+  <meta name="author" content="FTTA Attendance Project" />
+  <meta name="description" content="" />
+  <title>FTTA Announcements</title>
+  <script type="text/javascript" src="../jquery.js"></script>
+  <script type="text/javascript" src="../bootstrap/js/bootstrap.js"></script>
+  <script type="text/javascript" src="weather.js"></script>
+  <script type="text/javascript" src="itero.js"></script>
+  <link rel="stylesheet" href="../bootstrap/css/bootstrap.css" />
+  <link rel="stylesheet" href="../bootstrap/css/bootstrap-responsive.css" />
+  <link rel="stylesheet" href="../bootstrap/css/weather-icons.min.css" />
+  <link rel="stylesheet" href="./font.css" />
+  <style>
+    hr {
+      margin: 15px 0;
+    }
+
+    body {
+      font-weight: 300;
+      color: #334353;
+      font-family: "OpenSansLight";
+    }
+
+     :root {
+      --accent-color: #4f7e90;
+    }
+
+    #title {
+      font-size: 2em;
+      padding: .4em;
+      padding-top: 1em;
+      background-color: var(--accent-color);
+      color: white;
+      font-weight: 100;
+    }
+
+    #main {
+      margin-top: 1em;
+    }
+
+    #clock {
+      font-size: 11.5em;
+      white-space: pre;
+    }
+
+    #ampm {
+      font-size: 3em;
+    }
+
+    #clock-container {
+      margin-top: 4.5em;
+    }
+
+    #date {
+      font-size: 2em;
+      font-weight: 400;
+    }
+
+    #date-container {
+      margin-top: 1em;
+    }
+
+    .weather-container {
+      margin-left: 140px;
+    }
+
+    .weather-item {
+      margin-left: -30px;
+    }
+
+    .not-today {
+      color: var(--accent-color);
+    }
+
+    .wi {
+      font-size: 4em;
+      margin: .25em;
+      margin-top: .5em;
+    }
+
+    .weather-today,
+    .weather-not-today {
+      font-size: 1.5em;
+    }
+
+    #today-temp {
+      font-size: 4em;
+      margin-bottom: .1em;
+    }
+
+    #today-low,
+    #today-high,
+    #tomorrow-low,
+    #tomorrow-high,
+    #daft-low,
+    #daft-high {
+      font-size: 1.5em;
+    }
+
+    #reservations {
+      font-size: 2em;
+    }
+
+    #schedule {
+      margin-top: 1em;
+      font-size: .9em;
+      border-radius: 0px;
+      -webkit-border-radius: 0px;
+    }
+
+    td {
+      text-align: center !important;
+    }
+
+    .cell {
+      padding-top: 1.05em !important;
+      padding-bottom: 1.05em !important;
+    }
+
+    .occupied {
+      background-color: #eee;
+    }
+  </style>
+  <script type="text/javascript">
+    var page_version;
+    $(document).ready(function () {
+      loadTab();
+      console.log("BYE");
+      setInterval(loadTab, 1000);
+      loadWeather();
+      setInterval(loadWeather, 10000);
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      setInterval(function () {
+        $.get(urlprefix + 'itero_page_version', function (data) {
+          if (page_version !== data) {
+            location.reload(true);
+          }
+        });
+      }, 60 * 1000);
+      $.get(urlprefix + 'itero_page_version', function (data) {
+        page_version = data;
+      });
+    });
+
+    var urlprefix = 'api/';
+    function formatAMPM(date) {
+      var hours = date.getHours();
+      var minutes = date.getMinutes();
+      var ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      var strTime = hours + ':' + minutes + ' ' + ampm;
+      return strTime;
+    }
+
+    var oldWeather;
+    function loadWeather() {
+      $.getJSON(urlprefix + 'weather.php', updateWeather)
+        .error(function () {
+          updateWeather(oldWeather);
+        });
+    }
+    function updateWeather(weather) {
+      oldWeather = weather;
+      var condition = weather.query.results.channel.item.condition;
+      var forecasts = weather.query.results.channel.item.forecast;
+      $('#today-temp').html(condition.temp + '&deg;');
+      var conditions = [$('#today-condition'), $('#tomorrow-condition'), $('#daft-condition')];
+      var lows = [$('#today-low'), $('#tomorrow-low'), $('#daft-low')];
+      var highs = [$('#today-high'), $('#tomorrow-high'), $('#daft-high')];
+      for (var i = 0; i < 3; i++) {
+        var forecast = forecasts[i];
+        lows[i].html('L ' + forecast.low + '&deg;');
+        highs[i].html('H ' + forecast.high + '&deg;');
+        conditions[i].attr('class', 'wi wi-' + WEATHER_CODES[forecast.code]);
+      }
+      $('#daft').text(forecasts[2].day);
+    }
+
+    function updateClock() {
+      var currentTime = new Date();
+      var currentSeconds = currentTime.getSeconds();
+      currentSeconds = (currentSeconds < 10 ? "0" : "") + currentSeconds;
+      var minutesAndHours = formatAMPM(currentTime).split(' ');
+      var timeOfDay = minutesAndHours[1];
+      var currentTimeString = minutesAndHours[0] + ":" + currentSeconds;
+      var hour = currentTimeString.split(':')[0];
+      if (hour.length < 2) {
+        currentTimeString = ' ' + currentTimeString;
+      }
+      $("#clock").text(currentTimeString);
+      $("#ampm").text(timeOfDay);
+      var options = {
+        weekday: "long", year: "numeric", month: "long",
+        day: "numeric"
+      };
+      $("#date").html(currentTime.toLocaleDateString('en-us', options));
+    }
+  </script>
+</head>
+
+<!-- From https://jaicab.com/localFont/ -->
+<script type="text/javascript">
+    !function () { "use strict"; function e(e, t, n) { e.addEventListener ? e.addEventListener(t, n, !1) : e.attachEvent && e.attachEvent("on" + t, n) } function t(e) { return window.localStorage && localStorage.font_css_cache && localStorage.font_css_cache_file === e } function n() { if (window.localStorage && window.XMLHttpRequest) if (t(o)) c(localStorage.font_css_cache); else { var n = new XMLHttpRequest; n.open("GET", o, !0), e(n, "load", function () { 4 === n.readyState && (c(n.responseText), localStorage.font_css_cache = n.responseText, localStorage.font_css_cache_file = o) }), n.send() } else { var a = document.createElement("link"); a.href = o, a.rel = "stylesheet", a.type = "text/css", document.getElementsByTagName("head")[0].appendChild(a), document.cookie = "font_css_cache" } } function c(e) { var t = document.createElement("style"); t.innerHTML = e, document.getElementsByTagName("head")[0].appendChild(t) } var o = "/font.css"; window.localStorage && localStorage.font_css_cache || document.cookie.indexOf("font_css_cache") > -1 ? n() : e(window, "load", n) }();
+
+</script>
+<noscript>
+  <link rel="stylesheet" href="/font.css">
+</noscript>
+
+<body>
+  <div id="title" class="text-center">FULL-TIME TRAINING IN ANAHEIM</div>
+  <div id="main" class="container">
+    <div class="row">
+
+      <div class="span6 text-center">
+        <div id="clock-container" class="row">
+          <div class="span6"><span id="clock"></span><span id="ampm"></span></div>
+        </div>
+        <div id="date-container" class="row">
+          <div class="span6"><span id="date"></span></div>
+        </div>
+      </div>
+
+      <div class="span6">
+        <div class="row weather-container">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th><font size= 5>ITERO</font></th>
+                <th><font size= 5>Trainees<font></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th><font size= 4>Sack lunch<font></th>
+                <td><input type="text" style="width:115px; height:50px; font-size:50px;"></td>
+                <td><input type="text" style="width:115px; height:50px; font-size:50px;" ></td>
+              </tr>
+              <tr>
+                <th><font size= 4>Dinner<font></th>
+                <td><input type="text" style="width:115px; height:50px; font-size:50px;" ></td>
+                <td><input type="text" style="width:115px; height:50px; font-size:50px;" ></td>
+              </tr>
+            </tbody>
+          </table>
+          <!--- <input type="text" name="Registration Count" style="width:225px; height:100px; font-size:100px;" >-->
+          <!--
+        <div class="span2 weather-item" style="margin-right:10px;">
+          <div class="row">
+            <div class="weather-today span2 text-center">Today</div>
+          </div>
+          <div class="row">
+            <div class="span2 text-center"><i id="today-condition"></i></div>
+          </div>
+
+          <div class="row">
+            <div class="span1" style="margin-left: 20px; margin-top:10px;">
+              <span id="today-temp"></span>
+            </div>
+            <div class="span1" style="margin-left: 40px;">
+              <div class="row">
+                <div class="span1"><span id="today-high"></span></div>
+              </div>
+              <div class="row">
+                <div class="span1"><span id="today-low"></span></div>
+              </div>
+            </div>
+          </div>
+-->
+        </div>
+        <!--
+        <div class="span2 weather-item not-today">
+          <div class="row">
+            <div class="weather-not-today span2 text-center">Tomorrow</div>
+          </div>
+          <div class="row">
+            <div class="span2 text-center"><i id="tomorrow-condition"></i></div>
+          </div>
+          <div id="tomorrow-low-container" class="row">
+            <div class="span2 text-center"><span id="tomorrow-high"></span></div>
+          </div>
+          <div id="tomorrow-high-container" class="row">
+            <div class="span2 text-center"><span id="tomorrow-low"></span></div>
+          </div>
+        </div>
+        -->
+        <!--
+        <div class="span2 weather-item not-today">
+          <div class="row">
+            <div id="daft" class="weather-not-today span2 text-center"></div>
+          </div>
+          <div class="row">
+            <div class="span2 text-center"><i id="daft-condition"></i></div>
+          </div>
+          <div id="daft-low-container" class="row">
+            <div class="span2 text-center"><span id="daft-high"></span></div>
+          </div>
+          <div id="daft-high-container" class="row">
+            <div class="span2 text-center"><span id="daft-low"></span></div>
+          </div>
+        </div>
+-->
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+
+  <table id="schedule" class="table table-bordered"></table>
+
+  </div>
+</body>
+</html>
