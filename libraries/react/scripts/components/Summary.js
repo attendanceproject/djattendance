@@ -4,7 +4,6 @@ import { Alert, Button } from 'react-bootstrap'
 import SlipDetail from './SlipDetail'
 import { FA_ICON_LOOKUP } from '../constants'
 
-
 const Summary = (p) => {
   let eventsWithRolls = p.eventsRolls.filter(esr => esr.event.roll)
   let unexcused_absences = eventsWithRolls.filter(esr => esr.event.roll.status === 'A' && esr.event.status.slip !== 'approved')
