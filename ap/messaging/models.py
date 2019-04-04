@@ -10,7 +10,7 @@ class Conversation(models.Model):
   participants = models.ManyToManyField(User, null=True, blank=True)
   
 class Message(models.Model):
-  conversation = models.ForeignKey(GospelPair, blank=True, null=True, on_delete=models.CASCADE)
+  conversation = models.ForeignKey(Conversation, blank=True, null=True, on_delete=models.CASCADE)
   sent_by = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
   read_by = models.ManyToManyField(User, null=True, blank=True)
   text = models.TextField(null=True, blank=True)
