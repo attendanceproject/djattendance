@@ -203,6 +203,7 @@ APPS = (
     'leaveslips',
     'lifestudies',
     'meal_seating',
+    'messaging',
     'reports',
     'room_reservations',
     'schedules',
