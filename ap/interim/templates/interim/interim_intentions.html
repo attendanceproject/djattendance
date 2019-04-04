@@ -138,7 +138,7 @@
     grid-template-rows: 35px 25px;
     grid-row-gap: 8px;
     row-gap: 8px;
-    grid-auto-flow: row;
+    grid-auto-rows: 25px;
     margin-top: 30px;
   }
 
@@ -204,8 +204,8 @@
     $("[name='start']").prop( "disabled", true );
     $("[name='start']").addClass('disabled');
 
-    $(".itin-row #id_end").change(function(eventData) {
-      // TODO
+    $(".itin-row #id_end").datepicker({
+      onSelect: change_end_date
     });
 
   });
@@ -245,6 +245,41 @@
     }
 
     $('#post_intent_comments_label').text(text)
+  }
+
+  function change_end_date(end_val, inst) {
+    var row_number = $(this).parent().attr('id').split("-").pop();
+    var start_val = $(this).parent().find("#id_start").val();
+    var reset = null;
+
+    if (end_val == start_val || row_number == "0" && start_val > end_val) {
+      var newDate = new Date(Date.parse(start_val) + 86400000);
+      $(this).val($.datepicker.formatDate('mm/dd/yy', newDate));
+    } else if (start_val > end_val) {
+      reset = end_val;
+      $(this).val(end_val = start_val);
+      start_val = reset;
+    }
+
+    var interim_end = "{{interim_end|date:'m/d/Y'}}";
+    if (end_val > interim_end) {
+      end_val = $(this).val(end_val = interim_end);
+    }
+
+    var next = $(this).parent().next(".itin-row").find("#id_start");
+    if (next.length == 0 && end_val != interim_end) {
+      next = $(this).parent().clone().appendTo(".actual-itin");
+      next_row = parseInt(row_number) + 1;
+      next.removeAttr('id').attr('id', 'row-' + next_row);
+
+      var nextStartDate = new Date(Date.parse(end_val) + 86400000);
+      next.find("#id_start").val($.datepicker.formatDate('mm/dd/yy', nextStartDate));
+      next.find("#id_end").val(interim_end);
+      next.find("#id_end").datepicker({
+        onSelect: change_end_date
+      });
+    }
+
   }
 
 </script>
@@ -345,7 +380,7 @@
       <p>You may arrive as early as <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> but not later than the date and time above. Those who arrive before <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> must be available to serve. The next term of the Training begins on <strong>{{admin.term_begin_date|date:'l, F d'}}</strong>.</p>
 
       <div class="new-form">
-        <div class="itin-grid">
+        <div class="itin-grid actual-itin">
           <div class="itin-row">
             <label for="start_date">Start Date</label>
             <label for="end_date">End Date</label>
@@ -353,13 +388,15 @@
           </div>
 
           {% for itin_form in itinerary_forms %}
-            <div class="itin-row row-{{forloop.counter0}}">
+            <div class="itin-row" id="row-{{forloop.counter0}}">
               {{itin_form.start}}
               {{itin_form.end}}
               {{itin_form.comments}}
             </div>
           {% endfor %}
         </div>
+        <br>
+        <p>Note: if you set a date after the last date of the interim (auto-filled) the last row will be removed. Date changes will be automatically sorted. Additional rows will be added each time the end date is changed.</p>
 
         <label for="id_intent" style="margin-top: 30px">Intent to Return</label><br>
         {% for c in form.intent %}
