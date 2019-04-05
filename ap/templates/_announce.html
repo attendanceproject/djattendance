@@ -8,8 +8,8 @@
   </div>
   <div id="announce__portal" class="collapse announce__portal" aria-expanded="false">
     <span class="triangle-left"></span>
-    <div class="announce__title" align="right">
-      <a href="{% url 'messaging:messaging' %}">View All</a>
+    <div class="announce__title" align="right" style="padding-top:5px;padding-right:10px">
+      <a href="{% url 'messaging:messaging' %}"><u>View All</u></a>
     </div>
     {% for message in messages %}
     <div class="row announce__row {{ message|bootstrap_message_classes }}">
