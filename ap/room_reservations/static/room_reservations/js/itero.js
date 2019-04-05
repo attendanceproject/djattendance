@@ -71,7 +71,7 @@ var SERVICE_GROUPS = {
         { "time": "11:45-12:30", "content": "POW WOW/Lunch" },
         { "time": "12:30-13:30", "content": "Lead Unloading, Check invoices" },
         { "time": "13:30-14:00", "content": "Orientation" },
-        { "time": "14:00-17:15", "content": "Organize Truck, Inventory, Help INV" },
+        { "time": "14:00-17:15", "content": "Organize Truck, INV, Help INV" },
         { "time": "17:15-17:45", "content": "Clean-up and Setup FTTA Dinner"},
         { "time": "17:45-18:30", "content": "KC Dinner" },
         { "time": "18:30-19:00", "content": "POW WOW" },
@@ -1597,6 +1597,7 @@ function updateClock() {
 
 $(document).ready(function () {
   loadTable();
+  setInterval(loadTable, 1000);
   loadWeather();
   setInterval(loadWeather, 10000);
   updateClock();
