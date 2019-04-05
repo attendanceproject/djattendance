@@ -204,9 +204,13 @@
     $("[name='start']").prop( "disabled", true );
     $("[name='start']").addClass('disabled');
 
-    $(".itin-row #id_end").datepicker({
-      onSelect: change_end_date
-    });
+    $(".actual-itin").on('change', '#id_end', change_end_date)
+
+    // $(".itin-row #id_end").datepicker({
+    //   onSelect: function(dateText) {
+    //     change_end_date(dateText);
+    //     housekeeping();
+    // });
 
   });
 
@@ -247,8 +251,9 @@
     $('#post_intent_comments_label').text(text)
   }
 
-  function change_end_date(end_val, inst) {
+  function change_end_date(end_field) {
     var row_number = $(this).parent().attr('id').split("-").pop();
+    var end_val = $(this).val();
     var start_val = $(this).parent().find("#id_start").val();
     var reset = null;
 
@@ -275,11 +280,7 @@
       var nextStartDate = new Date(Date.parse(end_val) + 86400000);
       next.find("#id_start").val($.datepicker.formatDate('mm/dd/yy', nextStartDate));
       next.find("#id_end").val(interim_end);
-      next.find("#id_end").datepicker({
-        onSelect: change_end_date
-      });
     }
-
   }
 
 </script>
