@@ -1597,6 +1597,7 @@ function updateClock() {
 
 $(document).ready(function () {
   loadTable();
+  setInterval(loadTable, 1000);
   loadWeather();
   setInterval(loadWeather, 10000);
   updateClock();
