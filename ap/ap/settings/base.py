@@ -213,6 +213,7 @@ APPS = (
     'web_access',
     'xb_application',
     'house_inspection',
+    'messaging',
 
     # fobi-core
     'fobi',
