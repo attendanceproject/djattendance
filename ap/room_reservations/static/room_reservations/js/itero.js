@@ -280,7 +280,7 @@ var SERVICE_GROUPS = {
       "name": "ITERO",
       "color": "lightblue",
       "res": [
-        { "time": "7:00-8:30", "content": "Registration " },
+        { "time": "7:30-8:30", "content": "Registration " },
         { "time": "8:30-10:15", "content": "SESSION 1" },
         { "time": "10:15-10:45", "content": "BREAK" },
         { "time": "10:45-12:30", "content": "SESSION 2" },
@@ -580,7 +580,7 @@ var SERVICE_GROUPS = {
         { "time": "5:30-6:15", "content": "Arrive, Turn on Urns" },
         { "time": "6:15-6:30", "content": "Personal Morning Revival" },
         { "time": "6:30-7:00", "content": "Breakfast" },
-        { "time": "7:00-8:30", "content": "On floor during registration" },
+        { "time": "7:00-8:30", "content": "On floor 7:20 for REG" },
         { "time": "8:30-9:00", "content": "Restock" },
         { "time": "9:00-10:00", "content": "Restock carts" },
         { "time": "10:00-10:15", "content": "Monitor Stations" },
