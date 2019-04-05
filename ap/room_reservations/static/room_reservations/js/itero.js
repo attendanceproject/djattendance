@@ -553,7 +553,7 @@ var SERVICE_GROUPS = {
         { "time": "6:30-7:00", "content": "Breakfast" },
         { "time": "7:00-8:30", "content": "Help TB" },
         { "time": "8:30-9:00", "content": "Finalize set up" },
-        { "time": "9:00-10:00", "content": "bags, baskets, utensils (setup for DINNER)" },
+        { "time": "9:00-10:00", "content": "bags, baskets, utensils" },
         { "time": "10:00-10:15", "content": "Load Butter into Truck" },
         { "time": "10:15-10:30", "content": "Help TB" },
         { "time": "10:30-12:00", "content": "Help SL" },
