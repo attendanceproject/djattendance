@@ -35,6 +35,92 @@ from .serializers import (AssignmentPinSerializer, ExceptionActiveSerializer,
 from .utils import (SERVICE_CHECKS, assign, assign_leaveslips, merge_assigns,
                     save_designated_assignments)
 
+def check_exceptions_view(request):
+  user = request.user
+  trainee = trainee_from_user(user)
+  if request.GET.get('week_schedule'):
+    current_week = request.GET.get('week_schedule')
+    current_week = int(current_week)
+    current_week = current_week if current_week < LAST_WEEK else LAST_WEEK
+    current_week = current_week if current_week > FIRST_WEEK else FIRST_WEEK
+    cws = WeekSchedule.get_or_create_week_schedule(trainee, current_week)
+  else:
+    ct = Term.current_term()
+    current_week = ct.term_week_of_date(date.today())
+    cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
+  week_start, week_end = cws.week_range
+
+  workers = Worker.objects.select_related('trainee').all().order_by('trainee__firstname', 'trainee__lastname')
+
+  # For Review Tab
+  categories = Category.objects.prefetch_related(
+      Prefetch('services', queryset=Service.objects.order_by('weekday', 'start')),
+      Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.filter(assignments__week_schedule=cws).annotate(workers_count=Count('assignments__workers')).order_by('-worker_group__assign_priority')),
+      Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.filter(~Q(Q(assignments__isnull=False) & Q(assignments__week_schedule=cws))).filter(workers_required__gt=0), to_attr='unassigned_slots'),
+      Prefetch('services__serviceslot_set__assignments', queryset=Assignment.objects.filter(week_schedule=cws)),
+      Prefetch('services__serviceslot_set__assignments__workers', queryset=Worker.objects.select_related('trainee').order_by('trainee__gender', 'trainee__firstname', 'trainee__lastname'))
+  ).distinct()
+
+  # For Services Tab
+  service_categories = Category.objects.filter(services__designated=False).prefetch_related(
+      Prefetch('services', queryset=Service.objects.filter(designated=False).order_by('weekday', 'start')),
+      Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.all().order_by('-worker_group__assign_priority'))
+  ).distinct()
+
+  # For Designated Tab
+  designated_categories = Category.objects.filter(services__designated=True).prefetch_related(
+      Prefetch('services', queryset=Service.objects.filter(designated=True).order_by('weekday', 'start')),
+      Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.all().order_by('-worker_group__assign_priority'))
+  ).distinct()
+
+  pre_assignments = Assignment.objects.filter(week_schedule=cws, service__isnull=False).select_related(
+      'service',
+      'service_slot',
+      'service__category'
+  ).order_by('service__weekday')
+
+  worker_assignments = Worker.objects.select_related('trainee').prefetch_related(
+      Prefetch('assignments', queryset=pre_assignments, to_attr='week_assignments')
+  )
+
+  exceptions = ServiceException.objects.all().prefetch_related('workers', 'services').select_related('schedule')
+
+  # Getting all services to be displayed for calendar
+  services = Service.objects.filter(active=True).prefetch_related('serviceslot_set', 'worker_groups').order_by('start', 'end')
+
+  for worker in worker_assignments:
+    worker.workload = sum(a.workload for a in worker.week_assignments)
+    worker.checks = [
+        c.check(worker.week_assignments) for c in SERVICE_CHECKS
+    ]
+    # attach services directly to trainees for easier template traversal
+    service_db = {}
+    for a in worker.week_assignments:
+      service_db.setdefault(a.service.category, []).append((a.service, a.service_slot.name))
+    worker.services = service_db
+
+  # Make workers_bb
+  lJRender = JSONRenderer().render
+  workers_bb = lJRender(WorkerIDSerializer(workers, many=True).data)
+  services_bb = lJRender(ServiceCalendarSerializer(services, many=True).data)
+
+  ctx = {
+      'workers': workers,
+      'workers_bb': workers_bb,
+      'exceptions': exceptions,
+      'categories': categories,
+      'service_categories': service_categories,
+      'designated_categories': designated_categories,
+      'services_bb': services_bb,
+      'report_assignments': worker_assignments,
+      'cws': cws,
+      'current_week': current_week,
+      'prev_week': (current_week - 1),
+      'next_week': (current_week + 1),
+      'service_checks': SERVICE_CHECKS,
+  }
+
+  return render(request, 'services/services_check_exceptions.html', ctx)
 
 @timeit
 @group_required(['training_assistant', 'service_schedulers'])
