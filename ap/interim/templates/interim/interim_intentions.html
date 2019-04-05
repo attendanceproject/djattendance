@@ -160,29 +160,13 @@
 
 </style>
 {% endblock %}
+
 {% block scripts %}
 {{ block.super }}
 {{ form.media }}
 {{ itinerary_forms.0.media }}
 
 <script type="text/javascript">
-
-  function date_formatter(dt) {
-    date = dt.toLocaleDateString('en-US', options)
-    mon = date.slice(0, 2)
-    dat = date.slice(3, 5)
-    yer = date.slice(6, 10)
-    return mon + "/" + dat + "/" + yer
-  }
-
-  var dt_options = {
-    timepicker: false,
-    format: 'm/d/Y',
-    formatDate: 'm/d/Y',
-    defaultSelect: true,
-  };
-
-  var options = {year: 'numeric', month: '2-digit', day: '2-digit' };
 
   $(document).ready(() => {
 
@@ -201,16 +185,11 @@
       $("#id_end").val(interim_end);
     }
 
-    $("[name='start']").prop( "disabled", true );
-    $("[name='start']").addClass('disabled');
+    $("#row-0 #id_start").prop("disabled", true);
+    $("#row-0 #id_start").addClass('disabled');
 
-    $(".actual-itin").on('change', '#id_end', change_end_date)
-
-    // $(".itin-row #id_end").datepicker({
-    //   onSelect: function(dateText) {
-    //     change_end_date(dateText);
-    //     housekeeping();
-    // });
+    $(".actual-itin").on('change', '#id_start', change_start_date);
+    $(".actual-itin").on('change', '#id_end', change_end_date);
 
   });
 
@@ -251,6 +230,20 @@
     $('#post_intent_comments_label').text(text)
   }
 
+  function change_start_date(start_field) {
+    var start_val = $(this).val();
+    var prev = $(this).parent().prev('.itin-row').find("#id_end");
+    var one_day_before = new Date(Date.parse(start_val) - 86400000);
+    if (prev.val() && Date.parse(prev.val()) != one_day_before) {
+      prev.val($.datepicker.formatDate('mm/dd/yy', one_day_before)).change();
+    }
+
+    var end_field = $(this).parent().find("#id_end");
+    if (end_field.val() < start_val) {
+      end_field.change();
+    }
+  }
+
   function change_end_date(end_field) {
     var row_number = $(this).parent().attr('id').split("-").pop();
     var end_val = $(this).val();
@@ -268,18 +261,46 @@
 
     var interim_end = "{{interim_end|date:'m/d/Y'}}";
     if (end_val > interim_end) {
-      end_val = $(this).val(end_val = interim_end);
+      $(this).val(end_val = interim_end);
     }
 
     var next = $(this).parent().next(".itin-row").find("#id_start");
+    var one_day_later = new Date(Date.parse(end_val) + 86400000)
     if (next.length == 0 && end_val != interim_end) {
+      var dt_options = { // variable for setting datepicker on newly created fields
+        timepicker: false,
+        format: 'm/d/Y',
+        formatDate: 'm/d/Y',
+        defaultSelect: true,
+      };
+
       next = $(this).parent().clone().appendTo(".actual-itin");
       next_row = parseInt(row_number) + 1;
       next.removeAttr('id').attr('id', 'row-' + next_row);
 
-      var nextStartDate = new Date(Date.parse(end_val) + 86400000);
-      next.find("#id_start").val($.datepicker.formatDate('mm/dd/yy', nextStartDate));
+      next.find("#id_start").val($.datepicker.formatDate('mm/dd/yy', one_day_later));
       next.find("#id_end").val(interim_end);
+      next.find("#id_start").datetimepicker(dt_options);
+      next.find("#id_end").datetimepicker(dt_options);
+
+      next = next.find("#id_start");
+
+      if (row_number == 0) {
+        $("#row-1 #id_start").prop("disabled", false);
+        $("#row-1 #id_start").removeClass('disabled');
+      }
+    }
+
+    if (next.length > 0) {
+      next.val($.datepicker.formatDate('mm/dd/yy', one_day_later)).change();
+    }
+
+    if (reset) {
+      $(this).parent().find("#id_start").val(reset).change();
+    }
+
+    if (interim_end < start_val) {
+      $(this).parent.remove();
     }
   }
 
@@ -322,17 +343,15 @@
   </div>
 <!-- /Error messaging -->
 {% endif %}
-
-
 {% endfor %}
+
+<ul class="nav nav-tabs" role="tablist" style="margin-bottom: 30px">
+  <li role="presentation" class="active"><a href="#contact-info" aria-controls="home" role="tab" data-toggle="tab">Contact Information</a></li>
+  <li role="presentation"><a href="#int-itin" aria-controls="profile" role="tab" data-toggle="tab">Interim Itinerary</a></li>
+</ul>
 
 <form id="id_interim_intentions_form" method="post" action="">
   {% csrf_token %}
-
-  <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 30px">
-    <li role="presentation" class="active"><a href="#contact-info" aria-controls="home" role="tab" data-toggle="tab">Contact Information</a></li>
-    <li role="presentation"><a href="#int-itin" aria-controls="profile" role="tab" data-toggle="tab">Interim Itinerary</a></li>
-  </ul>
 
   <div class="tab-content">
 
