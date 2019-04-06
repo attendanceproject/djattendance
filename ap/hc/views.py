@@ -273,6 +273,7 @@ class HCSurveyTAView(GroupRequiredMixin, TemplateView):
     context['sis_reported'] = House.objects.filter(id__in=house_ids, gender="S")
     context['sis_not_reported'] = House.objects.exclude(id__in=house_ids).filter(gender="S")
     context['surveys_and_comments'] = surveys_and_comments
+    context['survey_number'] = index;
     context['page_title'] = "HC Survey Report"
     return context
 

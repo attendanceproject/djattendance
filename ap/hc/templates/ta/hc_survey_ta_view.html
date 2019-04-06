@@ -9,13 +9,13 @@
   $( document ).ready(() => {
     $("#collapse_all").on('click', function(){
       if (stat){
-        $("#content .collapse").collapse("show") 
+        $("#content .collapse").collapse("show")
         stat = false
       } else{
-        $("#content .collapse").collapse("hide") 
+        $("#content .collapse").collapse("hide")
         stat = true
       }
-      
+
     })
   })
 </script>
@@ -24,14 +24,14 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<h2>HC Survey Admin</h2>
+<h2>HC Survey #{{survey_number}} Report</h2>
 <div id="content">
   <h3>Summary</h3>
   <table class="table table-bordered" id="summary_table">
     <thead>
       <tr>
         <th>Brothers Reported</th>
-        <th>Sisters Reported</th>        
+        <th>Sisters Reported</th>
       </tr>
     </thead>
     <tbody>
