@@ -8,13 +8,17 @@ Check Exceptions
 {% endblock %}
 
 {% block content %}
-  <h3>Assignments Violating Active Exceptions</h3>
-  <table class="table">
-    {% for service, workers in service_to_workers.items %}
-      <tr>
-        <td>{{ service.name }}</td>
-        <td>{{ workers }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+  {% if service_to_workers|length > 0%}
+    <h3>Assignments Violating Active Exceptions</h3>
+    <table class="table">
+      {% for service, workers in service_to_workers.items %}
+        <tr>
+          <td>{{ service.name }}</td>
+          <td>{{ workers }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <h3>No assignments are violating active exceptions.</h3>
+  {% endif %}
 {% endblock %}
