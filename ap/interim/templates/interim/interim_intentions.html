@@ -123,7 +123,7 @@
 
   #submit{
     display: inline-block;
-    float: left;
+    float: right;
   }
 
   label[for=id_intent_0], label[for=id_intent_1], label[for=id_intent_2], label[for=id_intent_3] {
@@ -178,7 +178,12 @@
 
     // interim itinerary javascript
     var interim_start = "{{interim_start|date:'m/d/Y'}}";
-    var interim_end = "{{interim_end|date:'m/d/Y'}}";
+    var interim_end = "";
+    if ({{ request.user.current_term }} == 1) {
+      interim_end = "{{admin.date_1yr_return|date:'m/d/Y'}}";
+    } else {
+      interim_end = "{{admin.date_2yr_return|date:'m/d/Y'}}";
+    }
 
     if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
       $("#id_start").val(interim_start);
@@ -195,17 +200,11 @@
 
   function show_hide_post_interim(){
     if($('#id_intent_1, #id_intent_2, #id_intent_3').is(':checked')) {
-      $('#post_intent_comments_label').show();
-      $("#id_post_intent_comments").show();
-      $('label[for=id_post_training_intentions]').show();
-      $("#id_post_training_intentions").show();
+      $('.post-training-plans').show();
       $("#id_post_training_intentions").attr("required", true);
       $("#id_post_intent_comments").attr("required", true);
     } else {
-      $('#post_intent_comments_label').hide();
-      $("#id_post_intent_comments").hide();
-      $('label[for=id_post_training_intentions]').hide();
-      $("#id_post_training_intentions").hide();
+      $('.post-training-plans').hide();
       $("#id_post_training_intentions").attr("required", false);
       $("#id_post_intent_comments").attr("required", false);
     }
@@ -422,8 +421,7 @@
         {% for c in form.intent %}
           {{c}}&nbsp;&nbsp;
         {% endfor %}<br>
-
-        <div class="itin-grid">
+        <div class="itin-grid post-training-plans">
             {{form.post_training_intentions.label_tag}}
             {{form.post_training_intentions}}
             <p id="post_intent_comments_label">
@@ -434,10 +432,10 @@
 
       </div>
 
+      <br>
+      <button type="submit" class="btn btn-danger btn-save" id="submit">{{button_label|safe}}</button>
     </div>
   </div>
 
-  <br>
-  <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
 </form>
 {% endblock %}
