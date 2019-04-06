@@ -166,7 +166,7 @@ class FaqTaComment(FaqMixin, generic.UpdateView):
   form_class = HouseInspectionFaqCommentForm
   raise_exception = True
 
-class InspectorAnswer(FaqMixin, generic.UpdateView):  
+class InspectorAnswer(FaqMixin, generic.UpdateView):
   template_name = 'requests/ta_answer.html'
   form_class = HouseInspectionFaqAnswerForm
   raise_exception = True
@@ -179,7 +179,7 @@ class InspectorAnswer(FaqMixin, generic.UpdateView):
     obj.save()
     return redirect_url
 
-modify_status = modify_question_status(HouseInspectionFaq, reverse_lazy('house_inspection:question_list'))  
+modify_status = modify_question_status(HouseInspectionFaq, reverse_lazy('house_inspection:question_list'))
 
 def houseInspectionFaq(request):
   if request.method == "POST":

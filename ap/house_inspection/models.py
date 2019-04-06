@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 # unsure of import ValidationError
 
 class HouseInspectionFaq(models.Model):
-	TYPE_APPROVAL_STATUS_CHOICES = (    	
+	TYPE_APPROVAL_STATUS_CHOICES = (
     	('A', 'Approved'),
     	('An', 'Answered'),
     	('U', 'Unanswered'),
@@ -18,7 +18,7 @@ class HouseInspectionFaq(models.Model):
 	question = models.TextField(null=True, blank=True)
 	answer = models.TextField(null=True, blank=True)
 	status = models.CharField(choices=TYPE_APPROVAL_STATUS_CHOICES, max_length=2, default='U')
-	trainee = models.ForeignKey(Trainee, blank=True, null=True, on_delete=models.SET_NULL)	
+	trainee = models.ForeignKey(Trainee, blank=True, null=True, on_delete=models.SET_NULL)
 	date_assigned = models.DateTimeField(auto_now_add=True)	
 	comment = models.TextField(blank=True, null=True)
 
@@ -44,7 +44,7 @@ class HouseInspectionFaq(models.Model):
 		return self.comment
 
 	@property
-	def requester_name(self):		
+	def requester_name(self):
 		if self.trainee:
 		  return self.trainee.full_name
 		return "Guest"
