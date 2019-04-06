@@ -234,3 +234,12 @@ export const isAM = (user) => {
   }
   return false;
 }
+
+export const isTA = (user) => {
+  for (let group of TA_GROUP) {
+    if (user.groups.indexOf(group) >= 0) {
+      return true;
+    }
+  }
+  return false;
+}

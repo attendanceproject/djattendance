@@ -1,0 +1,99 @@
+<h1 id="title">
+  {{team}}
+</h1>
+<h2>
+  Gospel Team Statistics {{term}}
+</h2>
+<style>
+table, th, td {
+  border: 1px solid black;
+  padding: 3px;
+  text-align: center;
+  border-collapse: collapse;
+}
+thead {
+  background: #E3E3E3;
+}
+</style>
+{% if reporttype < 2 %}
+<table>
+  <thead>
+    <tr>
+      <th colspan=14>
+        Gospel Pair Statistic
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for pair in pairs %}
+    <tr>
+      {% for each in pair %}
+      <tr>
+      {% for every in each %}
+      <td>
+        {{every}}
+      </td>
+      {% endfor %}
+      </tr>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  <tbody>
+</table>
+{% endif %}
+
+{% if reporttype < 3 %}
+<table>
+  <thead>
+    <tr>
+      <th>
+        Weekly Statistic
+      </th>
+      {% for each in attributes %}
+      <th>
+        {{each}}
+      </th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for each in weekly %}
+    <tr>
+      {% for every in each %}
+      <td>
+        {{every}}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  <tbody>
+</table>
+{% endif %}
+
+{% if reporttype < 4 %}
+<table>
+  <thead>
+    <tr>
+      <th>
+        Total
+      </th>
+      {% for each in attributes %}
+      <th>
+        {{each}}
+      </th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for each in total %}
+    <tr>
+      {% for every in each %}
+      <td>
+        {{every}}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  <tbody>
+</table>
+{% endif %}

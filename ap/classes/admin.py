@@ -33,5 +33,15 @@ class ClassAdmin(FilteredSelectMixin, admin.ModelAdmin):
     obj.save()
 
 
+class ClassFileAdmin(admin.ModelAdmin):
+  list_display = ('label', 'for_class', 'file')
+  list_filter = ('label', 'for_class', 'file')
+  search_fields = ('label', 'for_class', 'file')
+
+  class Meta:
+    model = ClassFile
+    fields = '__all__'
+
+
 admin.site.register(Class, ClassAdmin)
-admin.site.register(ClassFile)
+admin.site.register(ClassFile, ClassFileAdmin)

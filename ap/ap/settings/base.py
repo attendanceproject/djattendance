@@ -194,6 +194,7 @@ APPS = (
     'classnotes',
     'dailybread',  # daily nourishment
     'exams',
+    'gospel_statistics',
     'gospel_trips',
     'graduation',
     'hc',
