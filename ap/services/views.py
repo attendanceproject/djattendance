@@ -167,7 +167,7 @@ def check_exceptions_view(request):
   # You can combine these query sets using:
   se_used = se_n | se_d
 
-  # A dictionary of assignments that violate active exceptions. 
+  # A dictionary of assignments that violate active exceptions.
   # Maps service to string of worker names
   service_to_workers = {}
 
