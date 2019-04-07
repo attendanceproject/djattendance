@@ -60,15 +60,23 @@ class EventUtils:
 
     # Prioritized weekly event table
     # {(w, weekday): OrderedDict(ev: set([trainee1, trainee2,]))}
+    # the try-excpets are used for schedules validation where instead of an actual schedule object
+    # we're mimicking it using a dictionary
     w_tb = OrderedDict()
 
     wk_set = set([int(w) for w in weeks])
 
     for schedule in schedules:
       # order events so collision detection behavior is very predictable
-      evs = schedule.events.order_by('weekday', 'start', 'end')
-      valid_weeks = set([int(x) for x in schedule.weeks.split(',')]).intersection(wk_set)
-      t_intersect = set(schedule.trainees.all()).intersection(t_set)
+      try:
+        evs = schedule.events.order_by('weekday', 'start', 'end')
+        valid_weeks = set([int(x) for x in schedule.weeks.split(',')]).intersection(wk_set)
+        t_intersect = set(schedule.trainees.all()).intersection(t_set)
+      except AttributeError:
+        evs = schedule['events'].order_by('weekday', 'start', 'end')
+        valid_weeks = set([int(x) for x in schedule['weeks'].split(',')]).intersection(wk_set)
+        t_intersect = set(schedule['trainees'].all()).intersection(t_set)
+
       for w in valid_weeks:
         for ev in evs:
           # skip if current week is not for one off event
@@ -76,7 +84,10 @@ class EventUtils:
             continue
           # absolute date is already calculated
           weekday = ev.weekday
-          ev.priority = schedule.priority
+          try:
+            ev.priority = schedule.priority
+          except AttributeError:
+            ev.priority = schedule['priority']
           day_evnts = w_tb.setdefault((w, weekday), OrderedDict())
 
           # check for conflicts.
