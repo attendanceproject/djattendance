@@ -21,22 +21,22 @@
     align-items: end;
   }
 
-  label[for=first-name-text] {
+  label[for=first_name_text] {
     grid-column: 1 / 2;
     grid-row: 1 / 2;
   }
 
-  #first-name-text {
+  #first_name_text {
     grid-column: 1 / 2;
     grid-row: 2 / 3;
   }
 
-  label[for=last-name-text] {
+  label[for=last_name_text] {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
   }
 
-  #last-name-text {
+  #last_name_text {
     grid-column: 2 / 3;
     grid-row: 2 / 3;
   }
@@ -168,6 +168,20 @@
 
 <script type="text/javascript">
 
+  var dt_options = { // variable for setting datepicker on newly created fields
+    timepicker: false,
+    format: 'm/d/Y',
+    formatDate: 'm/d/Y',
+    defaultSelect: true,
+  };
+
+  var interim_end = "";
+  if ({{ request.user.current_term }} == 1) {
+    interim_end = "{{admin.date_1yr_return|date:'m/d/Y'}}";
+  } else {
+    interim_end = "{{admin.date_2yr_return|date:'m/d/Y'}}";
+  }
+
   $(document).ready(() => {
 
     // post-training intent javascript
@@ -178,20 +192,15 @@
 
     // interim itinerary javascript
     var interim_start = "{{interim_start|date:'m/d/Y'}}";
-    var interim_end = "";
-    if ({{ request.user.current_term }} == 1) {
-      interim_end = "{{admin.date_1yr_return|date:'m/d/Y'}}";
-    } else {
-      interim_end = "{{admin.date_2yr_return|date:'m/d/Y'}}";
-    }
 
     if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
       $("#id_start").val(interim_start);
       $("#id_end").val(interim_end);
     }
 
-    $("#row-0 #id_start").prop("disabled", true);
-    $("#row-0 #id_start").addClass('disabled');
+    $("#row-0 #id_start").prop("readonly", true);
+    $("#row-0 #id_start").addClass('readonly');
+    $("#row-0 #id_start").datetimepicker("destroy");
 
     $(".actual-itin").on('change', '#id_start', change_start_date);
     $(".actual-itin").on('change', '#id_end', change_end_date);
@@ -231,22 +240,29 @@
 
   function change_start_date(start_field) {
     var start_val = $(this).val();
-    var prev = $(this).parent().prev('.itin-row').find("#id_end");
+    var prev = $(this).parent(".itin-row").prev('.itin-row').find("#id_end");
     var one_day_before = new Date(Date.parse(start_val) - 86400000);
     if (prev.val() && Date.parse(prev.val()) != one_day_before) {
+      // change_end_date(prev.val($.datepicker.formatDate('mm/dd/yy', one_day_before)));
       prev.val($.datepicker.formatDate('mm/dd/yy', one_day_before)).change();
+      // change_end_date(prev);
+      alert("A");
     }
+    alert("B");
 
-    var end_field = $(this).parent().find("#id_end");
+    var end_field = $(this).parent(".itin-row").find("#id_end");
     if (end_field.val() < start_val) {
+      alert("C");
+      // change_end_date(end_field);
       end_field.change();
     }
   }
 
   function change_end_date(end_field) {
-    var row_number = $(this).parent().attr('id').split("-").pop();
+    // console.log($(this).val());
+    var row_number = $(this).parent(".itin-row").attr('id').split("-").pop();
     var end_val = $(this).val();
-    var start_val = $(this).parent().find("#id_start").val();
+    var start_val = $(this).parent(".itin-row").find("#id_start").val();
     var reset = null;
 
     if (end_val == start_val || row_number == "0" && start_val > end_val) {
@@ -258,22 +274,14 @@
       start_val = reset;
     }
 
-    var interim_end = "{{interim_end|date:'m/d/Y'}}";
     if (end_val > interim_end) {
       $(this).val(end_val = interim_end);
     }
 
-    var next = $(this).parent().next(".itin-row").find("#id_start");
+    var next = $(this).parent(".itin-row").next(".itin-row").find("#id_start");
     var one_day_later = new Date(Date.parse(end_val) + 86400000)
     if (next.length == 0 && end_val != interim_end) {
-      var dt_options = { // variable for setting datepicker on newly created fields
-        timepicker: false,
-        format: 'm/d/Y',
-        formatDate: 'm/d/Y',
-        defaultSelect: true,
-      };
-
-      next = $(this).parent().clone().appendTo(".actual-itin");
+      next = $(this).parent(".itin-row").clone().appendTo(".actual-itin");
       next_row = parseInt(row_number) + 1;
       next.removeAttr('id').attr('id', 'row-' + next_row);
 
@@ -285,21 +293,21 @@
       next = next.find("#id_start");
 
       if (row_number == 0) {
-        $("#row-1 #id_start").prop("disabled", false);
-        $("#row-1 #id_start").removeClass('disabled');
+        $("#row-1 #id_start").prop("readonly", false);
+        $("#row-1 #id_start").removeClass('readonly');
       }
     }
 
     if (next.length > 0) {
+      // change_start_date(next.val($.datepicker.formatDate('mm/dd/yy', one_day_later)));
       next.val($.datepicker.formatDate('mm/dd/yy', one_day_later)).change();
     }
-
     if (reset) {
-      $(this).parent().find("#id_start").val(reset).change();
+      // change_start_date($(this).parent(".itin-row").find("#id_start").val(reset));
+      $(this).parent(".itin-row").find("#id_start").val(reset).change();
     }
-
-    if (interim_end < start_val) {
-      $(this).parent.remove();
+    if (interim_end <= start_val) {
+      $(this).parent(".itin-row").remove();
     }
   }
 
@@ -358,11 +366,11 @@
       <p>Please verify that your contact information is up to date.</p>
 
       <div class="new-form contact-grid">
-        <label for="first-name-label">First Name</label>
-        <div class="text readonly" id="first-name-text">{{request.user.firstname}}</div>
+        <label for="first_name_label">First Name</label>
+        <div class="text readonly" id="first_name_text">{{request.user.firstname}}</div>
 
-        <label for="last-name-text">Last Name</label>
-        <div class="text readonly" id="last-name-text">{{request.user.lastname}}</div>
+        <label for="last_name_text">Last Name</label>
+        <div class="text readonly" id="last_name_text">{{request.user.lastname}}</div>
 
         {{ form.cell_phone.label_tag }}
         {{ form.cell_phone }}

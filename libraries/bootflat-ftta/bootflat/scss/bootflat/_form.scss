@@ -225,7 +225,7 @@ $search-icon-line-height:          30px !default;
       border: solid 1px $blue-light;
     }
 
-    & .disabled, .readonly {
+    & .readonly {
       background-color: $form-disabled-color;
     }
 
