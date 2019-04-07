@@ -645,3 +645,19 @@ class GradedExamView(TakeExamView):
         "View", True)
     ctx['graded_exam_available'] = self._get_exam().is_graded_open
     return ctx
+
+class OpenCloseExamView(ExamEditView): 
+  def post(self, request):
+
+    if request.method=="POST":
+      try:
+        pk = int(request.POST['exam_id'])
+
+        exam = Exam.objects.get(id=pk)
+        exam.is_open = not exam.is_open
+        exam.save()
+      except KeyError:
+        return HttpResponse('Error')
+      return HttpResponseRedirect(reverse_lazy('exams:manage'))
+    else:
+      raise Http404
