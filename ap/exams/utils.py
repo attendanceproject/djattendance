@@ -403,7 +403,8 @@ def save_grader_scores_and_comments(session, section, responses):
   if section.section_type == 'E' and responses['comments'] == "NOT GRADED YET":
     responses_obj.comments = "GRADED"
   else:
-    responses_obj.comments = responses['comments']
+    comments = responses['comments']
+    responses_obj.comments = comments.replace("\"", "\\\"") #used to properly save and load the string with the escape character
   responses_obj.save()
 
 
