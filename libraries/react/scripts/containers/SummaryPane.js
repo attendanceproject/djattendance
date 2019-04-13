@@ -2,12 +2,14 @@ import { connect } from 'react-redux'
 import { deleteLeaveSlip, editLeaveSlip, editGroupLeaveSlip, deleteGroupSlip } from '../actions'
 import { getGroupSlipsforPeriod, getLeaveSlipsforPeriod, getEventsByRollStatus } from '../selectors/selectors'
 import Summary from '../components/Summary'
+import { isTA } from '../constants'
 
 const mapStateToProps = (state) => {
   return {
     eventsRolls: getEventsByRollStatus(state),
     groupslips: getGroupSlipsforPeriod(state),
     leaveslips: getLeaveSlipsforPeriod(state),
+    isTA: isTA(state.trainee),
   }
 }
 

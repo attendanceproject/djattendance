@@ -43,7 +43,7 @@ const Summary = (p) => {
           <div className="col-xs-1">Submitted</div>
         </div>
         {p.leaveslips.sort((s1, s2) => s1.submitted > s2.submitted ? -1 : 1)
-          .map((slip, i) => <SlipDetail slip={slip} key={i} onClick={() => p.editSlip(slip)} deleteSlip={p.deleteSlip} /> )}
+          .map((slip, i) => <SlipDetail slip={slip} key={i} onClick={() => p.isTA ? window.open("/leaveslips/individual/update/" + slip.id) : p.editSlip(slip)} deleteSlip={p.deleteSlip} /> )}
         </div> : ''
       }
 
@@ -57,7 +57,7 @@ const Summary = (p) => {
           <div className="col-xs-1">Submitted</div>
         </div>
         {p.groupslips.sort((s1, s2) => s1.submitted > s2.submitted ? -1 :1)
-          .map((slip, i) => <SlipDetail trainee={p.trainee} slip={slip} key={i} onClick={() => p.editGroupSlip(slip)} deleteSlip={p.deleteGroupSlip} /> )}
+          .map((slip, i) => <SlipDetail trainee={p.trainee} slip={slip} key={i} onClick={() => p.isTA ? window.open("/leaveslips/group/update/" + slip.id) : p.editGroupSlip(slip)} deleteSlip={p.deleteGroupSlip} /> )}
         </div> : ''
       }
 
