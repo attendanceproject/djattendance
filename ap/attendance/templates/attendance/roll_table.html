@@ -145,6 +145,7 @@
     collapse_date_header();
     table = $("#display_roll").DataTable({
       ordering: true,
+      info: false,
       columnDefs: [
         {
           "targets": [ 1, 2, 3 ],
@@ -239,6 +240,31 @@
       var select = $(e.currentTarget);
       var col = select.data("col");
       $("td[data-col='"+col+"'").text(select.val().trim()).blur();
+    }).on('click', '#finalize_rolls', function(e) {
+      data = {}
+      wk = {{week}}
+      data.trainee_id = []
+      $("th[data-row]").each(function(){
+        data.trainee_id.push($(this).attr('data-row'))
+      })
+      data.event_type = '{{event_type}}'
+      data.week = $("#week_menu").find(":selected").val()
+      if (wk > data.week) {
+        if (confirm("Are you sure you want to finalize?")) {
+          $.ajax({
+            type: "POST",
+            url: "{% url 'attendance:finalize-rolls'%}",
+            data: JSON.stringify(data),
+            success: function(response) {
+              new Notification(Notification.SUCCESS, 'Saved').show();
+              $("td[contenteditable]").attr("contenteditable", false);
+              $("#finalize_rolls").attr('disabled', true);
+            },
+          });
+        }
+      } else {
+        new Notification(Notification.ERROR, "Can't finalize now").show();
+      }
     });
 
     $("#week_menu, #team_menu, #house_menu").on("change", function(e) {
@@ -338,7 +364,7 @@
               <td></td>
               <td></td>
               {% for event in event_list %}
-              <th><select class="set_all" data-col='{{event.id}}'>
+              <th><select class="set_all" data-col='{{event.id}}' {% if finalized %} disabled {% endif %}>
                 <option val=""></option>
                 <option val="P">P</option>
                 <option val="A">A</option>
@@ -378,7 +404,7 @@
               {% with events=trainees_event_list|get_item:t %}
               {% if event in events %}
               {% with evt=events|lookup:event %}
-              <td contenteditable="true" class='sectionInputs' data-row='{{t.id}}' data-col='{{evt.id}}' data-date='{{ evt.start_datetime.date|date:"c"}}'>
+              <td {% if not finalized %} contenteditable="true" {% endif %} class='sectionInputs' data-row='{{t.id}}' data-col='{{evt.id}}' data-date='{{ evt.start_datetime.date|date:"c"}}'>
                 {% if evt.roll %}{{evt.roll.status}}{% endif %}
               </td>
               {% endwith %}
@@ -391,6 +417,7 @@
             {% endfor %}
           </tbody>
         </table>
+        <button id="finalize_rolls" class="btn btn-default" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
         {% else %}
         No rolls for this week
         {% endif %}

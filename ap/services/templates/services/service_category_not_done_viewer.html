@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+{{ form.media }}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $("#id_category_id").djangoSelect2({width: '100%'}).on("select2:select", (e) => {
+        $('form').attr("action",$("form").attr("action")+'/'+$("#id_category_id").val());
+        $('form').submit();
+    });
+
+    $('#trainees_not_scheduled_table').DataTable({
+        order: [[ 2, "asc" ], [1, "asc"], [0, "asc"]],
+        info: false,
+        paging: false,
+        autoWidth: true
+    });
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>{{page_title}}</h1>
+<form action="{% url 'services:service_category_not_done_viewer' %}" method="post">
+  {% csrf_token %}
+  <h3>Service Category</h3>
+  <div class="panel">
+    <div class="row">
+      <div class="col-md-4">
+        {{form.category_id}}
+      </div>
+    </div>
+  </div>
+</form>
+
+<h3>Trainees who have <mark><u>NOT</u></mark> done this service category this term</h3>
+<p>Brothers: {{brothers_count}}</p>
+<p>Sisters: {{sisters_count}}</p>
+<p>Total: {{count}}</p>
+
+<div class="data-table-container">
+  <table id="trainees_not_scheduled_table" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Trainee</th>
+        <th>Gender</th>
+        <th>Term</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for trainee in trainees %}
+        <tr>
+          <td>{{trainee.full_name2}}</td>
+          <td>{{trainee.gender}}</td>
+          <td>{{trainee.current_term}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

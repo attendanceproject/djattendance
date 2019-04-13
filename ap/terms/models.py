@@ -1,12 +1,10 @@
 import datetime
-from datetime import timedelta, date
-from exceptions import ValueError
-
-from django.db import models
-from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from datetime import date, timedelta
 
 from aputils.utils import ensure_date
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.db import ProgrammingError, models
+from django.db.models import Q
 
 """ TERM models.py
 
@@ -90,14 +88,14 @@ class Term(models.Model):
       # try to return term by date (will not work for interim)
       try:
         return Term.objects.get(Q(start__lte=today), Q(end__gte=today))
-      except ObjectDoesNotExist, ProgrammingError:
+      except (ObjectDoesNotExist, ProgrammingError):
         # logging.critical('Could not find any terms that match current date!')
         return None
     except MultipleObjectsReturned:
       # logging.critical('More than one term marked as current term! Check your Term models')
       # try to return term by date (will not work for interim)
       return Term.objects.get(Q(start__lte=today), Q(end__gte=today))
-    except:
+    except Exception:
       return None
 
   @staticmethod
@@ -108,7 +106,7 @@ class Term(models.Model):
     if current.season == SPRING:
       return Term(season=FALL, year=current.year)
     else:
-      return Term(season=SPRING, year=current.year+1)
+      return Term(season=SPRING, year=current.year + 1)
 
   @staticmethod
   def current_season():
@@ -173,24 +171,40 @@ class Term(models.Model):
     '''
       Accepts Periods in range: 0-9
     '''
-    return self.startdate_of_week(period*2)
+    return self.startdate_of_week(period * 2)
 
   def enddate_of_period(self, period):
     '''
       Accepts Periods in range: 0-9
     '''
-    return self.enddate_of_week(period*2+1)
+    return self.enddate_of_week(period * 2 + 1)
 
   def period_from_date(self, date):
     if not self.is_date_within_term(date):
-      print 'Outside term range, defaulting to last period'
-      return LAST_PERIOD
+      log_str = 'Outside term range, defaulting to '
+      d = ensure_date(date)
+      if d > self.end:
+        log_str += 'last period'
+        print log_str
+        return LAST_PERIOD
+      if d < self.start:
+        log_str += 'first period'
+        print log_str
+        return FIRST_PERIOD
     return (self.term_week_of_date(date)) // 2
 
   def term_week_of_date(self, date):
     if not self.is_date_within_term(date):
-      print str(date) + ' outside term range, defaulting to last week'
-      return LAST_WEEK
+      log_str = str(date) + ' outside term range, defaulting to '
+      d = ensure_date(date)
+      if d > self.end:
+        log_str += 'last week'
+        print log_str
+        return LAST_WEEK
+      if d < self.start:
+        log_str += 'first week'
+        print log_str
+        return FIRST_WEEK
     return (date.isocalendar()[1] - self.start.isocalendar()[1])
 
   def get_date(self, week, day):
@@ -212,7 +226,6 @@ class Term(models.Model):
       return (19, 6)
 
   def is_attendance_finalized(self, week, trainee):
-    today = datetime.date.today()
     term = self.current_term()
     week_start = term.startdate_of_week(week)
     week_end = term.enddate_of_week(week)

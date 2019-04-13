@@ -6,9 +6,11 @@
 </a>
 {% if request.get_status_display != 'Marked for Fellowship' %}
    <a href="{% url 'web_access:modify-status' 'F' request.id %}">
-    <button class="btn btn-info fellowship" title="Mark for Fellowship"><span class="glyphicon glyphicon-exclamation-sign"></span></button>
-  </a>
+{% else %}
+   <a href="{% url 'web_access:modify-status' 'P' request.id %}">
 {% endif %}
+   <button class="btn btn-info fellowship" title="Mark for Fellowship"><span class="glyphicon glyphicon-exclamation-sign"></span></button>
+   </a>
  <a href="{% url 'web_access:web_access-update-ta' request.id %}">
   <button class="btn btn-info comment" title="Comment"><span class="glyphicon glyphicon-comment"></span></button>
 </a>

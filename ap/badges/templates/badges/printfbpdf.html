@@ -1,6 +1,7 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 {% load render_bundle from webpack_loader %}
+{% load common_tags %}
 
 <head style="margin-bottom:100px">
   {% render_bundle 'jquery_bootstrap' %}
@@ -91,7 +92,7 @@ p {
                       <br>{{badge.lastname}}
                       <br>
                     </b>
-                    {{badge.locality}}
+                    {{badge.locality|default_if_none:""}}
                   </p>
                 </div>
               </div>

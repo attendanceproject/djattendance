@@ -4,14 +4,51 @@
 
 {% block references %}
 <link rel="stylesheet" href="{% static 'apimport/css/apimport.css' %}" />
+{% endblock %}
 
+{% block scripts %}
+<script src="{%static 'apimport/js/csv-processing.js' %}"></script>
+<script type="text/javascript">
+  var TOTAL_ROWS = "{{row_count}}";
+  function update_progress(complete, total){
+    var percentage = Math.round(complete / total * 100);
+    $("#progressbar").children().attr("aria-valuenow", percentage).css("width", percentage + "%").text(percentage + "% Complete");
+  }
+
+  function processRow(rowNumber){
+    $.ajax({
+      type: "POST",
+      url: "{% url 'apimport:process-row' %}",
+      data: {
+        rowNumber: rowNumber,
+        filePath: "{{file_path}}",
+      },
+      success: function(response){
+        update_progress(rowNumber, TOTAL_ROWS);
+        if (response.success){
+          $(".processed-list").append( '<li>' + response.name + '</li>' );
+        }
+        else {
+          $(".failed-list").append( '<li> Row: ' + response.rowNumber + ' -- ' +  response.error + '</li>' );
+        }
+      },
+    })
+  };
+
+  $(document).ready(() => {
+    for (var rowCount = 0; rowCount < TOTAL_ROWS; rowCount++){
+      setTimeout(processRow, 400, rowCount);
+    }
+  });
+
+</script>
 {% endblock %}
 
 {% block title %}Process CSV File{% endblock %}
 
 {% block content %}
 
-{% if not import_complete %}
+{% if not csv_passed %}
   <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#localities">Localities</a></li>
     <li><a data-toggle="tab" href="#teams">Teams</a></li>
@@ -64,11 +101,18 @@
     <button type="input" class="btn btn-success">Refresh</input>
   </form>
 {% else %}
-  Import completed
+  <div class="progress" id="progressbar">
+    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;">0%
+  </div>
+</div>
+<div>
+  <h4>Processed:</h4>
+  <ol class="processed-list">
+  </ol>
+  <h4>Failed:</h4>
+  <ol class="failed-list">
+  </ol>
+</div>
 {% endif %}
 
-{% endblock %}
-
-{% block scripts %}
-  <script src="{%static 'apimport/js/csv-processing.js' %}"></script>
 {% endblock %}

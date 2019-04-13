@@ -4,7 +4,8 @@
 }
 
 .progress {
-  max-width: 500px;
+  max-width: 100%;
+  height: 16px;
 }
 
 /* Overwrite bootstrap */
@@ -14,8 +15,8 @@
   padding-right: 10px;
 }
 
-.progress-bar-second {
-  background-color: green !important;
+.progress-bar-bible {
+  background-color: #E85328;
 }
 
 label.btn-success:active, label.btn-success.active, label.btn-warning.active, label.btn-warning:active, label.btn-danger.active, label.btn-danger:active {

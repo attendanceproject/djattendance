@@ -42,6 +42,12 @@
   li {
     list-style-type: none;
   }
+
+  ul {
+    margin-bottom: 0;
+  }
+
+
 </style>
 
 {% endblock %}
@@ -63,43 +69,45 @@
 <!-- /Error messaging -->
 {% endif %}
 <h2>{{ page_title }}</h2>
-{% if object.due_date%}
+{% if object.due_date %}
   <h3>Due: {{ object.due_date }}</h3>
 {% endif %}
 
 <div class="row"><div class="col-xs-12"><div class="panel">
-  <p>Name: <strong>{{object.trainee.full_name}}</strong></p> 
-  <p>Sending Locality: <strong>{{object.trainee.locality}}</strong></p>
-  <p>Team: <strong>{{object.trainee.team}}</strong></p>
+  <p><strong>Name</strong>: {{object.trainee.full_name}}</p>
+  <p><strong>Sending Locality</strong>: {{object.trainee.locality}}</p>
+  <p><strong>Team</strong>: {{object.trainee.team}}</p>
 </div></div></div>
 
 <form id="id_grad_form" action="" method="post">
   {% csrf_token %}
   <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>Are you considering attending FTTA-XB for this upcoming term?</p>
+    <p><strong>Are you considering attending FTTA-XB for this upcoming term?</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.attend_XB}}
+        <div style="margin-left: 60px">{{form.XB_other}} (65 character limit)</div>
       </div></div>
   </div></div></div>
 
   <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>Have you fellowshipped with the leading brothers in your locality yet?</p>
+    <p><strong>Have you fellowshipped with the leading brothers in your locality yet?</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.fellowshipped}}
+        <div style="margin-left: 60px">{{form.fship_date}} (Date)</div>
       </div></div>
   </div></div></div>
 
   <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>Do you have any other considerations or definite plans for after the Training? Please be specific if possible.</p>
+    <p><strong>Do you have any other considerations or definite plans for after the Training? Please be specific if possible.</strong></p>
       <div class="row"><div class="col-xs-12">
-        {{form.consideration_plan}}<br><div class="remaining_chars"></div> 250 characters maximum.
+        {{form.consideration_plan}}<br>(<div class="remaining_chars"></div>; 250 characters maximum)
       </div></div>
   </div></div></div>
 
   <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>Any other relevant comments i.e, student loans, graduate school deferments, etc.</p>
+    <p><strong>Any other relevant comments i.e, student loans, graduate school deferments, etc.</strong></p>
       <div class="row"><div class="col-xs-12">
-        {{form.comments}}<br><div class="remaining_chars"></div> 150 characters maximum.
+        {{form.comments}}<br>(<div class="remaining_chars"></div>; 150 characters maximum)
       </div></div>
   </div></div></div>
 

@@ -62,7 +62,7 @@ def report(request):
     stat_options = [int(x) for x in p.getlist('stats[]')]
     cutoff_range = int(p.get('cutoff_range', ''))
 
-    trainee_bible_readings = BibleReading.objects.filter(Q(trainee__type='R') | Q(trainee__type='C')).select_related('trainee').all()
+    trainee_bible_readings = BibleReading.objects.filter(trainee__is_active=True).filter(Q(trainee__type='R') | Q(trainee__type='C')).select_related('trainee').all()
 
     trainee_stats = []
 

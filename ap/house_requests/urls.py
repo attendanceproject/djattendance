@@ -6,6 +6,7 @@ app_name = 'house_requests'
 
 urlpatterns = [
   url(r'^maintenance_list/$', views.MaintenanceRequestList.as_view(), name='maintenance-list'),
+  url(r'^maintenance_json/$', views.MaintenanceRequestJSON.as_view(), name='maintenance-json'),
   url(r'^maintenance_request/$', views.MaintenanceRequestCreate.as_view(), name='maintenance-request'),
   url(r'^maintenance_update/(?P<pk>\d+)$', views.MaintenanceRequestUpdate.as_view(), name='maintenance-update'),
   url(r'^maintenance_detail/(?P<pk>\d+)$', views.MaintenanceRequestDetail.as_view(), name='maintenance-detail'),
@@ -15,6 +16,7 @@ urlpatterns = [
   url(r'^maintenance_report/$', views.MaintenanceReport, name='maintenance-report'),
 
   url(r'^linens_list/$', views.LinensRequestList.as_view(), name='linens-list'),
+  url(r'^linens_json/$', views.LinensRequestJSON.as_view(), name='linens-json'),
   url(r'^linens_request/$', views.LinensRequestCreate.as_view(), name='linens-request'),
   url(r'^linens_update/(?P<pk>\d+)$', views.LinensRequestUpdate.as_view(), name='linens-update'),
   url(r'^linens_detail/(?P<pk>\d+)$', views.LinensRequestDetail.as_view(), name='linens-detail'),
@@ -23,6 +25,7 @@ urlpatterns = [
   url(r'^linens_tacomment/(?P<pk>\d+)$', views.LinensRequestTAComment.as_view(), name='linens-tacomment'),
 
   url(r'^framing_list/$', views.FramingRequestList.as_view(), name='framing-list'),
+  url(r'^framing_json/$', views.FramingRequestJSON.as_view(), name='framing-json'),
   url(r'^framing_request/$', views.FramingRequestCreate.as_view(), name='framing-request'),
   url(r'^framing_update/(?P<pk>\d+)$', views.FramingRequestUpdate.as_view(), name='framing-update'),
   url(r'^framing_detail/(?P<pk>\d+)$', views.FramingRequestDetail.as_view(), name='framing-detail'),

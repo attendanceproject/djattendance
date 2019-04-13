@@ -8,20 +8,23 @@
 {% block content %}
 <h2>HC Survey Admin</h2>
 <div>
-  {% for hcr in hc_recommendations %}
-  <h3>{{hcr.house}}</h3>
+  {% for recommendations in hc_recommendations %}
+  <h3>{{recommendations.house}}</h3>
+  <p>Recommendations: {{recommendations.submitted}} / {{recommendations.expected}}</p>
   <table class="table table-bordered" id="recommendation_table">
     <tr>
       <th>Name</th>
       <th>Choice</th>
       <th>Recommendation</th>
     </tr>
-    <tr id="row_0">
+    {% for hcr in recommendations.hcrs %}
+    <tr>
       <td>{{hcr.recommended_hc}}</td>
       <td>{{hcr.choice}}</td>
-      <td>{{hcr.recommendation}}
-      </tr>
-    </table>
+      <td>{{hcr.recommendation}}</td>
+    </tr>
+    {% endfor %}
+   </table>
   {% endfor %}
 </div>
 {% endblock %}

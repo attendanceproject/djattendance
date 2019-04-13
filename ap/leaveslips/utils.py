@@ -10,7 +10,9 @@ def find_next_leaveslip(current_ls):
     ON i_s.id = is_r.individualslip_id
     JOIN attendance_roll AS a_r
     ON is_r.roll_id = a_r.id
-    WHERE (i_s.status = 'P' OR i_s.status = 'S') AND i_s."TA_id" = {}
+    JOIN terms_term AS t_t
+    ON t_t.start < a_r.date
+    WHERE (i_s.status = 'P' OR i_s.status = 'S') AND i_s."TA_id" = {} AND t_t.current = 't'
     GROUP BY i_s.id
     ORDER BY min_date ASC
     LIMIT 2;'''.format(current_ls.TA.id))

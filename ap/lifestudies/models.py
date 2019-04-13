@@ -27,8 +27,27 @@ SUMMARY
 
 """
 
+class DisciplineManager(models.Manager):
+  def get_queryset(self):
+    queryset = super(DisciplineManager, self).get_queryset()
+    if Term.current_term():
+      start_date = Term.current_term().start
+      end_date = Term.current_term().end
+      return queryset.filter(date_assigned__gte=start_date, date_assigned__lte=end_date).distinct()
+    else:
+      return queryset
+
+
+class DisciplineAllManager(models.Manager):
+  def get_queryset(self):
+    return super(DisciplineAllManager, self).get_queryset()
+
 
 class Discipline(models.Model):
+
+  objects = DisciplineManager()
+  objects_all = DisciplineAllManager()
+
   TYPE_OFFENSE_CHOICES = (
     ('MO', 'Monday Offense'),
     ('RO', 'Regular Offense'),
@@ -170,9 +189,29 @@ class Discipline(models.Model):
       return str(self.id) + ": " + str(e)
 
 
+class SummaryManager(models.Manager):
+  def get_queryset(self):
+    queryset = super(SummaryManager, self).get_queryset()
+    if Term.current_term():
+      start_date = Term.current_term().start
+      end_date = Term.current_term().end
+      return queryset.filter(date_submitted__gte=start_date, date_submitted__lte=end_date).distinct()
+    else:
+      return queryset
+
+
+class SummaryAllManager(models.Manager):
+  def get_queryset(self):
+    return super(SummaryAllManager, self).get_queryset()
+
+
 class Summary(models.Model):
+
+  objects = SummaryManager()
+  objects_all = SummaryAllManager()
+
   # the content of the summary (> 250 words)
-  content = models.TextField()
+  content = models.TextField(blank=True)
 
   # the book assigned to summary
   # relationship: many summaries to one book
@@ -201,7 +240,7 @@ class Summary(models.Model):
   minimum_words = models.PositiveSmallIntegerField(default=250)
 
   # hardCopy
-  hard_copy = models.BooleanField(default=False)
+  submitting_paper_copy = models.BooleanField(default=False)
 
   # sort summaries by name
   class Meta:
@@ -240,7 +279,7 @@ class Summary(models.Model):
   def clean(self, *args, **kwargs):
     """Custom validator for word count"""
     wc_list = self.content.split()
-    if len(wc_list) < self.minimum_words and self.hard_copy is False:
+    if len(wc_list) < self.minimum_words and self.submitting_paper_copy is False:
       raise ValidationError("Your word count is less than {count}".format(count=self.minimum_words))
     super(Summary, self).clean(*args, **kwargs)
 

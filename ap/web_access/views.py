@@ -1,15 +1,48 @@
-from django.contrib import messages
-from django.shortcuts import redirect, render
-from django.core.urlresolvers import reverse_lazy
-from django.views import generic
-from django.http import HttpResponse
 from itertools import chain
-from .forms import WebAccessRequestCreateForm, WebAccessRequestTACommentForm, WebAccessRequestGuestCreateForm, DirectWebAccess, EShepherdingRequest
-from .models import WebRequest
-from . import utils
-from aputils.trainee_utils import trainee_from_user, is_TA
+
+from ap.base_datatable_view import BaseDatatableView  # , DataTableViewerMixin
 from aputils.decorators import group_required
+from aputils.trainee_utils import is_TA, trainee_from_user
 from aputils.utils import modify_model_status
+from django.contrib import messages
+from django.core.urlresolvers import reverse_lazy
+# from django.db import models
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.views import generic
+from terms.models import Term
+
+from . import utils
+from .forms import (DirectWebAccess, EShepherdingRequest,
+                    WebAccessRequestCreateForm,
+                    WebAccessRequestGuestCreateForm,
+                    WebAccessRequestTACommentForm)
+from .models import WebRequest
+
+
+class WebRequestJSON(BaseDatatableView):
+  model = WebRequest
+  columns = ['id', 'trainee', 'reason', 'minutes', 'date_assigned', 'status', ]
+  order_columns = ['id', 'trainee', '', '', 'date_assigned', 'status', ]
+  max_display_length = 120
+
+  def filter_queryset(self, qs):
+    search = self.request.GET.get(u'search[value]', None)
+    ret = qs.none()
+    if search:
+      filters = []
+      filters.append(Q(trainee__firstname__icontains=search))
+      filters.append(Q(trainee__lastname__icontains=search))
+      filters.append(Q(id=search))
+      for f in filters:
+        try:
+          ret = ret | qs.filter(f)
+        except ValueError:
+          continue
+      return ret
+    else:
+      return qs
 
 
 class WebAccessMixin(object):
@@ -34,10 +67,9 @@ class WebAccessUpdate(WebAccessMixin, generic.UpdateView):
 
 
 class WebAccessDelete(WebAccessMixin, generic.DeleteView):
-  def get_success_url(self):
-    if self.get_object().trainee:
-      return self.success_url
-    return reverse_lazy('login')
+  model = WebRequest
+  success_url = reverse_lazy('web_access:web_access-list')
+
 
 
 class WebAccessDetail(generic.DetailView):
@@ -48,6 +80,8 @@ class WebAccessDetail(generic.DetailView):
 class WebRequestList(generic.ListView):
   model = WebRequest
   template_name = 'web_access/web_access_list.html'
+  DataTableView = WebRequestJSON
+  source_url = reverse_lazy("web_access:web_access-json")
 
   def get_queryset(self):
     if is_TA(self.request.user):
@@ -63,8 +97,12 @@ class WebRequestList(generic.ListView):
     if is_TA(self.request.user):
       wars = WebRequest.objects.none()
       for status in ['P', 'F', 'A', 'D']:
-        wars = chain(wars, WebRequest.objects.filter(status=status).order_by('date_assigned'))
+        wars = chain(wars, WebRequest.objects.filter(status=status).filter(date_assigned__gte=Term.current_term().get_date(0, 0)).order_by('date_assigned'))
       context['wars'] = wars
+    # if not is_TA(self.request.user):
+    #   del context['source_url']
+    #   del context['header']
+    #   del context['targets_list']
     return context
 
 

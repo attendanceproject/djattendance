@@ -24,7 +24,7 @@ echo "from accounts.models import User; User.objects.filter(email='ap_test@gmail
 # run the server
 echo "Loading webpack ... ..."
 npm run start > run_webpack.log 2>&1 &
-while ! grep -qw "webpack: Compiled successfully." run_webpack.log; do sleep 5; done
+while ! grep -qw "Compiled successfully." run_webpack.log; do sleep 5; done
 echo "Loading Django ... ..."
 python manage.py runserver &
 sleep 60

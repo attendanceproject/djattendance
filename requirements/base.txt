@@ -2,7 +2,7 @@ python-dateutil==2.6.0
 pytz==2018.3
 tzlocal==1.5.1
 
-Django==1.11.2
+Django==1.11.16
 psycopg2==2.7
 django-braces==1.8.0
 django-adminactions==1.2
@@ -26,7 +26,7 @@ django-fobi==0.12.2
 
 # Django admin docs
 docutils==0.12
-requests==2.11.1
+requests==2.21.0
 
 # PDF
 xhtml2pdf==0.2b1
@@ -51,7 +51,5 @@ plan==0.5
 # Django wiki
 bleach==2.0.0
 wiki==0.3b3
-
-django-easy-pdf==0.2.0-dev1
 
 ortools==6.5.4527

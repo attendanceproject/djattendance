@@ -4,7 +4,7 @@ import { Button, Collapse, OverlayTrigger, Popover } from 'react-bootstrap'
 import Select from 'react-select'
 import Form from 'react-formal'
 import types from 'react-formal-inputs'
-import yup from 'yup'
+import * as yup from 'yup'
 
 import { ATTENDANCE_STATUS } from '../constants'
 import SelectedEventsField from './SelectedEventsField'
@@ -43,9 +43,19 @@ const RollForm = ({...props}) => {
 
         <FormSummary />
 
-        <Form.Button className='dt-submit' type='submit' disabled={!props.canSubmitRoll}>Submit Roll</Form.Button>
+        <Form.Button className='dt-submit btn btn-primary' type='submit' disabled={!props.canSubmitRoll}>Submit Roll</Form.Button>
       </Form>
-      <Form.Button className='dt-submit' type='button' disabled={!props.canFinalizeWeek} onClick={props.finalizeRoll} >Finalize Roll</Form.Button>
+      <Form.Button className='dt-submit btn btn-danger' type='button' disabled={!props.canFinalizeWeek}
+        onClick={(e) => {
+          if (confirm('Are you sure you want to finalize? Please make sure you are finalizing the correct week.')) {
+            props.finalizeRoll()
+          }
+          e.stopPropagation()
+        }}
+      >
+        {props.isWeekFinalized ? <span>Roll Finalized</span> : <span>Finalize Roll</span> }
+      </Form.Button>
+      {props.canFinalizeWeek ? <p style={{color: 'red'}}>Please submit rolls before finalizing.</p> : ''}
     </div>
   )
 }

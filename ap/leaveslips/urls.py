@@ -7,9 +7,7 @@ urlpatterns = [
     url(r'group/update/(?P<pk>\d+)$', views.GroupSlipUpdate.as_view(), name='group-update'),
     url(r'^$', views.LeaveSlipList.as_view(), name='leaveslips-list'),
     url(r'ta$', views.TALeaveSlipList.as_view(), name='ta-leaveslip-list'),
-    url(r'(?P<classname>individual|group)/(?P<status>[APFD])/(?P<id>\d+)$', views.modify_status, name='modify-status'),
-    url(r'(?P<classname>individual|group)/(?P<status>[LITK])/(?P<ls_id>\d+)$', views.ta_sister_actions, name='ta_sister_actions'), # L = approve from list view; I = approve from individual detail view; T = transfer without approving on detail view; K = transferring without approving in TA sister list view
-    url(r'bulk/update/(?P<status>[APFDS])$', views.bulk_modify_status, name='bulk-modify-status'),
+    url(r'bulk/update/(?P<status>[ADST])$', views.bulk_modify_status, name='bulk-modify-status'),
     url(r'^admin/leaveslips/create/$', views.IndividualSlipAdminCreate.as_view(), name='admin-islip-create'),
     url(r'^admin/leaveslips/(?P<pk>\d+)$', views.IndividualSlipAdminUpdate.as_view(), name='admin-islip'),
     url(r'^admin/leaveslips/delete/(?P<pk>\d+)$', views.IndividualSlipAdminDelete.as_view(), name='admin-islip-delete'),

@@ -1,7 +1,7 @@
+from accounts.models import Trainee
+from accounts.widgets import TraineeSelect2MultipleInput
 from django import forms
 from fobi.base import BasePluginForm, get_theme
-from accounts.widgets import TraineeSelect2MultipleInput
-from accounts.models import Trainee
 
 theme = get_theme(request=None, as_instance=True)
 

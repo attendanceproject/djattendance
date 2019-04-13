@@ -73,10 +73,10 @@
         </div>
       </div>
     </div>
-  </div> 
+  </div>
   -->
 
-  {% elif user.type == 'R' %}
+  {% elif user.type == 'R' or user.type == 'C' %}
 
   <div class="row">
     <!-- Panels -->
@@ -142,11 +142,12 @@
           -->
           <tr>
             <form class="form-group bibleDropDown" id="bibleDropDown" method="post">
-              <th rowspan="3">BIBLE READING PROGRESS</th>
+              <th rowspan="2">BIBLE READING PROGRESS</th>
               {% for day in 0|get_weekday_codes %}
               <td class="bibleReadingRow">
+				  
                 <select class="bible-selector" id="bibleDropDown_{{day}}" data-day="{{day}}">
-                  <option value="_"></option>
+                  <option value="_">_</option>
                   <br />
                   <option value="C">C</option>
                   <br />
@@ -204,11 +205,21 @@
             {% for card_link in card.card_links %}
             <span class="card-item">
               <a href="{{ card_link.url }}" class="card-list">{{ card_link.title }}</a>
-              {% if card_link.number is not None %} {% if card_link.number == 0 %}
-              <div class="number-nought">0</div>
-              {% else %}
-              <div class="number-alert">{{ card_link.number }}</div>
-              {% endif %} {% endif %}
+              {% if card_link.number is not None %}
+                {% if card_link.ta_number is None %}
+                  {% if card_link.number == 0 %}
+                    <div class="card-num">0</div>
+                  {% else %}
+                    <div class="card-num-alert">{{ card_link.number }}</div>
+                  {% endif %}
+                {% else %}
+                  {% if card_link.ta_number == 0 %}
+                    <div class="card-num">0 ({{ card_link.number }})</div>
+                  {% else %}
+                    <div class="card-num-alert">{{ card_link.ta_number }} ({{ card_link.number }})</div>
+                  {% endif %}
+                {% endif %}
+              {% endif %}
             </span>
             {% endfor %}
           </span>

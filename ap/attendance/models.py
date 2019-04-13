@@ -1,10 +1,13 @@
 from datetime import date, datetime
 
 from accounts.models import Trainee, User
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import models
 from schedules.models import Event
+from terms.models import Term
 
+from django.core.validators import validate_comma_separated_integer_list
 
 """ attendance models.py
 The attendance module takes care of data and logic directly related
@@ -17,6 +20,22 @@ DATA MODELS:
       then there will be 10 roll objects associated to that event,
       as well as each trainee.
 """
+
+
+class RollManager(models.Manager):
+  def get_queryset(self):
+    queryset = super(RollManager, self).get_queryset()
+    if Term.current_term():
+      start_date = Term.current_term().start
+      end_date = Term.current_term().end
+      return queryset.filter(date__gte=start_date, date__lte=end_date).distinct()
+    else:
+      return queryset
+
+
+class RollAllManager(models.Manager):
+  def get_queryset(self):
+    return super(RollAllManager, self).get_queryset()
 
 
 class Roll(models.Model):
@@ -57,8 +76,8 @@ class Roll(models.Model):
   def __unicode__(self):
     try:
       # return status, trainee name, and event
-      return "ID %s [%s] %s @ [%s] %s" % (self.id, self.date, self.event, self.status, self.trainee)
-    except AttributeError as e:
+      return "ID %s [%s] %s @ [%s] %s" % (self.id, self.date, self.event, self.status, self.trainee.full_name)
+    except (AttributeError, MultipleObjectsReturned, ObjectDoesNotExist) as e:
       return str(self.id) + ": " + str(e)
 
   class Meta:
@@ -94,3 +113,32 @@ class Roll(models.Model):
 
   def get_delete_url(self):
     return reverse('attendance:admin-roll-delete', kwargs={'pk': self.id})
+
+
+class RollsFinalization(models.Model):
+
+  EVENT_TYPES = (
+    ('EV', 'Everything'),
+    ('AM', 'Attendance Monitor'),
+    ('TM', 'Team Monitor'),
+    ('HC', 'House Coordinator'),
+  )
+
+  trainee = models.ForeignKey(Trainee)
+
+  weeks = models.CharField(validators=[validate_comma_separated_integer_list], max_length=50, blank=True, null=False)
+
+  events_type = models.CharField(max_length=2, choices=EVENT_TYPES)
+
+  class Meta:
+    unique_together = ('trainee', 'events_type')
+
+  def __unicode__(self):
+    return "%s for %s" % (self.trainee, self.get_events_type_display())
+
+  def has_week(self, week):
+    if self.weeks != '':
+      weeks = [int(x) for x in self.weeks.split(',')]
+      return week in weeks
+    else:
+      return False

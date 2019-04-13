@@ -1,4 +1,19 @@
-<script>
+<script type="text/javascript">
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = jQuery.trim(cookies[i]);
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
   var Events = {{ events_bb|safe }};
   var GroupEvents = {{ groupevents_bb|safe }};
   var Rolls = {{ rolls_bb|safe}};
@@ -8,7 +23,10 @@
   var Trainees = {{ trainees_bb|safe }};
   var TAs = {{ TAs_bb|safe }};
   var Term = {{ term_bb|safe }};
+  var FinalizedWeeks = {{ finalize_bb|safe }};
   var AM_GROUPS = {{ am_groups|safe }};
+  var TA_GROUP = {{ ta_group|safe }};
+  var CSRF_TOKEN = getCookie('csrftoken');
   {% if show %}
     var Show = '{{show}}';
   {% endif %}

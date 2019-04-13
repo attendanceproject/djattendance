@@ -1,9 +1,9 @@
-from django.db import models
-from django.core.urlresolvers import reverse
-from django.conf import settings
-from schedules.models import Event
 import os
 
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.utils.deconstruct import deconstructible
+from schedules.models import Event
 
 """" CLASSES models.py
 
@@ -21,14 +21,13 @@ Data Models:
 
 """
 
-from django.utils.deconstruct import deconstructible
 
 CLASS_CHOICES = (
     ('Greek', 'Greek'),
     ('German', 'German'),
     ('Character', 'Character'),
     ('PSRP', 'PSRP'),
-    ('4th Term', 'T4'),
+    ('Graduation', 'Graduation'),
 )
 
 # everyone has permissions for these
@@ -65,6 +64,12 @@ class ClassManager(models.Manager):
     return super(ClassManager, self).get_queryset().filter(type='C')
 
 
+class RegularClassesManager(models.Manager):
+
+  def get_queryset(self):
+    return Class.objects.filter(schedules__weeks__regex='.{5,}').exclude(schedules__trainee_select='GP').filter(type='C', monitor='AM').exclude(class_type="AFTN").distinct().order_by('weekday', 'start')
+
+
 class Class(Event):
   class Meta:
     proxy = True
@@ -76,6 +81,7 @@ class Class(Event):
     super(Class, self).save(*args, **kwargs)
 
   objects = ClassManager()
+  regularclasses = RegularClassesManager()
 
 
 class ClassFile(models.Model):

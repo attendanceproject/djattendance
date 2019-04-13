@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load common_tags %}
+
+{% block scripts %}
+{{ block.super }}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $("#id_schedules_table").DataTable({
+      info: false,
+      paging: false,
+      autoWidth: false,
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      columnDefs: [
+        {
+          "targets": 0,
+          "visible": false,
+          "searchable": false,
+        }
+      ]
+    });
+  });
+</script>
+{% endblock %}
+
+{% block title %}Schedules Table{% endblock %}
+
+
+{% block content %}
+<h2>Schedules Table</h2>
+
+<a href="{% url 'schedules:assign-team-schedules' %}">Assign Team Schedules</a>
+
+  <div class="data-table-container">
+    <table id="id_schedules_table" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Name</th>
+          <th>Comments</th>
+          <th>Priority</th>
+          <th>Weeks</th>
+          <th>Is Deleted</th>
+          <th>Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for schedule in object_list %}
+        <tr>
+          <td>{{schedule.id}}</td>
+          <td>{{schedule.name}}</td>
+          <td>{{schedule.comments}}</td>
+          <td>{{schedule.priority}}</td>
+          <td>{{schedule.weeks}}</td>
+          <td>{{schedule.is_deleted}}</td>
+          <td><a href="{{ schedule.get_absolute_url }}">Detail</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}

@@ -41,7 +41,7 @@ class Qualification(models.Model):
 
 class WorkerManager(models.Manager):
   def get_queryset(self, *args, **kwargs):
-    return super(WorkerManager, self).get_queryset(*args, **kwargs).select_related('trainee')
+    return super(WorkerManager, self).get_queryset(*args, **kwargs).filter(trainee__is_active=True).select_related('trainee')
 
 
 # Has exceptions

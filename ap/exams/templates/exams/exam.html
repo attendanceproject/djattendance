@@ -36,9 +36,8 @@
           {% csrf_token %}
           <ol id="question-list">
             {% for section, response, score, comments in data %}
-              <h4> {{ section.section_type }} section </h4>
               <b> Instructions: </b> {{ section.instructions|linebreaks }}
-              You must answer at least {{ section.required_number_to_submit }} questions for this section in order to submit the exam.
+              You must answer at least {{ section.required_number_to_submit }} question(s) for this section in order to submit the exam.
               <br></br>
               {% if section.section_type == 'Matching' %}
                 Matching Options:
@@ -159,9 +158,15 @@
         }
       });
       if (e.currentTarget.id === "finalize_button") {
-        rtn_data['Submit'] ='true';
+        var confirmed = confirm("Are you sure you want to finalize your exam? You will not be able to edit afterwards.");
+        if (confirmed) {
+          rtn_data['Submit'] ='true';
+        } else {
+          rtn_data['Submit'] ='false';
+          return
+        }
       } else {
-        rtn_data['Submit'] ='false';
+        rtn_data['Submit'] = 'false';
       }
       $.ajax({
         type: 'POST',

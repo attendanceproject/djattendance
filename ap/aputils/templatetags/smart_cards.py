@@ -48,19 +48,17 @@ def generate_cards(context):
 
     room_res = RoomReservation.objects.filter(status='P')
     room_reservation_count = room_res.count()
-    room_reservations_ta_count = room_res.filter(requester__in=my_trainees).count()
 
     ann = Announcement.objects.filter(status='P')
     announce_count = ann.count()
-    announce_ta_count = ann.filter(author__in=my_trainees).count()
 
     TA_requests = Card(
         header_title="Requests",
         card_links=[
             CardLink(title="Web Access", url=reverse('web_access:web_access-list'), number=web_access_count, ta_number=web_access_ta_count),
             CardLink(title="AV", url=reverse('audio:ta-audio-home'), number=av_count, ta_number=av_ta_count),
-            CardLink(title="Room Reservation", url=reverse('room_reservations:ta-room-reservation-list'), number=room_reservation_count, ta_number=room_reservations_ta_count),
-            CardLink(title="Announcements", url=reverse('announcements:announcement-request-list'), number=announce_count, ta_number=announce_ta_count)
+            CardLink(title="Room Reservation", url=reverse('room_reservations:ta-room-reservation-list'), number=room_reservation_count),
+            CardLink(title="Announcements", url=reverse('announcements:announcement-request-list'), number=announce_count)
         ]
     )
 
@@ -107,6 +105,8 @@ def generate_cards(context):
             CardLink(title="Designated Services Trainees", url=reverse('services:designated_services_viewer')),
             CardLink(title="Designated Services Hours", url=reverse('services:service_hours_ta_view')),
             CardLink(title="Interim Intentions", url=reverse('interim:interim_intentions_admin')),
+            CardLink(title="Gospel Trips", url=reverse('gospel_trips:admin-create')),
+            CardLink(title='Custom Forms', url=reverse('fobi.dashboard'))
         ]
     )
 
@@ -160,14 +160,25 @@ def generate_cards(context):
             CardLink(title="Service Portal", url=reverse('services:services_view')),
             CardLink(title="Service Admin", url='admin/services/'),
             CardLink(title="Designated Services Viewer", url=reverse('services:designated_services_viewer')),
+            CardLink(title="Group Slips Viewer", url=reverse('attendance:groupslips-viewer')),
         ]
     )
     cards.append(service_card)
+
+  if user.has_group(['attendance_monitors','service_schedulers']) and not user.has_group(['training_assistant']):
+    admin_card = Card(
+        header_title='Administration',
+        card_links=[
+            CardLink(title="Trainee Information", url=reverse('trainee_information')),
+        ]
+    )
+    cards.append(admin_card)
 
   if user.has_group(['attendance_monitors', 'training_assistant']):
     attendance_card = Card(
         header_title='Rolls',
         card_links=[
+            CardLink(title="Audit", url=reverse('attendance:audit-rolls')),
             CardLink(title="Class", url=reverse('attendance:class-rolls')),
             CardLink(title="House", url=reverse('attendance:house-rolls')),
             CardLink(title="Meal", url=reverse('attendance:meal-rolls')),
@@ -179,9 +190,15 @@ def generate_cards(context):
     cards.append(attendance_card)
 
     schedules_card = Card(
-        header_title='Admin',
+        header_title='Attendance Admin',
         card_links=[
-            CardLink(title="Roll", url='admin/attendance/roll/'),
+            CardLink(title="Single Trainee Attendance", url=reverse('attendance:admin-trainee-attendance')),
+            CardLink(title="Rolls Viewer", url=reverse('attendance:rolls-viewer')),
+            CardLink(title="Leave Slips Viewer", url=reverse('attendance:leaveslips-viewer')),
+            CardLink(title="Group Slips Viewer", url=reverse('attendance:groupslips-viewer')),
+            CardLink(title="Events Viewer", url=reverse('attendance:events-viewer')),
+            CardLink(title="Schedules Viewer", url=reverse('attendance:schedules-viewer')),
+            CardLink(title="Schedules Table", url=reverse('schedules:admin-schedule-table'))
         ]
     )
     cards.append(schedules_card)

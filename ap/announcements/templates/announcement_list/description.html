@@ -1,4 +1,5 @@
 Announcement: {{ request.announcement }}<br>
+Fellowshipped with TA: {{ request.fellowshipped|yesno:"Yes,No" }}<br>
 TA Comment:
 {% if request.TA_comments|length > 0 %}
   {{ request.TA_comments }}

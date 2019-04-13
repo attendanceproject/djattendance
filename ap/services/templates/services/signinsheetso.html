@@ -8,7 +8,6 @@
 
 <div class="header {% if 'Sack' in cats.0.service.category.name %}header-two-column{% endif %}">
   <h1> {{cats.0.service.category}} Sign-In</h1>
-  As of {{wkstart}}
   {% if 'Sack' in cats.0.service.category.name %}
     {% include "services/_instructions.html" %}
   {% endif %}

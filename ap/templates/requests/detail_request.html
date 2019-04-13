@@ -2,6 +2,8 @@
 {% load staticfiles %}
 {% load common_tags %}
 
+{% block title %}{{ view.model|model_verbose_name|title }}{% endblock %}
+
 {% block content %}
   <h2>{{ view.model|model_verbose_name|title }}<br>
     <small>Submitted on {{ object.get_date_created }} by {{ object.get_trainee_requester }}</small>

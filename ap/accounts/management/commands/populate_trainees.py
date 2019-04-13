@@ -410,6 +410,7 @@ class Command(BaseCommand):
 
     lastterm = Term.objects.get(year=currentterm.year - 1, season='Fall')
     for t in Trainee.objects.filter(current_term__gte=2):
+
       t.terms_attended.add(lastterm)
       t.date_begin = lastterm.start
       t.save()

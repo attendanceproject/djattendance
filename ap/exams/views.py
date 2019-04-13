@@ -20,10 +20,10 @@ from terms.models import Term
 
 from .forms import ExamCreateForm, ExamReportForm
 from .models import Exam, Section, Session, Responses, Makeup
-from .utils import get_exam_questions, save_exam_creation, get_exam_context_data, makeup_available, save_responses, trainee_can_take_exam, save_grader_scores_and_comments, is_float
+from .utils import get_exam_questions, save_exam_creation, get_exam_context_data, get_exam_preview_context_data, makeup_available, save_responses, trainee_can_take_exam, save_grader_scores_and_comments, is_float
 
 from accounts.models import Trainee
-from schedules.models import Event
+from classes.models import Class
 
 # PDF generation (Unused)
 import cStringIO as StringIO
@@ -60,11 +60,15 @@ class ExamEditView(ExamCreateView):
   def get_success_url(self):
     return reverse_lazy('exams:edit', kwargs={'pk': self.kwargs['pk']})
 
+  def get_preview_url(self):
+    return reverse_lazy('exams:preview', kwargs={'pk': self.kwargs['pk']})
+
   def get_context_data(self, **kwargs):
     context = super(ExamEditView, self).get_context_data(**kwargs)
     exam = Exam.objects.get(pk=self.kwargs['pk'])
     context['exam_edit'] = True
     context['is_open'] = bool(exam.is_open)
+    context['is_graded_open'] = bool(exam.is_graded_open)
     context['is_final'] = bool(exam.category == 'F')
     context['data'] = get_exam_questions(exam, True)
     context['total_score'] = exam.total_score
@@ -92,33 +96,33 @@ class ExamTemplateListView(ListView):
   def get_queryset(self):
     user = self.request.user
     is_manage = 'manage' in self.kwargs
-    is_taken = 'taken' in self.kwargs
     if is_manage:
       exams = Exam.objects.all()
-    elif is_taken:
-      sessions = Session.objects.filter(trainee=user, is_graded=True)
-      exams = []
-      for session in sessions:
-        if session.exam is not None:
-          exams.append(session.exam)
-        else:
-          session.delete()
-      for exam in exams:
-        exam.visible = True
-        exam.completed = True
-        exam.graded = True
-      return exams
     else:
       exams = []
-      if user.type == 'R':
+      if user.type in ['R', 'C']:
+        # Open exams
         if user.current_term == 1 or user.current_term == 2:
-          for exam in Exam.objects.filter(is_open=True):
+          for exam in Exam.objects.filter(is_open=True, is_graded_open=False):
             if exam.training_class.class_type == 'MAIN' or exam.training_class.class_type == '1YR' or exam.training_class.class_type == 'AFTN':
               exams.append(exam)
         elif user.current_term == 3 or user.current_term == 4:
-          for exam in Exam.objects.filter(is_open=True):
+          for exam in Exam.objects.filter(is_open=True, is_graded_open=False):
             if exam.training_class.class_type == 'MAIN' or exam.training_class.class_type == '2YR' or exam.training_class.class_type == 'AFTN':
               exams.append(exam)
+
+        # Open graded exams
+        sessions = Session.objects.filter(trainee=user, is_graded=True)
+        for session in sessions:
+          if session.exam is None:
+            session.delete()
+          elif session.exam.is_graded_open:
+            exam = session.exam
+            exam.visible = True
+            exam.completed = True
+            exam.graded = True
+            exams.append(exam)
+
     makeup = Makeup.objects.filter(trainee=user)
     #all makeup exams should be open
     makeup_exams = []
@@ -128,7 +132,7 @@ class ExamTemplateListView(ListView):
     exams = list(exams)
     # TODO - Fix this. to show makeup
     for exam in exams:
-      exam.visible = exam.is_open and trainee_can_take_exam(user, exam)
+      exam.visible = (exam.is_open and trainee_can_take_exam(user, exam)) or exam.is_graded_open
       if exam in makeup_exams:
         exam.visible = True
       # Don't show to exam service manage page
@@ -146,9 +150,8 @@ class ExamTemplateListView(ListView):
     user = self.request.user
     is_manage = 'manage' in self.kwargs
     ctx['exam_service'] = is_manage and user.is_designated_grader() or is_TA(user)
-    ctx['classes'] = Event.objects.filter(start=datetime.strptime('10:15', '%H:%M'), type='C').exclude(name="Session II")\
-        | Event.objects.filter(start=datetime.strptime('08:25', '%H:%M')).exclude(name="Session I")
-    ctx['terms'] = Term.objects.all()
+    ctx['classes'] = Class.regularclasses.all()
+    ctx['terms'] = reversed(Term.objects.all())
     return ctx
 
 
@@ -205,7 +208,6 @@ class SingleExamGradesListView(GroupRequiredMixin, TemplateView):
         trainee = Trainee.objects.get(id=trainee_id)
         exam = Exam.objects.get(pk=self.kwargs['pk'])
         Makeup.objects.get_or_create(trainee=trainee, exam=exam)
-        
         #need code to create session
         try:
           session = Session.objects.get(trainee=trainee, exam=exam)
@@ -247,13 +249,13 @@ class SingleExamGradesListView(GroupRequiredMixin, TemplateView):
 
         sessions = trainee.current_sessions
         # Save grades for trainees who use paper submission
-        session = Session(
-            exam=exam,
-            trainee=trainee,
-            is_submitted_online=False,
-            time_finalized=datetime.now(),
-            is_graded=True,
-            grade=float(grades[index]))
+        session, created = Session.objects.update_or_create(
+          exam=exam,
+          trainee=trainee)
+        session.is_submitted_online=False
+        session.time_finalized=datetime.now()
+        session.is_graded=True
+        session.grade=float(grades[index])
         session.save()
 
       grades2 = P.getlist('session-id-grade')
@@ -401,13 +403,7 @@ class PreviewExamView(GroupRequiredMixin, SuccessMessageMixin, ListView):
 
   def get_context_data(self, **kwargs):
     context = super(PreviewExamView, self).get_context_data(**kwargs)
-    return get_exam_context_data(
-        context,
-        self._get_exam(),
-        self._exam_available(),
-        self._get_session(),
-        "Take",
-        False)
+    return get_exam_preview_context_data(context, self._get_exam())
 
 
 class TakeExamView(SuccessMessageMixin, CreateView):
@@ -598,7 +594,7 @@ class GradeExamView(GroupRequiredMixin, CreateView):
       body = []
 
     P = request.POST
-    scores = P.getlist('question-score')
+    scores = P.getlist('section-score')
     comments = P.getlist('grader-comment')
     responses = session.responses.all()
     resp_s = {}
@@ -636,16 +632,18 @@ class GradedExamView(TakeExamView):
 
   #not really needed, as this is checked again in get_exam_context_data in utils.py
   def _exam_available_to_see(self):
-    if self._get_exam().is_open and self._get_session().is_graded and self._get_session().time_finalized != None:
+    if self._get_exam().is_graded_open and self._get_session().is_graded and self._get_session().time_finalized != None:
       return True
     else:
       return False
 
   def get_context_data(self, **kwargs):
     context = super(GradedExamView, self).get_context_data(**kwargs)
-    return get_exam_context_data(
+    ctx = get_exam_context_data(
         context,
         self._get_exam(),
         self._exam_available_to_see(),
         self._get_session(),
         "View", True)
+    ctx['graded_exam_available'] = self._get_exam().is_graded_open
+    return ctx

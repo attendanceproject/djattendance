@@ -5,15 +5,15 @@
 
 <br><br>
 <h3>General Notes</h3>
-  <table id="weekdate_match">
-    <tr>
-      {% for day in 1|get_weekday_codes %}
-        <td><b>{{day}}</b></td>
-      {% endfor %}
-    </tr>
-    <tr class="this_week">
-    </tr>
-  </table>
+<table id="weekdate_match">
+  <tr>
+    {% for day in 1|get_weekday_codes %}
+      <td><b>{{day}}</b></td>
+    {% endfor %}
+  </tr>
+  <tr class="this_week">
+  </tr>
+</table>
 <br>
 {{encouragement|safe}}
 

@@ -1,37 +1,21 @@
-from django.contrib import admin
+from aputils.admin_utils import FilteredSelectMixin
+from aputils.queryfilter import QueryFilterService
 from django.conf.urls import url
+from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django import forms
+from services.models import (Assignment, Category, Qualification,
+                             SeasonalServiceSchedule, Service,
+                             ServiceException, ServiceSlot, Trainee,
+                             WeekSchedule, Worker, WorkerGroup)
+from terms.models import Term
 
-from services.models import (
-    Worker,
-    Category,
-    Service,
-    SeasonalServiceSchedule,
-    WeekSchedule,
-    Qualification,
-    WorkerGroup,
-    Assignment,
-    Trainee,
-    ServiceSlot,
-    ServiceException,
-)
+from .forms import (AssignmentAdminForm, ExceptionAdminForm, QualificationForm,
+                    SeasonalServiceScheduleForm, WorkGroupAdminForm)
 
-from .forms import (
-  SeasonalServiceScheduleForm,
-  AssignmentAdminForm,
-  WorkGroupAdminForm,
-  ExceptionAdminForm,
-  QualificationForm
-)
+NONSERVICE_GROUPS = ['training_assistant', 'regular_training_assistant', 'saturday_training_assistant', 'grad_committee', 'HC', 'team_monitors', 'ypc_monitors', 'PSRP_facilitator']
 
-from aputils.admin_utils import FilteredSelectMixin
-from aputils.widgets import MultipleSelectFullCalendar
-from aputils.queryfilter import QueryFilterService
-
-NONSERVICE_GROUPS = ['training_assistant', 'regular_training_assistant', 'saturday_training_assistant', 'grad_committee', 'HC', 'team_monitors', 'ypc_monitors', 'designated_service', 'PSRP_facilitator']
 
 class ReadonlyException(object):
   def name(self, instance):
@@ -243,6 +227,13 @@ class AssignmentAdmin(admin.ModelAdmin):
   list_filter = ('week_schedule', 'service', 'service_slot', 'pin')
   save_as = True
 
+  def get_queryset(self, request):
+    qs = super(AssignmentAdmin, self).get_queryset(request)
+    if Term.current_term():
+      start_date = Term.current_term().start
+      return qs.filter(week_schedule__start__gte=start_date)
+    return qs
+
   # def get_queryset(self, request):
   #   assignment = super(AssignmentAdmin, self).get_queryset(request)
   #   assignment = assignment.select_related('week_schedule', 'service', 'service_slot').prefetch_related('workers')
@@ -321,7 +312,7 @@ class ExceptionAdmin(admin.ModelAdmin):
   ordering = ('active', 'name')
 
   # filter_horizontal = ('workers', 'services')
-  search_fields = ('name', 'desc',)
+  search_fields = ('name', 'desc', 'workers__trainee__firstname', 'workers__trainee__lastname',)
   list_filter = ('active', 'tag', 'start', 'end')
   # inlines = [
   #   ServiceInline,

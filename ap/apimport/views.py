@@ -1,22 +1,22 @@
+import json
 import logging
 import os
-import sys
+from datetime import datetime, time, timedelta
 
-from datetime import datetime, timedelta, time
-import json
-
-from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponse, HttpResponseRedirect
+from aputils.models import City
+from braces.views import SuperuserRequiredMixin
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
-from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView
-
 from terms.models import Term
-from aputils.models import City
 
-from .forms import DateForm, CityFormSet, TeamFormSet, HouseFormSet
-from .utils import create_term, generate_term, term_start_date_from_semiannual, validate_term, check_csvfile, import_csvfile, save_file, mid_term, migrate_schedules, save_locality, save_team, save_residence
+from .forms import CityFormSet, DateForm, HouseFormSet, TeamFormSet
+from .utils import (check_csvfile, create_term, generate_term, get_row_count,
+                    get_row_from_csvfile, import_row, mid_term,
+                    migrate_schedules, migrate_seating_charts, save_file,
+                    save_locality, save_residence, save_team,
+                    term_start_date_from_semiannual, validate_term)
 
 CSV_FILE_DIR = os.path.join('apimport', 'csvFiles')
 
@@ -24,7 +24,7 @@ log = logging.getLogger("apimport")
 
 
 # Create your views here.
-class CreateTermView(CreateView):
+class CreateTermView(SuperuserRequiredMixin, CreateView):
   template_name = 'apimport/term_details.html'
   model = Term
   fields = []
@@ -49,7 +49,8 @@ class CreateTermView(CreateView):
       log.debug("Loading CreateTermView -- Beginning of Term view.")
 
       context['full_input'] = True
-      context['season'], context['year'] = generate_term()
+      context['season'], context['year'] = generate_term()  # TODO: Sometimes skips a term
+      log.debug("Generated term -- {0}, {1}.".format(context['season'], context['year']))
 
       semi_season = "Summer" if context['season'] is "Spring" else "Winter"
 
@@ -113,21 +114,19 @@ class CreateTermView(CreateView):
     return redirect('apimport:process_csv')
 
 
-class ProcessCsvData(TemplateView):
+class ProcessCsvData(SuperuserRequiredMixin, TemplateView):
   template_name = 'apimport/process_csv.html'
   fields = []
 
   def get_context_data(self, **kwargs):
     context = super(ProcessCsvData, self).get_context_data(**kwargs)
 
-    # Check the CSV File
     localities, teams, residences = check_csvfile(self.request.session['file_path'])
 
     if localities or teams or residences:
       initial_locality = []
       for locality in localities:
         # locality is a tuple of locality name, locality state, locality country
-        state_check_failed = False
         if locality[2] == "US":
           initial_locality.append({'name': locality[0], 'state': locality[1], 'country': locality[2]})
         else:
@@ -144,14 +143,33 @@ class ProcessCsvData(TemplateView):
       for residence in residences:
         initial_residence.append({'name': residence, 'city': anaheim})
       context['houseformset'] = HouseFormSet(initial=initial_residence, prefix='house')
-      context['import_complete'] = False
+      context['csv_passed'] = False
     else:
-      context['import_complete'] = import_csvfile(self.request.session['file_path'])
+      file_path = self.request.session['file_path']
+      context['csv_passed'] = True
+      context['row_count'] = get_row_count(file_path)
+      context['file_path'] = file_path
 
     return context
 
   def post(self, request, *args, **kwargs):
       return self.get(request, *args, **kwargs)
+
+
+def process_row(request):
+  if request.method == "POST" and request.is_ajax():
+    row_number = request.POST['rowNumber']
+    file_path = request.POST['filePath']
+    try:
+      row = get_row_from_csvfile(file_path, int(row_number))
+      name = row['stName'] + ' ' + row['lastName']
+      import_row(row)
+      return JsonResponse({'success': True, 'name': name})
+    except Exception as e:
+      print e
+      return JsonResponse({'success': False, 'rowNumber': row_number, 'error': str(e)})
+  else:
+    return JsonResponse({'success': False})
 
 
 def save_data(request):

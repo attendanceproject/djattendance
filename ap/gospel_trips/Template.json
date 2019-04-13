@@ -1,0 +1,355 @@
+{
+  "sections": [
+    {
+      "_order": 0, 
+      "name": "General", 
+      "questions": [
+        {
+          "_order": 0, 
+          "answer_required": false, 
+          "instruction": "<p>The purpose of the gospel trips is for the trainees to experience the full-time life and service outside of the Full-Time Training, to testify concerning the Full-Time Training, to encourage young people to join the Full-Time Training, to coordinate and blend with the local churches, to preach the gospel and announce the truth in the work of propagation, and to be broadened in our view of the Lord's need. Testimonies of past trainees have confirmed that these trips are an integral part of the Full-Time Training experience.</p>", 
+          "answer_type": "None", 
+          "label": "Purpose"
+        }, 
+        {
+          "_order": 1, 
+          "answer_required": false, 
+          "instruction": "<p>While it is our burden that all of the trainees would be able to participate in at least one gospel trip during the two years of the Full-Time Training, the trainees are asked to have much and thorough prayer before the Lord as the Head regarding how they would spend their time during the interim and to fellowship with their sending locality regarding their participation and about any needs the sending localities may have during the interim, including campus burdens, local gospel trips, etc. before indicating any preference to attend or not to attend a gospel trip. Acceptance to participate is not automatic. Trainees not in good standing with the Training may receive fellowship regarding their participation. Outside travel requests or personal adjustments to what is being arranged for the gospel trips will not be permitted.</p>", 
+          "answer_type": "None", 
+          "label": "Participation"
+        }, 
+        {
+          "_order": 2, 
+          "answer_required": false, 
+          "instruction": "<ul>\r\n<li>Thursday, November 16: Registration opens</li>\r\n<li><strong>Monday, December 4</strong><strong>: Registration deadline</strong> (Step 1)</li>\r\n<li><strong>Monday, December 4</strong><strong>: Registration fee deposit deadline</strong> (Step 2)</li>\r\n<li>Monday, December 11: Team assignments announced</li>\r\n<li><strong>Monday, December 18</strong><strong>: Risk and release form deadline</strong> (Step 5)</li>\r\n<li><strong>Monday, December 18</strong><strong>: Media and report/statistics coordinator sign-up deadline</strong> (Step 6)</li>\r\n<li>Tuesday, December 19, 12:00pm-2:00pm: General orientation</li>\r\n<li>TBA: Trainee contacts orientation</li>\r\n<li>TBA: Media and report/statistics coordinators orientation</li>\r\n</ul>", 
+          "answer_type": "None", 
+          "label": "Registration Timeline"
+        }, 
+        {
+          "_order": 3, 
+          "answer_required": false, 
+          "instruction": "<p>Gospel trips are approximately two weeks long during the winter interim, typically occurring mid to late January and early February.</p>\r\n<ul>\r\n<li>Northwest:</li>\r\n<ul>\r\n<li><strong>Everett/West Richland, WA</strong>: January 26 to February 12</li>\r\n</ul>\r\n<li>Southwest (Northern California):</li>\r\n<ul>\r\n<li><strong>Berkeley, CA</strong>: January 26 to February 12</li>\r\n<li><strong>Burlingame, CA</strong>: January 26 to February 11</li>\r\n<li><strong>Chico/Folsom, CA</strong>: January 26 to February 11</li>\r\n<li><strong>Clovis/Merced/Madera, CA</strong>: January 26 to February 11</li>\r\n<li><strong>Crescent City/Eureka, CA</strong>: January 26 to February 11</li>\r\n<li><strong>Fremont, CA</strong>: January 26 to February 11</li>\r\n<li><strong>Morgan Hill/Monterey, CA</strong>: January 26 to February 11</li>\r\n<li><strong>Palo Alto/Cupertino/Campbell, CA</strong>: January 26 to February 12</li>\r\n<li><strong>Reno, NV; Davis, CA</strong>: January 26 to February 12</li>\r\n<li><strong>Sacramento/Elk Grove/Roseville/Modesto, CA</strong>: January 26 to February 10</li>\r\n<li><strong>San Francisco, CA</strong>: January 26 to February 12</li>\r\n<li><strong>San Jose, CA</strong>: January 26 to February 12</li>\r\n<li><strong>San Luis Obispo/Santa Cruz, CA</strong>: January 26 to February 11</li>\r\n</ul>\r\n</ul>", 
+          "answer_type": "None", 
+          "label": "Destinations and Dates"
+        }, 
+        {
+          "_order": 4, 
+          "answer_required": false, 
+          "instruction": "<p>The following are costs according to continent:</p>\r\n<ul>\r\n<li>Africa: $600 registration fee ($100 deposit + $500 balance) + airfare expenditures</li>\r\n<li>Europe: $750&nbsp; registration fee ($100 deposit + $650 balance) + airfare expenditures</li>\r\n<li>North America: $400 registration fee ($100 deposit + $500 balance) + airfare expenditures</li>\r\n<li>South America: $600 registration fee ($100 deposit + $500 balance) + airfare expenditures</li>\r\n</ul>", 
+          "answer_type": "None", 
+          "label": "Cost"
+        }, 
+        {
+          "_order": 5, 
+          "answer_required": false, 
+          "instruction": "<div>There will be no prayer times set by the Training. Please coordinate with your team to arrange prayer times for the remainder of the term and during the interim. Feel free to invite trainees not assigned to your team to participate in the prayer times.\\r\\n\r\n<ul>\r\n<li>Africa: NE212 (Meeting Room)</li>\r\n<li>Europe: Main Classroom</li>\r\n<li>North America: NE3 (Second-year Classroom)</li>\r\n<li>South America: NE210 (Meeting Room)</li>\r\n</ul>\r\n</div>\r\n<hr /><hr /><hr />\r\n<p>&nbsp;</p>", 
+          "answer_type": "None", 
+          "label": "Prayer Times"
+        }
+      ], 
+      "show": "SHOW"
+    }, 
+    {
+      "_order": 1, 
+      "name": "Step 1a: Register Destination Preferences and Language Proficiencies", 
+      "questions": [
+        {
+          "_order": 0, 
+          "answer_required": false, 
+          "instruction": "<p>Before indicating your destination preferences, have much and throrough fellowship with the Lord regarding His burden for you related to His move on the earth. Have the spirit of being sent to these destinations and not of sending yourself.</p>\r\n<p><strong>Enter your destination preferences by Wednesday, October 19</strong></p>\r\n<ul>\r\n<li>You must enter three destinations you have a gospel burden for. Blank preferences will be interpreted as \\\"All Continents: no preference\\\"</li>\r\n<li>Do not submit multiple preferences for the same destination, unless you select one of the \\\"no preference\\\" options</li>\r\n<li>If you have no preferences, please select the \\\"no preference\\\" option</li>\r\n<li>First-term trainees are required to submit at least one North America destination.</li>\r\n<li>Certain trainees with an M-1 student visa may not be able to travel internationally due to visa restrictions. Trainees with an M-1 student visa who are not clear regarding these restrictions should fellowship with the office before registering.</li>\r\n</ul>", 
+          "answer_type": "None", 
+          "label": null
+        }, 
+        {
+          "_order": 1, 
+          "answer_required": true, 
+          "instruction": "", 
+          "answer_type": "destinations", 
+          "label": "Destination Preference 1"
+        }, 
+        {
+          "_order": 2, 
+          "answer_required": true, 
+          "instruction": "", 
+          "answer_type": "destinations", 
+          "label": "Destination Preference 2"
+        }, 
+        {
+          "_order": 3, 
+          "answer_required": true, 
+          "instruction": "", 
+          "answer_type": "destinations", 
+          "label": "Destination Preference 3"
+        }, 
+        {
+          "_order": 4, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "text", 
+          "label": "Destination Preference Comments"
+        }, 
+        {
+          "_order": 5, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "Languages", 
+          "label": "Language 1"
+        }, 
+        {
+          "_order": 6, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "Language Proficiency", 
+          "label": "Language 1 Proficiency"
+        }
+      ], 
+      "show": "SHOW"
+    }, 
+    {
+      "_order": 2, 
+      "name": "Step 1b: Personal Information", 
+      "questions": [
+        {
+          "_order": 0, 
+          "answer_required": false, 
+          "instruction": "<p>Enter your personal information by <strong>Wednesday, October 19</strong>. Prospective participants with at least one internation destination preference (including Canada) must submit their passport information and ensure that their passport is valid through August 2017. Those who do not have such a passport should immediately order one. Prospective participants only considering domestic destinatinos are not required to submit passport information.</p>", 
+          "answer_type": "None", 
+          "label": null
+        }, 
+        {
+          "_order": 1, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "text", 
+          "label": "Passport First and Middle (Given) Names"
+        }, 
+        {
+          "_order": 2, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "text", 
+          "label": "Passport Last Name (Surname)"
+        }, 
+        {
+          "_order": 3, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "text", 
+          "label": "Passport Citizenship"
+        }, 
+        {
+          "_order": 4, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "text", 
+          "label": "Passport Number"
+        }, 
+        {
+          "_order": 5, 
+          "answer_required": false, 
+          "instruction": "<p>E.g., pets, foods, medications, etc. (leave blank if none)</p>", 
+          "answer_type": "text", 
+          "label": "Allergies"
+        }, 
+        {
+          "_order": 6, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "date", 
+          "label": "Passport Expiration Date"
+        }
+      ], 
+      "show": "SHOW"
+    }, 
+    {
+      "_order": 3, 
+      "name": "Step 1c: Finance Survey", 
+      "questions": [
+        {
+          "_order": 0, 
+          "answer_required": false, 
+          "instruction": "<p><strong>Complete the finance survey by Wednesday, October 19.</strong> Go to the Lord as the source, and then consider your personal financial situation before fellowshipping with your family or sending/supporting locality. In fellowshipping with your sending/supporting locality, do so without any expectation, but rather fellowship in the principle of opening your burden and situation.</p>", 
+          "answer_type": "None", 
+          "label": null
+        }, 
+        {
+          "_order": 1, 
+          "answer_required": true, 
+          "instruction": "<p><strong>After fellowshipping with the Lord, your family, and your sending locality/supporting locality, will you have enough finances to cover the registration fee plus the driving or airfare expenditures for the destination preferences you indicated?</strong></p>", 
+          "answer_type": "Yes/No", 
+          "label": "Finance Support"
+        }, 
+        {
+          "_order": 2, 
+          "answer_required": false, 
+          "instruction": "<p><strong>If your answer to the first question is \"no\", what is the approximate amount you have available to cover the cost of the trip?</strong></p>", 
+          "answer_type": "Yes/No", 
+          "label": "Finance: Approximate amount"
+        }, 
+        {
+          "_order": 3, 
+          "answer_required": false, 
+          "instruction": "<p><strong>If your answer to the first question is \"no\", which airport would you be flying from to reach your destination (enter in the three-letter IATA code, e.g., LAX, SNA, DFW, etc.):</strong></p>", 
+          "answer_type": "airports", 
+          "label": "Finance: Airport"
+        }, 
+        {
+          "_order": 4, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "text", 
+          "label": "Finance Comments"
+        }
+      ], 
+      "show": "SHOW"
+    }, 
+    {
+      "_order": 4, 
+      "name": "Step 2: Registration Fee Deposit", 
+      "questions": [
+        {
+          "_order": 0, 
+          "answer_required": false, 
+          "instruction": "<div>Complete a registration payment form from the FTTA trainee counter or FTTA register. <strong>Submit the form plus the <u>non-refundable</u> $100 registration fee deposit by Monday, December 4.</strong> Credit cards, checks, or cash are accepted. Checks should be made out to \"FTTA\" and include \"Gospel Trips\" and the participant's name in the memo field. Payments may be made:\r\n<ul>\r\n<li>Tuesday through Friday, between classes at the FTTA register</li>\r\n<li>Mondays, 4:30pm-6:45pm at the FTTA register</li>\r\n</ul>\r\n<p>If a locality decides to support a trainee financially, funds should be sent directly to the trainee and not to FTTA. No arrangements will be made for FTTA to receive funds directly from a locality.</p>\r\n</div>", 
+          "answer_type": "None", 
+          "label": null
+        }
+      ], 
+      "show": "SHOW"
+    }, 
+    {
+      "_order": 5, 
+      "name": "Step 3: Registration Fee Balance", 
+      "questions": [
+        {
+          "_order": 0, 
+          "answer_required": false, 
+          "instruction": "<p><strong>After your destination has been assigned, </strong><strong>complete a registration payment form from the FTTA trainee counter or FTTA register. Submit the form plus the registration fee balance by Monday, November 21.</strong>**</p>\r\n<p>Credit cards, checks, or cash are accepted. Checks should be made out to \"FTTA\" and include \"Gospel Trips\" and the participant's name in the memo field. Payments may be made:</p>\r\n<ul>\r\n<li>Between classes Tuesday through Friday at the FTTA register</li>\r\n<li>Wednesday, November&nbsp; 16, 4:00pm - 5:15pm at the FTTA reception counter (brothers only)</li>\r\n<li>Thursday, November 17, 6:15pm - 8:00pm at the FTTA reception counter (sisters only)</li>\r\n<li>Monday, November 21, 4:30pm - 6:45pm at the FTTA register</li>\r\n</ul>\r\n<p>If a locality decides to support a trainee financially, funds should be sent directly to the trainee and not to FTTA. No arrangements will be made for FTTA to receive funds directly from a locality.</p>\r\n<p><strong>**If you indicated a financial need based on your finance survey, do not submit the balance of the registration fee. You will receive specific instructions from brother Jerome.</strong></p>", 
+          "answer_type": "None", 
+          "label": null
+        }
+      ], 
+      "show": "SHOW"
+    }, 
+    {
+      "_order": 6, 
+      "name": "Step 4a: Flight Purchase", 
+      "questions": [
+        {
+          "_order": 0, 
+          "answer_required": false, 
+          "instruction": "<p><strong>After your destination has been assigned, purchase your airfare by Monday, December 5, if applicable, if not driving.</strong>**</p>\r\n<ul>\r\n<li>FOLLOW THE PARAMETERS EXACTLY.</li>\r\n<li>If the parameters are not mentioned, COORDINATE with your team when purchasing your flights to clsuter together your arrival and departure times. Arrive at and depart from your destination at reasonable times of day on the arrival and departure listed below.</li>\r\n<li>PAY CLOSE ATTENTION TO INTERNATION OAND OVERNIGHT FLIGHTS (e.g. if you are instructed to arrive on Thursday, your flight may need to depart on a Wednesday).</li>\r\n<li>DO NOT ARRIVE EARLIER BEFORE OR STAY LATER AFTER the gospel trips.</li>\r\n<li>NOT SIGHTSEEING OR SIDE TRUPS before or after the gospel trips.</li>\r\n<li>Any special travel arrangement or exception outside these paramters must be fellowshipped with and approved by FTTA.</li>\r\n</ul>\r\n<p>**<strong>If you indicate a financial need based on your finance survey, do not purchase your airfare. You will receive specific instructions from brother Jerome.</strong></p>\r\n<ul>\r\n<li>Africa:</li>\r\n<ul>\r\n<li>South Africa: Arrive on Thursday, January 19 at O.R. Tambo International Airport (JNB). Depart on Monday, February 16 from JNB.</li>\r\n</ul>\r\n<li>Europe:</li>\r\n<ul>\r\n<li>All countries: Arrive on Thursday, January 19 at Heathrow Airport (LHR) <strong>between</strong> <strong>8:00am and 4:00pm. Do not use any other London airport.</strong> Depart on Thursday, February 2 from LHR. <strong>You are not responsible or permitted to book any other flights within Europe.</strong></li>\r\n</ul>\r\n<li>South America:\r\n<ul>\r\n<li>Brazil: Arrive on Friday, January 20 at Sao Paulo-Guarulhos International Airport (GRU). Depart on Monday, February 6 from GRU.</li>\r\n</ul>\r\n</li>\r\n</ul>", 
+          "answer_type": "None", 
+          "label": null
+        }
+      ], 
+      "show": "SHOW"
+    }, 
+    {
+      "_order": 7, 
+      "name": "Step 4b: Flight Itinerary", 
+      "questions": [
+        {
+          "_order": 0,
+          "answer_required": false, 
+          "instruction": "<p><strong>Enter in your flight itinerary by <span style=\"color: #ff0000;\">Monday, December 5</span>, if applicable. </strong>If your itinerary has mutliple stops either to or from yur destination, only include the flight information that directly applies to your destination.</p>\r\n<p>Inbound flight information is <strong>TO </strong>Gospel Trip destination</p>\r\n<p>Outbound flight information is <strong>FROM</strong> Gospel Trip destination</p>", 
+          "answer_type": "None", 
+          "label": null
+        },
+        {
+          "_order": 1, 
+          "answer_required": false, 
+          "instruction": "<p>Enter in the two-letter IATA airline code, e.g., AA, DL, UA, etc.:</p>", 
+          "answer_type": "airlines", 
+          "label": "Inbound Airline"
+        }, 
+        {
+          "_order": 2, 
+          "answer_required": false, 
+          "instruction": "<p>Enter only numbers:</p>", 
+          "answer_type": "text", 
+          "label": "Inbound Flight Number"
+        }, 
+        {
+          "_order": 3, 
+          "answer_required": false, 
+          "instruction": "<p>Enter in the three-letter IATA airport code, e.g., LAX, SNA, DFW, etc.:</p>", 
+          "answer_type": "airports", 
+          "label": "Inbound Departure Airport"
+        }, 
+        {
+          "_order": 4, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "datetime", 
+          "label": "Inbound Departure Date and Time"
+        }, 
+        {
+          "_order": 5, 
+          "answer_required": false, 
+          "instruction": "<p>Enter in the three-letter IATA airport code, e.g., LAX, SNA, DFW, etc.:</p>", 
+          "answer_type": "airports", 
+          "label": "Inbound Arrival Airport"
+        }, 
+        {
+          "_order": 6, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "datetime", 
+          "label": "Inbound Arrival Date and Time"
+        }, 
+        {
+          "_order": 7, 
+          "answer_required": false, 
+          "instruction": "<p>Enter in the two-letter IATA airline code, e.g., AA, DL, UA, etc.:</p>", 
+          "answer_type": "airlines", 
+          "label": "Outbound Airline"
+        }, 
+        {
+          "_order": 8, 
+          "answer_required": false, 
+          "instruction": "<p>Enter only numbers:</p>", 
+          "answer_type": "text", 
+          "label": "Outbound Flight Number"
+        }, 
+        {
+          "_order": 9, 
+          "answer_required": false, 
+          "instruction": "<p>Enter in the three-letter IATA airport code, e.g., LAX, SNA, DFW, etc.:</p>", 
+          "answer_type": "airports", 
+          "label": "Outbound Departure Airport"
+        }, 
+        {
+          "_order": 10, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "datetime", 
+          "label": "Outboud Departure Date and Time"
+        }, 
+        {
+          "_order": 11, 
+          "answer_required": false, 
+          "instruction": "<p><strong>Enter in the three-letter IATA airport code, e.g., LAX, SNA, DFW, etc.:</strong></p>", 
+          "answer_type": "airports", 
+          "label": "Outbound Arrival Airport"
+        }, 
+        {
+          "_order": 12, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "datetime", 
+          "label": "Outboud Arrival Date and Time"
+        }, 
+        {
+          "_order": 13, 
+          "answer_required": false, 
+          "instruction": "", 
+          "answer_type": "text", 
+          "label": "Flight Comments"
+        }
+      ], 
+      "show": "SHOW"
+    }
+  ], 
+  "name": "Template"
+}

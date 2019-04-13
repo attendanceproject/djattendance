@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% load bootstrap3 %}
+{% load common_tags %}
 
 {% block title %}
 Service Scheduling
@@ -135,11 +136,16 @@ Service Scheduling
     <div role="tabpanel" class="tab-pane active" id="assign">
       <div class="pull-right" role="group">
         <div class="btn-group">
-          <a href="{% url 'services:services_generate_leaveslips' %}?week_schedule={{current_week}}" class="btn btn-primary">Generate Leave Slips</a>
+          <a href="{% url 'services:services_generate_leaveslips' %}?week_schedule={{current_week}}" class="btn btn-primary" onclick="return confirm('Are you sure? This could overwrite existing leaveslips.')">Generate Leave Slips</a>
         </div>
         &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
         <div class="btn-group">
-          <a href="{% url 'services:services_assign_view' %}?week_schedule={{current_week}}" class="btn btn-success">Make Schedule</a>
+          <a href="{% url 'services:services_assign_view' %}?week_schedule={{current_week}}" class="btn btn-success" style="color:red;" onclick="return confirm('Are you sure? This will overwrite the current schedule.')">Make Schedule</a>
         </div>
       </div>
       <div>
@@ -246,8 +252,11 @@ Service Scheduling
       <div class="pull-left">
         Workers:
       </div>
-      <div class="col-xs-6 pull-left" style="width: 318px;">
+      <div class="col-xs-6 pull-left" style="width: 140px;">
         <a href="{% url 'admin:services_worker_changelist' %}" class="btn btn-default">Edit Workers</a>
+      </div>
+      <div class="col-xs-6 pull-left" style="width: 318px;">
+        <a href="{% url 'services:import-guests' %}" class="btn btn-default" target="_blank" style="color:red;">Import Guests</a>
       </div>
 
       <div class="pull-right">
@@ -363,14 +372,16 @@ Service Scheduling
       <table class="table table-striped table-bordered data-table" id="results">
         <thead>
           <tr>
-            <th class="category-info">Workers</th>
-            <th class="category-info">Workload</th>
+            <th id="workers" class="category-info">Workers</th>
+            <th id="workload" class="category-info">Workload</th>
             {% for category in categories %}
-              <th class="category-info">{{ category.name }}</th>
+              <th id="{{category.name|cut:" "|lower}}" class="category-info">{{ category.name }}</th>
             {% endfor %}
-            {% for c in service_checks %}
-              <th class="service-limits"></th>
+            <!-- These are hidden, see datatable columnDefs -->
+            {% for check in service_checks %}
+              <th id="{{check.html_id}}" class="service-limits">{{ check.name }}</th>
             {% endfor %}
+            <th id="gender" class="gender">Gender</th>
           </tr>
         </thead>
         <tbody>
@@ -396,6 +407,7 @@ Service Scheduling
             {% for c in worker.checks %}
               <td>{{ c }}</td>
             {% endfor %}
+            <td>{{ worker.trainee.gender }}</td>
            </tr>
         {% endfor %}
         </tbody>
@@ -454,7 +466,13 @@ Service Scheduling
 
   <!-- Assignments Tab -->
   <div role="tabpanel" class="tab-pane" id="assignments">
-    <div class="clear">&nbsp;</div>
+    <div class="clear">&nbsp;</div>    
+    <h4>
+      <div class="col-xs-6 pull-left" style="width: 318px;">
+          <a href="{% url 'services:services_form' %}" class="btn btn-default">Add Trainees</a>
+      </div>
+    </h4>
+    <br/><br/>
     <div class="alert alert-info" role="alert">
       Note - # of trainees for designated services are automatically calculated based on trainees selected in worker group
     </div>
@@ -516,6 +534,12 @@ Service Scheduling
     <div class="row">
       <div class="col-sm-3">
         <a href="{% url 'services:single_trainee_services_viewer' %}" target="_blank" class="btn btn-primary">Single Trainee Services Viewer</a>
+        <br />
+        <br />
+        <a href="{% url 'services:service_category_not_done_viewer' %}" target="_blank" class="btn btn-primary">Have Not Done This Service Category</a>
+        <br />
+        <br />
+        <a href="{% url 'services:service_category_counts_viewer' %}" target="_blank" class="btn btn-primary">Service Category Counts</a>
       </div>
     </div>
   </div>
@@ -868,22 +892,76 @@ Service Scheduling
 
     const NUM_FILTERS = {{ service_checks|length }};
     let showAll = (dt) => {
-      for (var i = dt.columns().nodes().length - NUM_FILTERS; i < dt.columns().nodes().length; i++) {
+      for (var i = dt.columns().nodes().length - NUM_FILTERS - 1; i < dt.columns().nodes().length; i++) {
         dt.columns(i).search('', true, false).draw();
       }
     }
-    let filterer = (index) => {
+    let filterer = (id) => {
       return function(e, dt, node, config) {
         showAll(dt);
-        dt.columns(index(dt)).search('True', true, false).draw();
+        dt.columns(id).search('True', true, false).draw();
       }
     }
     function initializeDataTable(elem) {
+      var dtButtons = [
+            {
+              extend: 'colvis',
+              text: 'Show/Hide Columns',
+              columns: ':gt(0)',
+            },
+            {
+              text: 'Show all trainees',
+              action: function(e, dt, node, config) {
+                showAll(dt);
+              }
+            }
+          ];
+
+      var reviewButtons = [
+            {
+              text: 'Brothers',
+              action: function(e, dt, node, config) {
+                showAll(dt);
+                dt.columns("#gender").search('B', true, false).draw();
+              }
+            },
+            {
+              text: 'Sisters',
+              action: function(e, dt, node, config) {
+                showAll(dt);
+                dt.columns("#gender").search('S', true, false).draw();
+              }
+            },
+            {
+              extend: 'csvHtml5',
+              text: 'CSV',
+              filename: 'Service Schedule Report',
+              title: 'Service Schedule Report',
+              exportOptions: {
+                columns: ':visible'
+              },
+            },
+            {% for check in service_checks %}
+            {% verbatim %}{{% endverbatim %}
+              text: "{{ check.name|safe }}",
+              action: filterer("#{{check.html_id}}"),
+            {% verbatim %}},{% endverbatim %}
+            {% endfor %}
+          ];
+
+      if (elem.attr('id') == 'results') {
+        dtButtons = dtButtons.concat(reviewButtons);
+      }
+
       elem.DataTable({
         paging: false,
         columnDefs: [
           {
             targets: 'service-limits',
+            visible: false,
+          },
+          {
+            targets: 'gender',
             visible: false,
           },
           {
@@ -902,41 +980,14 @@ Service Scheduling
             visible: true
           },
         ],
-        scrollY: '45vh',
+        scrollY: '100%',
         scrollCollapse: true,
         scrollX: true,
         dom: '<"row"<"col-sm-8"Bl><"col-sm-4"f>>' +
           '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
           '<"row"<"col-sm-5"i><"col-sm-7"p>>',
         buttons: {
-          buttons: [
-            {
-              extend: 'csvHtml5',
-              text: 'CSV',
-              filename: 'Service Schedule Report',
-              title: 'Service Schedule Report',
-              exportOptions: {
-                columns: ':visible'
-              },
-            },
-            {
-              extend: 'colvis',
-              text: 'Show/Hide Columns',
-              columns: ':gt(0)',
-            },
-            {
-              text: 'Show all trainees',
-              action: function(e, dt, node, config) {
-                showAll(dt);
-              }
-            },
-            {% for check in service_checks %}
-            {% verbatim %}{{% endverbatim %}
-              text: "{{ check.name|safe }}",
-              action: filterer((dt) => dt.columns().nodes().length - (NUM_FILTERS - {{ forloop.counter0 }})),
-            {% verbatim %}},{% endverbatim %}
-            {% endfor %}
-          ],
+          buttons: dtButtons,
           dom: {
             container: {
               className: 'dt-buttons'

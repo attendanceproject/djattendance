@@ -28,16 +28,31 @@ class TestimonyForm(GenericModelForm):
 class ConsiderationForm(GenericModelForm):
   def __init__(self, *args, **kwargs):
     super(ConsiderationForm, self).__init__(*args, **kwargs)
-    self.fields['financial'].required = False
+    # self.fields['financial'].required = False
 
   class Meta(GenericModelForm.Meta):
     model = Consideration
     widgets = {
       'attend_XB': forms.RadioSelect,
+      'XB_other': forms.TextInput(attrs={'rows': 1, 'cols': '100vh'}),
       'fellowshipped': forms.RadioSelect,
+      'fship_date': DatePicker(),
       'consideration_plan': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'char_count'}),
       'comments': forms.Textarea(attrs={'rows': 4, 'cols': '100vh', 'class': 'char_count'}),
     }
+
+  def clean(self):
+    attend_XB = self.cleaned_data.get("attend_XB")
+    XB_other = self.cleaned_data.get("XB_other")
+    fellowshipped = self.cleaned_data.get("fellowshipped")
+    fship_date = self.cleaned_data.get("fship_date")
+
+    if attend_XB == "OTHER" and not XB_other:
+      raise forms.ValidationError("Please elaborate regarding attending FTTA-XB.")
+
+    if fellowshipped == "OTHER" and not fship_date:
+      raise forms.ValidationError("Please set a date to fellowship with the leading brothers in your locality.")
+
 
 
 class WebsiteForm(GenericModelForm):
@@ -60,7 +75,7 @@ class RemembranceForm(GenericModelForm):
   class Meta(GenericModelForm.Meta):
     model = Remembrance
     widgets = {
-        'remembrance_text': forms.TextInput(attrs={'rows': 1, 'maxlength': 50, 'size': '60vh', 'placeholder': 'maximum 50 characters'}),
+        'remembrance_text': forms.TextInput(attrs={'rows': 1, 'size': '60vh'}),
         'remembrance_reference': forms.TextInput(attrs={'rows': 1, 'size': '30vh'})
     }
 

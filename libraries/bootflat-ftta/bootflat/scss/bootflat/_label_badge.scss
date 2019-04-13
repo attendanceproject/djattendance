@@ -1,13 +1,13 @@
 // Variables
 //------------------------------------------------------
 $label-normal:                  $blue !default;
-$label-default:                 $white !default;
-$label-primary:                 $blue !default;
+$label-default:                 #0C5F80 !default;
+$label-primary:                 #393A42 !default;
 $label-success:                 $blue !default;
 $label-danger:                  $red !default;
 $label-warning:                 $tan !default;
-$label-info:                    $tan-light !default;
-$label-text:  $black;
+$label-info:                    #929497 !default;
+$label-text:                    #F1F2F2;
 $label-default-font-color:      $blue !default;
 
 // Exports
@@ -22,13 +22,12 @@ $label-default-font-color:      $blue !default;
   .label,
   .badge {
     background-color: $label-normal;
+    border-radius: 0px;
   }
 
   .label-default,
   .badge-default {
-    border: 1px solid $button-normal;
     background-color: $label-default;
-    color: $label-default-font-color;
   }
 
   .label-primary,
@@ -53,6 +52,7 @@ $label-default-font-color:      $blue !default;
   .badge-warning {
     border-color: $label-warning;
     background-color: $label-warning;
+    color: #393A42;
   }
 
   .label-info,

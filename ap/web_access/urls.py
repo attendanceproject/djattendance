@@ -5,6 +5,7 @@ from web_access.models import WebRequest
 
 urlpatterns = [
     url(r'^$', views.WebRequestList.as_view(), name='web_access-list'),
+    url(r'^json/$', views.WebRequestJSON.as_view(), name='web_access-json'),
     url(r'^create$', views.WebAccessCreate.as_view(model=WebRequest), name='web_access-create'),
     url(r'^detail/(?P<pk>\d+)$', views.WebAccessDetail.as_view(), name='web_access-detail'),
     url(r'^update/(?P<pk>\d+)$', views.WebAccessUpdate.as_view(), name='web_access-update'),

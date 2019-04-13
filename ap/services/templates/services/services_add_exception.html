@@ -6,6 +6,11 @@
 
 {% block scripts %}
 {{form.media}}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $(".select-fk").select2({width: '100%'});
+  });
+</script>
 {% endblock %}
 
 {% block title %}Add Exception{% endblock %}
@@ -14,14 +19,13 @@
 <div class="col-md-12">
 
   <h3>Add Exception</h3>
-  
+
   <form method="post">
     {% csrf_token %}
     {% bootstrap_form form %}
     <button class="btn btn-primary" type="submit">{{button_label}}</button>
   </form>
-  
-  
+
 </div>
 
 {% endblock %}

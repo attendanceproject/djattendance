@@ -16,6 +16,8 @@ from .serializers import UserSerializer, TraineeSerializer, TrainingAssistantSer
 
 from aputils.auth import login_user
 
+from braces.views import GroupRequiredMixin
+
 
 class CurUserOnlyDetailView(SingleObjectMixin):
   def get_object(self, *args, **kwargs):
@@ -49,7 +51,7 @@ class EmailUpdateView(CurUserOnlyDetailView, UpdateView):
 
   def get_success_url(self):
     messages.success(self.request, "Email Updated Successfully!")
-    return reverse_lazy('user-detail', kwargs={'pk': self.kwargs['pk']})
+    return reverse_lazy('user_detail', kwargs={'pk': self.kwargs['pk']})
 
 
 # class SwitchUserView(GroupRequiredMixin, TemplateView):
@@ -67,15 +69,16 @@ class SwitchUserView(SuccessMessageMixin, FormView):
     return super(SwitchUserView, self).form_valid(form)
 
 
-class AllTrainees(ListView):
+class AllTrainees(GroupRequiredMixin, ListView):
   model = Trainee
   template_name = 'accounts/trainees_table.html'
+  group_required = [u'attendance_monitors', u'training_assistant', u'service_schedulers']
 
   def post(self, request, *args, **kwargs):
     return self.get(request, *args, **kwargs)
 
   def get_context_data(self, **kwargs):
-    if self.request.method == 'POST':
+    if self.request.method == 'POST' and self.request.user.has_group(['attendance_monitors']):
       val = self.request.POST.get('change')
       email = self.request.POST.get('pk')
       f = self.request.POST.get('f')

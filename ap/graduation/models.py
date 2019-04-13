@@ -44,6 +44,9 @@ class GradAdmin(models.Model):
   # speaking trainees
   speaking_trainees = models.ManyToManyField(Trainee, blank=True)
 
+  # remembrance character limit
+  remembrance_char_limit = models.IntegerField(blank=True, null=True)
+
   def __unicode__(self):
     try:
       return "[Graduation] %s" % (self.term)
@@ -130,10 +133,10 @@ class Survey(models.Model):
 
 class Testimony(Survey):
 
-  top_experience = models.TextField(null=True, blank=True)
-  encouragement = models.TextField(null=True, blank=True)
-  overarching_burden = models.TextField(null=True, blank=True)
-  highlights = models.TextField(null=True, blank=True)
+  top_experience = models.TextField(null=True)
+  encouragement = models.TextField(null=True)
+  overarching_burden = models.TextField(null=True)
+  highlights = models.TextField(null=True)
 
   @property
   def responded(self):
@@ -151,29 +154,25 @@ class Consideration(Survey):
 
   attend_XB = models.CharField(max_length=5, choices=XB_CHOICES, null=True)
 
+  XB_other = models.TextField(null=True, blank=True, max_length=65) # only filled out if "other" under attend_XB is selected.
+
   FELLOWSHIP_CHOICES = (
       ('YES', 'Yes'),
       ('NO', 'No'),
-      ('OTHER', 'Other')
+      ('OTHER', 'I have not fellowshipped yet, but am scheduled to fellowship on')
   )
 
   fellowshipped = models.CharField(max_length=5, choices=FELLOWSHIP_CHOICES, null=True)
 
-  FINANCIAL_CHOICES = (
-      ('FLWSHP', 'All finances have been fellowshipped and are taken care of'),
-      ('PART', 'I may need to fellowship for help with part of the finances'),
-      ('ALL', 'I may need to fellowship for help with all of the finances'),
-      ('OTHER', 'Other')
-  )
-  financial = models.CharField(max_length=5, choices=FINANCIAL_CHOICES, null=True)
+  fship_date = models.DateField(blank=True, null=True) # only required if "other" under fellowshipped is selected.
 
   consideration_plan = models.TextField(null=True, max_length=250)
 
-  comments = models.TextField(null=True, max_length=150)
+  comments = models.TextField(blank=True, null=True, max_length=150)
 
   @property
   def responded(self):
-    return self.attend_XB or self.fellowshipped or self.financial or self.consideration_plan
+    return self.attend_XB or self.fellowshipped or self.consideration_plan
 
 
 class Website(Survey):
@@ -245,7 +244,7 @@ class Misc(Survey):
 
   @property
   def responded(self):
-    return self.grad_invitations or self.grad_dvd
+    return self.grad_invitations is not None or self.grad_dvd is not None
 
   def menu_title(self):
     return "Invites & DVDs"

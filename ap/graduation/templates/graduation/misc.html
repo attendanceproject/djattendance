@@ -37,7 +37,8 @@
     {% endif %}
 
     setcost()
-
+    $("#invite_cost").css("font-weight", "Bold");
+    $("#dvd_cost").css("font-weight", "Bold");
     $("input").on('change', function(){
       setcost()
     })
@@ -59,7 +60,7 @@
   <div class="row"><div class="col-xs-12"><div class="panel">
     <p>Please note that invitations come in bundles of 5, so your choice must be a multiple of 5 and represents the total number of invitations (not the number of sets). The average price will be $2.50 per set of 5 invitations. Envelopes included. Stamps not included.</p>
       <div class="row"><div class="col-xs-12">
-        Number of invitations: {{form.grad_invitations}}
+        <strong>Number of invitations</strong>: {{form.grad_invitations}}
       </div></div>
       <div class="row"><div class="col-xs-12">
         Number of packs: <span id="invite_pack_amount">0 packs</span><br>
@@ -70,7 +71,7 @@
   <div class="row"><div class="col-xs-12"><div class="panel">
     <p>The price will be $11.00 per DVD. DVD case included.</p>
       <div class="row"><div class="col-xs-12">
-        Number of DVD: {{form.grad_dvd}}
+        <strong>Number of DVD</strong>: {{form.grad_dvd}}
       </div></div>
       <div class="row"><div class="col-xs-12">
         Total cost:  <span id="dvd_cost">$0.00</span>

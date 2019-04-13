@@ -2,11 +2,31 @@ from datetime import date, datetime, timedelta
 
 from accounts.models import Trainee
 from django.db import models
+from terms.models import Term
 from pytz import timezone
 from schedules.models import Event
 
 
+class ClassnotesManager(models.Manager):
+  def get_queryset(self):
+    queryset = super(ClassnotesManager, self).get_queryset()
+    if Term.current_term():
+      start_date = Term.current_term().start
+      end_date = Term.current_term().end
+      return queryset.filter(date_assigned__gte=start_date, date_assigned__lte=end_date).distinct()
+    else:
+      return queryset
+
+
+class ClassnotesAllManager(models.Manager):
+  def get_queryset(self):
+    return super(ClassnotesAllManager, self).get_queryset()
+
+
 class Classnotes(models.Model):
+
+  objects = ClassnotesManager()
+  objects_all = ClassnotesAllManager()
 
   class Meta:
     ordering = ['-date_assigned']

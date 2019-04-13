@@ -1,17 +1,11 @@
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-import django.contrib.auth
-from sets import Set
-import json
 from collections import OrderedDict
-# from accounts.models import Trainee, User
-
-from services.models import Qualification
 
 from django.db.models.query_utils import Q
 
+
 class QueryFilterService:
   queryfilter_store = OrderedDict()
+
   def __init__(self):
     pass
 
@@ -46,6 +40,7 @@ class QueryFilterService:
 def add(*args, **kwargs):
   QueryFilterService.addQ(*args, **kwargs)
 
+
 add('Brothers', gender='B')
 add('Sisters', gender='S')
 
@@ -54,9 +49,9 @@ add('Not Couple', meta__is_married=False)
 add('Commuter', Q(type='C'))
 add('Not Commuter', ~Q(type='C'))
 
-add('First Term',  current_term=1)
+add('First Term', current_term=1)
 add('Second Term', current_term=2)
-add('Third Term',  current_term=3)
+add('Third Term', current_term=3)
 add('Fourth Term', current_term=4)
 add('First Year', Q(current_term=1) | Q(current_term=2))
 add('Second Year', Q(current_term=3) | Q(current_term=4))
@@ -82,7 +77,6 @@ add('Team Internet', team__type='IT')
 # add('Kitchen Star', worker__qualifications__name='Kitchen Star')
 # add('Restroom Star', worker__qualifications__name='Restroom Star')
 # add('Sack Lunch Star', worker__qualifications__name='Sack Lunch Star')
-
 
 
 # Star filter may be done through qualifications

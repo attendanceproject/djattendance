@@ -1,4 +1,4 @@
-import { addDays, differenceInWeeks, startOfWeek } from 'date-fns'
+import { addDays, differenceInWeeks, getDay, setHours, setMinutes, startOfWeek, endOfWeek, isSunday } from 'date-fns'
 
 //constants
 
@@ -59,12 +59,11 @@ export const SLIP_TYPES = [
   {id: 'NOTIF', name: 'Notification Only'},
 ]
 
-export const TA_IS_INFORMED = {id: 'true', name: 'Yes, by a TA'}
+export const TA_IS_INFORMED = {id: 'true', name: 'Yes, informed a TA'}
 export const TA_EMPTY = {id: '-1', name: ''}
-
 export const INFORMED = [
   TA_IS_INFORMED,
-  {id: 'texted', name: 'Yes, by the attendance number (only for sisters if the office is closed)'},
+  {id: 'texted', name: 'Yes, texted the attendance number (only for sisters when the office is closed)'},
   {id: 'false', name: 'No'},
   TA_EMPTY,
 ]
@@ -132,24 +131,22 @@ export function canSubmitRoll(dateDetails) {
   return (rollDate >= weekStart && rollDate <= weekEnd)
 }
 
-export function canFinalizeRolls(rolls, dateDetails) {
-  let weekStart = dateDetails.weekStart
-  let weekEnd = dateDetails.weekEnd
-  let isWeekFinalized = rolls.filter(function(roll) {
-    let rollDate = new Date(roll.date)
-    return rollDate >= weekStart && rollDate <= weekEnd && roll.finalized
-  }).length > 0
+export function canFinalizeRolls(term, date, finalizedweeks) {
+  let weekView = getWeekFromDate(term, date)
+  let isWeekFinalized = (finalizedweeks.indexOf(weekView.toString()) >= 0)
   // to enforce time limitation on when trainees can finalize
-  
-  // let now = new Date()
-  // // Monday midnight is when you can begin finalizing
-  // let isPastMondayMidnight = now >= weekEnd
-  // // Tuesday midnight is when you can no longer finalize
-  // weekEnd = addDays(weekEnd, 2)
-  // let isBeforeTuesdayMidnight = now <= weekEnd  
-  // let canFinalizeWeek = !isWeekFinalized && isPastMondayMidnight && isBeforeTuesdayMidnight
-  let canFinalizeWeek = !isWeekFinalized  
+  let now = new Date()
+  let currentWeek = getWeekFromDate(term, now)
+  let day = getDay(now)
+  // Sunday 17:45 is when you can begin finalizing
+  let startFinalization = setMinutes(setHours(startOfWeek(now), 17), 45)
+  let canFinalizeWeek = !isWeekFinalized && (currentWeek > weekView ||
+                          (currentWeek == weekView && isSunday(now) && now > startFinalization))
   return canFinalizeWeek
+}
+
+export function isWeekFinalized(term, date, finalizedweeks) {
+  return finalizedweeks.indexOf(getWeekFromDate(term, date).toString()) >= 0
 }
 
 export const compareLeaveslipEvents = (e1, e2) => {
@@ -184,7 +181,30 @@ export function getPeriodFromDate(term, date) {
   if (period < 0) {
     return 0
   }
+
+  if (period > 9) {
+    return 9
+  }
+
   return period
+}
+
+export function getWeekFromDate(term, date) {
+  let week = Math.floor(
+    differenceInWeeks(
+      startOfWeek(date, {weekStartsOn: 1}),
+      new Date(term.start)
+    )
+  )
+  // if it's interim
+  if (week < 0) {
+    return 0
+  }
+
+  if (week > 19) {
+    return 19
+  }
+  return week
 }
 
 export const taInformedToServerFormat = ta_informed => {
@@ -208,6 +228,15 @@ export const taInformedToServerFormat = ta_informed => {
 
 export const isAM = (user) => {
   for (let group of AM_GROUPS) {
+    if (user.groups.indexOf(group) >= 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export const isTA = (user) => {
+  for (let group of TA_GROUP) {
     if (user.groups.indexOf(group) >= 0) {
       return true;
     }

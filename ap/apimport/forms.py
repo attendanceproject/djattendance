@@ -1,13 +1,10 @@
 from django import forms
-from django.forms import ModelForm, TextInput, CharField, ModelChoiceField
+from django.forms import ModelForm, CharField, ModelChoiceField
 from django.forms.formsets import formset_factory
 from aputils.models import City
 from houses.models import House
 from teams.models import Team
-from terms.models import Term
 from aputils.widgets import DatePicker
-
-from functools import partial
 
 
 class DateForm(forms.Form):
@@ -27,6 +24,7 @@ class CityForm(ModelForm):
           'class': 'form-control'
       })
 
+
 CityFormSet = formset_factory(CityForm, extra=0)
 
 
@@ -41,6 +39,7 @@ class TeamForm(ModelForm):
       self.fields[field].widget.attrs.update({
           'class': 'form-control'
       })
+
 
 TeamFormSet = formset_factory(TeamForm, extra=0)
 
@@ -60,5 +59,6 @@ class HouseForm(ModelForm):
       self.fields[field].widget.attrs.update({
           'class': 'form-control'
       })
+
 
 HouseFormSet = formset_factory(HouseForm, extra=0)

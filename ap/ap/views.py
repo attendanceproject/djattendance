@@ -11,7 +11,6 @@ from bible_tracker.models import BibleReading, EMPTY_WEEKLY_STATUS, UNFINALIZED_
 from bible_tracker.views import EMPTY_WEEK_CODE_QUERY
 from terms.models import Term
 from house_requests.models import MaintenanceRequest
-from django.core.urlresolvers import reverse_lazy
 import json
 
 from aputils.utils import WEEKDAY_CODES
@@ -60,7 +59,7 @@ def home(request):
       'weekly_status': weekly_status,
       'weeks': Term.all_weeks_choices(),
       'finalized': finalized_str,
-      'weekday_codes':json.dumps(WEEKDAY_CODES)
+      'weekday_codes': json.dumps(WEEKDAY_CODES)
   }
   notifications = get_announcements(request)
   for notification in notifications:
@@ -102,9 +101,32 @@ def custom500errorview(request):
   return render(request, 'error.html', context=ctx)
 
 
+def custom502errorview(request):
+  ctx = {
+    'image_path': 'img/502error.png',
+    'page_title': 'Bad Gateway Error'
+  }
+  return render(request, 'error.html', context=ctx)
+
+
 def custom503errorview(request):
   ctx = {
     'image_path': 'img/503error.png',
     'page_title': 'Service Unavailable'
   }
   return render(request, 'error.html', context=ctx)
+
+
+def custom504errorview(request):
+  ctx = {
+    'image_path': 'img/504error.png',
+    'page_title': 'Gateway Timeout'
+  }
+  return render(request, 'error.html', context=ctx)
+
+def printerinstructions(request):
+  ctx = {
+    'image_path' : 'img/printer.jpg',
+    'page_title' : 'Printer Instructions',
+  }
+  return render(request, 'printer.html', context=ctx)

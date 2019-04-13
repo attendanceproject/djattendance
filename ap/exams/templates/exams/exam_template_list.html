@@ -11,10 +11,10 @@ function filterTermClass() {
   $("div.exam-panel").each((i, e) => {
     const elem = $(e);
     elem.show();
-    if (term != "Choose term" && elem.attr('data-term') != term) {
+    if (term != "All Terms" && elem.attr('data-term') != term) {
       elem.hide();
     }
-    if (cls != "Choose class" && elem.attr('data-class') != cls) {
+    if (cls != "All Classes" && elem.attr('data-class') != cls) {
       elem.hide();
     }
   });
@@ -36,23 +36,29 @@ function filterTermClass() {
   </h1>
 
   {% if exam_service %}
-    <select id="term" onchange="filterTermClass()"> Term
-      <option value="Choose term" selected>
-      Choose term
-      </option>
-      {% for term in terms %}
-        <option value="{{ term.name }}">{{ term.name }}</option>
-      {% endfor %}
-    </select>
+    <body onload="filterTermClass()">
+      <select id="term" onchange="filterTermClass()"> Term
+        <option value="All Terms">
+        All Terms
+        </option>
+        {% for term in terms %}
+          {% if forloop.first %}
+          <option value="{{ term.name }}" selected>{{ term.name }}</option>
+          {% else %}
+          <option value="{{ term.name }}">{{ term.name }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
 
-    <select id="class" onchange="filterTermClass()"> Class
-      <option value="Choose class" selected>
-      Choose class
-      </option>
-      {% for class in classes %}
-        <option value="{{ class.name }}">{{ class.name }}</option>
-      {% endfor %}
-    </select>
+      <select id="class" onchange="filterTermClass()"> Class
+        <option value="All Classes" selected>
+        All Classes
+        </option>
+        {% for class in classes %}
+          <option value="{{ class.name }}">{{ class.name }}</option>
+        {% endfor %}
+      </select>
+    </body>
   {% endif %}
 
   {% for exam in exams %}
@@ -63,7 +69,7 @@ function filterTermClass() {
             {% if user|is_trainee %}
               {% if exam.visible and not exam_service and not exam.completed %}
                 <a href="{% url 'exams:take' exam.id %}" class="btn btn-success">Take exam</a>
-              {% elif exam.graded and exam.is_open and not exam_service %}
+              {% elif exam.graded and exam.is_graded_open and not exam_service %}
                 <a href="{% url 'exams:graded' exam.id %}" class="btn btn-success">View graded exam</a>
               {% endif %}
             {% endif %}

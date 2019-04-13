@@ -12,12 +12,10 @@ def interim_intentions_available(request):
 
   try:
     admin = InterimIntentionsAdmin.objects.get(term=Term.current_term())
-    if admin.open_time:
-        if datetime.now() < admin.open_time:
-          return {'interim_intentions_available': False}
-    elif admin.close_time:
-      if datetime.now() > admin.close_time:
-        return {'interim_intentions_available': False}
-    return {'interim_intentions_available': True}
+    if admin.open_time and admin.close_time:
+      if datetime.now() >= admin.open_time and datetime.now() <= admin.close_time:
+        return {'interim_intentions_available': True}
   except InterimIntentionsAdmin.DoesNotExist:
-    return {'interim_intentions_available': False}
+    pass
+
+  return {'interim_intentions_available': False}

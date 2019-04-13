@@ -6,13 +6,15 @@ from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
 from django.db import models
 from terms.models import Term
+from semi.utils import REQUEST_STATUS
+from aputils.utils import RequestMixin
 
 
 def default_attendance():
   return {"tuesday": "N", "wednesday": "N", "thursday": "N", "friday": "N", "saturday": "N"}
 
 
-class SemiAnnual(models.Model):
+class SemiAnnual(models.Model, RequestMixin):
 
   trainee = models.ForeignKey(Trainee)
 
@@ -22,10 +24,19 @@ class SemiAnnual(models.Model):
 
   location = models.CharField(max_length=5, default='TC')
 
-  comments = models.CharField(max_length=200, blank=True)
+  other_location = models.CharField(max_length=200, blank=True)
+
+  request_comments = models.TextField(max_length=1000, blank=True, null=True)
+
+  ta_comments = models.TextField(max_length=500, blank=True, null=True)
+
+  status = models.CharField(max_length=1, default='P', choices=REQUEST_STATUS)
 
   class Meta:
     unique_together = ('trainee', 'term')
 
   def get_location_url(self):
     return reverse('semi:location', kwargs={'pk': self.id})
+
+  def get_trainee_requester(self):
+    return self.trainee

@@ -58,7 +58,7 @@ for day in ('sunday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'):
     absentee_report_job = DjangoCommandJob(
         task='send_absentee_roster_emails',
         every=day,
-        at='08:00'
+        at='08:25'
     )
     cron.job(absentee_report_job)
 # cron.command('env > ~/cronenv', every='1.minute')

@@ -64,7 +64,7 @@ def absent_trainee_form(request):
   bro_unreported = roster.unreported_houses.filter(gender='B')
   sis_unreported = roster.unreported_houses.filter(gender='S')
 
-  if request.user.house in bro_unreported:
+  if request.user.house in bro_unreported | sis_unreported:
     stat = "Unsubmitted"
   else:
     stat = "Submitted"
@@ -73,6 +73,9 @@ def absent_trainee_form(request):
   if time(6) <= datetime.now().time() <= time(8, 05):
     read_only = False
 
+  if datetime.today().weekday() == 6:
+    if time(6) <= datetime.now().time() <= time(8, 20):
+      read_only = False
   c = {
       'formset': formset,
       'user': request.user,

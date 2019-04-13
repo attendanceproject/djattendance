@@ -1,20 +1,18 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
+from accounts.models import Trainee
+from aputils.eventutils import EventUtils
+from aputils.models import QueryFilter
+from aputils.utils import comma_separated_field_is_in_regex
+from django.core.urlresolvers import reverse
+from django.core.validators import validate_comma_separated_integer_list
 from django.db import models
 from django.db.models import Q
-from django.core.validators import validate_comma_separated_integer_list
-
-from terms.models import Term
-from accounts.models import Trainee
-from seating.models import Chart
-from aputils.models import QueryFilter
-from teams.models import Team
-
-from aputils.utils import comma_separated_field_is_in_regex
-from aputils.eventutils import EventUtils
-
 from schedules.constants import WEEKDAYS
-from django.core.urlresolvers import reverse
+from seating.models import Chart
+from teams.models import Team
+from terms.models import Term
+
 
 """ SCHEDULES models.py
 This schedules module is for representing weekly trainee schedules.
@@ -364,9 +362,12 @@ class Schedule(models.Model):
 
     return EventUtils.flip_roll_list(event_trainee_tb)
 
-  def __get_qf_trainees(self):
+  def save(self, *args, **kwargs):
+    super(Schedule, self).save(*args, **kwargs)
+
+  def _get_qf_trainees(self):
     if not self.query_filter:
-      return None
+      return Trainee.objects.all()
     query = eval(self.query_filter.query)
     if isinstance(query, dict):
       return Trainee.objects.filter(**query)
@@ -380,9 +381,12 @@ class Schedule(models.Model):
     q.save()
   """
   def assign_trainees(self):
-    trainees = self.__get_qf_trainees()
+    trainees = self._get_qf_trainees()
     if trainees:
       self.trainees.set(trainees)
+
+  def get_assign_url(self):
+    return reverse('schedules:assign-trainees', kwargs={'pk': self.id})
 
   def get_absolute_url(self):
     return reverse('schedules:admin-schedule', kwargs={'pk': self.id})
@@ -392,88 +396,3 @@ class Schedule(models.Model):
 
   def get_split__partial_url(self):
     return '/schedules/admin/schedules/split/%s/' % str(self.id)
-
-  # TODO: Hailey will write a wiki to explain this function.
-  def assign_trainees_to_schedule(self):
-    if self.is_locked:
-      return
-
-    new_set = self.__get_qf_trainees()
-    current_set = self.trainees.all()
-
-    # If the schedules are identical, bail early
-    to_add = new_set.exclude(pk__in=current_set)
-    to_delete = current_set.exclude(pk__in=new_set)
-
-    if not to_add and not to_delete:
-      return
-
-    # Does the schedule need to be split?
-    term = Term.current_term()
-    if term is None or datetime.now().date() > term.end:
-      return
-
-    if datetime.now().date() < term.start:
-      week = -1
-    else:
-      week = term.term_week_of_date(datetime.today().date())
-
-    weeks = eval(self.weeks)
-
-    # todo(import2): this doesn't work yet
-    if False:  # (len(Set(range(0, week + 1)).intersection(weeks_set))> 0):
-      # Splitting
-      s1 = Schedule(
-          name=self.name,
-          comments=self.comments,
-          priority=self.priority,
-          season=self.season,
-          term=term
-      )
-      s2 = Schedule(
-          name=self.name,
-          comments=self.comments,
-          priority=self.priority,
-          season=self.season,
-          term=term
-      )
-
-      if self.parent_schedule:
-        s1.parent_schedule = self.parent_schedule
-        s2.parent_schedule = self.parent_schedule
-      else:
-        s1.parent_schedule = self
-        s2.parent_schedule = self
-
-      sched_weeks = [int(x) for x in self.weeks.split(',')]
-      s1_weeks = []
-      s2_weeks = []
-      for x in sched_weeks:
-        if x <= week:
-          s1_weeks.append(x)
-        else:
-          s2_weeks.append(x)
-
-      s1.weeks = str(s1_weeks)
-      s2.weeks = str(s2_weeks)
-
-      s1.is_locked = True
-
-      # only the most recent needs a query_filter.  Older ones don't need it.
-      s2.query_filter = self.query_filter
-      s1.save()
-      s2.save()
-
-      s1.trainees = current_set
-      s2.trainees = new_set
-
-      s1.save()
-      s2.save()
-
-      self.trainees = []
-      self.is_locked = True
-      self.save()
-    else:
-      # No split necessary
-      self.trainees = new_set
-      self.save()

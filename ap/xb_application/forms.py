@@ -30,9 +30,6 @@ class XBApplicationForm(forms.ModelForm):
     exclude = ['trainee', 'submitted', 'date_submitted', 'last_updated']
     widgets = {
       "birthdate": DatePicker(),
-      "date_saved": DatePicker(),
-      "date_baptized": DatePicker(),
-      "first_church_date": DatePicker(),
       "grad_date": DatePicker(),
       "date_marriage": DatePicker(),
       "gender": forms.RadioSelect,

@@ -42,7 +42,7 @@ class AnnouncementRequestList(generic.ListView):
 
   def get_queryset(self):
     if is_TA(self.request.user):
-      return Announcement.objects.filter().order_by('status')
+      return Announcement.objects.filter().order_by('status', 'announcement_date')
     else:
       trainee = self.request.user
       return Announcement.objects.filter(author=trainee).order_by('status')
@@ -97,6 +97,8 @@ class AnnouncementList(GroupRequiredMixin, generic.ListView):
 
   def get_queryset(self):
     announcements = Announcement.objects.filter(type='CLASS', status='A', announcement_date=self.date)
+    # Includes 'On TV Page' announcements for the day
+    announcements |= Announcement.objects.filter(type='TV', status='A', announcement_date__lte=self.date, announcement_end_date__gte=self.date)
     return announcements
 
 
@@ -107,6 +109,8 @@ class AnnouncementsRead(generic.ListView):
   def get_queryset(self):
     trainee = self.request.user
     announcements = Announcement.objects.filter(trainees_read=trainee)
+    announcements |= Announcement.objects.filter(is_popup=False, trainees_show=trainee)
+    announcements |= Announcement.objects.filter(type='SERVE', is_popup=False, all_trainees=True)
     return announcements
 
 

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+
+  $(document).ready(() => {
+    $(".select-fk").select2({width:"100%"});
+    $('#trainee_table tfoot th').each(function (){
+      let title = $(this).text();
+      $(this).html( '<input type="text" placeholder="'+title+'" />' );
+    });
+    let table = $("#trainee_table").DataTable({
+      info: true,
+      paging: false,
+      autoWidth: true,
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      fixedHeader: true,
+      scrollY: '80vh',
+      scrollX: true,
+      scrollCollapse: true
+    });
+    table.columns().every(function () {
+      let that = this;
+      $('input', this.footer() ).on('keyup change', function () {
+        if(that.search() !== this.value) {
+          that
+            .search(this.value)
+            .draw();
+        }
+      });
+    });
+    $(".btn-danger").click(function() {
+      if (confirm('Are you sure you want to delete this application?')) {
+        $.ajax({
+          type: "POST",
+          url: $(this).attr('value'),
+          success: (data) => {
+            if (data.success) {
+              $(this).parent().parent().fadeOut();
+            } else {
+              alert('Error.');
+            }
+          },
+        });
+      }
+    });
+  });
+</script>
+{% endblock%}
+
+{% block content %}
+<h2>{{page_title}}</h2>
+
+<div class="panel">
+<form action="" method="get" id="id_form">
+  {% csrf_token %}
+  {% for section in sections %}
+    {% if section.question_set.all %}
+      <h3>{{ section.name }}</h3>
+      <select class="select-fk" name="questions" multiple="multiple">
+      {% for q in section.question_set.all %}
+       {% if q.answer_type != "None" %}
+        <option value="{{q.id}}" {% if q.id in chosen %} selected="selected" {% endif %}>{{q.label}}</option>
+       {% endif %}
+      {% endfor %}
+      </select>
+    {% endif %}
+  {% endfor %}
+  <h3>General Information</h3>
+  <select class="select-fk" name="general" multiple="multiple">
+    {% for k, v in general_options.items %}
+    <option value="{{k}}" {% if k in chosen_general %} selected="selected" {% endif %}>{{v}}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-primary btn-save" type="submit">Submit</button>
+</form>
+</div>
+<div class="panel">
+  <table class="table table-bordered" id="trainee_table">
+    <thead>
+      <tr>
+        <th>Clear Application</th>
+        <th>Trainee</th>
+        <th>Destination</th>
+        {% for q in questions %}
+        <th>{{q.label}}</th>
+        {% endfor %}
+        {% for g in chosen_general %}
+        <th>{{g}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for trainee in trainees %}
+        <tr>
+          <th><button value="{% url 'gospel_trips:admin-clear-app' request.resolver_match.kwargs.pk trainee.id %}" class="btn btn-danger" title="Clear"/><span class="glyphicon glyphicon-trash"></span></button></th>
+          <td>{{trainee.name}}</td>
+          <td>{{trainee.destination.name}}</td>
+          {% for response in trainee.responses %}
+            {% if response.answer__response %}
+              <td>{{response.answer__response}}</td>
+            {% else %}
+              <td></td>
+            {% endif %}
+          {% endfor %}
+          {% for g in chosen_general %}
+            <td>{{ trainee|get_item:g }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>Clear Application</th>
+        <th>Trainee</th>
+        <th>Destination</th>
+        {% for q in questions %}
+        <th>{{q.label}}</th>
+        {% endfor %}
+        {% for g in chosen_general %}
+        <th>{{g}}</th>
+        {% endfor %}
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+{% endblock %}

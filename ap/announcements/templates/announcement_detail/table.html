@@ -7,6 +7,8 @@
     <td>{{ announcement.get_type_display }}</td></tr>
   <tr><td>Announcement:</td>
     <td>{{ announcement.announcement }}</td></tr>
+  <tr><td>Fellowshipped with TA:</td>
+    <td>{{ announcement.fellowshipped|yesno:"Yes,No" }}</td></tr>
   <tr><td>Start Date:</td>
     <td>{{ announcement.announcement_date}}</td></tr>
   <tr><td>End Date:</td>
@@ -25,3 +27,4 @@
 </table>
 
 <a class="btn btn-default" href="{{ view.model.get_create_url }}">Create new {{ view.model|model_verbose_name }}</a>
+<a class="btn btn-default" href="{{ announcement.get_update_url }}">Edit</a>

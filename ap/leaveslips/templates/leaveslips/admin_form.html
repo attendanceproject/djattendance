@@ -10,6 +10,7 @@
 <script type="text/javascript">
   $(document).ready(() => {
     $("span.select2").css({ 'width' : ''});
+    $('.select-fk').select2();
   });
  </script>
 {% endblock %}
@@ -45,7 +46,7 @@
 
 <form id="id_form" action="" method="post">
   {% csrf_token %}
-  {% bootstrap_form form %} 
+  {% bootstrap_form form %}
   <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
 </form>
 {% if delete_button %}

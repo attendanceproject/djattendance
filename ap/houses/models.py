@@ -54,6 +54,9 @@ class House(models.Model):
   def residents_list(self):
     return sorted_user_list_str(self.residents.filter(is_active=True))
 
+  def get_hcs(self):
+    return sorted_user_list_str(self.residents.filter(groups__name="HC"))
+
   #returns a query set of the empty bunks for this house
   def empty_bunk_count(self,position_list=[]):
     if len(position_list)==0:

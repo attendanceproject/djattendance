@@ -20,6 +20,7 @@
           <span class="glyphicon glyphicon-plus-sign"></span> Decrease Penalty
         </button>
       </form>
+      <br>Note: {{discipline.note}}</br>
     </div>
   </div>
   <p>
@@ -27,7 +28,17 @@
     {% if discipline.infraction == 'MS' %}
     Missed Service: {{discipline.missed_service}}<br>
     {% endif %}
-    Summaries Due: <strong>{{discipline.get_num_summary_due}}</strong>
+    Summaries Due: <strong>{{discipline.get_num_summary_due}}</strong><br>
+    <form action="" method="post">
+        {% csrf_token %}
+        <label for="offense_type">Offense Type:</label>
+        <strong>
+          <select name="offense_type" onChange="form.submit();"> 
+            <option value="RO" {% if discipline.offense == "RO" %} selected="selected" {% endif %}> Regular Offense </option>
+            <option value="MO" {% if discipline.offense == "MO" %} selected="selected" {% endif %}> Monday Offense </option>
+          </select>
+        </strong>
+      </form>
   <p>
 
   {% for summary in discipline.summary_set.all %}
@@ -37,6 +48,11 @@
       <p>{{summary.content}}</p>
       <div>
         <span class="badge alert-info">{{summary.date_submitted}}</span>
+        {% if not summary.submitting_paper_copy %}
+          <span class="badge alert-info">{{ summary_wc }} words</span>
+        {% else %}
+          <span class="badge alert-info">submitted paper copy</span>
+        {% endif %}
         {% if summary.approved %}
         <span class="badge alert-success">approved</span>
         {% else %}

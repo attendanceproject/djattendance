@@ -93,7 +93,7 @@ def calculate_trainee_absent_freq(date):
       if is_unreported:
         unreported.add(absentee.id)
       if absentee.id in trainees or is_unreported:
-        days += 1 + m
+        days += 1
         m = 0
       else:
         break
@@ -115,6 +115,8 @@ def send_absentee_report(year, month, day):
   email.attach('roster.pdf', pdf_data.content, 'application/pdf')
   email.send(fail_silently=False)
 
+  print 'Absent trainee roster email', settings.ABSENT_TRAINEE_ROSTER_EMAIL
+  print 'Absentee roster recipients', settings.ABSENTEE_ROSTER_RECIPIENTS
   print 'Absentee report email sent', datetime.now()
 
 

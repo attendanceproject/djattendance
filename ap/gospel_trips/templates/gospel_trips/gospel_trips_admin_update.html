@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}{{page_title}}{% endblock %}
+
+{% block references %}
+{% render_bundle "tinymce" "css" %}
+<link rel="stylesheet" href="{% static 'gospel_trips/css/admin_update.css' %}" />
+{% endblock %}
+
+
+{% block scripts %}
+{% render_bundle "tinymce" "js" %}
+{{gt_form.media}}
+{{admin_form.media}}
+<script type="text/javascript" src="{% static 'gospel_trips/js/dragdrop.js' %}"></script>
+<script type="text/javascript">
+  window.onload = function(){ document.getElementById("loading").style.display = "none" };
+  $(document).ready(function() {
+    var tabs = document.querySelectorAll('#section-tabs > .sortable-section');
+    [].forEach.call(tabs, addDnDHandlers);
+    $("#gospel_trip_form").submit(function (){
+      var order_list = $('#section-tabs .sortable-section').map(function() {
+        return $(this).attr("section-pk");
+      }).get();
+      $('input[name=section-order]').val(order_list);
+      return true;
+    });
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="loading" class="loading-container">
+  <img class="loading-image" src="{% static 'gospel_trips/images/loading.gif' %}" alt="Loading..." />
+</div>
+<h2>Gospel Trip Creator</h2>
+<!-- Form Error Display -->
+<div id="errors">
+{{gt_form.non_form_errors}}
+{{gt_form.errors}}
+{% for section_form in section_formset.forms %}
+  {{ section_form.non_form_errors }}
+  {{ section_form.errors }}
+  {% for heading, nested_formset in section_form.nested.items %}
+    {% if nested_formset %}
+      {% for nform in nested_formset.forms %}
+        {{ nform.non_form_errors }}
+        {% if nform.errors %}
+          {{nform.instance}}
+        {% endif %}
+        {{ nform.errors }}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+</div>
+<!-- Form Error Display -->
+
+<!-- Navigation Display -->
+<ul class="nav nav-tabs" id="section-tabs">
+  <li class="active"><a data-toggle="tab" href="#main">Gospel Trip</a></li>
+  {% for section_form in section_formset.forms %}
+    <li class="sortable-section" draggable="true" section-pk="{{section_form.instance.pk}}">
+      <a data-toggle="tab" href="#section_{{forloop.counter}}">
+        {% if forloop.last %}
+        New Section
+        {% else %}
+        {{section_form.instance.name}}
+        {% endif %}
+    </a>
+    </li>
+  {% endfor %}
+</ul>
+<!-- Navigation Display -->
+
+<form id="gospel_trip_form" action="" method="post">
+  {% csrf_token %}
+
+  <div class="section_formset">
+    {{ section_formset.management_form }}
+    {{ section_formset.non_form_errors }}
+
+    <div class="tab-content">
+
+      <div id="main" class="tab-pane fade in active">
+        {% bootstrap_form gt_form %}
+        <input type="hidden" name="section-order" />
+      </div> <!-- gospel-trip-form-container-->
+
+      {% for section_form in section_formset.forms %}
+        <div id="section_{{forloop.counter}}" class="tab-pane fade">
+          <div class="panel{% if forloop.last %} new-form{% endif %}">
+            <h3>Section</h3>
+
+            {% bootstrap_form section_form %}
+
+            {% for heading, nested_formset in section_form.nested.items %}
+              {% if nested_formset %}
+                {{ nested_formset.management_form }}
+                {{ nested_formset.non_form_errors }}
+                <h3>{{heading}}</h3>
+                {% for nested_form in nested_formset.forms %}
+                  <div class=" {% if forloop.last %}new-form{% endif %}" draggable="true">
+                    {% bootstrap_form nested_form %}
+                  </div>
+                  <hr /><hr />
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+          </div><!-- section-container -->
+        </div><!-- tab-pane -->
+      {% endfor %}
+    </div><!-- tab-content -->
+  </div><!-- formset -->
+
+  <div class="row">
+    <div class="col-md-12">
+      <button type="submit" class="btn btn-primary btn-save">Save</button>
+      <a href="{% url 'gospel_trips:gospel-trip' section_formset.instance.id %}"><button type="button" class="btn btn-primary" title="Preview"><span class="glyphicon glyphicon-play"></span></button></a>
+      <a href="{% url 'gospel_trips:admin-create' %}"><button type="button" class="btn btn-primary" title="Preview"><span class="glyphicon glyphicon-home"></span></button></a>
+    </div>
+  </div>
+</form>
+{% endblock %}

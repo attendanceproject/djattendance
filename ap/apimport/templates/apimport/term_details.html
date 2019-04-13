@@ -26,9 +26,9 @@
 
 <form action="" id="surveyForm" method="post" class="form-horizontal" enctype="multipart/form-data">
   <fieldset>
-    <h1>Welcome to the Mighty New Term Helper!</h1>
     {% csrf_token %}
     {% if full_input %}
+      <h1>Pre-Term -- New Term Helper</h1>
       <div class="form-group">
         <label class="col-md-2" for="textinput">Term Name:</label>
         <div class="col-md-4">
@@ -94,7 +94,29 @@
       </tbody>
       </table>
       </div>
+      <div>
+        <h4>Instructions</h4>
+        <ul>
+          <li>This is for pre-term imports (e.g., creating a new term, migrating schedules, etc.)</li>
+          <li>Backup all data. Test back up data. Do all of the following steps on a local machine before doing it on live. This is mainly to validate the import file.</li>
+          <li>This should be done before the term begins (i.e. Lord's Day before the training begins, not the Monday of).</li>
+          <li>Make sure you have not already created a term. This may happen if the import gets interrupted. Check the admin or shell.
+            <ul><li>If you don't know, or something is wrong, this is why you made backups :).</li></ul>
+          </li>
+          <li>Follow all the above and following instructions until you get "IMPORT COMPLETE".</li>
+          <li>Restart the server to cache the new current_term.</li>
+          <li>Now assign schedules (pre-training and regular house, meal, and class schedules) for all imported trainees. Team schedules may be done later, because there will be team changes. However, sooner is always better.
+            <ul>
+              <li>At this point, schedules should've been reset, but it's buggy. So <a href="{% url 'schedules:clear-all-schedules' %}">click here</a> to reset all the schedules.</li>
+              <li>Now, assign individual schedules <a href="{% url 'schedules:admin-schedule-table' %}">here</a>.</li>
+              <li>Or assign all team schedules <a href="{% url 'schedules:assign-team-schedules' %}">here</a>.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <button type="submit" class="col-md-offset-4 col-md-2 btn btn-default">Next</button>
     {% else %}
+      <h1>Mid-Term -- New Term Helper</h1>
       <label class="col-md-2" for="textinput">Import File:</label>
       <div class="col-md-4">
         {% with stryear=year|stringformat:"s" %}
@@ -103,8 +125,27 @@
         {% endwith %}
         {% endwith %}
       </div>
+      <button type="submit" class="col-md-offset-4 col-md-2 btn btn-default">Next</button>
+      <div>
+        <h4>Instructions</h4>
+        <ul>
+          <li>This is for mid-term imports (e.g., team assignments, importing 1st term trainees, etc.)</li>
+          <li>For small changes (a trainee changes team or house), don't use this. Do it manually through Django or Custom admin pages.</li>
+          <li>Make sure are working in the right term.
+            <ul><li>If not, go through the Pre-term Import page by going back in time.</li></ul>
+          </li>
+          <li>Please make sure all your data is imported correctly (e.g., trainees, schedules, etc.)</li>
+          <li>Import file. Click next. Wait (maybe a long time). Follow instructions. Wait again. Do this until you get "IMPORT COMPLETE".</li>
+          <li>Now assign schedules
+            <ul>
+              <li>Now, assign individual schedules <a href="{% url 'schedules:admin-schedule-table' %}">here</a>.</li>
+              <li>Or assign all team schedules <a href="{% url 'schedules:assign-team-schedules' %}">here</a>.</li>
+              <li>Or clear all team schedules <a href="{% url 'schedules:clear-team-schedules' %}">here</a>.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
     {% endif %}
-    <button type="submit" class="col-md-offset-4 col-md-2 btn btn-default">Next</button>
   </fieldset>
 </form>
 

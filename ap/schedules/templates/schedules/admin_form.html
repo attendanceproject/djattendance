@@ -6,15 +6,44 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block scripts %}
+{{ form.media }}
 <script type="text/javascript">
-  $(document).ready(() => {
-    $('.select-fk').select2({width: '100%'});
-    $('[multiple*=multiple]').select2({width: '100%'})
+  $(document).ready(function(){
+    $('.select-fk').select2({width: "100%"});
+    $('[multiple*=multiple]').select2({width: "100%"})
+    $('#id_trainees').djangoSelect2({width: '100%'});
     $("#id_split_button").click(split_schedule);
+    {% if assign_trainees_button %}
+    $("#id_assign_trainees").click(assign_trainees);
+    {% endif %}
+    $("#delete_rolls").on('click', function(){
+      delete_conflicting_rolls();
+    })
   });
 
+  function delete_conflicting_rolls(){
+    let roll_ids = []
+    $(".roll_id").each(function(){
+      roll_ids.push(this.getAttribute('rollid'))
+    });
+    $.ajax({
+      type: "POST",
+      url: "{% url 'schedules:delete-conflicting-rolls' %}",
+      data: {'roll_ids': JSON.stringify(roll_ids)},
+      success: function(response){
+        message = response['message']
+        if (response['message'] == "Deletion success"){
+          $("#message_delete_rolls").hide()
+          new Notification(Notification.SUCCESS, message + '. Click on '+ $("#action").text() +' again.').show();
+        }else{
+          new Notification(Notification.ERROR, message + '. Contact AP trainees.').show();
+        }
+      }
+    });
+  }
+
   function split_schedule(e){
-    split_url = "{{form.instance.get_split__partial_url}}"
+    let split_url = "{{form.instance.get_split__partial_url}}";
     e.preventDefault();
       $.ajax({
         type: "POST",
@@ -29,7 +58,37 @@
         }
     });
   }
+
+{% if assign_trainees_button %}
+  function assign_trainees(e){
+    let assign_url = "{{form.instance.get_assign_url}}";
+    e.preventDefault();
+      $.ajax({
+        type: "POST",
+        url: assign_url,
+        success: function(result) {
+          if(result.success){
+            window.location = window.location;
+          }
+        },
+        error: function(result) {
+            alert('Something went wrong.');
+        }
+    });
+  }
+{% endif %}
  </script>
+{% endblock %}
+
+{% block references %}
+
+{# used to remove errors display from the bootstrap_form, if not, the error message is twice displayed #}
+<style type="text/css">
+  form > div.alert-dismissable {
+    display:none;
+  }
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -39,8 +98,6 @@
 <!-- Error messaging -->
   <div id="errors">
     <div class="inner">
-      <p>There were some errors in the information you entered. Please correct the following:</p>
-      {{ form.non_field_errors }}
       <ul>
         {% for field in form %}
           {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
@@ -51,16 +108,39 @@
 <!-- /Error messaging -->
 {% endif %}
 
+{% if form.non_field_errors %}
+  {% if form.non_field_errors|length_is:"1" and delete_rolls%}
+  <div id="message_delete_rolls" class="alert alert-danger">
+  <p>The following rolls needs to be deleted before this schedule can be <span id="action">{{action}}</span>d:</p>
+    <ul>
+      {% for roll in delete_rolls %}
+        <li class="roll_id" rollid="{{roll.id}}">{{ roll }}</li>
+      {% endfor %}
+      <button id="delete_rolls" class="btn btn-danger">Delete Rolls</button>
+    </ul>
+  </div>
+  {% else %}
+  <p>There were some errors in the information you entered. Please correct the following:</p>
+  {{ form.non_field_errors }}
+  {% endif %}
+{% endif %}
+
+
+
+
+<a href="{% url 'schedules:admin-schedule-table' %}">Back To Table</a>
+
+
 <form id="id_form" action="" method="post">
   {% csrf_token %}
-  {% bootstrap_form form %}  
-  <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
-</form>
+  {% bootstrap_form form %}
+  <button type="submit" class="btn btn-primary btn-save" name="{{button_label}}" id="submit">{{button_label|safe}}</button>
 {% if delete_button %}
-  <form action = "{{form.instance.get_delete_url}}" method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger btn-delete" name="delete">Delete</button>
-  </form>
+  <button type="submit" class="btn btn-danger btn-delete" name="Delete" onclick="return confirm('Are you sure you want to delete the schedule?')">Delete</button>
+{% endif %}
+</form>
+{% if assign_trainees_button %}
+  <button type="button" class="btn btn-primary btn-save" name="assign" id="id_assign_trainees">Assign Trainees</button><br>
 {% endif %}
 {% if split_button %}
 <label for="id_week_select">Week</label>

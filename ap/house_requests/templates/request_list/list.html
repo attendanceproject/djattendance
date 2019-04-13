@@ -7,8 +7,10 @@
   $(document).ready(() => {
     $("#id_request_table").DataTable({
       info: false,
-      paging: false,
+      paging: true,
       autoWidth: true,
+      order: [[ 1, "desc" ]],
+      lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, "All"]],
       dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
       '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
       '<"row"<"col-sm-5"i><"col-sm-7"p>>',

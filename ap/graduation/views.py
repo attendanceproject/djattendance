@@ -18,13 +18,14 @@ from datetime import datetime
 from collections import OrderedDict
 
 MODELS = [Testimony, Consideration, Website, Outline, Remembrance, Misc]
+term = Term.current_term()
 
 
 class CreateUpdateView(UpdateView):
   template_name = 'graduation/graduation_form.html'
 
   def get_object(self, queryset=None):
-    grad_admin, created = GradAdmin.objects.get_or_create(term=Term.current_term())
+    grad_admin, created = GradAdmin.objects.get_or_create(term=term)
     obj, created = self.model.objects.get_or_create(trainee=self.request.user, grad_admin=grad_admin)
     return obj
 
@@ -42,8 +43,7 @@ class CreateUpdateView(UpdateView):
   def get_context_data(self, **kwargs):
     ctx = super(CreateUpdateView, self).get_context_data(**kwargs)
     today = datetime.now().date()
-    if self.object.show_status == 'SHOW' or today > self.object.due_date:
-      ctx['read_only'] = True
+    ctx['read_only'] = (self.object.show_status == 'SHOW')
     ctx['page_title'] = self.object.name_of_model
     ctx['button_label'] = 'Save'
     return ctx
@@ -75,8 +75,8 @@ class OutlineView(CreateUpdateView):
   # instead of using a form invalid as a hack
   def form_invalid(self, form):
     obj = self.object
-    obj.speaking_section = form.cleaned_data['speaking_section']
-    obj.speaking = form.cleaned_data['speaking']
+    obj.speaking_section = form.cleaned_data.get('speaking_section')
+    obj.speaking = form.cleaned_data.get('speaking')
     obj.save()
     return redirect('graduation:outline-view')
 
@@ -84,6 +84,12 @@ class RemembranceView(CreateUpdateView):
   model = Remembrance
   form_class = RemembranceForm
   template_name = 'graduation/remembrance.html'
+
+  def get_context_data(self, **kwargs):
+    ctx = super(RemembranceView, self).get_context_data(**kwargs)
+    ctx['rem_limit'] = self.object.grad_admin.remembrance_char_limit
+
+    return ctx
 
 
 class MiscView(CreateUpdateView):
@@ -105,7 +111,7 @@ class GradAdminView(GroupRequiredMixin, UpdateView):
   group_required = ['training_assistant', 'grad_committee']
 
   def get_object(self, queryset=None):
-    obj, created = self.model.objects.get_or_create(term=Term.current_term())
+    obj, created = self.model.objects.get_or_create(term=term)
     return obj
 
   def get(self, request, *args, **kwargs):
@@ -121,19 +127,14 @@ class GradAdminView(GroupRequiredMixin, UpdateView):
     return super(GradAdminView, self).post(request, *args, **kwargs)
 
   def xb_form_valid(self, data):
-    term = Term.current_term()
-    print term
     xb, created = XBAdmin.objects.get_or_create(term=term)
-    print xb
     form = XBAdminForm(data, instance=xb)
-    print form
     form.save()
 
   def form_valid(self, form):
     return super(GradAdminView, self).form_valid(form)
 
   def get_statistics(self):
-    term = Term.current_term()
     return OrderedDict([(m.__name__ + ' responses', m.responded_number(term)) for m in MODELS])
 
   def get_context_data(self, **kwargs):
@@ -142,8 +143,14 @@ class GradAdminView(GroupRequiredMixin, UpdateView):
     ctx['page_title'] = "Grad Admin"
     ctx['button_label'] = 'Save'
     ctx['4th_count'] = Misc.objects.filter(grad_admin=GradAdmin.objects.get(term=Term.objects.filter(current=True).first()), trainee__in=Trainee.objects.filter(current_term=4)).count()
+    # speaking
+    speaking_trainees = GradAdmin.objects.get(term=term).speaking_trainees.all()
+    oset = Outline.objects.filter(grad_admin__term=term, trainee__in=speaking_trainees)
+    ctx['speaking_stat'] = {
+      'count': speaking_trainees.count(),
+      'responses': len(filter(lambda o: o.speaking or o.speaking, oset))
+    }
     # xb form
-    term = Term.current_term()
     xba = XBAdmin.objects.filter(term=term)
     if xba:
       ctx['xb_form'] = XBAdminForm(instance=xba.first())
@@ -157,7 +164,7 @@ class ReportView(GroupRequiredMixin, ListView):
 
   def get_context_data(self, **kwargs):
     context = super(ReportView, self).get_context_data(**kwargs)
-    context['data'] = self.model.objects.filter(trainee__current_term=4)
+    context['data'] = self.model.objects.filter(grad_admin__term=term, trainee__current_term=4)
     context['title'] = title(self.model._meta.verbose_name + ' Report')
 
     return context
@@ -171,6 +178,27 @@ class TestimonyReport(ReportView):
 class ConsiderationReport(ReportView):
   model = Consideration
   template_name = 'graduation/consideration_report.html'
+
+  def get_context_data(self, **kwargs):
+    context = super(ConsiderationReport, self).get_context_data(**kwargs)
+
+    xb_choices = ['YES', 'OPEN', 'NO', 'OTHER', None]
+    xb_count = [0, 0, 0, 0, 0]
+    fellowshipped_choices = ['YES', 'NO', 'OTHER', None]
+    fellowshipped_count = [0, 0, 0, 0]
+
+    for c in context['data']:
+      xb_count[xb_choices.index(c.attend_XB)] += 1
+      fellowshipped_count[fellowshipped_choices.index(c.fellowshipped)] += 1
+
+    fourth_termers_count = len(context['data'])
+    xb_percent = [100 * x / float(fourth_termers_count) for x in xb_count]
+    fellowshipped_percent = [100 * x / float(fourth_termers_count) for x in fellowshipped_count]
+
+    context['xb_display'] = "Attend Boston?\tYes: %0.2f%% (%d/%d)\tOpen: %0.2f%% (%d/%d)\tNo: %0.2f%% (%d/%d)\tOther: %0.2f%% (%d/%d)\tNo Response: %0.2f%% (%d/%d)" % (xb_percent[0], xb_count[0], fourth_termers_count, xb_percent[1], xb_count[1], fourth_termers_count, xb_percent[2], xb_count[2], fourth_termers_count, xb_percent[3], xb_count[3], fourth_termers_count, xb_percent[4], xb_count[4], fourth_termers_count)
+    context['fellowshipped_display'] = "Fellowshipped?\tYes: %0.2f%% (%d/%d)\t\t\t\tNo: %0.2f%% (%d/%d)\tScheduled: %0.2f%% (%d/%d)\tNo Response: %0.2f%% (%d/%d)" % (fellowshipped_percent[0], fellowshipped_count[0], fourth_termers_count, fellowshipped_percent[1], fellowshipped_count[1], fourth_termers_count, fellowshipped_percent[2], fellowshipped_count[2], fourth_termers_count, fellowshipped_percent[3], fellowshipped_count[3], fourth_termers_count,)
+
+    return context
 
 
 class WebsiteReport(ReportView):
@@ -189,8 +217,8 @@ class SpeakingReport(ReportView):
 
   def get_context_data(self, **kwargs):
     context = super(SpeakingReport, self).get_context_data(**kwargs)
-    speaking_trainees = GradAdmin.objects.get(term=Term.current_term()).speaking_trainees.all()
-    context['data'] = Outline.objects.filter(trainee__in=speaking_trainees)
+    speaking_trainees = GradAdmin.objects.get(term=term).speaking_trainees.all()
+    context['data'] = Outline.objects.filter(grad_admin__term=term, trainee__in=speaking_trainees)
     context['title'] = 'Speaking Report'
 
     return context

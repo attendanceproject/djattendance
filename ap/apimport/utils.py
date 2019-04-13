@@ -1,29 +1,29 @@
 import csv
-import requests
-import json
 import logging
 import os
 from datetime import date, datetime, time, timedelta
-from dateutil.relativedelta import relativedelta
 from urllib import urlencode
+import itertools
 
-from django.contrib.auth.models import Group
+import requests
+from requests.exceptions import ConnectionError
+from accounts.models import TrainingAssistant, User, UserMeta, Trainee
+from aputils.models import Address, City, Vehicle
+from aputils.trainee_utils import is_trainee
+from dateutil.relativedelta import relativedelta
 from django.conf import settings  # for access to MEDIA_ROOT
 from django.contrib import messages
-from django_countries import countries
+from django.contrib.auth.models import Group
+from django.core import serializers
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-
-from accounts.models import Trainee, TrainingAssistant, User, UserMeta
-from aputils.models import Address, City, Vehicle
+from django_countries import countries
 from houses.models import House
 from localities.models import Locality
+from schedules.models import Event, Schedule
+from seating.models import Chart, Partial
 from teams.models import Team
 from terms.models import Term
-from schedules.models import Schedule, Event
-from seating.models import Chart, Partial
-
-from aputils.trainee_utils import is_trainee
 
 log = logging.getLogger("apimport")
 MONDAY, SATURDAY, SUNDAY = (0, 5, 6)
@@ -56,11 +56,13 @@ def term_start_date_from_semiannual(season, year):
   # return date of 19 weeks previous-- one week for semi-annual
   return datetime.combine(seed_date + timedelta(weeks=-19, days=0), time(0, 0))
 
+
 def term_end_date_from_semiannual(season, year):
   """ This returns the best-guess term start date for the given semi-annual.
     Input should follow the form of ("Winter"/"Summer", year) """
   start_date = term_start_date_from_semiannual(season, year)
-  # returns date 6 days after semi-annual starts
+  # returns 19 weeks + 5 days after term starts
+  # i.e for start day Monday of week 0 return Saturday of week 19
   return start_date + timedelta(weeks=19, days=5)
 
 
@@ -95,22 +97,13 @@ def previous_term():
 
 
 def generate_term():
-  season, year = previous_term()
-
-  if season == "Fall":
-    season = "Spring"
-    year = year + 1
-  elif season == "Spring":
-    season = "Fall"
+  # only called if not mid_term()
+  today = datetime.now()
+  start_date = next_term_start_date(today)
+  if start_date.month <= 4:  # month chosen semi-arbitrarily
+    return "Spring", start_date.year
   else:
-    # No term found, use today's date to identify what term we are hoping to create
-    today = datetime.now().date()
-    start_date = next_term_start_date(today)
-    if start_date.month <= 4:  # month chosen semi-arbitrarily
-      return "Spring", start_date.year
-    else:
-      return "Fall", start_date.year
-  return (season, year)
+    return "Fall", start_date.year
 
 
 def deactivate_user(user):
@@ -142,7 +135,9 @@ def create_term(season, year, start_date, end_date):
     DOES NOT CHECK to see if the data you're passing in is good or not.
     MAKE THE PROPER CHECKS FIRST."""
 
-  deactivate_previous_term()
+  # deactivate_previous_term()
+  Trainee.objects.all().update(is_active=False, team=None, house=None)
+  # TODO: also for workers
 
   try:
     term = Term.objects.get(season=season, year=year)
@@ -227,8 +222,14 @@ def save_file(f, path):
   return full_path
 
 
-def check_sending_locality(locality):
-  return Locality.objects.filter(city__name=locality).exists()
+def check_sending_locality(locality, state=None, country=None):
+  if state is None and country is None:
+    return Locality.objects.filter(city__name=locality).exists()
+  else:
+    if country == 'US':
+      return Locality.objects.filter(city__name=locality, city__state=state, city__country=country).exists()
+    else:
+      return Locality.objects.filter(city__name=locality, city__country=country).exists()
 
 
 def check_team(team):
@@ -253,7 +254,7 @@ def save_locality(city_name, state_id, country_code):
     city, created = City.objects.get_or_create(name=city_name, state=state_id, country=country_code)
   else:
     city, created = City.objects.get_or_create(name=city_name, country=country_code)
-  
+
   if created:
     log.info("Created city " + str(city) + ".")
 
@@ -296,7 +297,7 @@ def check_csvfile(file_path):
   locality_countries = []
   teams = []
   residences = []
-  with open(file_path, 'r') as f:
+  with open(file_path, 'rU') as f:
     reader = csv.DictReader(f)
     for row in reader:
       # is this an empty row?
@@ -307,14 +308,14 @@ def check_csvfile(file_path):
       # localities share a city name.  Potential upcoming one: Vancouver, WA versus
       # Vancouver, BC
       if (not check_sending_locality(row['sendingLocality'])) and (row['sendingLocality'] not in localities):
-        city_norm, state_norm, country_norm = normalize_city(row['sendingLocality'], row['state'], row['country'])
+        city_norm, state_norm, country_norm = new_normalize_city(row['sendingLocality'], row['state'], row['country'])
 
         if fake:
           save_locality(city_norm, state_norm, country_norm)
         else:
           # TODO(import2): Is a check on the normalized values enough?  Probably since
           # that's what we use anyways.
-          if (not check_sending_locality(city_norm)) and (city_norm not in localities):
+          if (not check_sending_locality(city_norm, state_norm, country_norm)) and (city_norm not in localities):
             localities.append(city_norm)
             locality_states.append("" if state_norm is None else state_norm)
             locality_countries.append("" if country_norm is None else country_norm)
@@ -404,6 +405,61 @@ def normalize_city(city, state, country):
   return best['name'], state_code, code
 
 
+def new_normalize_city(city, state, country):
+  addr = city + ", " + state + ", " + country
+  country_code = ""
+  state_code = ""
+  city_name = ""
+
+  if city.lower() == 'new york city':  # NYC is a very common problem
+    city_name = "New York City"
+    state_code = "NY"
+    country_code = "US"
+  else:
+    args = {'address': addr, 'key': 'AIzaSyBgKOBuWmQm1ion3F3BNdRUPLczEYn6O6I'}
+    url = "https://maps.googleapis.com/maps/api/geocode/json?" + urlencode(args)
+    try:
+      r = requests.get(url)
+      result = r.json()['results'][0]['address_components']
+    except (IndexError, KeyError, ConnectionError) as e:
+      log.warning("Unable to normalize city defined by " + city + ", " + state + ", " + country + ".")
+      log.warning("%s." % (e))
+      return country_code, state_code, city_name
+
+    if len(result) == 1:
+      country_code = result[0]['short_name']
+      state_code = result[0]['short_name']
+      city_name = result[0]['long_name']
+    else:
+      loc = ""
+      subloc = ""
+      for item in result:
+        if not country_code and 'country' in item['types']:
+          country_code = item['short_name']
+          continue
+
+        if not state_code and 'administrative_area_level_1' in item['types']:
+          state_code = item['short_name']
+          continue
+
+        if not loc and 'locality' in item['types']:
+          loc = item['long_name']
+          continue
+
+        if not subloc and 'sublocality' in item['types']:
+            subloc = item['short_name']
+
+      if subloc and not loc:
+        loc = subloc
+      city_name = loc
+  # Puerto Rico
+  if country_code == "PR":
+    state_code = "PR"
+    country_code = "US"
+
+  return city_name, state_code, country_code
+
+
 def countrycode_from_alpha3(code3):
   """Converts from a three-letter country code to a 2-letter country code if such a
      matching exists.
@@ -421,14 +477,19 @@ def import_address(address, city, state, zip, country):
     return address_obj
   except Address.DoesNotExist:
     pass
+  except Address.MultipleObjectsReturned:
+    return Address.objects.filter(address1=address).first()
 
-  city_norm, state_norm, country_norm = normalize_city(city, state, country)
+  city_norm, state_norm, country_norm = new_normalize_city(city, state, country)
 
   # TODO (import2): graceful fail if could not find best-->state_norm and country_norm are None
   if city_norm is None or country_norm is None:
     return None
 
-  city_obj, created = City.objects.get_or_create(name=city_norm, state=state_norm, country=country_norm)
+  if country_norm == 'US':
+    city_obj, created = City.objects.get_or_create(name=city_norm, state=state_norm, country=country_norm)
+  else:
+    city_obj, created = City.objects.get_or_create(name=city_norm, country=country_norm)
 
   try:
     zip_int = int(zip)
@@ -460,6 +521,31 @@ def gospel_code(choice):
 
 def lrhand_code(choice):
   return 'R' if choice == 'right' else 'L'
+
+
+def validate_row(row):
+  for k, v in row.items():
+    row[k] = unicode(v, errors='ignore')
+    if 'phone' in k:
+      if len(v) > 25:
+        print "For %s: %s - Value is too long " % (k, v)
+        rm = 25 - len(v)
+        v = v[:rm]
+
+
+def get_row_count(file_path):
+  count = 0
+  with open(file_path, 'rU') as f:
+    reader = csv.reader(f)
+    count = sum(1 for row in reader)
+  return count - 1  # account for header row
+
+
+def get_row_from_csvfile(file_path, row_number):
+  row = {}
+  with open(file_path, 'rU') as f:
+    row = next(itertools.islice(csv.DictReader(f), row_number, None))
+  return row
 
 
 def import_row(row):
@@ -502,7 +588,7 @@ def import_row(row):
   user.gender = row.get('gender', user.gender)
   user.lrhand = lrhand_code(row.get('LRHand'))  # TODO: This is prone to errors
   if row.get('birthDate') != "":
-    user.date_of_birth = datetime.strptime(row.get('birthDate'), "%m/%d/%Y %H:%M").date()
+    user.date_of_birth = datetime.strptime(row.get('birthDate'), "%m/%d/%y %H:%M").date()
   user.is_active = True
 
   term = Term.current_term()
@@ -517,12 +603,19 @@ def import_row(row):
   user.date_end = term.end
 
   # TA
-  ta = TrainingAssistant.objects.filter(firstname=row.get('trainingAssistantID', "")).first()
+  ta = TrainingAssistant.objects.filter(groups__name="regular_training_assistant", firstname=row.get('trainingAssistantID', "")).first()
   if ta:
     user.TA = ta
   else:
     log.warning("Unable to set TA [%s] for trainee: %s %s" % (row['trainingAssistantID'], row['stName'], row['lastName']))
 
+  # TA_secondary
+  ta_secondary = TrainingAssistant.objects.filter(groups__name="regular_training_assistant", firstname=row.get('secondTAID', "")).first()
+  if ta_secondary and row.get('gender', user.gender) == 'S':
+    user.TA_secondary = ta_secondary
+  elif row.get('gender', user.gender) == 'S':
+    log.warning("Unable to set secondTAID [%s] for trainee: %s %s" % (row['secondTAID'], row['stName'], row['lastName']))
+    
   # Mentor
   if row.get('mentor', "") != "":
     lname, fname = row.get('mentor').split(", ")
@@ -535,13 +628,13 @@ def import_row(row):
   # TODO: This needs to be done better, once we get more information about localities
   locality = Locality.objects.filter(city__name=row['sendingLocality']).first()
   if locality:
-    user.locality.add(locality)
+    user.locality = locality
   else:
     # Try to find a city that corresponds
     city = City.objects.filter(name=row['sendingLocality']).first()
     if city:
       locality, created = Locality.objects.get_or_create(city=city)
-      user.locality.add(locality)
+      user.locality = locality
     else:
       log.warning("Unable to set locality [%s] for trainee: %s %s" % (row['sendingLocality'], row['stName'], row['lastName']))
 
@@ -553,7 +646,7 @@ def import_row(row):
   else:
     log.warning("Unable to set team for trainee: %s %s" % (row['teamID'], row['stName'], row['lastName']))
 
-  if row['HouseCoor'] is "1" or row['couples'] is "1":
+  if row['HouseCoor'] == "TRUE" or row['couples'] == "1":
     hc_group = Group.objects.get(name='HC')
     hc_group.user_set.add(user)
 
@@ -564,7 +657,7 @@ def import_row(row):
     else:
       log.warning("Unable to set house [%s] for trainee: %s %s" % (row['residenceID'], row['stName'], row['lastName']))
 
-  user.self_attendance = user.current_term > 2
+  # user.self_attendance = user.current_term > 2
   user.save()
 
   # META
@@ -619,6 +712,7 @@ def import_row(row):
 
 
 def import_csvfile(file_path):
+  # term = Term.current_term()
   # sanity check
   localities, teams, residences = check_csvfile(file_path)
   if localities or teams or residences:
@@ -626,21 +720,11 @@ def import_csvfile(file_path):
 
   log.info("Beginning CSV File Import")
 
-  # TODO(import2): Remove this
-  # count = 0;
-  with open(file_path, 'r') as f:
+  with open(file_path, 'rU') as f:
     reader = csv.DictReader(f)
     for row in reader:
-      # count = count + 1
-      # if count > 10:
-      #     return
+      validate_row(row)
       import_row(row)
-  term = Term.current_term()
-  schedules = Schedule.objects.filter(term=term)
-
-  # TODO(import2) -- this needs to be smarter eventually
-  for schedule in schedules:
-      schedule.assign_trainees_to_schedule()
 
   log.info("Import complete")
   return True
@@ -661,36 +745,39 @@ def term_before(term):
   return term_minus
 
 
-def migrate_schedule(schedule):
+def migrate_schedule(schedule, term):
   if schedule is None:
     return
+  # clear trainees on schedule
+  # unlock schedule
+  # change to latest term
+  # trainees are assigned to schedules manually
+  schedule.trainees.clear()  # TODO: clearing doesn't work
+  schedule.save()
+  schedule.is_locked = False
+  schedule.term = term
+  schedule.save()
+  return schedule
 
-  schedule2 = schedule
-  schedule2.pk = None
-  schedule2.date_created = datetime.now()
-  schedule2.is_locked = False
-  schedule2.term = Term.current_term()
-  schedule2.save()
-  schedule2.events.add(*schedule.events.all())
-  schedule2.save()
-  return schedule2
+
+def schedules_dump():
+  RIGHT_NOW = datetime.now().strftime("%m%d%Y_%H%M%S")
+  fname = "schedules_%s.json" % RIGHT_NOW
+  data = serializers.serialize("json", Schedule.objects.all())
+  out = open(fname, "w")
+  out.write(data)
+  out.close()
 
 
 def migrate_schedules():
-  term = Term.current_term()
-  term_minus_one = term_before(term)
-  term_minus_two = term_before(term_minus_one)
-
-  schedule_set = []
-
-  schedules = Schedule.objects_all.filter(term=term_minus_one, import_to_next_term=True, season="All")
-  schedule_set.extend(schedules)
-
-  schedules = Schedule.objects_all.filter(term=term_minus_two, import_to_next_term=True, season=term.season)
-  schedule_set.extend(schedules)
-
-  for schedule in schedule_set:
-    s_new = migrate_schedule(schedule)
+  # dump all schedule data
+  # delete all schedules with import_to_next_term = false
+  # migrate all schedules with import_to_next_term = true
+  term = Term.objects.order_by('start').last()
+  schedules_dump()
+  Schedule.objects.filter(import_to_next_term=False).delete()
+  for schedule in Schedule.objects_all.filter(import_to_next_term=True):
+    migrate_schedule(schedule, term)
 
 
 def migrate_seating_chart(chart, term):
@@ -699,7 +786,6 @@ def migrate_seating_chart(chart, term):
   chart.pk = None
   chart.term = term
   chart.save()
-  new_partition_arr = []
   for partition in partitions:
     partition.pk = None
     partition.chart = chart
@@ -710,7 +796,7 @@ def migrate_seating_chart(chart, term):
 
 
 def migrate_seating_charts():
-  term = Term.current_term()
+  term = Term.objects.order_by('start').last()
   term_minus_one = term_before(term)
 
   charts = Chart.objects_all.filter(term=term_minus_one)
@@ -727,8 +813,7 @@ def log_changes(sender, instance, **kwargs):
   else:
     for field in User._meta.get_fields():
       if hasattr(instance, field.name) and (getattr(user, field.name) != getattr(instance, field.name)):
-        # try:
-        log.info("%s - %s changed from %s to %s." % (user.full_name, field.name, str(getattr(user, field.name)), str(getattr(instance, field.name))))
-        # except TypeError:
-        #   log.info("%s - %s changed." % (user.full_name, field.name))
-        #   log.warning(field.name + " has no string rendering.")
+        try:
+          log.info("%s - %s changed from %s to %s." % (user.full_name, field.name, str(getattr(user, field.name)), str(getattr(instance, field.name))))
+        except Exception:
+          pass

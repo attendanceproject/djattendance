@@ -1,10 +1,10 @@
 {% load bootstrap3 %}
 <h2>HC Recommendation Admin</h2>
 
-<form id='id_hcra_form' action="" method="post">
+<form id='id_hcra_form' action="" method="post" autocomplete="off">
   {% csrf_token %}
 
-  {% bootstrap_form hcra_form %}  
+  {% bootstrap_form hcra_form %}
 
   <button name="hcra_form" value="hcra_form" type="submit" class="btn btn-primary btn-save" id="submit">{{button_label2|safe}}</button>
 </form>

@@ -141,7 +141,9 @@
         <th>Team</th>
         <th class="trainee-info">Phone</th>
         <th class="trainee-info">Email</th>
+        <th>Vehicle</th>
         <th>TA</th>
+        <th>Secondary TA</th>
         <th>On self attendance</th>
       </tr>
     </thead>
@@ -158,7 +160,9 @@
         <td>{{t.team}}</td>
         <td>{{t.meta.phone}}</td>
         <td class="pk">{{t.email}}</td>
+        <td>{% if t.vehicles.exists %} True {% else %} False {% endif %}</td>
         <td>{{t.TA.full_name}}</td>
+        <td>{{t.TA_secondary.full_name}}</td>
         <td>{{t.self_attendance}}</td>
       </tr>
       {% endfor %}

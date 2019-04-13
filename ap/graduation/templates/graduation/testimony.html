@@ -59,7 +59,7 @@
 <form id="id_grad_form" action="" method="post">
   {% csrf_token %}
   <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>1. What was ONE of the top experiences you had/revelations you received in the Training?</p> Please consider writing along ONE of the following lines:
+    <p><strong>1. What was ONE of the top experiences you had/revelations you received in the Training?</strong></p> Please consider writing along ONE of the following lines:
     <ul><li>A helpful practice</li>
       <li>A lesson learned</li>
       <li>A specific enjoyment</li>
@@ -72,21 +72,21 @@
   </div></div></div>
 
   <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>2. What fellowship would you like to pass on to subsequent terms for their encouragement</p>
+    <p><strong>2. What fellowship would you like to pass on to subsequent terms for their encouragement</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.encouragement}} <div class="remaining_words 300"></div> 300 maximum.
       </div></div>
   </div></div></div>
 
   <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>3. What were some of the overarching burdens expressed in the brothers' speaking throughout your training? </p>
+    <p><strong>3. What were some of the overarching burdens expressed in the brothers' speaking throughout your training?</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.overarching_burden}} <div class="remaining_words 250"></div> 250 maximum.
       </div></div>
   </div></div></div>
 
   <div class="row"><div class="col-xs-12"><div class="panel">
-    <p>4. What were some major events, memorable moments, and/or highlights from your four terms of training?</p>
+    <p><strong>4. What were some major events, memorable moments, and/or highlights from your four terms of training?</strong></p>
       <div class="row"><div class="col-xs-12">
         {{form.highlights}} <div class="remaining_words 150"></div> 150 maximum.
       </div></div>

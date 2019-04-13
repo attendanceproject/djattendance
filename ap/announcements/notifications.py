@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 
 from models import Announcement
+from absent_trainee_roster.models import Roster
 from lifestudies.models import Summary
 from bible_tracker.models import BibleReading
 from leaveslips.models import IndividualSlip, GroupSlip
@@ -14,7 +15,9 @@ from house_requests.models import MaintenanceRequest, LinensRequest, FramingRequ
 from audio.models import AudioRequest
 from room_reservations.models import RoomReservation
 from terms.models import Term
+from attendance.models import RollsFinalization
 from aputils.trainee_utils import is_trainee, trainee_from_user
+from datetime import timedelta
 
 
 def get_popups(request):
@@ -33,7 +36,8 @@ def get_announcements(request):
                           server_announcements(trainee),
                           bible_reading_announcements(trainee),
                           request_statuses(trainee),
-                          attendance_announcements(trainee))
+                          attendance_announcements(trainee),
+                          hc_reminder(trainee))
   # sort on severity level of message
   return sorted(notifications, lambda a, b: b[0] - a[0])
 
@@ -97,8 +101,47 @@ def attendance_announcements(trainee):
   term = Term.current_term()
   week = term.term_week_of_date(today)
   if trainee.self_attendance:
-    weeks = map(str, filter(lambda w: not term.is_attendance_finalized(w, trainee), range(week)))
+    try:
+      trainee_rf = RollsFinalization.objects.get(trainee=trainee, events_type='EV')
+      finalized_weeks = [int(x) for x in trainee_rf.weeks.split(',')]
+    except (RollsFinalization.DoesNotExist, ValueError):
+      finalized_weeks = []
+
+    weeks = []
+    for w in range(week):
+      if w not in finalized_weeks:
+        weeks.append(str(w))
+
   else:
     weeks = []
-  message = 'You have not finalized your attendance for week {week}. Fellowship with a TA to finalize it.'
-  return [(messages.WARNING, message.format(week=', '.join(weeks)))] if weeks else []
+  url = reverse('attendance:attendance-submit')
+  message = 'You have not finalized your <a href="{url}">Personal attendance</a> for week {week}. '
+  return [(messages.WARNING, message.format(url=url, week=', '.join(weeks)))] if weeks else []
+
+def hc_reminder(trainee):
+  if trainee.HC_status() and trainee.house.gender != 'C':
+    today = datetime.date.today()
+    last_unreported_roster = Roster.objects.filter(unreported_houses=trainee.house).latest('date')
+    days_difference = (today - last_unreported_roster.date).days
+    last_unreported = last_unreported_roster.date.strftime('%A')
+    if last_unreported == "Monday":
+      if 0 < days_difference < 4:
+        if days_difference == 1:
+          day = 'today'
+        elif days_difference == 2:
+          day = 'yesterday'
+        else:
+          day = 'on ' + (last_unreported_roster.date + timedelta(days=1)).strftime('%b %d')
+        message = "Your house didn't submit a house attendance {day}, please remember to do so. This message will disappear if your house submits house attendance for three consecutive days."
+        return [(messages.WARNING, message.format(day=day))]
+    else:
+      if 0 <= days_difference < 4:
+        if days_difference == 0:
+          day = 'today'
+        elif days_difference == 1:
+          day = 'yesterday'
+        else:
+          day = 'on ' + last_unreported_roster.date.strftime('%b %d')
+        message = "Your house didn't submit a house attendance {day}, please remember to do so. This message will disappear if your house submits house attendance for three consecutive days."
+        return [(messages.WARNING, message.format(day=day))]
+  return []

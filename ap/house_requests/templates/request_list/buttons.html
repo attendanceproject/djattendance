@@ -1,3 +1,8 @@
+{% if request.get_status != 'Completed' %}
+  <a href="{% url view.modify_status_url 'C' request.id %}">
+    <button class="btn btn-success approve" title="Completed"><span class="glyphicon glyphicon-ok"></span></button>
+  </a>
+{% endif %}
 {% if request.get_status_display != 'Approved' %}
   <a href="{{ request.get_update_url }}">
     <button class="btn btn-primary" title="Edit details"><span class="glyphicon glyphicon-pencil"></span></button>

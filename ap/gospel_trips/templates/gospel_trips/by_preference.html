@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+{% with gtpk=request.resolver_match.kwargs.pk %}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $(".assign-role").on("click", function() {
+      let val = $(this).val().split('-');
+      $.ajax({
+        type: "POST",
+        url: "{% url 'gospel_trips:assign-trainee-role' pk=gtpk %}",
+        data: {
+          'trainee_id': val[1],
+          'is_contact': $(this).prop('checked'),
+          'field': val[0]
+        },
+        success: function(data){
+          if (data.success){
+            new Notification(Notification.SUCCESS, 'Saved.').show();
+          } else if (data.noDest){
+            new Notification(Notification.ERRROR, 'Assign destination first.').show();
+          } else if (data.dataError){
+            new Notification(Notification.ERRROR, 'Data Error. Please contact AP.').show();
+          } else if (data.badRequest){
+            new Notification(Notification.ERRROR, 'Bad Request. Try again or contact AP.').show();
+          }
+        },
+      });
+    });
+
+    $(".destination_select").on("change", function() {
+      let name = $(this).attr('name').split('_');
+      let trainee_id = name[name.length - 1];
+      let is_contact = $('.assign-role, [value=trainee_contacts-' + trainee_id + ']').prop('checked');
+      $.ajax({
+        type: "POST",
+        url: "{% url 'gospel_trips:assign-destination' pk=gtpk %}",
+        data: {
+          'destination_id': $(this).val(),
+          'trainee_id': trainee_id,
+          'is_contact': is_contact,
+        },
+        success: function(data){
+          console.log(data);
+          if (data.success){
+            new Notification(Notification.SUCCESS, 'Saved.').show();
+          }
+        }
+      });
+    });
+
+    $("#responses_table").DataTable({
+      info: true,
+      paging: false,
+      autoWidth: true,
+      fixedHeader: true,
+      scrollY: '80vh',
+      scrollX: true,
+      scrollCollapse: true
+    });
+
+  });
+</script>
+{% endwith %}
+{% endblock scripts%}
+
+{% block content %}
+<h2>{{page_title}}</h2>
+<div class="panel">
+  <table class="table table-bordered" id="responses_table">
+    <thead>
+      <tr>
+        <th>Trainee</th>
+        <th>Term</th>
+        <th>Locality</th>
+        <th>Preference 1</th>
+        <th>Preference 2</th>
+        <th>Preference 3</th>
+        <th>Select Destination</th>
+        <th>Trainee Contact</th>
+        <th>Finance Coordinator</th>
+        <th>Media Coordinator</th>
+        <th>Report/Stats Coordinator</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for trainee in by_preference %}
+        <tr>
+          <td>{{trainee.name}}</td>
+          <td>{{trainee.term}}</td>
+          <td>{{trainee.locality}}</td>
+          <td>{{trainee.preference_1}}</td>
+          <td>{{trainee.preference_2}}</td>
+          <td>{{trainee.preference_3}}</td>
+          <td>
+            <select class="destination_select" name="destination_select_for_{{trainee.id}}">
+            {% for choice in destinations %}
+              <option {% if trainee.destination == choice.id %}selected="selected"{% endif %} value="{{choice.id}}">{{choice.name}}</option>
+            {% endfor %}
+          </select>
+          </td>
+          <td><input class="assign-role" type="checkbox" value="trainee_contacts-{{trainee.id}}" {% if trainee.trainee_contact %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="finance_coords-{{trainee.id}}" {% if trainee.finance_coord %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="media_coords-{{trainee.id}}" {% if trainee.media_coord %}checked="checked"{% endif %}></input></td>
+          <td><input class="assign-role" type="checkbox" value="stat_coords-{{trainee.id}}" {% if trainee.stat_coord %}checked="checked"{% endif %}></input></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

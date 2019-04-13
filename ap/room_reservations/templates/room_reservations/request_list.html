@@ -10,7 +10,8 @@
       "ordering": true,
       "info":     false,
       "search":{
-        "search": "Pending"
+        "regex": true,
+        "search": "Pending|Marked"
       },
     });
   });
@@ -34,7 +35,6 @@
           <th>Start</th>
           <th>End</th>
           <th>Room</th>
-          <th>Group Size</th>
           <th>Frequency</th>
           <th>Reason</th>
           <th>Actions</th>
@@ -52,7 +52,6 @@
           <td>{{reservation.start|time}}</td>
           <td>{{reservation.end|time}}</td>
           <td>{{reservation.room}}</td>
-          <td>{{reservation.group_size}}</td>
           <td>{{reservation.frequency}}</td>
           <td>{{reservation.reason}}</td>
           <td>

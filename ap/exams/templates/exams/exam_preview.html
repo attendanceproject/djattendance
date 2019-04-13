@@ -11,14 +11,11 @@
   <div class="panel panel-default">
     <div class="panel-heading exam-panel-heading">
       <div class="btn-group pull-right">
-        <a href="{% url 'exams:manage' %}">
+        <a href='javascript:window.location = document.referrer;'>
           <button type="button" class="btn btn-default">Back</button>
         </a>
       </div>
       <h3 class="panel-title exam-panel-title">
-        {% if role == 'Grade' %}
-          {{ examinee.full_name }} -
-        {% endif %}
         {{ exam }}
       </h3>
     </div>
@@ -26,10 +23,9 @@
         <form id="exam_form" action="" method="post">
           {% csrf_token %}
           <ol id="question-list">
-            {% for section, response, score, comments in data %}
-              <h4> {{ section.section_type }} section </h4>
+            {% for section in questions %}
               <b> Instructions: </b> {{ section.instructions|linebreaks }}
-              You must answer at least {{ section.required_number_to_submit }} questions for this section in order to submit the exam.
+              You must answer at least {{ section.required_number_to_submit }} question(s) for this section in order to submit the exam.
               <br>
               {% if section.section_type == 'Matching' %}
                 Matching Options:
@@ -71,9 +67,6 @@
   function updateCountdown() {
     display = $(this).parent().children(".char_count");
     var char_count = 0
-    if ($(this).val()){
-      char_count = $(this).val().split(" ").length;
-    }    
     jQuery(display).text(char_count + ' words.');
   }
 

@@ -3,7 +3,7 @@
 
 $table-background-color:          $white !default;
 $table-background-striped:        $tan-light !default;
-$table-background-hover:          $tan !default;
+$table-background-hover:          $blue-highlight !default;
 $table-border-color:              $tan-light !default;
 $table-border-editable:           $tan !default;
 
@@ -35,6 +35,10 @@ $table-text-color:                darken($brown, 50%) !default;
   }
   tr{
     text-align: center;
+  }
+
+  .td-text {
+    text-align: left;
   }
 
 
@@ -169,9 +173,6 @@ $table-text-color:                darken($brown, 50%) !default;
   .table-hover {
     > tbody > tr:hover {
       background-color: $table-background-hover;
-      > td {
-        color: $white;
-      }
     }
   }
 
