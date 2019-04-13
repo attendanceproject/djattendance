@@ -37,18 +37,16 @@
     <tbody>
       <tr>
         <td>
-          {% for h in bro_reported %}
-          {{h}},
-          {% empty %}
-          None reported
-          {% endfor %}
+          {{ bro_reported|join:", " }}
+          {% if not bro_reported %}
+            None reported
+          {% endif %}
         </td>
         <td>
-          {% for h in sis_reported %}
-          {{h}},
-          {% empty %}
-          None reported
-          {% endfor %}
+          {{ sis_reported|join:", " }}
+          {% if not sis_reported %}
+            None reported
+          {% endif %}
         </td>
       </tr>
       <tr>
@@ -57,18 +55,16 @@
       </tr>
       <tr>
         <td>
-          {% for h in bro_not_reported %}
-          {{h}},
-          {% empty %}
-          All reported
-          {% endfor %}
+          {{ bro_not_reported|join:", " }}
+          {% if not bro_not_reported %}
+            All reported
+          {% endif %}
         </td>
         <td>
-          {% for h in sis_not_reported %}
-          {{h}},
-          {% empty %}
-          All reported
-          {% endfor %}
+          {{ sis_not_reported|join:", " }}
+          {% if not sis_not_reported %}
+            All reported
+          {% endif %}
         </td>
       </tr>
     </tbody>
