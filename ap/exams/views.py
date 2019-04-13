@@ -646,8 +646,8 @@ class GradedExamView(TakeExamView):
     ctx['graded_exam_available'] = self._get_exam().is_graded_open
     return ctx
 
-class OpenCloseExamView(ExamEditView): 
-  def post(self, request):
+class OpenCloseExamView(ExamEditView):
+  def post(self, request, *args, **kwargs):
 
     if request.method=="POST":
       try:
