@@ -13,24 +13,23 @@
 		<tr>
 			<th> Residence </th>
 			<th> Type </th>			
-			<th> Uninspectable </th>						
+			<th> Uninspectable </th>
 		</tr>
 		<form action="" method="POST">
 		{% csrf_token %}
 		<input type="submit" value="Submit" class="btn" name="mybtn">
-		{% for house in inspectableHouses %}			
-			<tr>							
+		{% for house in inspectableHouses %}
+			<tr>
 				<td>{{ house.residence }}</td>
 				<td>{{ house.residence_type }}</td>
 				<td>{{ house.uninspectable }}</td>
-				<td>				
-					
+				<td>
 					<div class="form-group">
 						<!--<label for="house.uninspectable">Uninspectable</label>-->
-						<input type="checkbox" name="checks[]" value="{{ house.id }}">				
-					</div>													
+						<input type="checkbox" name="checks[]" value="{{ house.id }}">
+					</div>
 				</td>
-			</tr>			
+			</tr>
 		{% endfor %}
 		</form>
 	</table>
@@ -42,7 +41,7 @@
 
 
 <form action="" method="POST">
-    	{% csrf_token %}            
+    	{% csrf_token %}
 		<div class="form-group">
 			<label for="last_name">Last Name</label>
 			<input type="text" name="last_name" class="form-control" required>
@@ -54,6 +53,6 @@
 		<div class="form-group">
 			<label for="prefect_number">Prefect Number</label>
 			<input type="text" name="prefect_number" class="form-control" required>
-		</div>                                
+		</div>
         <input type="submit" value="Submit" class="btn" name="mybtn">
 </form>

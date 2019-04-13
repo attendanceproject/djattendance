@@ -128,7 +128,10 @@ def generate_menu(context):
           SubMenuItem(name='Meal Seating', permission='meal_seating.add_table', url='meal_seating:new-seats', condition=user.has_group(['kitchen'])),
           SubMenuItem(name='Seating Chart', permission='seating.add_chart', url='seating:chart_list', condition=user.has_group(['attendance_monitors'])),
           SubMenuItem(name='Audio Upload', permission='audio.add_audiofile', url='audio:audio-upload', condition=user.has_group(['av'])),
-          SubMenuItem(name='House Inspection FAQ', url='house_inspection:house_inspection_faq', condition=user.has_group(['house_inspectors', 'training_assistant'])),
+          SubMenuItem(name='House Inspection FAQ', url='house_inspection:question_list', condition=user.has_group(['house_inspectors', 'training_assistant'])),
+          SubMenuItem(name='House Inspection Old FAQ', url='house_inspection:house_inspection_faq', condition=user.has_group(['house_inspectors', 'training_assistant'])),
+          #SubMenuItem(name='House Inspection Manage Inspectors', url='house_inspection:manage_inspectors', condition=user.has_group(['house_inspectors', 'training_assistant'])),
+          #SubMenuItem(name='House Inspection Manage Inspectable Houses', url='house_inspection:manage_inspectable_houses', condition=user.has_group(['house_inspectors', 'training_assistant'])),
       ]
   )
 

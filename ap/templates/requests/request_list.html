@@ -12,7 +12,7 @@
 
 <h1>{{ view.model|model_verbose_name|title }}s</h1>
 
-{% if view.request.user|is_trainee or view.request.user|is_TA and not "audio" in view.model|model_verbose_name and not "web" in view.model|model_verbose_name %}
+{% if view.request.user|is_trainee or view.request.user|is_TA and not "audio" in view.model|model_verbose_name and not "web" in view.model|model_verbose_name  %}
   <div><a href="{{ view.model.get_create_url }}">Create new {{ view.model|model_verbose_name }}</a></div>
 {% endif %}
 
@@ -33,18 +33,20 @@
         {% elif 'Fellowship' in requestGroups.grouper %}panel-info{% endif %}
       ">
         <div class="panel-heading">
-          <h4 class="panel-title">
-            {{ request.get_category }}
-            {% if view.request.user|is_TA %}
-            - submitted by {{ request.requester_name }}
-              <small>
-                on {{ request.get_date_created }}
-              </small>
-            {% endif %}
-          </h4>
+          {% if view.request.user|is_trainee and not "inspection" in view.model|model_verbose_name %}
+            <h4 class="panel-title">            
+              {{ request.get_category }}          
+              {% if view.request.user|is_TA %}
+              - submitted by {{ request.requester_name }}
+                <small>
+                  on {{ request.get_date_created }}
+                </small>
+              {% endif %}
+            </h4>
+          {% endif %}
 
           <div class="pull-right">
-            {% if view.request.user|is_TA %}
+            {% if view.request.user.firstname == 'Tobi' and view.request.user.lastname == 'Abosede' or view.request.user.firstname == 'Sofia' and view.request.user.lastname == 'Hunter' or view.request.user|is_TA %}
               {% include request.get_ta_button_template %}
             {% else %}
               {% include request.get_button_template %}
