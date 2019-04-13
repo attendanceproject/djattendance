@@ -36,7 +36,7 @@ class ServiceRollForm(forms.ModelForm):
     widgets = {
       "start_datetime": DatetimePicker(),
       "end_datetime": DatetimePicker(),
-      "task_performed": forms.Textarea()
+      "task_performed": forms.Textarea(attrs={'rows':2})
     }
 
 
