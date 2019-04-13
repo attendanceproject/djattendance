@@ -118,11 +118,14 @@ class RoomReservationSchedule(GroupRequiredMixin, RoomReservationSubmit, Templat
   group_required = ['training_assistant']
   template_name = 'room_reservations/schedule.html'
 
-
 class RoomReservationTVView(TemplateView):
   model = RoomReservation
   template_name = 'room_reservations/tv_page.html'
 
+class RoomReservationIteroView(TemplateView):
+  model = RoomReservation
+  template_name = 'room_reservations/itero_page.html'
+  #template_name = 'room_reservations/itero/announcements/itero_page.html'
 
 def weather_api(request):
   # Basic info

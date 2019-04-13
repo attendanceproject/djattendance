@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}Gospel Statistics{% endblock %}
+{% block references %}
+<script>
+$(document).ready(function() {
+  createTable();
+});
+function createTable() {
+  var atts = {{attributes|safe}};
+};
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+<p>
+  <a href="{% url 'gospel_statistics:generate-report' %}">
+    <button type="button" class="btn btn-primary" title="Generate Reports">Generate Reports</button>
+  </a>
+</p>
+*GPT means the total divided by the number of trainees who are registered on the gospel stats page for the particular group.
+<table id="allStat" class="table table-bordered-wkly-sum">
+  <thead id="tableHead">
+    <th>Team Type</th>
+    {% for each in attributes %}
+    <th>{{each}}</th>
+    {% endfor %}
+  </thead>
+  <tbody>
+    <tr>
+      <th>Campus Total</th>
+      {% for each in campus_total %}
+      <th>{{each}}</th>
+      {% endfor %}
+    </td>
+    <tr>
+      <th>Community Total</th>
+      {% for each in community_total %}
+      <th>{{each}}</th>
+      {% endfor %}
+    </tr>
+    <tr><th colspan='14'></th></tr>
+    <tr>
+      <th>Campus *GPT Average</th>
+      {% for each in campus_average %}
+      <th>{{each}}</th>
+      {% endfor %}
+    </tr>
+    <tr>
+      <th>Community *GPT Average</th>
+      {% for each in community_average %}
+      <th>{{each}}</th>
+      {% endfor %}
+    </tr>
+  </tbody>
+</table>
+{% endblock %}

@@ -1,17 +1,91 @@
 
-
+from datetime import date, datetime, timedelta
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from accounts.models import Trainee
+from django.core.urlresolvers import reverse
 
 # unsure of import ValidationError
 
+class HouseInspectionFaq(models.Model):
+	TYPE_APPROVAL_STATUS_CHOICES = (
+    	('A', 'Approved'),
+    	('An', 'Answered'),
+    	('U', 'Unanswered'),
+    	('D', 'Denied')
+    )
 
-class FAQ(models.Model):
-    question = models.TextField(null=True, blank=True)
-    answer = models.TextField(null=True, blank=True)
-    isAnswered = models.BooleanField(default=False)
-    '''
-    def __unicode__(self):
+	question = models.TextField(null=True, blank=True)
+	answer = models.TextField(null=True, blank=True)
+	status = models.CharField(choices=TYPE_APPROVAL_STATUS_CHOICES, max_length=2, default='U')
+	trainee = models.ForeignKey(Trainee, blank=True, null=True, on_delete=models.SET_NULL)
+	date_assigned = models.DateTimeField(auto_now_add=True)	
+	comment = models.TextField(blank=True, null=True)
+
+	def get_absolute_url(self):
+		return reverse('house_inspection:house_inspection_faq-detail', kwargs={'pk': self.id})
+		
+	def get_category(self):
+		return
+
+	def get_date_created(self):
+		return self.date_assigned
+
+	def get_status(self):
+		return self.get_status_display()
+
+	def get_question(self):
+		return self.question
+
+	def get_answer(self):
+		return self.answer
+		
+	def get_comment(self):
+		return self.comment
+
+	@property
+	def requester_name(self):
+		if self.trainee:
+		  return self.trainee.full_name
+		return "Guest"
+
+	def get_trainee_requester(self):
+	    return self.trainee
+
+	@staticmethod
+	def get_create_url():
+		return reverse('house_inspection:faq-create')
+
+	def get_update_url(self):
+		return reverse('house_inspection:faq-update', kwargs={'pk': self.id})
+
+	def get_absolute_url(self):
+		return reverse('house_inspection:house_inspection_faq-detail', kwargs={'pk': self.id})
+
+	def get_delete_url(self):
+		return reverse('house_inspection:faq-delete', kwargs={'pk': self.id})
+
+	def get_answer_url(self):
+		return reverse('house_inspection:inspector-answer', kwargs={'pk': self.id})
+
+	@staticmethod
+	def get_detail_template():
+		return 'house_inspection/faq_description.html'
+
+	@staticmethod
+	def get_table_template():
+		return 'house_inspection/faq_detail_table.html'
+
+	@staticmethod
+	def get_ta_button_template():
+		return 'house_inspection/ta_buttons.html'
+
+	@staticmethod
+	def get_button_template():
+		return 'house_inspection/buttons.html'
+
+	'''
+	def __unicode__(self):
 	    try:
 	      return "%s %s" % (self.question, self.answer)
 	    except AttributeError as e:

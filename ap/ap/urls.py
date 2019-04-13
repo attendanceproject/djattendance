@@ -72,6 +72,7 @@ urlpatterns = [
   url(r'^graduation/', include('graduation.urls', namespace="graduation")),
   url(r'^xb/', include('xb_application.urls', namespace="xb")),
   url(r'^interim/', include('interim.urls', namespace="interim")),
+  url(r'^gospel_statistics/', include('gospel_statistics.urls', namespace="gospel_statistics")),
   url(r'^house_inspection/', include('house_inspection.urls', namespace='house_inspection')),
   url(r'^greek/', include('greek.urls', namespace='greek')),
   # admin urls

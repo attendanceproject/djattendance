@@ -8,7 +8,7 @@
     $("#id_schedules_table").DataTable({
       info: false,
       paging: false,
-      autoWidth: true,
+      autoWidth: false,
       dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
       '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
       '<"row"<"col-sm-5"i><"col-sm-7"p>>',
@@ -39,10 +39,7 @@
           <th>Id</th>
           <th>Name</th>
           <th>Comments</th>
-          <th>Filter</th>
           <th>Priority</th>
-          <th>Term</th>
-          <th>Season</th>
           <th>Weeks</th>
           <th>Is Deleted</th>
           <th>Detail</th>
@@ -54,10 +51,7 @@
           <td>{{schedule.id}}</td>
           <td>{{schedule.name}}</td>
           <td>{{schedule.comments}}</td>
-          <td>{{schedule.query_filter}}</td>
           <td>{{schedule.priority}}</td>
-          <td>{{schedule.term}}</td>
-          <td>{{schedule.season}}</td>
           <td>{{schedule.weeks}}</td>
           <td>{{schedule.is_deleted}}</td>
           <td><a href="{{ schedule.get_absolute_url }}">Detail</a></td>

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}Gospel Statistics{% endblock %}
+{% block references %}
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+
+<form action="" method="post">
+  {% csrf_token %}
+  {% for member in members %}
+  <input type="checkbox" name="inputs" value = {{member.id}}>{{member}}<br>
+  {% endfor %}
+  <div>
+    <button type="submit" class="btn btn-primary" title="Create a new gospel pair">Add</button>
+  </div>
+</form>
+ 
+{% endblock %}
