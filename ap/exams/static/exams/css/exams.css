@@ -88,3 +88,9 @@ span.select2-container {
   width: 20px;
   opacity: .7;
 }
+
+blockquote {
+  font-size: 95%;
+  text-align: justify;
+  margin-left: 15px;
+}

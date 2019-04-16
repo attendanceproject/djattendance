@@ -2,10 +2,13 @@
 <li>{{ question.prompt }}</li>
 <b> (Points: {{ question.points }})</b>
 <div class="clearfix"></div>
-<textarea class="form-control exam-response"
-  {% if role != 'Take' %}disabled{% endif %}
-  cols="100" rows="10" placeholder="Type your response here." name="response">{% if preview is False %}{{ response|get_item:forloop.counter }}{% endif %}
+{% if role == 'Take' %}
+<textarea class="form-control exam-response" cols="100" rows="10"
+	placeholder="Type your response here." name="response">{% if preview is False %}{{ response|get_item:forloop.counter }}{% endif %}
 </textarea>
+{% else %}
+<blockquote>{{ response|get_item:forloop.counter }}</blockquote>
+{% endif %}
 <div class="clearfix"></div>
 <b>Word Count: </b><span class="char_count"></span>
 <div class="clearfix"></div>
