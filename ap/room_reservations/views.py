@@ -165,6 +165,7 @@ def weather_api(request):
   request.add_header('Yahoo-App-Id', app_id)
   try:
     weather_info = urllib2.urlopen(request).read()
+  # Empty weahter_info if urlilib2 throws an exception
   except Exception:
     weather_info = ''
 
