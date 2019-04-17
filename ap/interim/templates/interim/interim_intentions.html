@@ -242,24 +242,17 @@
     var start_val = $(this).val();
     var prev = $(this).parent(".itin-row").prev('.itin-row').find("#id_end");
     var one_day_before = new Date(Date.parse(start_val) - 86400000);
-    if (prev.val() && Date.parse(prev.val()) != one_day_before) {
-      // change_end_date(prev.val($.datepicker.formatDate('mm/dd/yy', one_day_before)));
+    if (prev.val() && Date.parse(prev.val()) != one_day_before.getTime()) {
       prev.val($.datepicker.formatDate('mm/dd/yy', one_day_before)).change();
-      // change_end_date(prev);
-      alert("A");
     }
-    alert("B");
 
     var end_field = $(this).parent(".itin-row").find("#id_end");
     if (end_field.val() < start_val) {
-      alert("C");
-      // change_end_date(end_field);
       end_field.change();
     }
   }
 
   function change_end_date(end_field) {
-    // console.log($(this).val());
     var row_number = $(this).parent(".itin-row").attr('id').split("-").pop();
     var end_val = $(this).val();
     var start_val = $(this).parent(".itin-row").find("#id_start").val();
@@ -267,7 +260,8 @@
 
     if (end_val == start_val || row_number == "0" && start_val > end_val) {
       var newDate = new Date(Date.parse(start_val) + 86400000);
-      $(this).val($.datepicker.formatDate('mm/dd/yy', newDate));
+      end_val = $.datepicker.formatDate('mm/dd/yy', newDate);
+      $(this).val(end_val);
     } else if (start_val > end_val) {
       reset = end_val;
       $(this).val(end_val = start_val);
@@ -298,12 +292,11 @@
       }
     }
 
-    if (next.length > 0) {
-      // change_start_date(next.val($.datepicker.formatDate('mm/dd/yy', one_day_later)));
+
+    if (next.length > 0 && Date.parse(next.val()) != one_day_later.getTime()) {
       next.val($.datepicker.formatDate('mm/dd/yy', one_day_later)).change();
     }
     if (reset) {
-      // change_start_date($(this).parent(".itin-row").find("#id_start").val(reset));
       $(this).parent(".itin-row").find("#id_start").val(reset).change();
     }
     if (interim_end <= start_val) {

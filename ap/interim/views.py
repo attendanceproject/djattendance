@@ -171,9 +171,11 @@ class InterimIntentionsCalendarView(TemplateView, GroupRequiredMixin):
       interim_end = interim_start + timedelta(days=1)
       ctx['subtitle'] = "Please enter the starting date for next term."
     else:
-      interim_end = InterimIntentionsAdmin.objects.get(term=term).term_begin_date
+      date_1 = InterimIntentionsAdmin.objects.get(term=term).date_1yr_return
+      date_2 = InterimIntentionsAdmin.objects.get(term=term).date_2yr_return
+      interim_end = date_2.date() if (date_2 >= date_1) else date_1.date();
 
-    ctx['interim_length'] = (interim_end - interim_start).days
+    ctx['interim_length'] = (interim_end - interim_start).days + 1
     ctx['date_list'] = [interim_start + timedelta(days=x) for x in range(0, ctx['interim_length'])]
 
     ctx['trainees'] = Trainee.objects.values('firstname', 'lastname', 'id')
