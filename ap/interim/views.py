@@ -167,9 +167,9 @@ class InterimIntentionsCalendarView(TemplateView, GroupRequiredMixin):
     term = Term.current_term()
 
     interim_start = term.end + timedelta(days=1)
-    if InterimIntentionsAdmin.objects.get(term=term).term_begin_date is None:
+    if not InterimIntentionsAdmin.objects.get(term=term).date_1yr_return or not InterimIntentionsAdmin.objects.get(term=term).date_2yr_return:
       interim_end = interim_start + timedelta(days=1)
-      ctx['subtitle'] = "Please enter the starting date for next term."
+      ctx['subtitle'] = "Please enter the return dates for next term."
     else:
       date_1 = InterimIntentionsAdmin.objects.get(term=term).date_1yr_return
       date_2 = InterimIntentionsAdmin.objects.get(term=term).date_2yr_return
