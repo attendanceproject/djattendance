@@ -268,11 +268,16 @@
       start_val = reset;
     }
 
+    var next = $(this).parent(".itin-row").next(".itin-row");
     if (end_val > interim_end) {
       $(this).val(end_val = interim_end);
+      while (next.length > 0) {
+        next.remove();
+        next = $(this).parent(".itin-row").next(".itin-row");
+      }
     }
 
-    var next = $(this).parent(".itin-row").next(".itin-row").find("#id_start");
+    next = $(this).parent(".itin-row").next(".itin-row").find("#id_start");
     var one_day_later = new Date(Date.parse(end_val) + 86400000)
     if (next.length == 0 && end_val != interim_end) {
       next = $(this).parent(".itin-row").clone().appendTo(".actual-itin");
@@ -291,7 +296,6 @@
         $("#row-1 #id_start").removeClass('readonly');
       }
     }
-
 
     if (next.length > 0 && Date.parse(next.val()) != one_day_later.getTime()) {
       next.val($.datepicker.formatDate('mm/dd/yy', one_day_later)).change();
