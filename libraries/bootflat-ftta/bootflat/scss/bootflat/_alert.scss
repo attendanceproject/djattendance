@@ -6,6 +6,7 @@ $alert-danger:                  $red-light !default;
 $alert-warning:                 $tan-light !default;
 $alert-info:                    $tan-light !default;
 $alert-comment:                 $tan-light !default;
+$alert-TAComment:               #E85328 !default;
 
 $alert-primary-text:            $blue !default;
 $alert-success-text:            $blue !default;
@@ -13,6 +14,8 @@ $alert-danger-text:             $red !default;
 $alert-warning-text:            $tan !default;
 $alert-info-text:               $tan !default;
 $alert-comment-text:            $black !default;
+$alert-TAComment-text:          $white !default;
+
 
 $alert-close-color:             $black !default;
 
@@ -50,6 +53,11 @@ $alert-link-color:              $grey !default;
           background-color: $alert-comment;
           color: $alert-comment-text;
           border: $alert-comment;
+      }
+      @at-root &-TAComment {
+          background-color: $alert-TAComment;
+          color: $alert-TAComment-text;
+          border: $alert-TAComment;
       }
       @at-root &-danger {
           background-color: $alert-danger;
