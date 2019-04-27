@@ -27,7 +27,46 @@
 
   $(document).ready(() => {
     $("#id_room").select2();
+
   });
+
+  $(document).on("change", "#id_start", function(){
+    var input = document.getElementById('id_start').value;
+    date = new Date();
+    var ampm = input.split(":")[1].split(" ")[1].toUpperCase();
+    var hour = input.split(":")[0]
+    ampm == "PM" && hour != 12 ? date.setHours(Number(hour) + 12) : date.setHours(input.split(":")[0])
+    date.setMinutes(input.split(":")[1].split(" ")[0])
+    var roundedMil = Math.round(date/1000/60/30) * 30 * 60 * 1000;
+    var roundedTime = new Date(roundedMil);
+    hour = roundedTime.getHours() % 12;
+    if (hour == 0) {
+      hour = 12;
+      if (ampm == "PM" && date.getHours() % 12== 11) { ampm = "AM"}
+        else if (ampm == "AM" & date.getHours() % 12== 11) { ampm = "PM"}
+    }
+    document.getElementById('id_start').value = hour + ":" + (roundedTime.getMinutes() < 10 ? roundedTime.getMinutes() + "0" : roundedTime.getMinutes()) + " " + ampm;
+  });
+
+  $(document).on("change", "#id_end", function(){
+    var input = document.getElementById('id_end').value;
+    date = new Date();
+    var ampm = input.split(":")[1].split(" ")[1].toUpperCase();
+    var hour = input.split(":")[0]
+    ampm == "PM" && hour != 12 ? date.setHours(Number(hour) + 12) : date.setHours(input.split(":")[0])
+    date.setMinutes(input.split(":")[1].split(" ")[0])
+    var roundedMil = Math.round(date/1000/60/30) * 30 * 60 * 1000;
+    var roundedTime = new Date(roundedMil);
+    hour = roundedTime.getHours() % 12;
+    if (hour == 0) {
+      hour = 12;
+      if (ampm == "PM" && date.getHours() % 12== 11) { ampm = "AM"}
+        else if (ampm == "AM" & date.getHours() % 12== 11) { ampm = "PM"}
+    }
+    document.getElementById('id_end').value = hour + ":" + (roundedTime.getMinutes() < 10 ? roundedTime.getMinutes() + "0" : roundedTime.getMinutes()) + " " + ampm;
+
+});
+
 </script>
 {% endblock %}
 
