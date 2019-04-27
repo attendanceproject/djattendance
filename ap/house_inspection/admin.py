@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from .models import Inspectors, InspectableHouses
+from .models import Inspectors, InspectableHouses, HouseInspectionFaq
 
 # Register your models here.
 
@@ -17,3 +17,7 @@ class InspectableHousesAdmin(admin.ModelAdmin):
 	search_fields = ('residence',)
 	list_per_page = 25
 admin.site.register(InspectableHouses, InspectableHousesAdmin)
+
+class FAQAdmin(admin.ModelAdmin):
+	list_per_page = 50
+admin.site.register(HouseInspectionFaq)

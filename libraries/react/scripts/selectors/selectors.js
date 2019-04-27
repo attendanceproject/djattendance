@@ -195,3 +195,10 @@ export const getGroupSlipsforPeriod = createSelector(
     )
   }
 )
+
+export const isTA = createSelector(
+  [trainee, tas],
+  (user, tas) => {
+    const ids = tas.map(ta => ta.id);
+    return ids.indexOf(user.id) >= 0;
+  })
