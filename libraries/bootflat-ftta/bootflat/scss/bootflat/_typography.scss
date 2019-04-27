@@ -99,14 +99,11 @@ $image-radius:               4px !default;
     margin-top: 30px;
     margin-bottom: 15px;
   }
-  h4 {
-    margin-top: 15px;
-    margin-bottom: 15px;
-  }
+  h4,
   h5,
   h6 {
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
   }
   h6 {
     font-weight: normal;
@@ -137,8 +134,7 @@ $image-radius:               4px !default;
   .h5 {
     font-family: 'Yantramanav Medium';
     text-transform: uppercase;
-    font-size: 20px;
-    color: #a6c5d1;
+    font-size: 14px;
   }
   h6,
   .h6 {

@@ -7,6 +7,9 @@
 
 
 {% block references %}
+{% endblock%}
+{% block scripts %}
+{{ block.super }} 
 <style>
   .select {
     border-radius: 0px;
@@ -76,12 +79,17 @@
     color: #a6c5d1;
     font-weight: 500;
   }
-  
-</style>
-{% endblock%}
+  h5 {
+    font-family: 'Yantramanav Medium';
+    text-transform: uppercase;
+    font-size: 20px;
+    color: #a6c5d1;
+    font-weight: 500;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+  </style>
 
-{% block scripts %}
-{{ block.super }}
 
 <script type="text/javascript">
 
@@ -199,7 +207,13 @@ Note: 12:00 AM will be interpreted as 00:00 in 24 hour time. Rows with blank hou
       
         {% csrf_token %}
     
-      
+      <tr>
+          <td></br></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          
+      </tr>
       
           <tr>
             <td><h5>Start</h5></td>
@@ -217,10 +231,11 @@ Note: 12:00 AM will be interpreted as 00:00 in 24 hour time. Rows with blank hou
           {% endfor %}
           </table>
       
-          <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
+          <button type="submit" class="btn btn-danger btn-save" id="submit">{{button_label|safe}}</button>
         </form>
-        <button class="btn btn-primary" id="delete_row">Delete</button>
-        <button style="margin-left:10px;" class="btn btn-primary" id="add_row">Add</button>
+        <button class="btn btn-primary" id="add_row">Add</button>
+        <button style="margin-left:10px;" class="btn btn-primary" id="delete_row">Delete</button>
+        
 </div>
 
 
