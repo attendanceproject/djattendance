@@ -24,7 +24,6 @@ class Vocab(models.Model):
 
     # parsing category greek word belongs to
     parsing = models.CharField(max_length=5, choices=PARSING_CODES)
-    # parsing = models.IntegerField()
 
     def __unicode__(self):
         try:

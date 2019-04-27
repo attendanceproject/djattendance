@@ -4,10 +4,22 @@
 {% load common_tags %}
 {% block title %}Greek{% endblock %}
 
+{% block scripts %}
+<script type="text/javascript">
+
+  $(document).ready(function () {
+
+  });
+</script>
+{% endblock %}
 {% block content %}
 
 <h1> Greek Vocab Helper</h1>
 
-
+<div class="container">
+    <p>
+        {{ greekVocab }}
+    </p>
+</div>
 
 {% endblock %}
