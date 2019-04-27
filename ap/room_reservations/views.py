@@ -163,7 +163,10 @@ def weather_api(request):
   request = urllib2.Request(url)
   request.add_header('Authorization', auth_header)
   request.add_header('Yahoo-App-Id', app_id)
-  weather_info = urllib2.urlopen(request).read()
+  try:
+    weather_info = urllib2.urlopen(request).read()
+  except Exception:
+    weather_info = ''
 
   condition_index = weather_info.find('condition')
   weather = {}

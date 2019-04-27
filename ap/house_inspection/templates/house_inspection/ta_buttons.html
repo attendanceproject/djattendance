@@ -1,0 +1,18 @@
+
+{% if request.get_status_display == 'Answered' %}
+	<a href="{% url 'house_inspection:modify-status' status='A' id=request.id %}">
+	  <button class="btn btn-success approve" title="Approve"><span class="glyphicon glyphicon-ok"></span></button>
+	</a>
+{% endif %}
+
+<a href="{% url 'house_inspection:house_inspection-update-answer' request.id %}">
+  <button class="btn btn-primary answer" title="Answer"><span class="glyphicon glyphicon-pencil"></span></button>
+</a>
+
+<a href="{% url 'house_inspection:house_inspection-faq-comment' request.id %}">
+  <button class="btn btn-info comment" title="Comment"><span class="glyphicon glyphicon-comment"></span></button>
+</a>
+
+ <a href="{% url 'house_inspection:modify-status' 'D' request.id %}">
+  <button class="btn btn-danger deny" title="Delete"><span class="glyphicon glyphicon-remove"></span></button>
+</a>
