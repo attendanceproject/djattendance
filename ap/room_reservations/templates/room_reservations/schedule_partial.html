@@ -163,8 +163,15 @@ function generateBody(date, list_of_rooms) {
 <div>
 
   <h5>Approved Room Reservation Schedule</h5>
+  {% if request.get_full_path != "/room_reservations/submit/" %}
+  <!-- Assumption is that this only appears on /room_reservations/schedule -->
   <label>Date &nbsp;</label>
   <input id="schedule-date" class="datepicker" placeholder="Date" title="" type="text" />
+  {% else %}
+  <!--shh, i'm hidden until another dev figures out how to better separate the datepicker. inputting a date on the form won't update without this line of code-->
+  <input type="hidden" id="schedule-date" class="datepicker" placeholder="Date" title="" type="text" />
+  {% endif %}
+
 </div>
 <div class="row">
   <div id="schedule" class="col-md-12">
