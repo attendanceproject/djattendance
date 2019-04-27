@@ -2,35 +2,94 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 {% load common_tags %}
-
 {% block title %}{{ page_title }}{% endblock %}
 
+
+
 {% block references %}
+{% endblock%}
+{% block scripts %}
+{{ block.super }} 
 <style>
+  .select {
+    border-radius: 0px;
+  }
   #submit{
+    display: inline-block;
+    float: right;
+    margin-right: 10px;
+  }
+  #delete_row{
     display: inline-block;
     float: left;
   }
 
-  #delete_row{
-    display: inline-block;
-    float: right;
-  }
-
   #add_row{
     display: inline-block;
-    float: right;
+    float: left;
   }
-
   #errors .inner{
     color: red;
   }
+  #narrow_content{
+    max-width: 1000px;
+    align-content: center;
+    margin:0 auto;
+    margin-bottom: 30px;
+  }
+  #week{
+  position: relative;
+  background-color: #095F80; 
+  padding: 5px 15px;
+  color: #fff;
+  font-family: 'Yantramanav Light';
+    font-size: 20px;
+  Margin-right: 0;
+  width: 180px;
+  }
+  div.longblue{
+  position: absolute;
+    margin-top: 0px;
+  width: 1000px;
+    height: 10px;
+  background-color: #095F80;  
+  }
+  
+ .container {
+  margin: 10px; 
+  padding: 0px; 
+  max-width: 1000px;
+  width: auto; 
+} 
+  .table > tbody > tr > td {
+    padding: 0px 20px 0px 0px;
+    text-align: left;
+  }
+ 
+  .form-control {
+    height: 25px;
+    padding: 4px 4px;
+    border:1px solid #a6c5d1 ;
+    border-radius: 0px; 
+  }
+  label.control-label {
+    font-family: 'Yantramanav Medium';
+    text-transform: uppercase;
+    font-size: 20px;
+    color: #a6c5d1;
+    font-weight: 500;
+  }
+  h5 {
+    font-family: 'Yantramanav Medium';
+    text-transform: uppercase;
+    font-size: 20px;
+    color: #a6c5d1;
+    font-weight: 500;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+  </style>
 
-</style>
-{% endblock%}
-
-{% block scripts %}
-{{ block.super }}
 
 <script type="text/javascript">
 
@@ -94,7 +153,8 @@ $(document).ready(() => {
 {% endblock %}
 
 {% block content %}
-<h2>{{ page_title }}</h2>
+<div id="narrow_content">
+<h1>{{ page_title }}</h1>
 
 {% if form.errors %}
 <!-- Error messaging -->
@@ -133,31 +193,57 @@ $(document).ready(() => {
 Also, posting hours again overwrites the old submission so you can post more than once.
 Note: 12:00 AM will be interpreted as 00:00 in 24 hour time. Rows with blank hours and no tasks performed will be deleted on save.</p>
 
-<br><br>
+<br>
+<div id="week">WEEKLY REPORTS</div>
+      <div class="longblue"></div>
+</br>
 
 <form id="id_service_hours_form" method="post" action="">
-  {% bootstrap_field form.designated_service %}
-  {% bootstrap_field form.week %}
-  {% csrf_token %}
-  <table class="table table-bordered" id="id_service_hours_table">
-    <tr>
-      <th>Start</th>
-      <th>End</th>
-      <th>Task Performed</th>
-      <th>Work Hours</th>
-    </tr>
-    {% for service_roll_form in service_roll_forms %}
-    <tr id="row_{{forloop.counter0}}">
-      <td>{% bootstrap_field service_roll_form.start_datetime layout='inline' %}</td>
-      <td>{% bootstrap_field service_roll_form.end_datetime layout='inline' %}</td>
-      <td>{% bootstrap_field service_roll_form.task_performed layout='inline' %}</td>
-      <td>{{service_roll_form.instance.get_time_diff|floatformat:2}}</td>
-    </tr>
-    {% endfor %}
-    </table>
+    <table class="table no-border" id="id_service_hours_table">
+        <tr>
+          <td style="border-radius:0px;">{% bootstrap_field form.week %}</td>
+          <td>{% bootstrap_field form.designated_service %}</td>
+        </tr>
+      
+        {% csrf_token %}
+    
+      <tr>
+          <td></br></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          
+      </tr>
+      
+          <tr>
+            <td><h5>Start</h5></td>
+            <td><h5>End</h5></td>
+            <td><h5>Task Performed</h5></td>
+            <td><h5>Hours</h5></td>
+          </tr>
+          {% for service_roll_form in service_roll_forms %}
+          <tr id="row_{{forloop.counter0}}">
+            <td>{% bootstrap_field service_roll_form.start_datetime layout='inline' %}</td>
+            <td>{% bootstrap_field service_roll_form.end_datetime layout='inline' %}</td>
+            <td>{% bootstrap_field service_roll_form.task_performed layout='inline' %}</td>
+            <td>{{service_roll_form.instance.get_time_diff|floatformat:2}}</td>
+          </tr>
+          {% endfor %}
+          </table>
+      
+          <button type="submit" class="btn btn-danger btn-save" id="submit">{{button_label|safe}}</button>
+        </form>
+        <button class="btn btn-primary" id="add_row">Add</button>
+        <button style="margin-left:10px;" class="btn btn-primary" id="delete_row">Delete</button>
+        
+</div>
 
-    <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
-  </form>
-  <button class="btn btn-primary" id="delete_row">Delete</button>
-  <button class="btn btn-primary" id="add_row">Add</button>
+
+    
+
+
+</br>
+</br>
+</br>
+</br>
 {% endblock %}
