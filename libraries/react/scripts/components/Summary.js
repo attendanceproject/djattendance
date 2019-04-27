@@ -61,7 +61,7 @@ const Summary = (p) => {
         </div> : ''
       }
 
-      <Alert bsStyle="danger" className="dt-leaveslip__note">
+      <Alert bsStyle="notice" className="dt-leaveslip__note">
         Note: Report information will not be up-to-date until attendance office hours (i.e., when the potential violators list is posted).
       </Alert>
     </div>
