@@ -257,14 +257,20 @@ def attendance_report_trainee(request):
 
   # CALCULATE %TARDY
   total_possible_rolls_count = sum(count[ev] for ev in count if ev.monitor is not None)
+  print (trainee.full_name+': '+str(total_possible_rolls_count))
   tardy_rolls = rolls.exclude(status='A').filter(~(Q(leaveslips__does_not_count=True) & Q(leaveslips__status='A')))
   tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips.filter(does_not_count=True))
+  print "tardy_rolls"
+  print tardy_rolls
 
   res["tardy_percentage"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
   # CALCULATE %CLASSES MISSED
   possible_class_rolls_count = sum(count[ev] for ev in count if ev.monitor == 'AM' and ev.type == 'C')
+  print "possible_class_rolls_count"
+  print possible_class_rolls_count
   missed_classes = rolls.filter(event__monitor='AM', event__type='C')
+  print "missed_classes"
 
   # currently counts rolls excused by individual and group slips
   # comment this part out to not count those rolls
@@ -275,18 +281,23 @@ def attendance_report_trainee(request):
 
   # exclude absent rolls excused by group slips
   missed_classes = rolls_excused_by_groupslips(missed_classes, group_slips.filter(does_not_count=True))
+  print missed_classes
 
   res["classes_missed_percentage"] = str(round(missed_classes.count() / float(possible_class_rolls_count) * 100, 2)) + "%"
 
   # CALCULATE %SICKNESS
   rolls_covered_by_sickness = Roll.objects.filter(trainee=trainee, leaveslips__status='A', leaveslips__type='SICK', date__gte=date_from, date__lte=date_to).distinct()
+  print "rolls_covered_by_sickness"
+  print rolls_covered_by_sickness
 
   res["sickness_percentage"] = str(round(rolls_covered_by_sickness.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
   # CALCULATE UNEXCUSED ABSENCES
   unexcused_absences = rolls.filter(status='A')
+  print "unexcused_absences"
   unexcused_absences = unexcused_absences.exclude(leaveslips__status='A')
   unexcused_absences = rolls_excused_by_groupslips(unexcused_absences, group_slips)
+  print unexcused_absences
   res["unexcused_absences_percentage"] = str(round(unexcused_absences.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
   stash.append_records(res)
