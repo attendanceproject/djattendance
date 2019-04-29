@@ -210,7 +210,7 @@ class HCRecommendationCreate(GroupRequiredMixin, TemplateView):
     ctx['page_title'] = 'HC Recommendation'
     ctx['hc'] = Trainee.objects.get(id=self.request.user.id)
     ctx['house'] = House.objects.get(id=self.request.user.house.id)
-    hcrs = HCRecommendation.objects.filter(house=ctx['house'])
+    hcrs = HCRecommendation.objects.filter(house=ctx['house'],survey_admin__term=Term.current_term())
     ctx['hcrs'] = JSONRenderer().render(HCRecommendationSerializer(hcrs, many=True).data)
     ctx['form'] = HCRecommendationForm(user=self.request.user)
     survey_admin = self.admin_model.objects.get_or_create(term=Term.current_term())[0]
