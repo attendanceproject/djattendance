@@ -288,7 +288,7 @@ def attendance_report_trainee(request):
   unexcused_absences = unexcused_absences.exclude(leaveslips__status='A')
   unexcused_absences = rolls_excused_by_groupslips(unexcused_absences, group_slips)
   res["unexcused_absences_percentage"] = str(round(unexcused_absences.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
-  
+ 
   stash.append_records(res)
   return JsonResponse(res)
 
