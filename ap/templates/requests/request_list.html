@@ -33,9 +33,9 @@
         {% elif 'Fellowship' in requestGroups.grouper %}panel-info{% endif %}
       ">
         <div class="panel-heading">
-          {% if view.request.user|is_trainee and not "inspection" in view.model|model_verbose_name %}
-            <h4 class="panel-title">            
-              {{ request.get_category }}          
+          {% if view.request.user|is_trainee and not "inspection" in view.model|model_verbose_name or view.request.user|is_TA %}
+            <h4 class="panel-title">
+              {{ request.get_category }}
               {% if view.request.user|is_TA %}
               - submitted by {{ request.requester_name }}
                 <small>
