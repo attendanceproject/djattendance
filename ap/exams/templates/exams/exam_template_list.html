@@ -88,6 +88,8 @@ function setExamStatus(button) {
                 <a href="{% url 'exams:take' exam.id %}" class="btn btn-success">Take exam</a>
               {% elif exam.graded and exam.is_graded_open and not exam_service %}
                 <a href="{% url 'exams:graded' exam.id %}" class="btn btn-success">View graded exam</a>
+              {% elif exam.visible and not exam_service %}
+                <a href="{% url 'exams:take' exam.id %}" class="btn btn-success">View exam</a>
               {% endif %}
             {% endif %}
             {% if exam_service %}

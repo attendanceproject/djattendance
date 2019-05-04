@@ -59,12 +59,14 @@
               <i>No exam questions to view.</i><br />
             {% endfor %}
           </ol>
+          {% if not is_finalized %}
           <div class="pull-right">
             <button id="save_button" name="Save" class="btn btn-success">Save</button>
             <button id="finalize_button" name="Submit" class="btn btn-primary">
               Finalize
             </button>
           </div>
+          {% endif %}
         </form>
       {% endif %}
     {% else %}
