@@ -355,7 +355,7 @@ class ExamMakeupView(GroupRequiredMixin, ListView):
 
 
 class PreviewExamView(GroupRequiredMixin, SuccessMessageMixin, ListView):
-  template_name = 'exams/exam_preview.html'
+  template_name = 'exams/exam.html'
   model = Session
   context_object_name = 'exam'
   fields = []
@@ -364,40 +364,8 @@ class PreviewExamView(GroupRequiredMixin, SuccessMessageMixin, ListView):
   def _get_exam(self):
     return Exam.objects.get(pk=self.kwargs['pk'])
 
-  def _get_most_recent_session(self):
-    return Session.objects.filter(exam=self._get_exam(), trainee=self.request.user).order_by('-time_started').first()
-
-  def _get_session(self):
-    if not self._exam_available():
-      return None
-
-    session = self._get_most_recent_session()
-    # Create a new exam session if there is no editable exam session
-    # TODO - Check if now - time_started is greater than exam.duration
-    if session is None:
-      session = Session(
-          trainee=trainee_from_user(self.request.user),
-          exam=self._get_exam(),
-          is_submitted_online=True)
-      session.save()
-
-    return session
-
   def _exam_available(self):
     return True
-    exam = self._get_exam()
-    user = self.request.user
-
-    if not trainee_can_take_exam(user, exam):
-      return False
-
-    # if the exam is in progress or doesn't exist, we're in business
-    most_recent_session = self._get_most_recent_session()
-
-    if (most_recent_session is None):
-      return True
-
-    return makeup_available(exam, user)
 
   def get_context_data(self, **kwargs):
     context = super(PreviewExamView, self).get_context_data(**kwargs)

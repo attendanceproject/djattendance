@@ -367,9 +367,30 @@ def get_exam_context_data(context, exam, is_available, session, role, include_an
 
 
 def get_exam_preview_context_data(context, exam):
+  context['role'] = "Take"
   context['exam'] = exam
-  context['exam_total_score'] = exam.total_score
-  context['questions'] = get_exam_questions(exam, False)
+  context['is_finalized'] = False
+  context['exam_available'] = True
+  questions = get_exam_questions(exam, False)
+
+  sections = Section.objects.filter(exam=exam)
+  responses = []
+  score_for_responses = []
+  comments_for_responses = []
+  for section in sections:
+    r = {}
+    for i in range(section.first_question_index, section.question_count + 1):
+      if section.section_type == 'FB':
+        regex = re.compile('[^##]')
+        r[i] = json.loads('"' + regex.sub('', section.questions[str(i)]) + '"')
+      else:
+        r[i] = json.loads('""')
+
+    responses.append(r)
+    score_for_responses.append({})
+    comments_for_responses.append({})
+
+  context['data'] = zip(questions, responses, score_for_responses, comments_for_responses)
   context['preview'] = True
   return context
 

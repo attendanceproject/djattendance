@@ -61,8 +61,8 @@
           </ol>
           {% if not is_finalized %}
           <div class="pull-right">
-            <button id="save_button" name="Save" class="btn btn-success">Save</button>
-            <button id="finalize_button" name="Submit" class="btn btn-primary">
+            <button id="save_button" name="Save" class="btn btn-success" {% if preview %}disabled{% endif %}>Save</button>
+            <button id="finalize_button" name="Submit" class="btn btn-primary" {% if preview %}disabled{% endif %}>
               Finalize
             </button>
           </div>
