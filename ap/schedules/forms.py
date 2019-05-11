@@ -112,17 +112,19 @@ class UpdateScheduleForm(BaseScheduleForm):
 
     if 'Update' in self.data:
       if 'weeks' in self.changed_data:
-        changed_weeks = cleaned_data['weeks'].split(',')
-        initial_weeks = self.initial['weeks'].split(',')
-        min_val = int(min(changed_weeks[0], initial_weeks[0]))
-        max_val = int(max(changed_weeks[-1], initial_weeks[-1])) + 1
-        weeks = range(min_val, max_val)
+        # gets only the changed weeks
+        changed_weeks = set(cleaned_data['weeks'].split(','))
+        initial_weeks = set(self.initial['weeks'].split(','))
+        weeks_set = changed_weeks - initial_weeks | initial_weeks - changed_weeks
+        weeks = [int(s) for s in weeks_set]
+
       else:
         weeks = [int(s) for s in cleaned_data['weeks'].split(',')]
 
       t_set = set(cleaned_data['trainees'])
       if 'trainees' in self.changed_data:
-        t_set = set(self.initial['trainees']) | t_set
+        # gets only the changed trainees
+        t_set = (t_set - set(self.initial['trainees'])) | (set(self.initial['trainees']) - t_set)
 
       schedules = Schedule.get_all_schedules_in_weeks_for_trainees(weeks, t_set)
       schedules = list(schedules.exclude(id=self.instance.id))
