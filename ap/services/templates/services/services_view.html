@@ -388,7 +388,7 @@ Service Scheduling
         {% for worker in report_assignments %}
           <tr>
             <td>{{ worker.trainee.full_name }}</td>
-            <td>{{ worker.workload }}</td>
+            <td>{{ worker.workload }} / {{worker.services_cap}}</td>
             {% for category in categories %}
               {% if category in worker.services %}
                 <td>
