@@ -4,6 +4,8 @@ from django.http import HttpResponseRedirect
 from django.utils.deprecation import MiddlewareMixin
 
 from .utils import unfinalized_week
+from terms.models import Term
+from datetime import date
 
 
 class BibleReadingMiddleware(MiddlewareMixin):
@@ -15,7 +17,12 @@ class BibleReadingMiddleware(MiddlewareMixin):
         reverse('apimport:term_details'), reverse('apimport:process_csv'), reverse('apimport:save_data')
     ]
     if request.path in exception_list or settings.DEBUG:
-      return None
+      current_week = Term.current_term().term_week_of_date(date.today())
+      week = request.GET.get('week')
+      if not week or int(week) > current_week:
+        return HttpResponseRedirect(reverse('bible_tracker:index') + '?week=' + str(current_week))
+      else:
+        return None
     if request.path not in url_list:
       week = unfinalized_week(request.user)
       if week and not settings.DEBUG:
