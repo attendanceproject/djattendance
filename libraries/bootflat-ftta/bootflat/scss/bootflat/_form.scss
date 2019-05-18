@@ -213,4 +213,30 @@ $search-icon-line-height:          30px !default;
     }
   }
 
+  .new-form {
+    & label {
+      color: $blue-light;
+      text-transform: uppercase;
+      font-size: 18pt;
+      margin: 0;
+    }
+
+    & .text, select, textarea, input {
+      border: solid 1px $blue-light;
+    }
+
+    & .readonly {
+      background-color: $form-disabled-color;
+    }
+
+
+    & select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      -ms-appearance: none;
+      -o-appearance: none;
+      appearance: none;
+    }
+  }
+
 }
