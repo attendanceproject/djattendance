@@ -14,6 +14,7 @@ class InterimItineraryForm(forms.ModelForm):
     model = InterimItinerary
     fields = ["start", "end", "comments", ]
     widgets = {
+      "start": DatePicker(),
       "end": DatePicker(),
       "comments": forms.Textarea(attrs={'rows': 2})
     }
@@ -21,6 +22,7 @@ class InterimItineraryForm(forms.ModelForm):
 
 class InterimIntentionsForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
+    kwargs.setdefault('label_suffix', '')
     super(InterimIntentionsForm, self).__init__(*args, **kwargs)
     self.fields['cell_phone'].label = 'Cell Phone'
     self.fields['email'].label = 'E-mail'
