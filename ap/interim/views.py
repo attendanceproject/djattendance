@@ -1,3 +1,5 @@
+import xlwt
+
 from datetime import datetime, timedelta
 
 from accounts.models import Trainee
@@ -6,6 +8,8 @@ from braces.views import GroupRequiredMixin
 from dateutil import parser
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import UpdateView
+from django.http import HttpResponse
+from django.conf.urls import url
 from interim.forms import (InterimIntentionsAdminForm, InterimIntentionsForm,
                            InterimItineraryForm)
 from interim.models import (InterimIntentions, InterimIntentionsAdmin,
@@ -156,6 +160,22 @@ class InterimIntentionsTAView(TemplateView, GroupRequiredMixin):
     ctx['trainees'] = trainees
     ctx['page_title'] = 'Interim Intentions Report'
     return ctx
+
+
+def export_interim_intentions_xls(request):
+  response = HttpResponse(content_type='application/ms-excel')
+  response['Content-Disposition'] = 'application; filename="sample.xls"'
+
+  wb = xlwt.Workbook(encoding='utf-8')
+  ws = wb.add_sheet('sample')
+
+  row_num = 0
+  columns = ['Plans', 'Etc']
+  for col_num in range(len(columns)):
+    ws.write(row_num, col_num, columns[col_num])
+
+  wb.save(response)
+  return response
 
 
 class InterimIntentionsCalendarView(TemplateView, GroupRequiredMixin):

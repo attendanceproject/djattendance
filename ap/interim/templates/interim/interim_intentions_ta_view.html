@@ -30,16 +30,12 @@
         exportOptions:{
           columns: ':visible'
         },
-      },
-      {
-        extend: 'csvHtml5',
-        text: 'CSV',
-        exportOptions: {
-          columns: ':visible'
-        },
       }
       ],
     });
+
+    $(".buttons-xls").appendTo($(".btn-group"));
+
   });
 </script>
 {% endblock %}
@@ -47,6 +43,8 @@
 {% block content %}
 
 <h1>{{ page_title }}</h1>
+
+<a class="btn btn-default buttons-xls" href="{% url 'interim:export_interim_intentions_xls' %}">Excel</a>
 
 <div class="data-table-container">
   <table id="id_interim_intentions_table" class="table table-striped table-bordered">
