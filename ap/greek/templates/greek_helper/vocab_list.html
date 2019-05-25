@@ -7,19 +7,47 @@
 {% block scripts %}
 <script type="text/javascript">
 
+  var chapter;
+
   $(document).ready(function () {
+
+    // Changing the chapter reloads the page to load the vocab list in that chapter
+    function changeChapter() {
+      var chap = document.getElementById("chapter_select").value;
+      console.log("chapter changed to", chap);
+    }
+
+    $("#chapter_select").on('change', changeChapter);
 
   });
 </script>
 {% endblock %}
+
 {% block content %}
 
 <h1> Greek Vocab Helper</h1>
 
 <div class="container">
-    <p>
-        {{ greekVocab }}
-    </p>
+  <form>
+    <div class="col-3">
+      Sort by chapter:
+    </div>
+    <div class="col-4">
+      <!-- Pick a chapter -->
+      <select id="chapter_select" class="form-control" name="chapter" size="0">
+        {% for i in chapters %}
+        <option value="{{i}}">{{i}}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+  <p>
+    {{ greekVocab }}
+  </p>
+  <br />
+  <p>
+    {{ english }}
+  </p>
 </div>
 
 {% endblock %}
