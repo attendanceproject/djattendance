@@ -19,9 +19,6 @@ class RoomReservationForm(forms.ModelForm):
       self.fields['reason'].required = False
 
     self.fields['group'].widget.attrs['placeholder'] = 'Group making reservation (will be displayed on TV)'
-    self.fields['start']
-    self.fields['end']
-    self.fields['date']
 
   class Meta:
     model = RoomReservation
