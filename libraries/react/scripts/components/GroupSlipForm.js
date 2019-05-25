@@ -41,7 +41,6 @@ const GroupSlipForm = ({...props}) => {
       </Alert>
     </div>
 
-
       <SlipTitle {...props} />
       <TAComments comments={props.form.comments} />
       <Form
