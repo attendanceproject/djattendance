@@ -18,6 +18,9 @@ from interim.models import (InterimIntentions, InterimIntentionsAdmin,
 from terms.models import Term
 
 
+term = Term.current_term()
+
+
 class InterimIntentionsView(UpdateView):
   model = InterimIntentions
   template_name = 'interim/interim_intentions.html'
@@ -124,7 +127,6 @@ class InterimIntentionsTAView(TemplateView, GroupRequiredMixin):
 
   def get_context_data(self, **kwargs):
     ctx = super(InterimIntentionsTAView, self).get_context_data(**kwargs)
-    term = Term.current_term()
 
     def merge_locality_entries(d, sep=' '):
       prefix = 'locality__city__'
@@ -164,23 +166,51 @@ class InterimIntentionsTAView(TemplateView, GroupRequiredMixin):
 
 
 def export_interim_intentions_xls(request):
-
   output = io.BytesIO() # in-memory output file for workbook
 
   wb = xlsxwriter.Workbook(output)
   ws = wb.add_worksheet()
 
   row_num = 0
-  columns = ['Name', 'Gender', 'Term', 'Locality', 'Team', 'Returning to FTTA (1st-3rd)', 'Not Returning (1st-3rd)', 'Undecided (1st-3rd)'] + [x[1] for x in POST_INTENT_CHOICES] + ['Notes']
-  for col_num, column_title in enumerate(columns, 0):
+  columns = ['Name', 'Gender', 'Term', 'Locality', 'Team',
+            'Returning to FTTA (1st-3rd)', 'Not Returning (1st-3rd)',
+            'Undecided (1st-3rd)'] + [x[1] for x in POST_INTENT_CHOICES]
+  columns.pop() # remove last "None" option
+  columns.append("Notes")
+
+  # excel headers
+  for col_num, column_title in enumerate(columns, 1):
     ws.write(row_num, col_num, column_title)
-    # ws.write(row_num, col_num, columns[col_num])
+
+  # trainee content
+  trainees = Trainee.objects.values('firstname', 'lastname', 'gender', 'current_term',
+                                    'team__name', 'locality__city__name', 'id')
+  row_num = 1
+  for t in trainees:
+    intention = InterimIntentions.objects.filter(trainee__id=t['id'], admin__term=term).first()
+
+    ws.write(row_num, 0, row_num)
+    ws.write(row_num, 1, t['firstname'] + " " + t['lastname'])
+    ws.write(row_num, 2, t['gender'])
+    ws.write(row_num, 3, t['current_term'])
+    ws.write(row_num, 4, t['locality__city__name'])
+    ws.write(row_num, 5, t['team__name'])
+
+    inter_plans = dict([('R', 6), ('N', 7), ('U', 8)])
+    post_plans = dict([('USC', 9), ('OCC', 10), ('LSM', 11), ('BFA', 12), ('OTH', 13),
+                       ('XB', 14), ('JOB', 15), ('SCH', 16), ('UND', 17)])
+    if intention:
+      if intention.intent != 'G':
+        ws.write(row_num, inter_plans[intention.intent], 'x')
+      if intention.post_training_intentions not in ["NON", ""]:
+        ws.write(row_num, post_plans[intention.post_training_intentions], 'x')
+      ws.write(row_num, 18, intention.post_intent_comments)
+    row_num = row_num + 1
 
   wb.close()
   output.seek(0) # rewinding the buffer
 
   response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  term = Term.current_term()
   response['Content-Disposition'] = 'attachment; filename=Interim-{t}.xlsx'.format(
     t = term.season + str(term.year)
   )
@@ -194,7 +224,6 @@ class InterimIntentionsCalendarView(TemplateView, GroupRequiredMixin):
 
   def get_context_data(self, **kwargs):
     ctx = super(InterimIntentionsCalendarView, self).get_context_data(**kwargs)
-    term = Term.current_term()
 
     interim_start = term.end + timedelta(days=1)
     if not InterimIntentionsAdmin.objects.get(term=term).date_1yr_return or not InterimIntentionsAdmin.objects.get(term=term).date_2yr_return:
