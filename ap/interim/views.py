@@ -1,4 +1,6 @@
-import xlwt
+# import xlwt
+# from openpyxl import Workbook
+import io, xlsxwriter
 
 from datetime import datetime, timedelta
 
@@ -9,11 +11,10 @@ from dateutil import parser
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import UpdateView
 from django.http import HttpResponse
-from django.conf.urls import url
 from interim.forms import (InterimIntentionsAdminForm, InterimIntentionsForm,
                            InterimItineraryForm)
 from interim.models import (InterimIntentions, InterimIntentionsAdmin,
-                            InterimItinerary)
+                            InterimItinerary, POST_INTENT_CHOICES)
 from terms.models import Term
 
 
@@ -163,18 +164,27 @@ class InterimIntentionsTAView(TemplateView, GroupRequiredMixin):
 
 
 def export_interim_intentions_xls(request):
-  response = HttpResponse(content_type='application/ms-excel')
-  response['Content-Disposition'] = 'application; filename="sample.xls"'
 
-  wb = xlwt.Workbook(encoding='utf-8')
-  ws = wb.add_sheet('sample')
+  output = io.BytesIO() # in-memory output file for workbook
+
+  wb = xlsxwriter.Workbook(output)
+  ws = wb.add_worksheet()
 
   row_num = 0
-  columns = ['Plans', 'Etc']
-  for col_num in range(len(columns)):
-    ws.write(row_num, col_num, columns[col_num])
+  columns = ['Name', 'Gender', 'Term', 'Locality', 'Team', 'Returning to FTTA (1st-3rd)', 'Not Returning (1st-3rd)', 'Undecided (1st-3rd)'] + [x[1] for x in POST_INTENT_CHOICES] + ['Notes']
+  for col_num, column_title in enumerate(columns, 0):
+    ws.write(row_num, col_num, column_title)
+    # ws.write(row_num, col_num, columns[col_num])
 
-  wb.save(response)
+  wb.close()
+  output.seek(0) # rewinding the buffer
+
+  response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  term = Term.current_term()
+  response['Content-Disposition'] = 'attachment; filename=Interim-{t}.xlsx'.format(
+    t = term.season + str(term.year)
+  )
+
   return response
 
 

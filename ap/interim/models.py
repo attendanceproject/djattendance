@@ -29,25 +29,25 @@ class InterimIntentionsAdmin(models.Model):
     return reverse('interim:interim_intentions_admin')
 
 
+POST_INTENT_CHOICES = (
+    ('USC', 'Serve Full-Time: College campus in the U.S.'),
+    ('OCC', 'Serve Full-Time: College campus in other countries'),
+    ('LSM', 'Serve Full-Time: Living Stream Ministry'),
+    ('BFA', 'Serve Full-Time: Bibles for America'),
+    ('OTH', 'Serve Full-Time: Other (explain)'),
+    ('XB', 'Attend the FTTA Extension in Boston'),
+    ('JOB', 'Take a Job'),
+    ('SCH', 'Return to school'),
+    ('UND', 'Other/Undecided (explain)'),
+    ('NON', 'None'),
+)
+
 class InterimIntentions(models.Model):
   INTENT_CHOICES = (
       ('R', 'Returning'),
       ('G', 'Graduating'),
       ('N', 'Not returning'),
       ('U', 'Unsure if I will return next term'),
-  )
-
-  POST_INTENT_CHOICES = (
-      ('USC', 'Serve Full-Time: College campus in the U.S.'),
-      ('OCC', 'Serve Full-Time: College campus in other countries'),
-      ('LSM', 'Serve Full-Time: Living Stream Ministry'),
-      ('BFA', 'Serve Full-Time: Bibles for America'),
-      ('OTH', 'Serve Full-Time: Other (explain)'),
-      ('XB', 'Attend the FTTA Extension in Boston'),
-      ('JOB', 'Take a Job'),
-      ('SCH', 'Return to school'),
-      ('UND', 'Other/Undecided (explain)'),
-      ('NON', 'None'),
   )
 
   trainee = models.ForeignKey(Trainee, null=True, on_delete=models.SET_NULL)
