@@ -1,5 +1,12 @@
-{% extends "base.html" %} {% load staticfiles %} {% load bootstrap3 %} {% load panels %} {% load smart_cards %} {% load common_tags
-%} {% block title %}Home{% endblock %} {% block scripts %}
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load panels %}
+{% load smart_cards %}
+{% load common_tags %}
+{% block title %}Home{% endblock %}
+
+{% block scripts %}
 <script type="text/javascript" src="{% static 'js/bootstrap-tab-history.js' %}"></script>
 {% if isTrainee %}
 <script type="text/javascript" src="{% static 'bible_tracker/js/bible_reading.js' %}"></script>

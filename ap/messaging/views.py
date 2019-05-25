@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.contrib import messages
+from announcements.notifications import get_announcements, get_popups
 
 from .models import Conversation
 
@@ -14,4 +16,8 @@ class MessagingView(TemplateView):
     current_user = self.request.user
     ctx = super(MessagingView, self).get_context_data(**kwargs)
     ctx['page_title'] = 'View Read Notifications'
+    notifications = get_announcements(request)
+    for notification in notifications:
+      tag, content = notification
+    messages.add_message(request, tag, content)
     return ctx
