@@ -171,40 +171,75 @@ def export_interim_intentions_xls(request):
   wb = xlsxwriter.Workbook(output)
   ws = wb.add_worksheet()
 
+  # formatting - colors from UI toolkit but not proportional
+  header_format = wb.add_format({'align': 'center', 'valign': 'vcenter', 'rotation': '90', 'text_wrap': True, 'bg_color': '#ffdb77', 'border': 1})
+  red_header_format = wb.add_format({'align': 'center', 'valign': 'vcenter', 'rotation': '90', 'text_wrap': True, 'bg_color': '#f69d74', 'border': 1})
+  blue_header_format = wb.add_format({'align': 'center', 'valign': 'vcenter', 'rotation': '90', 'text_wrap': True, 'bg_color': '#a6c4d1', 'border': 1})
+  ws.freeze_panes(1, 2)
+
+  # sizing cells
+  ws.set_row(0, 150)
+  ws.set_column(0, 0, 4.2)
+  ws.set_column(1, 1, 23)
+  ws.set_column(2, 3, 3.5)
+  ws.set_column(4, 4, 20)
+  ws.set_column(5, 5, 33)
+  ws.set_column(6, 17, 4.2)
+  ws.set_column(18, 18, 55)
+
   row_num = 0
-  columns = ['Name', 'Gender', 'Term', 'Locality', 'Team',
-            'Returning to FTTA (1st-3rd)', 'Not Returning (1st-3rd)',
-            'Undecided (1st-3rd)'] + [x[1] for x in POST_INTENT_CHOICES]
+  columns = ['NAME', 'GENDER', 'TERM', 'LOCALITY', 'TEAM',
+            'RETURNING TO FTTA (1st-3rd)', 'NOT RETURNING (1st-3rd)',
+            'UNDECIDED (1st-3rd)'] + [x[1] for x in POST_INTENT_CHOICES]
   columns.pop() # remove last "None" option
   columns.append("Notes")
 
   # excel headers
+  ws.write(row_num, 0, None, header_format)
   for col_num, column_title in enumerate(columns, 1):
-    ws.write(row_num, col_num, column_title)
+    switch_format = header_format
+    if col_num in range(6, 9):
+      switch_format = red_header_format
+    elif col_num in range(9, 18):
+      switch_format = blue_header_format
+    ws.write(row_num, col_num, column_title, switch_format)
 
   # trainee content
+  plain_format = wb.add_format({'border': 1})
+  plain_center_format = wb.add_format({'align': 'center', 'border': 1})
+  red_format = wb.add_format({'align': 'center', 'bg_color': '#f69d74', 'border': 1})
+  blue_format = wb.add_format({'align': 'center', 'bg_color': '#a6c4d1', 'border': 1})
+
   trainees = Trainee.objects.values('firstname', 'lastname', 'gender', 'current_term',
                                     'team__name', 'locality__city__name', 'id')
   row_num = 1
+  inter_plans = dict([('R', 6), ('N', 7), ('U', 8)])
+  post_plans = dict([('USC', 9), ('OCC', 10), ('LSM', 11), ('BFA', 12), ('OTH', 13),
+                       ('XB', 14), ('JOB', 15), ('SCH', 16), ('UND', 17)])
   for t in trainees:
     intention = InterimIntentions.objects.filter(trainee__id=t['id'], admin__term=term).first()
 
-    ws.write(row_num, 0, row_num)
-    ws.write(row_num, 1, t['firstname'] + " " + t['lastname'])
-    ws.write(row_num, 2, t['gender'])
-    ws.write(row_num, 3, t['current_term'])
-    ws.write(row_num, 4, t['locality__city__name'])
-    ws.write(row_num, 5, t['team__name'])
+    # default entries
+    ws.write(row_num, 0, row_num, plain_center_format)
+    ws.write(row_num, 1, t['firstname'] + " " + t['lastname'], plain_format)
+    ws.write(row_num, 2, t['gender'], plain_center_format)
+    ws.write(row_num, 3, t['current_term'], plain_center_format)
+    ws.write(row_num, 4, t['locality__city__name'], plain_format)
+    ws.write(row_num, 5, t['team__name'], plain_format)
+    for i in range(6, 9):
+      ws.write(row_num, i, None, red_format)
+    for i in range(9, 18):
+      ws.write(row_num, i, None, blue_format)
+    ws.write(row_num, 18, None, plain_format)
 
-    inter_plans = dict([('R', 6), ('N', 7), ('U', 8)])
-    post_plans = dict([('USC', 9), ('OCC', 10), ('LSM', 11), ('BFA', 12), ('OTH', 13),
-                       ('XB', 14), ('JOB', 15), ('SCH', 16), ('UND', 17)])
+    # more specific entries
     if intention:
       if intention.intent != 'G':
-        ws.write(row_num, inter_plans[intention.intent], 'x')
+        ws.write(row_num, inter_plans[intention.intent], 'x', red_format)
       if intention.post_training_intentions not in ["NON", ""]:
-        ws.write(row_num, post_plans[intention.post_training_intentions], 'x')
-      ws.write(row_num, 18, intention.post_intent_comments)
+        ws.write(row_num, post_plans[intention.post_training_intentions], 'x', blue_format)
+      ws.write(row_num, 18, intention.post_intent_comments, plain_format)
+
     row_num = row_num + 1
 
   wb.close()
