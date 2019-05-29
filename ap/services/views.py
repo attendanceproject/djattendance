@@ -168,8 +168,8 @@ def check_exceptions_view(request):
   se_used = se_n | se_d
 
   # A dictionary of assignments that violate active exceptions.
-  # Maps service to string of worker names
-  service_to_workers = {}
+  # Maps exception to string of service name and worker name.
+  exception_to_service = {}
 
   # You can then get all service assignments that conflict with the service exceptions
   # by using a nested for loop like:
@@ -178,13 +178,13 @@ def check_exceptions_view(request):
           for w in exception.workers.all():
               wa = current_assignments.filter(workers=w)
               if wa.filter(service=s):
-                if s in service_to_workers:
-                  service_to_workers[s] += ", " + w.trainee.full_name
+                if exception in exception_to_service:
+                  exception_to_service[exception] += ", " + s.name + " " + w.trainee.full_name
                 else:
-                  service_to_workers[s] = w.trainee.full_name
+                  exception_to_service[exception] = s.name + " " + w.trainee.full_name
 
   ctx = {
-      'service_to_workers': service_to_workers,
+      'exception_to_service': exception_to_service,
   }
 
   return render(request, 'services/services_check_exceptions.html', ctx)

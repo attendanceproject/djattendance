@@ -8,13 +8,21 @@ Check Exceptions
 {% endblock %}
 
 {% block content %}
-  {% if service_to_workers|length > 0%}
+  {% if exception_to_service|length > 0%}
     <h3>Assignments Violating Active Exceptions</h3>
     <table class="table">
-      {% for service, workers in service_to_workers.items %}
+      <tr>
+        <td> Exception Name </td>
+        <td> Start Date </td>
+        <td> End Date </td>
+        <td> Violating Assignment(s) </td>
+      </tr>
+      {% for exception, assignment in exception_to_service.items %}
         <tr>
-          <td>{{ service.name }}</td>
-          <td>{{ workers }}</td>
+          <td>{{ exception.name }}</td>
+          <td>{{ exception.start }}</td>
+          <td>{{ exception.end }}</td>
+          <td>{{ assignment }}</td>
         </tr>
       {% endfor %}
     </table>
