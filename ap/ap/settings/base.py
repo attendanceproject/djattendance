@@ -280,6 +280,7 @@ INSTALLED_APPS = (
     'django_countries',  # to replace aputils country
     'localflavor',  # to replace aputils states
     'django_filters',
+    'xlsxwriter',
 
     # django wiki modules
     'django.contrib.humanize',
