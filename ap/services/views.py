@@ -145,8 +145,8 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
 @group_required(['training_assistant', 'service_schedulers'])
 def check_exceptions_view(request):
   # try to get assignments from most recent week schedule object
-  ws = WeekSchedule.objects.first()
-  current_assignments = Assignment.objects.filter(week_schedule=ws)
+  cws = WeekSchedule.objects.first()
+  current_assignments = Assignment.objects.filter(week_schedule=cws)
   if len(current_assignments) == 0:
     # if the most recent week schedule object has no assignments, we try to get the assignments for this week
     user = request.user
