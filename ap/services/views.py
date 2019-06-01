@@ -171,17 +171,26 @@ def check_exceptions_view(request):
   # Maps exception to string of service name and worker name.
   exception_to_service = {}
 
-  # You can then get all service assignments that conflict with the service exceptions
-  # by using a nested for loop like:
+  # make a dictionary of worker to exception(s)
+  worker_to_exception = {}
   for exception in se_used:
-      for s in exception.services.all():
-          for w in exception.workers.all():
-              wa = current_assignments.filter(workers=w)
-              if wa.filter(service=s):
-                if exception in exception_to_service:
-                  exception_to_service[exception] += ", " + s.name + " " + w.trainee.full_name
-                else:
-                  exception_to_service[exception] = s.name + " " + w.trainee.full_name
+    for w in exception.workers.all():
+      if w not in worker_to_exception:
+        worker_to_exception[w] = [exception]
+      else:
+        worker_to_exception[w].append(exception)
+
+  for assignment in current_assignments:
+    for worker in assignment.workers.all():
+      if worker in worker_to_exception:
+        # this third for-loop won't significantly increase the runtime because the number of
+        # active exceptions a single worker is assigned to is usually quite small.
+        for exception in worker_to_exception[worker]:
+          if assignment.service in exception.services.all():
+            if exception in exception_to_service:
+              exception_to_service[exception] += ", " + assignment.service.name + " " + worker.trainee.full_name
+            else:
+              exception_to_service[exception] = assignment.service.name + " " + worker.trainee.full_name
 
   ctx = {
       'exception_to_service': exception_to_service,
