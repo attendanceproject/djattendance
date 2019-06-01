@@ -66,7 +66,8 @@ class OutlineForm(GenericModelForm):
   class Meta(GenericModelForm.Meta):
     model = Outline
     widgets = {
-      'participate': forms.RadioSelect()
+      'participate': forms.RadioSelect(),
+      'speaking_participate': forms.RadioSelect()
     }
 
 

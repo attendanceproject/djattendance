@@ -220,6 +220,7 @@ class Outline(Survey):
   sentence = models.CharField(max_length=500, null=True)
 
   speaking_section = models.CharField(max_length=50, null=True)
+  speaking_participate = models.CharField(max_length=5, choices=(("TRUTH", "Speak on a truth point"), ("EXP", "Speak my experience")), null=True)
   speaking = models.TextField(blank=True, null=True)
 
   @property

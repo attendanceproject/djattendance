@@ -77,6 +77,7 @@ class OutlineView(CreateUpdateView):
     obj = self.object
     obj.speaking_section = form.cleaned_data.get('speaking_section')
     obj.speaking = form.cleaned_data.get('speaking')
+    obj.speaking_participate = form.cleaned_data.get('speaking_participate')
     obj.save()
     return redirect('graduation:outline-view')
 
