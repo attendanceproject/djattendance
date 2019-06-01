@@ -14,6 +14,20 @@
     // Changing the chapter reloads the page to load the vocab list in that chapter
     function changeChapter() {
       var chap = document.getElementById("chapter_select").value;
+      // var urlString = "/greek/?chap=" + chap;
+
+      // $.ajax({
+      //   type: "POST",
+      //   url: urlString,
+      //   dataType: "json",
+      //   data: {
+      //       "chapter": chap,
+      //   },
+      //   success: function (data) {
+      //     var obj = JSON.parse(data);
+      //     chapter = obj.chapter;
+      //   }
+      // });
       console.log("chapter changed to", chap);
     }
 
