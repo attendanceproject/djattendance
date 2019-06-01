@@ -151,8 +151,6 @@ def check_exceptions_view(request):
     # if the most recent week schedule object has no assignments, we try to get the assignments for this week
     user = request.user
     trainee = trainee_from_user(user)
-    ct = Term.current_term()
-    current_week = ct.term_week_of_date(date.today())
     cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
     current_assignments = Assignment.objects.filter(week_schedule=cws) # Grab all assignments associated with cws
 
