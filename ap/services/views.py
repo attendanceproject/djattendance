@@ -144,12 +144,17 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
 
 @group_required(['training_assistant', 'service_schedulers'])
 def check_exceptions_view(request):
-  user = request.user
-  trainee = trainee_from_user(user)
-  ct = Term.current_term()
-  current_week = ct.term_week_of_date(date.today())
-  cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
-  current_assignments = Assignment.objects.filter(week_schedule=cws) # Grab all assignments associated with cws
+  # try to get assignments from most recent week schedule object
+  ws = WeekSchedule.objects.first()
+  current_assignments = Assignment.objects.filter(week_schedule=ws)
+  if len(current_assignments) == 0:
+    # if the most recent week schedule object has no assignments, we try to get the assignments for this week
+    user = request.user
+    trainee = trainee_from_user(user)
+    ct = Term.current_term()
+    current_week = ct.term_week_of_date(date.today())
+    cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
+    current_assignments = Assignment.objects.filter(week_schedule=cws) # Grab all assignments associated with cws
 
   # We want to grab only the active service exceptions that will potentially
   # have conflicts with the current week_schedule's assignments.
