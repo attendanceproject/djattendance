@@ -144,7 +144,11 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
 
 @group_required(['training_assistant', 'service_schedulers'])
 def check_exceptions_view(request):
-  cws = WeekSchedule.objects.first() # This variable is the current week schedule you want to work with
+  user = request.user
+  trainee = trainee_from_user(user)
+  ct = Term.current_term()
+  current_week = ct.term_week_of_date(date.today())
+  cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
   current_assignments = Assignment.objects.filter(week_schedule=cws) # Grab all assignments associated with cws
 
   # We want to grab only the active service exceptions that will potentially
@@ -171,8 +175,10 @@ def check_exceptions_view(request):
   # Maps exception to string of service name and worker name.
   exception_to_service = {}
 
-  # make a dictionary of worker to exception(s)
+  # A dictionary of worker to exception(s)
   worker_to_exception = {}
+
+  # Populates worker_to_exception dictionary
   for exception in se_used:
     for w in exception.workers.all():
       if w not in worker_to_exception:
@@ -180,6 +186,8 @@ def check_exceptions_view(request):
       else:
         worker_to_exception[w].append(exception)
 
+  # Loops through every assignment. For each assignment, see if the worker is involved in any
+  # active exception. If so, check to see if the assigned service is also in the exception.
   for assignment in current_assignments:
     for worker in assignment.workers.all():
       if worker in worker_to_exception:
