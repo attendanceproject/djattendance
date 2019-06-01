@@ -4,165 +4,164 @@
 {% load common_tags %}
 {% block title %} Home {% endblock %}
 {% block scripts %}
-  <script type="text/javascript" src="{% static 'js/bootstrap-tab-history.js' %}"></script>
-  {% if isTrainee %}
-  <script type="text/javascript" src="{% static 'bible_tracker/js/bible_reading.js' %}"></script>
-  <script type="text/javascript">
+<script type="text/javascript" src="{% static 'js/bootstrap-tab-history.js' %}"></script>
+{% if isTrainee %}
+<script type="text/javascript" src="{% static 'bible_tracker/js/bible_reading.js' %}"></script>
+<script type="text/javascript">
 
-    var isTrainee = "{{isTrainee}}";
-    var worker = "{{worker}}";
-    var currentWeek = "{{current_week}}";
-    var finalized = "{{finalized}}";
-    var bibleReadingStatus = "{{weekly_status}}";
-    var weekdayCodes = {{ weekday_codes| safe}};
-    var changeWeekUrl = "{% url 'bible_tracker:changeWeek' %}";
-    var updateStatusUrl = "{% url 'bible_tracker:updateStatus' %}";
-    var finalizeStatusUrl = "{% url 'bible_tracker:finalizeStatus' %}";
-    var designatedHoursUrl = "{% url 'services:designated_service_hours' %}";
-    var serviceUrl = "{% url 'services:changeWeek' %}";
-    var assignedServices = "{{assigned_list|safe}}";
-    var assignedDesignated = "{{designated_list|safe}}";
-    var serviceDays = "{{service_day|safe}}";
+  var isTrainee = "{{isTrainee}}";
+  var worker = "{{worker}}";
+  var currentWeek = "{{current_week}}";
+  var finalized = "{{finalized}}";
+  var bibleReadingStatus = "{{weekly_status}}";
+  var weekdayCodes = {{ weekday_codes| safe}};
+  var changeWeekUrl = "{% url 'bible_tracker:changeWeek' %}";
+  var updateStatusUrl = "{% url 'bible_tracker:updateStatus' %}";
+  var finalizeStatusUrl = "{% url 'bible_tracker:finalizeStatus' %}";
+  var designatedHoursUrl = "{% url 'services:designated_service_hours' %}";
+  var serviceUrl = "{% url 'services:changeWeek' %}";
+  var assignedServices = "{{assigned_list|safe}}";
+  var assignedDesignated = "{{designated_list|safe}}";
+  var serviceDays = "{{service_day|safe}}";
 
-    function initProcessServices(){
+  function initProcessServices() {
 
-      // regex to get services from string
-      var regex = /'(.*?)'/gm;
-      var services = assignedServices.match(regex);
-      regex = /\d+/gm;
-      var days = serviceDays.match(regex);
+    // regex to get services from string
+    var regex = /'(.*?)'/gm;
+    var services = assignedServices.match(regex);
+    regex = /\d+/gm;
+    var days = serviceDays.match(regex);
 
-      processServices(services, days);
+    processServices(services, days);
 
-    }
+  }
 
-    function processServices(services, services_day){
+  function processServices(services, services_day) {
 
-      // HTML inserts
-      var urlInsert = "<a href=\"{% url 'services:designated_service_hours' %}\">Hours</a>";
-      var htmlInitInsert = "<span id=\"service-tooltip\" data-toggle=\"tooltip\" title=\"";
-      var htmlLastInsert = "\"class=\"glyphicon glyphicon-ok\"></span>";
+    // HTML inserts
+    var urlInsert = "<a href=\"{% url 'services:designated_service_hours' %}\">Hours</a>";
+    var htmlInitInsert = "<span id=\"service-tooltip\" data-toggle=\"tooltip\" title=\"";
+    var htmlLastInsert = "\"class=\"glyphicon glyphicon-ok\"></span>";
 
-      var regex = /'(.*?)'/gm;
-      var designated = assignedDesignated.match(regex);
-      console.log(services, services_day, designated);
+    var regex = /'(.*?)'/gm;
+    var designated = assignedDesignated.match(regex);
+    console.log(services, services_day, designated);
 
-      // for service week row
-      var numCols = $("#front-table").find('tr')[1].cells.length;
-      var row = document.getElementById("service-row");
-      var cell;
-      var tableIndex = 0;
-      var colCount = 1;
-      var reverseColCount = 8;
-      var serviceIndex;
+    // for service week row
+    var numCols = $("#front-table").find('tr')[1].cells.length;
+    var row = document.getElementById("service-row");
+    var cell;
+    var tableIndex = 0;
+    var colCount = 1;
+    var reverseColCount = 8;
+    var serviceIndex;
 
-      // delete cells if already exist to load new data when the week changes
-      if(numCols > 1){
-        while(reverseColCount > 0){
-          row.deleteCell(reverseColCount);
-          reverseColCount--;
-        }
+    // delete cells if already exist to load new data when the week changes
+    if (numCols > 1) {
+      while (reverseColCount > 0) {
+        row.deleteCell(reverseColCount);
+        reverseColCount--;
       }
+    }
 
-      if (colCount < 8){
-        while(colCount < 8){
-          cell = row.insertCell(colCount);
-          for (serviceIndex = 0, len = services_day.length; serviceIndex<len; serviceIndex++) {
-            if (tableIndex == services_day[serviceIndex]){
-              cell.innerHTML = htmlInitInsert + services[serviceIndex] + htmlLastInsert;
-            }
+    if (colCount < 8) {
+      while (colCount < 8) {
+        cell = row.insertCell(colCount);
+        for (serviceIndex = 0, len = services_day.length; serviceIndex < len; serviceIndex++) {
+          if (tableIndex == services_day[serviceIndex]) {
+            cell.innerHTML = htmlInitInsert + services[serviceIndex] + htmlLastInsert;
           }
-          tableIndex++;
-          colCount++;
         }
+        tableIndex++;
+        colCount++;
       }
-
-      // redirect to designated hours if the trainee has designated service
-      cell = row.insertCell(colCount++);
-      (designated !== null) ? cell.innerHTML = urlInsert : cell.innerHTML = "";
     }
 
-    function changeServiceWeek(){
-      var weekId = $("#week-select").val();
+    // redirect to designated hours if the trainee has designated service
+    cell = row.insertCell(colCount++);
+    (designated !== null) ? cell.innerHTML = urlInsert : cell.innerHTML = "";
+  }
 
-      $.ajax({
-          type: "GET",
-          url: serviceUrl,
-          dataType: "json",
-          data: {
-              "week": weekId,
-          },
-          success: function(data){
-            console.log(data);
-            var services = new Array();
-            var services_day = new Array();
+  function changeServiceWeek() {
+    var weekId = $("#week-select").val();
 
-            for (var key in data) {
-              services.push(key);
-              services_day.push(data[key]);
-            }
-            processServices(services, services_day);
-          },
-          error: function (jqXHR, textStatus, errorThrown) {
-            console.log(jqXHR, textStatus, errorThrown);
-          }
-      });
-    }
+    $.ajax({
+      type: "GET",
+      url: serviceUrl,
+      dataType: "json",
+      data: {
+        "week": weekId,
+      },
+      success: function (data) {
+        console.log(data);
+        var services = new Array();
+        var services_day = new Array();
 
-    $(document).ready(function () {
-      $("#week-select option[value='{{current_week}}']").attr("selected", "selected");
-
-      initProcessServices();
-      changetoFinalize();
-      getWeeklyStatus();
-
-      $("#week-select").on('change', changeHomepageWeek);
-      $("#week-select").on('change', changeServiceWeek);
-
-      $("#bt-button").click(function (e) {
-        e.preventDefault();
-        if ($('#bt-button').val() == "Finalize") {
-          finalizeStatusFromHomepage();
+        for (var key in data) {
+          services.push(key);
+          services_day.push(data[key]);
         }
-        else {
-          updateStatusFromHomepage(finalized);
-        }
-      });
-
-      $(".bible-selector").on('change', changetoFinalize);
-
+        processServices(services, services_day);
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(jqXHR, textStatus, errorThrown);
+      }
     });
-  </script>
-  {% endif %}
-  {% endblock %} {% block references %}
+  }
 
-  <!-- Disable scaling to remove click delay on mobile for this page -->
-  <meta name="viewport" content="width=device-width, user-scalable=no">
+  $(document).ready(function () {
+    $("#week-select option[value='{{current_week}}']").attr("selected", "selected");
 
-  <!-- This css is specific for the index page for the progress bar -->
-  <style type="text/css">
-    .percent {
-      padding: 0px;
-      padding-left: 7px;
-      width: 30px;
-      line-height: 1;
-    }
+    initProcessServices();
+    changetoFinalize();
+    getWeeklyStatus();
 
-    .progress-style {
-      padding-right: 0px;
-    }
+    $("#week-select").on('change', changeHomepageWeek);
+    $("#week-select").on('change', changeServiceWeek);
 
-  </style>
-  {% endblock %} {% block content %}
+    $("#bt-button").click(function (e) {
+      e.preventDefault();
+      if ($('#bt-button').val() == "Finalize") {
+        finalizeStatusFromHomepage();
+      }
+      else {
+        updateStatusFromHomepage(finalized);
+      }
+    });
 
-  <div class="container">
-    <div class="row">
-      <h1 class="col-md-12"> Welcome, {{ user.firstname }}! </h1>
-    </div>
+    $(".bible-selector").on('change', changetoFinalize);
 
-    {% if user.type == 'T' %}
-    <!-- Trainee Search Box for TAs -->
-    <!--
+  });
+</script>
+{% endif %}
+{% endblock %} {% block references %}
+
+<!-- Disable scaling to remove click delay on mobile for this page -->
+<meta name="viewport" content="width=device-width, user-scalable=no">
+
+<!-- This css is specific for the index page for the progress bar -->
+<style type="text/css">
+  .percent {
+    padding: 0px;
+    padding-left: 7px;
+    width: 30px;
+    line-height: 1;
+  }
+
+  .progress-style {
+    padding-right: 0px;
+  }
+</style>
+{% endblock %} {% block content %}
+
+<div class="container">
+  <div class="row">
+    <h1 class="col-md-12"> Welcome, {{ user.firstname }}! </h1>
+  </div>
+
+  {% if user.type == 'T' %}
+  <!-- Trainee Search Box for TAs -->
+  <!--
     <div class="row">
       <div class="col-md-4">
         <div class="btn-group-vertical">
@@ -172,37 +171,113 @@
           </div>
         </div>
       </div>
-    </div>
-    -->
+      <br />
 
-    {% elif user.type == 'R' or user.type == 'C' %}
+      <table class="table table-bordered-wkly-sum">
+        <thead>
+          <tr>
+            <th scope="col" class="col-md-1"></th>
+            {% for day in 0|get_weekday_codes %}
+            <th scope="col" class="col-md-1">{{day}}</th>
+            {% endfor %}
+            <th scope="col" class="col-md-1"></th>
+          </tr>
+        </thead>
+        <tbody> -->
+        <!-- COMMENT OUT: SERVICE AND GOSPEL STATS ROWS --
+          <tr>
+            <th>SERVICE</th>
+            {% for i in "xxxxxxxx" %}
+            <td></td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th>GOSPEL STATISTICS</th>
+            {% for i in "xxxxxxx" %}
+            <td></td>
+            {% endfor %}
+            <td><a href="#">Input Stats</a></td>
+          </tr>
+          -->
+  <tr>
+    <form class="form-group bibleDropDown" id="bibleDropDown" method="post">
+      <th rowspan="2">BIBLE READING PROGRESS</th>
+      {% for day in 0|get_weekday_codes %}
+      <td class="bibleReadingRow">
 
-    <div class="row">
-      <!-- Panels -->
-      {% include "_panels.html" %}
-
-      <!-- Weekly Summary -->
-      {% include "_weekly_summary.html" %}
-    {% endif %}
-
-    <!-- Cards -->
-    {% spaceless %}
-    {% include "_cards.html" %}
-    {% endspaceless %}
-
-    {% if schedule %}
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h5 class="panel-title">Today's Schedule</h5>
+        <select class="bible-selector" id="bibleDropDown_{{day}}" data-day="{{day}}">
+          <option value="_">_</option>
+          <br />
+          <option value="C">C</option>
+          <br />
+          <option value="M">M</option>
+          <br />
+          <option value="N">N</option>
+          <br />
+        </select>
+      </td>
+      {% endfor %}
+      <td>
+        <input class="bibleTrackerButton" type="submit" name="save" Value="Save" id='bibleTrackerButton'></input>
+      </td>
+    </form>
+  </tr>
+  <tr>
+    <td class="td-remove-indent" colspan="7">
+      <div class="row">
+        <div class="col-11 col-sm-11 col-md-11 col-xs-11  progress-style">
+          <div class="homepage-progress">
+            <a href="{% url 'bible_tracker:index' %}">
+              <div class="homepage-progress-bar" role="progressbar" aria-valuenow="{{bible_reading_progress}}"
+                aria-valuemin="0" aria-valuemax="100" style="width: {{bible_reading_progress}}%">
+              </div>
+            </a>
+          </div>
+        </div>
+        <div class="col-2 col-sm-2 col-md-2 col-xs-2 percent">
+          {{bible_reading_progress}}%
+        </div>
       </div>
-      <div class="panel-body">
-        <ul>
-          {% for event in schedule.todays_events %}
-          <li>{{ event.name }} @ {{ event.start }}</li>
-          {% endfor %}
-        </ul>
-      </div>
+    </td>
+    <td>
+      <a class="bibleTrackerUpdate" href="{% if user.current_term == 1 or user.current_term == 2%}
+              {% url 'bible_tracker:index' %}#first-year-bible-reading
+              {% elif user.current_term == 3 or user.current_term == 4 %}
+              {% url 'bible_tracker:index' %}#second-year-bible-reading {% endif %}">Update</a>
+    </td>
+  </tr>
+  </tbody>
+  </table>
+</div>
+
+{% elif user.type == 'R' or user.type == 'C' %}
+
+<div class="row">
+  <!-- Panels -->
+  {% include "_panels.html" %}
+
+  <!-- Weekly Summary -->
+  {% include "_weekly_summary.html" %}
+  {% endif %}
+
+  <!-- Cards -->
+  {% spaceless %}
+  {% include "_cards.html" %}
+  {% endspaceless %}
+
+  {% if schedule %}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h5 class="panel-title">Today's Schedule</h5>
     </div>
-    {% endif %}
+    <div class="panel-body">
+      <ul>
+        {% for event in schedule.todays_events %}
+        <li>{{ event.name }} @ {{ event.start }}</li>
+        {% endfor %}
+      </ul>
+    </div>
   </div>
-  {% endblock %} {% block post_container %} {% include 'popups/announcement_popup.html' %} {% endblock %}
+  {% endif %}
+</div>
+{% endblock %} {% block post_container %} {% include 'popups/announcement_popup.html' %} {% endblock %}

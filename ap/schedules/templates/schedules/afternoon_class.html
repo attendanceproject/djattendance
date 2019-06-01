@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+{# {{form.media}} #}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $('.select-fk').select2({width: '100%'});
+    $('[multiple*=multiple]').select2({width: '100%'})
+  });
+</script>
+
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+
+<form id="id_form" action="" method="post">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  <button type="submit" class="btn btn-primary btn-save" id="submit">Submit</button>
+</form>
+
+
+
+{% endblock %}

@@ -847,3 +847,13 @@ def deactivate_guest(request, pk):
     w.trainee.delete()
     return JsonResponse({'success': True})
   return JsonResponse({'success': False})
+
+
+@group_required(['training_assistant', 'service_schedulers'])
+def bulk_deactivate_guests(request):
+  if request.method == "POST" and request.is_ajax():
+    for key, value in request.POST.iteritems():
+      w = Worker.objects.get(pk=key)
+      w.trainee.delete()
+    return JsonResponse({'success': True})
+  return JsonResponse({'success': False})

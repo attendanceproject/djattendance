@@ -9,8 +9,17 @@ from accounts.models import Trainee
 from django.contrib import messages
 from django.shortcuts import redirect
 from houses.models import House
-
-
+from .forms import FaqForm, QuestionRequestCreateForm, HouseInspectionFaqAnswerForm, HouseInspectionFaqCommentForm
+from .models import HouseInspectionFaq
+from terms.models import Term
+from ap.base_datatable_view import BaseDatatableView
+from django.views import generic
+from django.core.urlresolvers import reverse_lazy
+from aputils.trainee_utils import is_TA, trainee_from_user
+from itertools import chain
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from .utils import modify_question_status
 '''
 class HouseInspectionFaq(TemplateView):
   template_name = 'house_inspection/faq.html'
@@ -25,15 +34,162 @@ class HouseInspectionFaq(TemplateView):
   	return context
 '''
 
+'''
 def houseInspectionFaq(request):
   #template_name = 'house_inspection/faq.html'
   #model = FAQ
   #group_required = ['house_inspectors', 'training_assistant']
-  context = {
+  # bound form
+  if request.method == "POST":
+    form = FaqForm(request.POST)
+    if form.is_valid():
+      question = form.cleaned_data['var']
+      name = form.cleaned_data['name']
+
+  form = FaqForm() #unbound form
+  context = {    
+    form
     #'page_title' = "FAQ",
     #'list_questions' = FAQ.objects.values('id', 'question', 'answer')
   }
   return render(request, 'house_inspection/faq.html', context)
+'''
+
+'''
+This is the table under the cards.
+'''
+
+
+class QuestionRequestJSON(BaseDatatableView):
+  model = HouseInspectionFaq
+  columns = ['id', 'trainee', 'question', 'date_submitted', 'status',] # add date_submitted and status to model  
+  order_columns = ['date_assigned',]  
+  max_display_length = 120
+
+  def filter_queryset(self, qs):
+    search = self.request.GET.get(u'search[value]', None)
+    ret = qs.none()
+    if search:
+      filters = []
+      #filters.append(Q(trainee__firstname__icontains=search))
+      #filters.append(Q(trainee__lastname__icontains=search))
+      filters.append(Q(id=search))
+      for f in filters:
+        try:
+          ret = ret | qs.filter(f)
+        except ValueError:
+          continue
+      return ret
+    else:
+      return qs
+
+
+class QuestionList(generic.ListView):
+  model = HouseInspectionFaq
+  template_name = 'house_inspection/question_list.html' #for TA or TOBI
+  DataTableView = QuestionRequestJSON # goes to the class for the object
+  source_url = reverse_lazy("house_inspection:house_inspection-json") # the url for the class QuestionRequestJSON
+
+  # get the question and attached. Status should be U or A?
+  def get_queryset(self):
+    trainee = trainee_from_user(self.request.user)
+    if is_TA(self.request.user) or (trainee.firstname == 'Tobi' and trainee.lastname == 'Abosede') or (trainee.firstname == 'Sofia' and trainee.lastname == 'Hunter'): # or Tobi or Hunter
+      # FAQ.objects.filter(status='')
+      qs = HouseInspectionFaq.objects.filter(status='U')|HouseInspectionFaq.objects.filter(status='A')|HouseInspectionFaq.objects.filter(status='An')
+      return qs.order_by('date_assigned').order_by('status')
+    else:
+      trainee = trainee_from_user(self.request.user)
+      qset = HouseInspectionFaq.objects.filter(trainee=trainee).order_by('status') #pretty sure this never works b/c trainee is an object while trainee_name is a string
+    return qset
+
+  def get_context_data(self, **kwargs):
+    context = super(QuestionList, self).get_context_data(**kwargs)
+    trainee = trainee_from_user(self.request.user)
+    if is_TA(self.request.user) or (trainee.firstname == 'Tobi' and trainee.lastname == 'Abosede') or (trainee.firstname == 'Sofia' and trainee.lastname == 'Hunter'):
+      faqs = HouseInspectionFaq.objects.none()
+      for status in ['U', 'A', 'An', 'D']:
+        faqs = chain(faqs, HouseInspectionFaq.objects.filter(status=status).filter(date_assigned__gte=Term.current_term().get_date(0, 0)).order_by('date_assigned').order_by('status'))
+      context['faqs'] = faqs
+    if not is_TA(self.request.user) and (trainee.firstname != 'Tobi' or trainee.lastname != 'Abosede') and (trainee.firstname != 'Sofia' or trainee.lastname != 'Hunter'):
+      faqs = HouseInspectionFaq.objects.none()
+      for status in ['A']:
+        faqs = chain(faqs, HouseInspectionFaq.objects.filter(status=status).filter(date_assigned__gte=Term.current_term().get_date(0, 0)).order_by('date_assigned'))
+      context['faqs'] = faqs
+    return context
+
+class FaqMixin(object): #maybe faq question submission mixin
+  model = HouseInspectionFaq
+  template_name = 'requests/request_form.html'
+  form_class = QuestionRequestCreateForm
+  success_url = reverse_lazy('house_inspection:question_list')
+
+class FaqCreate(FaqMixin, generic.CreateView):
+  def form_valid(self, form):
+    req = form.save(commit=False)
+    req.trainee = trainee_from_user(self.request.user)
+    req.save()
+    message = "Created new question request."
+    messages.add_message(self.request, messages.SUCCESS, message)
+    return super(FaqCreate, self).form_valid(form)
+
+
+
+class FaqDetail(generic.DetailView):
+  model = HouseInspectionFaq
+  template_name = 'requests/detail_request.html'
+  # the id of the url will give the details to this page.
+
+class FaqUpdate(FaqMixin, generic.UpdateView):
+  pass
+
+class FaqDelete(FaqMixin, generic.DeleteView):
+  def get_success_url(self):
+    if self.get_object().trainee:
+      return self.success_url
+    return reverse_lazy('login')
+
+class FaqAnswer(FaqMixin, generic.UpdateView):
+  template_name = 'requests/ta_answer.html'
+  form_class = HouseInspectionFaqAnswerForm
+  raise_exception = True
+  def form_valid(self, form):
+    redirect_url = super(FaqAnswer, self).form_valid(form)
+    obj = self.get_object()
+    print obj.status 
+    obj.status = 'An'
+    print obj.status
+    obj.save()
+    return redirect_url
+
+class FaqTaComment(FaqMixin, generic.UpdateView):
+  template_name = 'requests/ta_comments.html'
+  form_class = HouseInspectionFaqCommentForm
+  raise_exception = True
+
+class InspectorAnswer(FaqMixin, generic.UpdateView):
+  template_name = 'requests/ta_answer.html'
+  form_class = HouseInspectionFaqAnswerForm
+  raise_exception = True
+  def form_valid(self, form):
+    redirect_url = super(InspectorAnswer, self).form_valid(form)
+    obj = self.get_object()
+    print obj.status 
+    obj.status = 'An'
+    print obj.status
+    obj.save()
+    return redirect_url
+
+modify_status = modify_question_status(HouseInspectionFaq, reverse_lazy('house_inspection:question_list'))
+
+def houseInspectionFaq(request):
+  if request.method == "POST":
+    form = FaqForm(request.POST)
+    if form.is_valid():
+      print("VALID")
+      form.save()
+
+  form = FaqForm() #unbound form
+  return render(request, 'house_inspection/faq.html', {'form': form})
 
 def manageInspectors(request):
   inspectors = Inspectors.objects.order_by('-last_name')

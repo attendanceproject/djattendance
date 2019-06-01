@@ -138,7 +138,9 @@ def react_attendance_context(trainee, request_params=None):
   finalize_bb = listJSONRenderer.render(RollsFinalizationSerializer(finalize_obj).data)
 
   am_groups = Group.objects.filter(name__in=['attendance_monitors', 'training_assistant'])
+
   groups = [g['id'] for g in am_groups.values('id')]
+
   ctx = {
       'events_bb': events_bb,
       'groupevents_bb': groupevents_bb,

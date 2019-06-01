@@ -1,0 +1,23 @@
+
+
+{% if request.get_status_display != 'Approved' and request.get_status_display != 'Denied' and not request.is_expired and request.trainee and view.request.user.firstname != 'Tobi' and view.request.user.lastname != 'Abosede' or request.get_status_display != 'Approved' and request.get_status_display != 'Denied' and not request.is_expired and request.trainee and view.request.user.firstname != 'Sofia' and view.request.user.lastname != 'Hunter' %}
+  <a href="{{ request.get_answer_url }}">
+    <button class="btn btn success" title="Answer" status="An" data-id="request.id">
+      <span class="glyphicon glyphicon-question-sign"></span>
+    </button>
+  </a>
+  <a href ="{{ request.get_update_url }}">
+    <button class="btn btn-primary" title="Edit question"><span class="glyphicon glyphicon-pencil"></span></button>
+  </a>
+  <a href="{{ request.get_delete_url }}">
+    <button class="btn btn-danger delete-request-button" type="submit" title="Delete" data-id="request.id">
+      <span class="glyphicon glyphicon-trash"></span>
+    </button>
+  </a>
+{% elif request.get_status_display == 'Denied' and view.request.user.firstname != 'Tobi' and view.request.user.lastname != 'Abosede' or request.get_status_display == 'Denied' and view.request.user.firstname != 'Sofia' and view.request.user.lastname != 'Hunter' %}
+  <a href="{{ request.get_delete_url }}">
+    <button class="btn btn-danger delete-request-button" type="submit" title="Delete" data-id="request.id">
+      <span class="glyphicon glyphicon-trash"></span>
+    </button>
+  </a>
+{% endif %}

@@ -118,11 +118,14 @@ class RoomReservationSchedule(GroupRequiredMixin, RoomReservationSubmit, Templat
   group_required = ['training_assistant']
   template_name = 'room_reservations/schedule.html'
 
-
 class RoomReservationTVView(TemplateView):
   model = RoomReservation
   template_name = 'room_reservations/tv_page.html'
 
+class RoomReservationIteroView(TemplateView):
+  model = RoomReservation
+  template_name = 'room_reservations/itero_page.html'
+  #template_name = 'room_reservations/itero/announcements/itero_page.html'
 
 def weather_api(request):
   # Basic info
@@ -160,7 +163,10 @@ def weather_api(request):
   request = urllib2.Request(url)
   request.add_header('Authorization', auth_header)
   request.add_header('Yahoo-App-Id', app_id)
-  weather_info = urllib2.urlopen(request).read()
+  try:
+    weather_info = urllib2.urlopen(request).read()
+  except Exception:
+    weather_info = ''
 
   condition_index = weather_info.find('condition')
   weather = {}

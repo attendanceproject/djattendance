@@ -1,7 +1,7 @@
 import datetime
 
 from aputils.trainee_utils import is_TA
-from aputils.widgets import DatePicker, TimePicker
+from aputils.widgets import DatePicker, TimePicker, RoomStartTimePicker, RoomEndTimePicker, RoomDatePicker
 from django import forms
 from terms.models import Term
 
@@ -22,9 +22,9 @@ class RoomReservationForm(forms.ModelForm):
       self.fields['reason'].required = False
 
     self.fields['group'].widget.attrs['placeholder'] = 'Group making reservation (will be displayed on TV)'
-    self.fields['start'].widget = TimePicker()
-    self.fields['end'].widget = TimePicker()
-    self.fields['date'].widget = DatePicker()
+    self.fields['start'].widget = RoomStartTimePicker()
+    self.fields['end'].widget = RoomEndTimePicker()
+    self.fields['date'].widget = RoomDatePicker()
 
   class Meta:
     model = RoomReservation
@@ -57,6 +57,8 @@ class RoomReservationForm(forms.ModelForm):
     # Based on a first-come, first-serve principle, do not allow trainees to submit a pending room reservation
     # if there is already a pending room reservation waiting to be approved or denied.
     PendingRoomReservations = RoomReservation.objects.filter(status='P', room=data_room)  # pull Pending Room Reservations data
+    if self.instance.id:
+      PendingRoomReservations = PendingRoomReservations.exclude(id=self.instance.id)
     for r in PendingRoomReservations:
       if r.end > data_start and r.start < data_end and r.date.weekday() == data_date.weekday():
         if r.frequency == 'Once' and r.date < data_date:
