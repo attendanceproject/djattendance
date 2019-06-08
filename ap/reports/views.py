@@ -142,7 +142,6 @@ def generate_zip(request):
   for locality in localities:
     locality_trainees = [record for record in records_duplicate if record["sending_locality"] == locality["id"]]
     context['trainee_records'] = locality_trainees
-    print context['trainee_records']
     context['locality'] = locality["name"]
 
     pdf_file = render_to_pdf("reports/template_report.html", context)
