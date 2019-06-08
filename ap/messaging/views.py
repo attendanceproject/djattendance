@@ -16,8 +16,9 @@ class MessagingView(TemplateView):
     current_user = self.request.user
     ctx = super(MessagingView, self).get_context_data(**kwargs)
     ctx['page_title'] = 'View Read Notifications'
-    notifications = get_announcements(request)
+    notifications = get_announcements(self.request)
     for notification in notifications:
       tag, content = notification
-    messages.add_message(request, tag, content)
+    messages.add_message(self.request, tag, content)
+    ctx['popups'] = get_popups(self.request)
     return ctx
