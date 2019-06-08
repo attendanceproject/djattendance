@@ -1,6 +1,6 @@
 from django import forms
 
-from interim.models import InterimIntentions, InterimItinerary, InterimIntentionsAdmin
+from interim.models import InterimIntentions, InterimItinerary, InterimIntentionsAdmin, POST_INTENT_CHOICES
 from aputils.widgets import DatePicker, DatetimePicker
 
 
@@ -35,7 +35,7 @@ class InterimIntentionsForm(forms.ModelForm):
     self.fields['intent'].label = 'Intent to Return'
     self.fields['post_training_intentions'].label = 'Post Training Intentions'
     self.fields['post_intent_comments'].label = 'Explain'
-    self.fields['post_training_intentions'].choices = InterimIntentions.POST_INTENT_CHOICES[:-1]  # removes None choice
+    self.fields['post_training_intentions'].choices = POST_INTENT_CHOICES[:-1]  # removes None choice
 
   class Meta:
     model = InterimIntentions
