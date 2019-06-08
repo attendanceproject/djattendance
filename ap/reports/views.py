@@ -125,7 +125,7 @@ def generate_zip(request):
 
   # we're using a deep copy because we'll modify and adjust them for teams and for localities
   # for locality files we don't need to render which locality the trainee is from
-  # for team files we don't need ot render which team the trainee is on
+  # for team files we don't need to render which team the trainee is on
   records_duplicate = copy.deepcopy(stash.get_records())
   date_range = [date_from, date_to]
   in_memory = StringIO()
@@ -142,6 +142,7 @@ def generate_zip(request):
   for locality in localities:
     locality_trainees = [record for record in records_duplicate if record["sending_locality"] == locality["id"]]
     context['trainee_records'] = locality_trainees
+    print context['trainee_records']
     context['locality'] = locality["name"]
 
     pdf_file = render_to_pdf("reports/template_report.html", context)
