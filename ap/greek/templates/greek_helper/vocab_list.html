@@ -38,15 +38,14 @@
 {% endblock %}
 
 {% block content %}
-
-<h1> Greek Vocab Helper</h1>
-
 <div class="container">
-  <form>
-    <div class="col-3">
+  <h1> Greek Vocab Helper</h1>
+
+  <form class="row">
+    <div class="col-sm-2">
       Sort by chapter:
     </div>
-    <div class="col-4">
+    <div class="col-sm-1">
       <!-- Pick a chapter -->
       <select id="chapter_select" class="form-control" name="chapter" size="0">
         {% for i in chapters %}
@@ -55,13 +54,9 @@
       </select>
     </div>
   </form>
-  <p>
-    {{ greekVocab }}
-  </p>
-  <br />
-  <p>
-    {{ english }}
-  </p>
-</div>
 
+  <div class="flashcard">
+    {{ greekVocab }}
+  </div>
+</div>
 {% endblock %}
