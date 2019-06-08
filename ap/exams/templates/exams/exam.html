@@ -11,12 +11,7 @@
   <div class="panel panel-default">
     <div class="panel-heading exam-panel-heading">
       <div class="btn-group pull-right">
-        <a href="
-        {% if role == 'Take' %}
-          {% url 'exams:list' %}
-        {% else %}
-          {% url 'exams:grades' exam.id %}
-        {% endif %}">
+        <a href="javascript:history.go(-1)">
           <button type="button" class="btn btn-default">Back</button>
         </a>
       </div>
