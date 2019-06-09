@@ -55,8 +55,23 @@
     </div>
   </form>
 
-  <div class="flashcard">
-    {{ greekVocab }}
-  </div>
+  <br />
+
+  <table class="table flashcard">
+    <tr>
+      <th>Greek</th>
+      <th>English</th>
+      <th>Chapter</th>
+      <th>Parsing</th>
+    </tr>
+    {% for g in greekVocab %}
+    <tr>
+      <td> {{g.greek}} </td>
+      <td> {{g.english}} </td>
+      <td> {{g.chapter}} </td>
+      <td> {{g.parsing}} </td>
+    </tr>
+    {% endfor %}
+  </table>
 </div>
 {% endblock %}
