@@ -35,6 +35,7 @@ class InterimIntentionsForm(forms.ModelForm):
     self.fields['intent'].label = 'Intent to Return'
     self.fields['post_training_intentions'].label = 'Post Training Intentions'
     self.fields['post_intent_comments'].label = 'Explain'
+    self.fields['intent'].choices = InterimIntentions.INTENT_CHOICES
     self.fields['post_training_intentions'].choices = InterimIntentions.POST_INTENT_CHOICES[:-1]  # removes None choice
 
   class Meta:
@@ -64,9 +65,12 @@ class InterimIntentionsForm(forms.ModelForm):
 
 
   def clean(self):
+    intent = self.cleaned_data.get("intent")
     post_intent = self.cleaned_data.get("post_training_intentions")
     post_comment = self.cleaned_data.get("post_intent_comments")
 
+    if not intent:
+      raise forms.ValidationError("Please fill out your intent to return.")
     needs_comment = ["USC", "OCC", "LSM", "OTH", "UND", "JOB", "SCH"]
     if post_intent in needs_comment and not post_comment:
       raise forms.ValidationError("Please elaborate on your post-training intentions.")
