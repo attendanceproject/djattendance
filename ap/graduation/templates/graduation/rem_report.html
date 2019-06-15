@@ -8,6 +8,23 @@
 {% block scripts %}
 {{ block.super }}
 <script type="text/javascript">
+
+  // set event for inline editing when you double click remembrance text or reference.
+  function dbclick() {
+    $(".rem-text, .rem-ref").on('dblclick', function(){
+      var orig = $(this).text();
+      var input = $('<input>', {
+        value: orig,
+        type: 'text',
+        blur: function() {
+          $(this).text(this.value);
+        }
+      });
+      input.appendTo($(this).empty()).focus();
+    })
+  }
+
+
   $(document).ready(function() {
     $("#graduation").DataTable({
       info: false,
@@ -48,6 +65,7 @@
 
     });
 
+    dbclick();
 
   });
 
@@ -72,8 +90,8 @@
       <tr>
         <td>{{m.trainee.firstname}}</td>
         <td>{{m.trainee.lastname}}</td>
-        <td>{{m.remembrance_text}}</td>
-        <td>{{m.remembrance_reference}}</td>
+        <td class="rem-text">{{m.remembrance_text}}</td>
+        <td class="rem-ref">{{m.remembrance_reference}}</td>
       </tr>
       {% endfor %}
     </tbody>
