@@ -136,6 +136,7 @@ class GospelStatisticsView(TemplateView):
     ctx['cols'] = attributes
     ctx['current'] = []
     ctx['atts'] = _attributes
+    ctx['members'] = Trainee.objects.filter(team=current_user.team)
     week = get_week()
     if 'week' in self.kwargs:
       week = self.kwargs['week']
@@ -246,7 +247,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       #return render(request, 'gospel_statistics/gospel_statistics_report_base.html', ctx)
       pdf_file = render_to_pdf('gospel_statistics/gospel_statistics_report_base.html', ctx)
       path = team.name+'.pdf'
-
+    
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
       zfile.write(path)
