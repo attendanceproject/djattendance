@@ -4,7 +4,7 @@
 {% load common_tags %}
 
 {% block scripts %}
-<script>
+<script type=text/javascript>
 function filterTermClass() {
   var term = document.getElementById("term").value;
   var cls = document.getElementById("class").value;
@@ -18,6 +18,23 @@ function filterTermClass() {
       elem.hide();
     }
   });
+}
+
+function setExamStatus(button) {
+  $.ajax({
+    type: "POST",
+    url: "{%url 'exams:change_status' %}",
+    data: {
+      csrfmiddlewaretoken: "{{ csrf_token }}",
+      exam_id: button.id,
+    },
+    success: function(data) {
+      button.innerText = (button.innerText == "OPENED") ? "CLOSED" : "OPENED";
+    },
+    error: function(xhr, textStatus, errorThrown) {
+      alert('Please try again or edit from the exam page.');
+    }
+    });
 }
 </script>
 {% endblock %}
@@ -71,19 +88,25 @@ function filterTermClass() {
                 <a href="{% url 'exams:take' exam.id %}" class="btn btn-success">Take exam</a>
               {% elif exam.graded and exam.is_graded_open and not exam_service %}
                 <a href="{% url 'exams:graded' exam.id %}" class="btn btn-success">View graded exam</a>
+              {% elif exam.visible and not exam_service %}
+                <a href="{% url 'exams:take' exam.id %}" class="btn btn-success">View exam</a>
               {% endif %}
             {% endif %}
             {% if exam_service %}
-              <a href="{% url 'exams:edit' exam.id %}" class="btn btn-default">Edit exam</a>
-              <a href = "{% url 'exams:preview' exam.id %}" class="btn btn-default"> Preview exam </a>
-              <a href="{% url 'exams:grades' exam.id %}" class="btn btn-default">Enter scores</a>
-              <a href="{% url 'exams:overview' exam.id %}" class="btn btn-default">View statistics</a>
+              <a href="{% url 'exams:edit' exam.id %}" class="btn btn-primary">Edit exam</a>
+              <a href = "{% url 'exams:preview' exam.id %}" class="btn btn-primary"> Preview exam </a>
+              <a href="{% url 'exams:grades' exam.id %}" class="btn btn-primary">Enter scores</a>
+              <a href="{% url 'exams:overview' exam.id %}" class="btn btn-primary">View statistics</a>
               <a href="{% url 'exams:delete' exam.id %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>
             {% endif %}
 
           </div>
           <h3 class="panel-title exam-panel-title">{{ exam }}
             {% if exam.completed and not exam_service %}<span class="badge alert-success">Finalized</span>{% endif %}
+            {% if exam_service %}
+              <a id="{{ exam.id }}" data-toggle="button" {% if exam.is_open %}class="btn btn-primary active"{% else %}class="btn btn-primary"{% endif %}onload="setExamStatus(this)" onclick="setExamStatus(this)">{% if exam.is_open %}OPENED{% else %}CLOSED{% endif %}</a>
+              {% csrf_token %}
+            {% endif %}
           </h3>
         </div>
         {% if exam_service %}
