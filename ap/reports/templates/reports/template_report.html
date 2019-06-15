@@ -13,8 +13,8 @@
 <div>
   <p>Averages (across all trainees)</p>
   <ul>
-    {% for avg in averages %}
-    <li>{{avg}}: {{averages|get_item:avg}}% </li>
+    {% for key, value in averages.items %}
+    <li>{{key}}: {{value}}% </li>
     {% endfor %}
   </ul>
 </div>

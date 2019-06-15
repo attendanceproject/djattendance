@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}
+Check Exceptions
+{% endblock %}
+
+{% block content %}
+  {% if exception_to_service|length > 0%}
+    <h3>Assignments Violating Active Exceptions</h3>
+    <table class="table">
+      <tr>
+        <th> Exception </th>
+        <th> Start Date </th>
+        <th> End Date </th>
+        <th> Violating Assignment(s) </th>
+      </tr>
+      {% for exception, assignment in exception_to_service.items %}
+        <tr>
+          <td>{{ exception.name }}</td>
+          <td>{{ exception.start }}</td>
+          <td>{{ exception.end }}</td>
+          <td>{{ assignment }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <h3>No assignments are violating active exceptions.</h3>
+  {% endif %}
+{% endblock %}
