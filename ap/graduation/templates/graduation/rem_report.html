@@ -10,17 +10,25 @@
 <script type="text/javascript">
 
   // set event for inline editing when you double click remembrance text or reference.
-  function dbclick() {
-    $(".rem-text, .rem-ref").on('dblclick', function(){
-      var orig = $(this).text();
+  function inlineEdit() {
+    $("#graduation").on('dblclick', ".rem-text, .rem-ref", function(){
+      var clicked = $(this)
+      var orig = $(this).text(); // to compare
       var input = $('<input>', {
-        value: orig,
+        value: clicked.text(),
         type: 'text',
-        blur: function() {
-          $(this).text(this.value);
+        blur: function() { // clicking outside box when editing is finished
+          clicked.text(this.value);
+          if (this.value != orig) {
+            // editDB(this.value, clicked.parent().attr("id"), clicked.attr("class")) // id gives remembrance pk; class gives whether it is text or reference;
+          }
+        },
+        keyup: function(e) { // if pressing enter
+          if (e.which === 13) input.blur();
         }
       });
-      input.appendTo($(this).empty()).focus();
+
+      input.appendTo( clicked.empty() ).focus();
     })
   }
 
@@ -65,7 +73,7 @@
 
     });
 
-    dbclick();
+    inlineEdit();
 
   });
 
@@ -87,7 +95,7 @@
     </thead>
     <tbody>
       {% for m in data %}
-      <tr>
+      <tr id="{{m.id}}">
         <td>{{m.trainee.firstname}}</td>
         <td>{{m.trainee.lastname}}</td>
         <td class="rem-text">{{m.remembrance_text}}</td>
