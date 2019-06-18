@@ -76,7 +76,7 @@
     "set-manipulator": "0.3.1",
     "sizzle": "^2.3.3",
     "style-loader": "^0.16.1",
-    "tinymce": "^4.9.1",
+    "tinymce": "^5.0.8",
     "ts-loader": "^2.0.3",
     "underscore": "^1.9.1",
     "url-loader": "^1.1.2",
