@@ -11,5 +11,6 @@
 <div class="clearfix"></div>
 {% else %}
 <blockquote>{{ response|get_item:forloop.counter }}</blockquote>
+<b>Word Count: </b>{{ response|get_item:forloop.counter|wordcount }}</span>
 {% endif %}
 </div>
