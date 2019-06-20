@@ -44,6 +44,6 @@ def semi_form_available():
 def semi_annual_training():
   ct = Term.current_term()
   if ct.season == 'Spring':
-    return 'Summer ' + str(ct.year)
+    return 'July ' + str(ct.year)
   else:
-    return 'Winter ' + str(ct.year)
+    return 'December ' + str(ct.year)
