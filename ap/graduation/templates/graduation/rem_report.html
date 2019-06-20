@@ -9,18 +9,42 @@
 {{ block.super }}
 <script type="text/javascript">
 
+  // ajax call to database for inline editing
+  function editDB(updated, rem_pk, field) {
+    $.ajax({
+      async: false,
+      type: "POST",
+      url: "{% url 'graduation:rem-report' %}",
+      data: {
+        change: updated,
+        pk: rem_pk,
+        f: field
+      },
+      success: function(response) {
+        new Notification(Notification.SUCCESS, 'Saved').show();
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        new Notification(Notification.ERROR, errorThrown).show();
+      }
+    });
+  }
+
+
   // set event for inline editing when you double click remembrance text or reference.
   function inlineEdit() {
     $("#graduation").on('dblclick', ".rem-text, .rem-ref", function(){
       var clicked = $(this)
-      var orig = $(this).text(); // to compare
+      var text, orig = $(this).text(); // to compare
+      if (text = "None") {
+        text = "";
+      }
       var input = $('<input>', {
-        value: clicked.text(),
+        value: text,
         type: 'text',
         blur: function() { // clicking outside box when editing is finished
           clicked.text(this.value);
           if (this.value != orig) {
-            // editDB(this.value, clicked.parent().attr("id"), clicked.attr("class")) // id gives remembrance pk; class gives whether it is text or reference;
+            editDB(this.value, clicked.parent().attr("id"), clicked.attr("class")) // id gives remembrance pk; class gives whether it is text or reference;
           }
         },
         keyup: function(e) { // if pressing enter

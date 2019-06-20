@@ -248,3 +248,23 @@ class MiscReport(ReportView):
 class RemembranceReport(ReportView):
   model = Remembrance
   template_name = 'graduation/rem_report.html'
+
+  def post(self, request, *args, **kwargs):
+    return self.get(request, *args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    if self.request.method == "POST" and self.request.user.has_group(['training_assistant']):
+      val = self.request.POST.get('change')
+      rpk = self.request.POST.get('pk')
+      field = self.request.POST.get('f')
+      t = Remembrance.objects.get(pk=rpk)
+
+      if field == "rem-text":
+        t.remembrance_text = val
+      elif field == "rem-ref":
+        t.remembrance_reference = val
+
+      t.save()
+
+    context = super(RemembranceReport, self).get_context_data(**kwargs)
+    return context;
