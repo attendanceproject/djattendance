@@ -231,14 +231,16 @@ function deletePair(pair_id) {
       </tbody>
     </table>
     </div>
+    <!--
     <div style="padding: 10px;">
         <a href="{% url 'gospel_statistics:new-pair' %}">
             <button type="button" class="btn btn-primary" title="Add a new gospel pair">Add new pair</button>
           </a>
         <button type="submit" class="btn btn-danger btn-primary" style="float: right;" title="Save current statistics">Save</button>
     </div>
+    -->
     
-  <button type="button" class="btn btn-primary" data-toggle="modal" title="Add a new gospel pair modal" data-target="#new-pair">Create Gospel pair</button>
+  <button type="button" class="btn btn-primary" data-toggle="modal" title="Add a new gospel pair modal" data-target="#new-pair">Add new pair</button>
     
     <!-- Modal -->
     <div class="modal fade" id="new-pair" tabindex="-1" role="dialog" aria-labelledby="new-pair-label" aria-hidden="true">
@@ -251,16 +253,15 @@ function deletePair(pair_id) {
             </button>
           </div>
           <div class="modal-body">
-                         
-              <form action="" method="post">
-                {% csrf_token %}
-                {% for member in members %}
-                <input type="checkbox" name="inputs" value = {{member.id}}>{{member}}<br>
-                {% endfor %}
-              </form>
-          </div>
-          <div class="modal-footer">
-              <button type="submit" class="btn btn-primary" title="Create a new gospel pair">Save</button>
+          <form action="" method="post">
+            {% csrf_token %}
+            {% for member in members %}
+            <input type="checkbox" name="inputs" value = {{member.id}}>{{member}}<br>
+            {% endfor %}
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary" title="Create a new gospel pair">Add</button>
+            </div>
+          </form>
           </div>
         </div>
       </div>
