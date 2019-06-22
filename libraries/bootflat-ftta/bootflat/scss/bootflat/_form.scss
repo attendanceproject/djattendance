@@ -212,7 +212,6 @@ $search-icon-line-height:          30px !default;
       color:  $message-danger;
     }
   }
-
   .new-form {
     & label {
       color: $blue-light;
@@ -229,7 +228,6 @@ $search-icon-line-height:          30px !default;
       background-color: $form-disabled-color;
     }
 
-
     & select {
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -240,7 +238,6 @@ $search-icon-line-height:          30px !default;
   }
 
 }
-
 input[type="checkbox"] {
   margin: 4px 5px 0 0;
 }

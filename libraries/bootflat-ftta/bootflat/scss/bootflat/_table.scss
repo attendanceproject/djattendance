@@ -7,7 +7,7 @@ $table-background-hover:          $blue-highlight !default;
 $table-border-color:              $tan-light !default;
 $table-border-editable:           $tan !default;
 
-$table-header-color:              darken($tan, 50%) !default;
+$table-header-color:             #C2b59b !default;
 $table-text-color:                darken($brown, 50%) !default;
 
 
@@ -175,8 +175,13 @@ $table-text-color:                darken($brown, 50%) !default;
   // Default zebra-stripe styles (alternating gray and transparent backgrounds)
 
   .table-striped {
-    > tbody > tr:nth-of-type(odd) {
-      background-color: $table-background-striped;
+    > tbody {
+      tr:nth-of-type(even) {
+        background-color: #F3F5ED;
+      }
+      tr:nth-of-type(odd) {
+        background-color: $table-background-color;
+      }
     }
   }
 
@@ -202,26 +207,30 @@ $table-text-color:                darken($brown, 50%) !default;
     padding: 0;
   }
 }
-
 // Styling for responsive table, allows for sticky headers horizontally and vertically
 .table-responsive {
   overflow: scroll;
   position: relative;
-  > .table {
+  max-height: 650px;
+  width: fit-content;
+  > table {
     position: relative;
-    border-collapse: separate;
+    border-collapse: separate; 
     border-spacing: 0;
     > thead {
+      > th {
+        color: $table-header-color;
+      }
       > tr { 
         > th {
+          color: $table-header-color;
           position: -webkit-sticky; /* for Safari */
           position: sticky;
           top: 0;
           background-color: #fff;
-         
         }
         > th:first-child {
-          z-index: 1;
+          z-index: 10;
           left: 0;
         }
       }
@@ -229,6 +238,7 @@ $table-text-color:                darken($brown, 50%) !default;
     > tbody {
       > tr { 
         > th {
+          color: $table-text-color;
           position: -webkit-sticky; 
           position: sticky;
           left: 0;
@@ -237,10 +247,29 @@ $table-text-color:                darken($brown, 50%) !default;
       }
     }
   }
-}
-
-.table-striped-even {
-  > tbody > tr:nth-of-type(even) {
-    background-color: #F3F5ED;
+  > table.dataTable {
+    > thead {
+      th.sorting, 
+      th.sorting_asc, 
+      th.sorting_asc_disabled, 
+      th.sorting_desc, 
+      th.sorting_desc_disabled {
+        position: sticky;
+      }
+    }
+  }
+  > .table-striped {
+    > tbody {
+      > tr:nth-of-type(even) {
+        > th {
+          background-color: #F3F5ED;
+        }
+      }
+      > tr:nth-of-type(odd) {
+        > th {
+          background-color: $table-background-color;
+        }
+      }
+    }
   }
 }

@@ -23,14 +23,14 @@ from StringIO import StringIO
 
 # ctx[cols] = attributes
 attributes = [
-    'Tracts Distributed', 'Bibles Distributed', 'Contacted (>30 sec)', 'Led to Pray', 'Baptized',
-    '2nd Appointment', 'Regular Appointment', 'Minutes on the Gospel', 'Minutes in Appointment',
+    'Minutes on the Gospel', 'Tracts Distributed', 'Bibles Distributed', 'Contacted (>30 sec)', 'Led to Pray', 'Baptized',
+    'Minutes in Appointment', '2nd Appointment', 'Regular Appointment', 
     'Bible Study', 'Small Groups', 'District Meeting (New Student)', 'Conference'
 ]
 
 _attributes = [
-    'tracts_distributed', 'bibles_distributed', 'contacted_30_sec', 'led_to_pray', 'baptized',
-    'second_appointment', 'regular_appointment', 'minutes_on_gospel', 'minutes_in_appointment',
+    'minutes_on_gospel', 'tracts_distributed', 'bibles_distributed', 'contacted_30_sec', 'led_to_pray', 'baptized',
+    'minutes_in_appointment', 'second_appointment', 'regular_appointment',
     'bible_study', 'small_group', 'district_meeting', 'conference'
 ]
 ctx = dict()
@@ -247,7 +247,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       #return render(request, 'gospel_statistics/gospel_statistics_report_base.html', ctx)
       pdf_file = render_to_pdf('gospel_statistics/gospel_statistics_report_base.html', ctx)
       path = team.name+'.pdf'
-    
+
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
       zfile.write(path)
