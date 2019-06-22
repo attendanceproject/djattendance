@@ -66,7 +66,7 @@ input {
   border-width: inherit;
 }
 .table-responsive {
-  height: 448px;
+  max-height: 448px;
 } 
 /* creates a blue box to go around the week dropdown*/
 #bluebox{
@@ -165,11 +165,11 @@ input {
       <table class="table table-bordered table-striped">
         <thead>
           <tr>
-            <th scope="col" class="fixed-header-top" style="width: 200px;">Week {{week}} Statistics</th>
+            <th scope="col" style="width: 200px;">Week {{week}} Statistics</th>
             {% for each in cols %}
-            <th scope="col" class="fixed-header-top" style="width: 125px;">{{each}}</th>
+            <th scope="col" style="width: 125px;">{{each}}</th>
             {% endfor %}
-            <th scope="col" class="fixed-header-top" style="width: 125px;">Actions</th>
+            <th scope="col" style="width: 125px;">Actions</th>
           </tr>
         </thead>
         <tbody>

@@ -212,7 +212,8 @@ $table-text-color:                darken($brown, 50%) !default;
   overflow: scroll;
   position: relative;
   max-height: 650px;
-  width: fit-content;
+  max-width: 1260px;
+
   > table {
     position: relative;
     border-collapse: separate; 
