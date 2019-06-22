@@ -24,7 +24,7 @@ from StringIO import StringIO
 # ctx[cols] = attributes
 attributes = [
     'Minutes on the Gospel', 'Tracts Distributed', 'Bibles Distributed', 'Contacted (>30 sec)', 'Led to Pray', 'Baptized',
-    'Minutes in Appointment', '2nd Appointment', 'Regular Appointment', 
+    'Minutes in Appointment', '2nd Appointment', 'Regular Appointment',
     'Bible Study', 'Small Groups', 'District Meeting (New Student)', 'Conference'
 ]
 
