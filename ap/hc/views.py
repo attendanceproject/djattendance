@@ -221,16 +221,8 @@ class HCRecommendationCreate(GroupRequiredMixin, TemplateView):
     ctx['button_label'] = 'Submit'
     ctx['page_title'] = 'HC Recommendation'
     ctx['hc'] = Trainee.objects.get(id=self.request.user.id)
-<<<<<<< HEAD
-    ctx['house'] = House.objects.get(id=self.request.user.house.id)
-    hcrs = HCRecommendation.objects.filter(house=ctx['house'])
-    ctx['hcrs'] = JSONRenderer().render(HCRecommendationSerializer(hcrs, many=True).data).decode('utf-8')
-    ctx['form'] = HCRecommendationForm(user=self.request.user)
-    survey_admin = self.admin_model.objects.get_or_create(term=Term.current_term())[0]
-=======
     ctx['house'] = house
     ctx['hc_recommendation_forms'] = hc_recommendation_forms
->>>>>>> dev
     # if survey is open, but not within time range -> read-only
     if (datetime.now() > survey_admin.close_time or datetime.now() < survey_admin.open_time) and survey_admin.open_survey:
       ctx['read_only'] = True

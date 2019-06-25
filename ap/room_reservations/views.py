@@ -11,13 +11,8 @@ from aputils.trainee_utils import is_TA
 from aputils.utils import modify_model_status
 from braces.views import GroupRequiredMixin
 from django.core.serializers import serialize
-<<<<<<< HEAD
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse_lazy
-=======
-from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
->>>>>>> dev
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from rooms.models import Room

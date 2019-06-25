@@ -45,17 +45,12 @@ class InterimIntentionsView(UpdateView):
     itins = []
 
     for index in range(len(start_list)):
-<<<<<<< HEAD
       itins.append(InterimItineraryForm(data={
         'start': start_list[index],
         'end': end_list[index],
         'comments': commments_list[index],
         'interim_intentions': interim_intentions})
       )
-=======
-      print(start_list[index] + " to " + end_list[index] + ": " + comments_list[index]);
-      itins.append(InterimItineraryForm(data={'start':start_list[index], 'end':end_list[index], 'comments':comments_list[index], 'interim_intentions': interim_intentions}))
->>>>>>> dev
     if all(f.is_valid() for f in itins):
       InterimItinerary.objects.filter(interim_intentions=interim_intentions).delete()
       for itin in itins:

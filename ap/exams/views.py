@@ -202,22 +202,11 @@ class SingleExamGradesListView(GroupRequiredMixin, TemplateView):
         trainee = Trainee.objects.get(id=trainee_id)
         exam = Exam.objects.get(pk=self.kwargs['pk'])
         Makeup.objects.get_or_create(trainee=trainee, exam=exam)
-<<<<<<< HEAD
-
-        # need code to create session
-        try:
-          session = Session.objects.get(trainee=trainee, exam=exam)
-          session.delete()
-        except Session.DoesNotExist:
-          pass
-        Session.objects.get_or_create(trainee=trainee, exam=exam)
-=======
         session, created = Session.objects.get_or_create(trainee=trainee, exam=exam)
         if not created:
           session.time_finalized = None
           session.is_graded = False
           session.save()
->>>>>>> dev
       except Trainee.DoesNotExist:
         pass
     elif 'close-makeup-trainee-id' in P:
