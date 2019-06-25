@@ -1,25 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import *
-
-from accounts.models import Trainee
-from django.core.urlresolvers import reverse
-from django.shortcuts import redirect, render
-from django.views.generic import TemplateView
-from django.http import HttpResponse
-from terms.models import Term
-from aputils.decorators import group_required
-from braces.views import GroupRequiredMixin
-
-from .models import GospelPair, GospelStat
-from teams.models import Team
-
 # Import for generate
 import os
-from aputils.utils import render_to_pdf
+from datetime import *
+from io import StringIO
 from zipfile import ZipFile
-from StringIO import StringIO
+
+from accounts.models import Trainee
+from aputils.decorators import group_required
+from aputils.utils import render_to_pdf
+from braces.views import GroupRequiredMixin
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.views.generic import TemplateView
+from teams.models import Team
+from terms.models import Termgos
+
+from .models import GospelPair, GospelStat
 
 # ctx[cols] = attributes
 attributes = [
@@ -199,7 +198,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
           one_pair.append(['GP Total']+pair_total)
           pairs.append(one_pair)
         ctx['pairs'] = pairs
-  
+
       if report_type < 3:
         # Weekly
         weekly = []
@@ -215,7 +214,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
           weekly.append(weeklys)
         weekly.append(weekly_total)
         ctx['weekly'] = weekly
-      
+
       # Total
       stats = GospelStat.objects.filter(gospelpair__in=gospelpairs)
       totals = [0 for i in range(len(_attributes))]

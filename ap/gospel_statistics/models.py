@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from accounts.models import Trainee
 from django.db import models
 from teams.models import Team
@@ -15,7 +12,7 @@ class GospelPair(models.Model):
   term = models.ForeignKey(Term, blank=True, null=True, on_delete=models.SET_NULL)
   trainees = models.ManyToManyField(Trainee, related_name="gospel_statistics")
 
-  def __unicode__(self):
+  def __str__(self):
     try:
       result = ""
       for each in self.trainees.all():
@@ -45,9 +42,9 @@ class GospelStat(models.Model):
   district_meeting = models.PositiveSmallIntegerField(default=0)
   conference = models.PositiveSmallIntegerField(default=0)
 
-  def __unicode__(self):
+  def __str__(self):
     try:
-      result = self.gospelpair.__unicode__()
-      return result+"; Week:%d" % (self.week)
+      result = self.gospelpair.__str__()
+      return result + "; Week:%d" % (self.week)
     except AttributeError as e:
       return str(self.id) + ": " + str(e)

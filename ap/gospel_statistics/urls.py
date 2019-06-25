@@ -2,6 +2,8 @@ from django.conf.urls import url
 
 from gospel_statistics import views
 
+app_name = 'gospel_statistics'
+
 urlpatterns = [
   # Trainee side
   url(r'^$', views.GospelStatisticsView.as_view(), name='gospel-statistics-view'),
