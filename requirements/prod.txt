@@ -3,9 +3,9 @@
 # production specific dependencies
 # used for staging and production
 
-dj-database-url==0.3.0
-gunicorn==19.0
+dj-database-url==0.5.0
+gunicorn==19.9.0
 
 # Loading env file into manage.py
-django-dotenv==1.4.1
-django-redis==4.9.0
+django-dotenv==1.4.2
+django-redis==4.10.0
