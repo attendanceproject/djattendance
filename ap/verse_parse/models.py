@@ -1,6 +1,4 @@
 import json
-import urllib.error
-import urllib.parse
 import urllib.request
 
 from django.db import models

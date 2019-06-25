@@ -16,7 +16,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import TemplateView
 from teams.models import Team
-from terms.models import Termgos
+from terms.models import Term
 
 from .models import GospelPair, GospelStat
 

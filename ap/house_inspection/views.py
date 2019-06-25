@@ -157,9 +157,7 @@ class FaqAnswer(FaqMixin, generic.UpdateView):
   def form_valid(self, form):
     redirect_url = super(FaqAnswer, self).form_valid(form)
     obj = self.get_object()
-    print obj.status
     obj.status = 'An'
-    print obj.status
     obj.save()
     return redirect_url
 

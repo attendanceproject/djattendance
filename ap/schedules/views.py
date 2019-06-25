@@ -179,13 +179,8 @@ class EventAdminDelete(EventCRUDMixin, DeleteView):
 class ScheduleCRUDMixin(GroupRequiredMixin):
   model = Schedule
   template_name = 'schedules/admin_form.html'
-<<<<<<< HEAD
-  form_class = ScheduleForm
-  group_required = ['attendance_monitors', 'training_assistant']
-=======
   form_class =  BaseScheduleForm
   group_required = [u'attendance_monitors', u'training_assistant']
->>>>>>> dev
 
   def form_invalid(self, form, **kwargs):
     context = self.get_context_data(form=form)
@@ -230,7 +225,6 @@ class ScheduleAdminUpdate(ScheduleCRUDMixin, UpdateView):
     return ctx
 
   def form_valid(self, form):
-<<<<<<< HEAD
 
     new_schedule = form.instance
     cur_schedule = Schedule.objects.get(id=new_schedule.id)
@@ -261,12 +255,10 @@ class ScheduleAdminUpdate(ScheduleCRUDMixin, UpdateView):
           if EventUtils.time_overlap(i['event__start'], i['event__end'], j['event__start'], j['event__end']):
             form._errors[NON_FIELD_ERRORS] = ErrorList(['Trainee(s) cannot be added to schedule. Split the schedule.'])
             return super(ScheduleAdminUpdate, self).form_invalid(form)
-=======
     if 'Delete' in form.data:
       obj_id = self.get_object().id
       Schedule.objects.get(pk=obj_id).delete()
       return redirect(reverse('schedules:admin-schedule-table'))
->>>>>>> dev
 
     return super(ScheduleAdminUpdate, self).form_valid(form)
 

@@ -1,6 +1,6 @@
 import json
 from datetime import date
-import time, uuid, urllib, urllib2
+import time, uuid, urllib
 import hmac, hashlib
 from base64 import b64encode
 
@@ -160,11 +160,11 @@ def weather_api(request):
 
   # Send request
   url = url + '?' + urllib.urlencode(query)
-  request = urllib2.Request(url)
+  request = urllib.request.Request(url)
   request.add_header('Authorization', auth_header)
   request.add_header('Yahoo-App-Id', app_id)
   try:
-    weather_info = urllib2.urlopen(request).read()
+    weather_info = urllib.request.urlopen(request).read()
   except Exception:
     weather_info = ''
 
