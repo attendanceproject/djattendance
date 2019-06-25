@@ -1,13 +1,13 @@
 import ast
 from decimal import Decimal
 
+from accounts.models import Trainee
+from classes.models import Class
 from django.contrib.postgres.fields import HStoreField
 from django.db import models
 from django.utils.timezone import timedelta
-
-from accounts.models import Trainee
-from classes.models import Class
 from terms.models import Term
+
 
 """ exams models.py
 

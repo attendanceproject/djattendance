@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
-
-# Create your views here.
-from house_inspection.models import Inspectors, InspectableHouses
-from accounts.models import Trainee
-from django.contrib import messages
-from django.shortcuts import redirect
-from houses.models import House
-from .forms import FaqForm, QuestionRequestCreateForm, HouseInspectionFaqAnswerForm, HouseInspectionFaqCommentForm
-from .models import HouseInspectionFaq
-from terms.models import Term
-from ap.base_datatable_view import BaseDatatableView
-from django.views import generic
-from django.core.urlresolvers import reverse_lazy
-from aputils.trainee_utils import is_TA, trainee_from_user
 from itertools import chain
+
+from accounts.models import Trainee
+from ap.base_datatable_view import BaseDatatableView
+from aputils.trainee_utils import is_TA, trainee_from_user
+from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
+from django.views import generic
+# Create your views here.
+from house_inspection.models import InspectableHouses, Inspectors
+from houses.models import House
+from terms.models import Term
+
+from .forms import (FaqForm, HouseInspectionFaqAnswerForm,
+                    HouseInspectionFaqCommentForm, QuestionRequestCreateForm)
+from .models import HouseInspectionFaq
 from .utils import modify_question_status
+
+
 '''
 class HouseInspectionFaq(TemplateView):
   template_name = 'house_inspection/faq.html'
@@ -155,7 +157,7 @@ class FaqAnswer(FaqMixin, generic.UpdateView):
   def form_valid(self, form):
     redirect_url = super(FaqAnswer, self).form_valid(form)
     obj = self.get_object()
-    print obj.status 
+    print obj.status
     obj.status = 'An'
     print obj.status
     obj.save()
@@ -173,9 +175,7 @@ class InspectorAnswer(FaqMixin, generic.UpdateView):
   def form_valid(self, form):
     redirect_url = super(InspectorAnswer, self).form_valid(form)
     obj = self.get_object()
-    print obj.status 
     obj.status = 'An'
-    print obj.status
     obj.save()
     return redirect_url
 
@@ -185,7 +185,6 @@ def houseInspectionFaq(request):
   if request.method == "POST":
     form = FaqForm(request.POST)
     if form.is_valid():
-      print("VALID")
       form.save()
 
   form = FaqForm() #unbound form
@@ -203,20 +202,20 @@ def manageInspectors(request):
     prefect_number = request.POST['prefect_number']
     # Use a manual form do a search for a trainee to connect it. Actually change the whole model.
     if not Trainee.objects.filter(lastname=last_name,firstname=first_name).exists():
-        # Error        
+        # Error
         messages.error(request, 'That trainee does not exist')
         return redirect('house_inspection:manage_inspectors')
     elif Inspectors.objects.filter(last_name=last_name,first_name=first_name).exists():
       messages.error(request, 'The Inspector already exists')
       return redirect('house_inspection:manage_inspectors')
-    else:          
+    else:
       trainee = Trainee.objects.get(lastname=last_name,firstname=first_name)
-      term = trainee.current_term  
+      term = trainee.current_term
       last_name = trainee.lastname
       first_name = trainee.firstname
       inspector = Inspectors.objects.create(trainee=trainee, last_name=last_name, first_name=first_name,term=term,prefect_number=prefect_number)
       inspector.save()
-  
+
   return render(request, 'house_inspection/manage_inspectors.html', context)
 
 def manageInspectableHouses(request):
@@ -232,13 +231,9 @@ def manageInspectableHouses(request):
   if request.method == 'POST':
     # Get Uninspectable
     # Get the house
-    print 'HOUSE CHANGE'
     list_of_checks = request.POST.getlist('checks[]')
-    print list_of_checks
     for house_id in list_of_checks:
-      print house_id
       house = InspectableHouses.objects.get(id=house_id)
-      print house
       house.uninspectable = True
       house.save()
   return render(request, 'house_inspection/manage_inspectable_houses.html', context)

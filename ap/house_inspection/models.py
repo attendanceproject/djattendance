@@ -1,9 +1,10 @@
 
 from datetime import date, datetime, timedelta
-from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
+
 from accounts.models import Trainee
-from django.core.urlresolvers import reverse
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+from django.urls import reverse
 
 # unsure of import ValidationError
 
@@ -19,12 +20,12 @@ class HouseInspectionFaq(models.Model):
 	answer = models.TextField(null=True, blank=True)
 	status = models.CharField(choices=TYPE_APPROVAL_STATUS_CHOICES, max_length=2, default='U')
 	trainee = models.ForeignKey(Trainee, blank=True, null=True, on_delete=models.SET_NULL)
-	date_assigned = models.DateTimeField(auto_now_add=True)	
+	date_assigned = models.DateTimeField(auto_now_add=True)
 	comment = models.TextField(blank=True, null=True)
 
 	def get_absolute_url(self):
 		return reverse('house_inspection:house_inspection_faq-detail', kwargs={'pk': self.id})
-		
+
 	def get_category(self):
 		return
 
@@ -39,7 +40,7 @@ class HouseInspectionFaq(models.Model):
 
 	def get_answer(self):
 		return self.answer
-		
+
 	def get_comment(self):
 		return self.comment
 

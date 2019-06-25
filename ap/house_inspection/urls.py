@@ -1,6 +1,9 @@
 from django.conf.urls import url
+
 from . import views
 from .models import HouseInspectionFaq
+
+app_name = 'house_inspections'
 
 urlpatterns = [
     url(r'^faq/$', views.houseInspectionFaq, name='house_inspection_faq'),
