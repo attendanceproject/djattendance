@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { Button, Collapse, OverlayTrigger, Popover } from 'react-bootstrap'
 import Form from 'react-formal'
 import types from 'react-formal-inputs'
-import yup from 'yup'
 
 import { GROUP_SLIP_TYPES, INFORMED } from '../constants'
 import { changeGroupSlipForm } from '../actions'

@@ -325,6 +325,9 @@ Service Scheduling
     <div class="btn-group">
       <a href="{% url 'services:services-exception-add' %}" class="btn btn-primary">Add Exception</a>
     </div>
+    <div class="btn-group">
+      <a href="{% url 'services:services-exception-check' %}" target="_blank" class="btn btn-primary">Check Exceptions</a>
+    </div>
 
     <div class="data-table-container">
       <table class="table table-striped table-bordered data-table" id="table_exceptions">
@@ -388,7 +391,7 @@ Service Scheduling
         {% for worker in report_assignments %}
           <tr>
             <td>{{ worker.trainee.full_name }}</td>
-            <td>{{ worker.workload }}</td>
+            <td>{{ worker.workload }} / {{worker.services_cap}}</td>
             {% for category in categories %}
               {% if category in worker.services %}
                 <td>

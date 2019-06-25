@@ -7,27 +7,162 @@
 
 {% block references %}
 <style type="text/css">
+
+  h2 {
+    margin: 42px 0px;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 200px 200px;
+    grid-template-rows: repeat(3, 35px 25px 17px) 27px 35px 25px 17px 35px 25px;
+    grid-column-gap: 85px;
+    column-gap: 85px;
+    align-items: end;
+  }
+
+  label[for=first_name_text] {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+  }
+
+  #first_name_text {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+  }
+
+  label[for=last_name_text] {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+  }
+
+  #last_name_text {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+  }
+
+  label[for=id_cell_phone] {
+    grid-column: 1 / 2;
+    grid-row: 4 / 5;
+  }
+
+  #id_cell_phone {
+    grid-column: 1 / 2;
+    grid-row: 5 / 6;
+  }
+
+  label[for=id_home_phone] {
+    grid-column: 2 / 3;
+    grid-row: 4 / 5;
+  }
+
+  #id_home_phone {
+    grid-column: 2 / 3;
+    grid-row: 5 / 6;
+  }
+
+  label[for=id_email] {
+    grid-column: 1 / 2;
+    grid-row: 7 / 8;
+  }
+
+  #id_email {
+    grid-column: 1 / 2;
+    grid-row: 8 / 9;
+  }
+
+  label[for=id_home_locality] {
+    grid-column: 2 / 3;
+    grid-row: 7 / 8;
+  }
+
+  #id_home_locality {
+    grid-column: 2 / 3;
+    grid-row: 8 / 9;
+  }
+
+  label[for=id_home_address] {
+    grid-column: 1 / 2;
+    grid-row: 11 / 12;
+  }
+
+  #id_home_address {
+    grid-column: 1 / 2;
+    grid-row: 12 / 13;
+  }
+
+  label[for=id_home_city] {
+    grid-column: 2 / 3;
+    grid-row: 11 / 12;
+  }
+
+  #id_home_city {
+    grid-column: 2 / 3;
+    grid-row: 12 / 13;
+  }
+
+  label[for=id_home_state] {
+    grid-column: 1 / 2;
+    grid-row: 14 / 15;
+  }
+
+  #id_home_state {
+    grid-column: 1 / 2;
+    grid-row: 15 / 16;
+  }
+
+  label[for=id_home_zip] {
+    grid-column: 2 / 3;
+    grid-row: 14 / 15;
+  }
+
+  #id_home_zip {
+    grid-column: 2 / 3;
+    grid-row: 15 / 16;
+  }
+
   #submit{
     display: inline-block;
-    float: left;
-  }
-
-  #delete_row{
-    display: inline-block;
     float: right;
   }
 
-  #add_row{
-    display: inline-block;
-    float: right;
+  label[for=id_intent_0], label[for=id_intent_1], label[for=id_intent_2], label[for=id_intent_3] {
+    color: #102C38;
+    text-transform: none;
+    font-size: 16px;
+    font-weight: normal;
   }
 
-  .readonly{
-    background-color: #DEDEDE;
+  .itin-grid {
+    display: grid;
+    grid-template-rows: 35px 25px;
+    grid-row-gap: 8px;
+    row-gap: 8px;
+    grid-auto-rows: 25px;
+    margin-top: 30px;
   }
 
+  .itin-row {
+    display: grid;
+    grid-template-columns: 140px 140px 350px;
+    grid-column-gap: 18px;
+    column-gap: 18px;
+  }
+
+  #post_intent_comments_label {
+    margin-top: 10px;
+    margin-bottom: 0px;
+  }
+
+  select {
+    background-color: white;
+  }
+  textarea {
+    max-height: 25px;
+  }
 </style>
 {% endblock %}
+
 {% block scripts %}
 {{ block.super }}
 {{ form.media }}
@@ -35,111 +170,145 @@
 
 <script type="text/javascript">
 
-function date_formatter(dt) {
-  date = dt.toLocaleDateString('en-US', options)
-  mon = date.slice(0, 2)
-  dat = date.slice(3, 5)
-  yer = date.slice(6, 10)
-  return mon + "/" + dat + "/" + yer
-}
+  var dt_options = { // variable for setting datepicker on newly created fields
+    timepicker: false,
+    format: 'm/d/Y',
+    formatDate: 'm/d/Y',
+    defaultSelect: true,
+  };
 
-var dt_options = {
-  timepicker: false,
-  format: 'm/d/Y',
-  formatDate: 'm/d/Y',
-  defaultSelect: true,
-};
-var options = {year: 'numeric', month: '2-digit', day: '2-digit' };
-var interim_end = "{{interim_last_day}}"
-
-$(document).ready(() => {
-
-  var interim_start = "{{interim_start|date:'m/d/Y'}}";
-
-  show_hide_post_interim();
-  change_post_intent_comments_labels();
-
-  $("#add_row").click(add_row);
-
-  $("#delete_row").click(delete_row);
-
-  $('input[type=radio][name=intent]').change(show_hide_post_interim);
-  $('#id_post_training_intentions').change(change_post_intent_comments_labels);
-
-  if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
-    $("#id_start").val(interim_start);
-    let dt = new Date(interim_end);
-    dt.setDate(dt.getDate());
-    $("#id_end").val(date_formatter(dt));
+  var interim_end = "";
+  if ({{ request.user.current_term }} == 1) {
+    interim_end = "{{admin.date_1yr_return|date:'m/d/Y'}}";
+  } else {
+    interim_end = "{{admin.date_2yr_return|date:'m/d/Y'}}";
   }
-  $("[name='start']").prop( "readonly", true );
-  $("[name='start']").addClass('readonly');
-});
+
+  $(document).ready(() => {
+
+    // post-training intent javascript
+    show_hide_post_interim();
+    change_post_intent_comments_labels();
+    $('input[type=radio][name=intent]').change(show_hide_post_interim);
+    $('#id_post_training_intentions').change(change_post_intent_comments_labels);
+
+    // interim itinerary javascript
+    var interim_start = "{{interim_start|date:'m/d/Y'}}";
+
+    if ($("#id_start").val() == 0 || $("#id_end").val() == 0) {
+      $("#id_start").val(interim_start);
+      $("#id_end").val(interim_end);
+    }
+
+    $("#row-0 #id_start").prop("readonly", true);
+    $("#row-0 #id_start").addClass('readonly');
+    $("#row-0 #id_start").datetimepicker("destroy");
+
+    $(".actual-itin").on('change', '#id_start', change_start_date);
+    $(".actual-itin").on('change', '#id_end', change_end_date);
+
+  });
 
   function show_hide_post_interim(){
     if($('#id_intent_1, #id_intent_2, #id_intent_3').is(':checked')) {
-      $("#id_post_intent_comments").parent().parent().show();
-      $("#id_post_training_intentions").parent().parent().show();
+      $('.post-training-plans').show();
       $("#id_post_training_intentions").attr("required", true);
       $("#id_post_intent_comments").attr("required", true);
     } else {
-      $("#id_post_intent_comments").parent().parent().hide();
-      $("#id_post_training_intentions").parent().parent().hide();
+      $('.post-training-plans').hide();
       $("#id_post_training_intentions").attr("required", false);
       $("#id_post_intent_comments").attr("required", false);
-    }
-  }
-
-  function add_row(){
-    let val = parseInt($("#id_itinerary_table tr:last").attr('id').split("_").pop());
-    let dt_val = $("#id_itinerary_table tr:last #id_end").val()
-
-    if (dt_val != 0 && dt_val != interim_end) {  //TODO: validate, i.e proper format, valid date range
-      let dt = new Date(dt_val);
-      $("#id_itinerary_table tr:last").clone().appendTo("#id_itinerary_table")
-      val++;
-      $("#id_itinerary_table tr:last").attr("id","row_" + val);
-      dt.setDate(dt.getDate() + 1);
-      $("#id_itinerary_table tr:last #id_start").val(date_formatter(dt));
-      let edt = new Date(interim_end)
-      edt.setDate(edt.getDate());
-      $("#id_itinerary_table tr:last #id_end").val(date_formatter(edt));
-      $($("#id_itinerary_table tr:last > td > input")[1]).datetimepicker(dt_options)
-
-    } else if (dt_val === interim_end) {
-      new Notification(Notification.SUCCESS, 'The term begins on {{admin.term_begin_date}}.').show();
-    } else {
-      new Notification(Notification.SUCCESS, 'Please fill out an end time before adding another row.').show();
-    }
-  }
-
-  function delete_row(){
-    let val = parseInt($("#id_itinerary_table tr:last").attr('id').split("_").pop());
-    if (val != 0){
-      $("#id_itinerary_table tr:last").remove();
     }
   }
 
   function change_post_intent_comments_labels() {
     intent = $('#id_post_training_intentions').val()
 
-    text = "Please explain:"
+    text = "Please explain"
     if (intent == "USC" || intent == "OCC") {
-      text = "Please enter the campus and approximate date available to go:"
+      text = "Please enter the campus and approximate date available to go"
     } else if (intent == "LSM") {
-      text = "Please enter the section of service:"
+      text = "Please enter the section of service"
     } else if (intent == "XB" || intent == "BFA") {
-      text = "Comments:"
+      text = "Comments"
     } else if (intent == "JOB") {
-      text = "Please enter the locality in which you'll be working:"
+      text = "Please enter the locality in which you'll be working"
     } else if (intent == "SCH") {
-      text = "Please enter the locality, name of school, and program entering:"
+      text = "Please enter the locality, name of school, and program entering"
     }
 
-    $('label[for=id_post_intent_comments]').text(text)
+    $('#post_intent_comments_label').text(text)
   }
 
+  function change_start_date(start_field) {
+    var start_val = $(this).val();
+    var prev = $(this).parent(".itin-row").prev('.itin-row').find("#id_end");
+    var one_day_before = new Date(Date.parse(start_val) - 86400000);
+    if (prev.val() && Date.parse(prev.val()) != one_day_before.getTime()) {
+      prev.val($.datepicker.formatDate('mm/dd/yy', one_day_before)).change();
+    }
 
+    var end_field = $(this).parent(".itin-row").find("#id_end");
+    if (end_field.val() < start_val) {
+      end_field.change();
+    }
+  }
+
+  function change_end_date(end_field) {
+    var row_number = $(this).parent(".itin-row").attr('id').split("-").pop();
+    var end_val = $(this).val();
+    var start_val = $(this).parent(".itin-row").find("#id_start").val();
+    var reset = null;
+
+    if (end_val == start_val || row_number == "0" && start_val > end_val) {
+      var newDate = new Date(Date.parse(start_val) + 86400000);
+      end_val = $.datepicker.formatDate('mm/dd/yy', newDate);
+      $(this).val(end_val);
+    } else if (start_val > end_val) {
+      reset = end_val;
+      $(this).val(end_val = start_val);
+      start_val = reset;
+    }
+
+    var next = $(this).parent(".itin-row").next(".itin-row");
+    if (end_val > interim_end) {
+      $(this).val(end_val = interim_end);
+      while (next.length > 0) {
+        next.remove();
+        next = $(this).parent(".itin-row").next(".itin-row");
+      }
+    }
+
+    next = $(this).parent(".itin-row").next(".itin-row").find("#id_start");
+    var one_day_later = new Date(Date.parse(end_val) + 86400000)
+    if (next.length == 0 && end_val != interim_end) {
+      next = $(this).parent(".itin-row").clone().appendTo(".actual-itin");
+      next_row = parseInt(row_number) + 1;
+      next.removeAttr('id').attr('id', 'row-' + next_row);
+
+      next.find("#id_start").val($.datepicker.formatDate('mm/dd/yy', one_day_later));
+      next.find("#id_end").val(interim_end);
+      next.find("#id_start").datetimepicker(dt_options);
+      next.find("#id_end").datetimepicker(dt_options);
+
+      next = next.find("#id_start");
+
+      if (row_number == 0) {
+        $("#row-1 #id_start").prop("readonly", false);
+        $("#row-1 #id_start").removeClass('readonly');
+      }
+    }
+
+    if (next.length > 0 && Date.parse(next.val()) != one_day_later.getTime()) {
+      next.val($.datepicker.formatDate('mm/dd/yy', one_day_later)).change();
+    }
+    if (reset) {
+      $(this).parent(".itin-row").find("#id_start").val(reset).change();
+    }
+    if (interim_end <= start_val) {
+      $(this).parent(".itin-row").remove();
+    }
+  }
 
 </script>
 {% endblock %}
@@ -180,145 +349,96 @@ $(document).ready(() => {
   </div>
 <!-- /Error messaging -->
 {% endif %}
-
-
 {% endfor %}
+
+<ul class="nav nav-tabs" role="tablist" style="margin-bottom: 30px">
+  <li role="presentation" class="active"><a href="#contact-info" aria-controls="home" role="tab" data-toggle="tab">Contact Information</a></li>
+  <li role="presentation"><a href="#int-itin" aria-controls="profile" role="tab" data-toggle="tab">Interim Itinerary</a></li>
+</ul>
 
 <form id="id_interim_intentions_form" method="post" action="">
   {% csrf_token %}
-  <div class="panel">
-    <h4>Contact Information:</h4>
-    <p>Please verify that your contact information is up to date.</p><br>
 
-    <div class="row">
-      <div class="col-md-2">
-        First Name:
-      </div>
-      <div class="col-md-4">
-        <strong>{{request.user.firstname}}</strong>
-      </div>
-      <div class="col-md-2">
-        Last Name:
-      </div>
-      <div class="col-md-4">
-        <strong>{{request.user.lastname}}</strong>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.cell_phone.label}}:
-      </div>
-      <div class="col-md-4">
-        {{form.cell_phone}}
-      </div>
-      <div class="col-md-2">
-        {{form.home_phone.label}}:
-      </div>
-      <div class="col-md-4">
-        {{form.home_phone}}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.email.label}}:
-      </div>
-      <div class="col-md-4">
-        {{form.email}}
-      </div>
-      <div class="col-md-2">
-        {{form.home_locality.label}}:
-      </div>
-      <div class="col-md-4">
-        {{form.home_locality}}
-      </div>
-    </div>
-    <hr>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.home_address.label}}:
-      </div>
-      <div class="col-md-10">
-        {{form.home_address}}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.home_city.label}}:
-      </div>
-      <div class="col-md-2">
-        {{form.home_city}}
-      </div>
-      <div class="col-md-2">
-        {{form.home_state.label}}:
-      </div>
-      <div class="col-md-2">
-        {{form.home_state}}
-      </div>
-      <div class="col-md-2">
-        {{form.home_zip.label}}:
-      </div>
-      <div class="col-md-2">
-        {{form.home_zip}}
-      </div>
-    </div>
-  </div>
-  <div class="panel">
-    <h4>Interim Itinerary:</h2>
-    <p>Please be thorough in filling out the schedule below and include brief descriptions, locations with pertinent addresses, phone numbers, etc. for our ease in contacting you. The following return dates have been set to help you have a smooth transition into the next term, to give you additional time to unpack and settle into your house before pre-training, and to prepare your house for incoming trainees.<br/>
+  <div class="tab-content">
 
-    Second year trainees return by <strong>{{admin.date_2yr_return|date:'l, F d'}} at {{admin.date_2yr_return|date:'g:i a'}}</strong><br/>
-    First year trainees return by <strong>{{admin.date_1yr_return|date:'l, F d'}} at {{admin.date_1yr_return|date:'g:i a'}}</strong><br/></p>
+    <div id="contact-info" class="tab-pane active" role="tabpanel">
+      <p>Please verify that your contact information is up to date.</p>
 
-    <p>You may arrive as early as <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> but not later than the date and time above. Those who arrive before <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> must be available to serve. The next term of the Training begins on <strong>{{admin.term_begin_date|date:'l, F d'}}</strong>.</p>
-    <div class="row">
-      <div class="col-md-12">
-        <table class="table table-bordered" id="id_itinerary_table">
-          <tr>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Notes/Comments</th>
-          </tr>
+      <div class="new-form contact-grid">
+        <label for="first_name_label">First Name</label>
+        <div class="text readonly" id="first_name_text">{{request.user.firstname}}</div>
+
+        <label for="last_name_text">Last Name</label>
+        <div class="text readonly" id="last_name_text">{{request.user.lastname}}</div>
+
+        {{ form.cell_phone.label_tag }}
+        {{ form.cell_phone }}
+
+        {{ form.home_phone.label_tag }}
+        {{ form.home_phone }}
+
+        {{ form.email.label_tag }}
+        {{ form.email }}
+
+        {{ form.home_locality.label_tag }}
+        {{ form.home_locality }}
+
+        {{ form.home_address.label_tag }}
+        {{ form.home_address }}
+
+        {{ form.home_city.label_tag }}
+        {{ form.home_city }}
+
+        {{ form.home_state.label_tag }}
+        {{ form.home_state }}
+
+        {{ form.home_zip.label_tag }}
+        {{ form.home_zip }}
+      </div>
+    </div>
+
+    <div id="int-itin" class="tab-pane" role="tabpanel">
+      <p>Please be thorough in filling out the schedule below and include brief descriptions, locations with pertinent addresses, phone numbers, etc. for our ease in contacting you. The following return dates have been set to help you have a smooth transition into the next term, to give you additional time to unpack and settle into your house before pre-training, and to prepare your house for incoming trainees.</p>
+
+      <p>Second year trainees return by <strong>{{admin.date_2yr_return|date:'l, F d'}} at {{admin.date_2yr_return|date:'g:i a'}}</strong><br/>
+      First year trainees return by <strong>{{admin.date_1yr_return|date:'l, F d'}} at {{admin.date_1yr_return|date:'g:i a'}}</strong></p>
+
+      <p>You may arrive as early as <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> but not later than the date and time above. Those who arrive before <strong>{{admin.earliest_arrival_date|date:'l, F d'}}</strong> must be available to serve. The next term of the Training begins on <strong>{{admin.term_begin_date|date:'l, F d'}}</strong>.</p>
+
+      <div class="new-form">
+        <div class="itin-grid actual-itin">
+          <div class="itin-row">
+            <label for="start_date">Start Date</label>
+            <label for="end_date">End Date</label>
+            <label for="notes_comments">Notes/Comments</label>
+          </div>
           {% for itin_form in itinerary_forms %}
-          <tr id="row_{{forloop.counter0}}">
-            <td>{{itin_form.start}}</td>
-            <td>{{itin_form.end}}</td>
-            <td>{{itin_form.comments}}</td>
-          </tr>
+            <div class="itin-row" id="row-{{forloop.counter0}}">
+              {{itin_form.start}}
+              {{itin_form.end}}
+              {{itin_form.comments}}
+            </div>
           {% endfor %}
-        </table>
-      </div>
-      <div class="col-md-12">
-        <button type="button" class="btn btn-primary" id="delete_row">Delete</button>
-        <button type="button" class="btn btn-primary" id="add_row">Add</button>
-      </div>
-    </div>
-  </div>
-  <div class="panel">
-    <h4>{{form.intent.label}}:</h4>
-    <div class="row">
-      <div class="col-md-12">
+        </div>
+        <br>
+        <p>Note: if you set a date after the last date of the interim (auto-filled) the last row will be removed. Date changes will be automatically sorted. Additional rows will be added each time the end date is changed.</p>
+        <label for="id_intent" style="margin-top: 30px">Intent to Return</label><br>
         {% for c in form.intent %}
-          {{c}}&nbsp;
-        {% endfor %}
+          {{c}}&nbsp;&nbsp;
+        {% endfor %}<br>
+        <div class="itin-grid post-training-plans">
+            {{form.post_training_intentions.label_tag}}
+            {{form.post_training_intentions}}
+            <p id="post_intent_comments_label">
+              {{ form.post_intent_comments.label }}
+            </p>
+            {{form.post_intent_comments}}
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.post_training_intentions.label_tag}}
-      </div>
-      <div class="col-md-2">
-        {{form.post_training_intentions}}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        {{form.post_intent_comments.label_tag}}
-      </div>
-      <div class="col-md-2">
-        {{form.post_intent_comments}}
-      </div>
+      <br>
+      <button type="submit" class="btn btn-danger btn-save" id="submit">{{button_label|safe}}</button>
     </div>
   </div>
-    <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
-  </form>
+
+</form>
 {% endblock %}

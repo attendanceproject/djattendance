@@ -15,9 +15,10 @@ urlpatterns = [
     url(r'^admin/events/create/$', views.EventAdminCreate.as_view(), name='admin-event-create'),
     url(r'^admin/events/(?P<pk>\d+)$', views.EventAdminUpdate.as_view(), name='admin-event'),
     url(r'^admin/events/delete/(?P<pk>\d+)$', views.EventAdminDelete.as_view(), name='admin-event-delete'),
+    url(r'^admin/schedules/table/$', views.AllSchedulesView.as_view(), name='admin-schedule-table'),
     url(r'^admin/schedules/create/$', views.ScheduleAdminCreate.as_view(), name='admin-schedule-create'),
     url(r'^admin/schedules/(?P<pk>\d+)$', views.ScheduleAdminUpdate.as_view(), name='admin-schedule'),
-    url(r'^admin/schedules/table/$', views.AllSchedulesView.as_view(), name='admin-schedule-table'),
-    url(r'^admin/schedules/delete/(?P<pk>\d+)$', views.ScheduleAdminDelete.as_view(), name='admin-schedule-delete'),
-    url(r'^admin/schedules/split/(?P<pk>\d+)/(?P<week>\d+)$', views.split_schedules_view, name='admin-schedule-split')
+    url(r'^admin/schedules/split/(?P<pk>\d+)/(?P<week>\d+)$', views.split_schedules_view, name='admin-schedule-split'),
+    url(r'^afternoon_changes', views.AfternoonClassChange.as_view(), name='afternoon-class-change'),
+    url(r'^admin/schedules/delete-rolls/$', views.scheduleCRUD_delete_rolls, name='delete-conflicting-rolls'),
 ]

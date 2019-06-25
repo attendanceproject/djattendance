@@ -224,12 +224,6 @@ def save_exam_creation(request, pk):
   for section in sections:
     section_id = int(section.get('section_id', -1))
     section_instructions = section['instructions']
-    if section_instructions == "":
-      exam.delete()
-      for section in Section.objects.all():
-        if section.exam is None:
-          section.delete()
-      return (False, "No section instructions given.")
     section_questions = section['questions']
     section_type = section['section_type']
     required_number_to_submit = section['required_number_to_submit']
@@ -351,9 +345,8 @@ def get_exam_context_data(context, exam, is_available, session, role, include_an
     context['exam_available'] = False
     return context
   context['is_graded'] = session.is_graded
-  if session.time_finalized is not None and exam.is_open and session.is_graded:
-    context['exam_available'] = True
-  elif session.time_finalized is not None or not exam.is_open:
+  context['is_finalized'] = session.time_finalized is not None
+  if not exam.is_open:
     context['exam_available'] = False
   else:
     context['exam_available'] = True
@@ -372,9 +365,30 @@ def get_exam_context_data(context, exam, is_available, session, role, include_an
 
 
 def get_exam_preview_context_data(context, exam):
+  context['role'] = "Take"
   context['exam'] = exam
-  context['exam_total_score'] = exam.total_score
-  context['questions'] = get_exam_questions(exam, False)
+  context['is_finalized'] = False
+  context['exam_available'] = True
+  questions = get_exam_questions(exam, False)
+
+  sections = Section.objects.filter(exam=exam)
+  responses = []
+  score_for_responses = []
+  comments_for_responses = []
+  for section in sections:
+    r = {}
+    for i in range(section.first_question_index, section.question_count + 1):
+      if section.section_type == 'FB':
+        regex = re.compile('[^##]')
+        r[i] = json.loads('"' + regex.sub('', section.questions[str(i)]) + '"')
+      else:
+        r[i] = json.loads('""')
+
+    responses.append(r)
+    score_for_responses.append({})
+    comments_for_responses.append({})
+
+  context['data'] = zip(questions, responses, score_for_responses, comments_for_responses)
   context['preview'] = True
   return context
 
@@ -409,7 +423,8 @@ def save_grader_scores_and_comments(session, section, responses):
   if section.section_type == 'E' and responses['comments'] == "NOT GRADED YET":
     responses_obj.comments = "GRADED"
   else:
-    responses_obj.comments = responses['comments']
+    comments = responses['comments']
+    responses_obj.comments = comments.replace("\"", "\\\"") #used to properly save and load the string with the escape character
   responses_obj.save()
 
 

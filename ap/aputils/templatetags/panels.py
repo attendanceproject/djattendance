@@ -7,7 +7,7 @@ from classnotes.models import Classnotes
 from django import template
 from django.urls import reverse
 from django.db.models import Q
-from leaveslips.models import IndividualSlip
+from leaveslips.models import IndividualSlip, GroupSlip
 from lifestudies.models import Discipline
 from terms.models import Term
 
@@ -78,8 +78,9 @@ def generate_panels(context):
   )
 
   ls_pending = 0
-  ls_p = IndividualSlip.objects.filter(trainee=user, status='P')
-  ls_pending = sum([1 if p in slip.periods else 0 for slip in ls_p])
+  ls_ip = IndividualSlip.objects.filter(trainee=user, status='P')
+  ls_gp = GroupSlip.objects.filter(trainees=user, status='P')
+  ls_pending = sum([1 if p in slip.periods else 0 for slip in ls_ip] + [1 if p in slip.periods else 0 for slip in ls_gp])
 
   leaveslips_panel = Panel(
       name='Leave Slips Pending',

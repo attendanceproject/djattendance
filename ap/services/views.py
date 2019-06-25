@@ -1,7 +1,7 @@
 import csv
 import json
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from accounts.models import Trainee
 from aputils.decorators import group_required
@@ -141,6 +141,73 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
       'service_checks': SERVICE_CHECKS,
   }
   return render(request, 'services/services_view.html', ctx)
+
+@group_required(['training_assistant', 'service_schedulers'])
+def check_exceptions_view(request):
+  # try to get assignments from most recent week schedule object
+  cws = WeekSchedule.objects.first()
+  current_assignments = Assignment.objects.filter(week_schedule=cws)
+  if len(current_assignments) == 0:
+    # if the most recent week schedule object has no assignments, we try to get the assignments for this week
+    user = request.user
+    trainee = trainee_from_user(user)
+    cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
+    current_assignments = Assignment.objects.filter(week_schedule=cws) # Grab all assignments associated with cws
+
+  # We want to grab only the active service exceptions that will potentially
+  # have conflicts with the current week_schedule's assignments.
+  # If the service schedulers remember to only turn on service exceptions
+  # that they are currently using, this command should work:
+  se_active = ServiceException.objects.filter(active=True).all()
+
+  # However, they may not always do this (i.e. they may leave "active" service exceptions
+  # they are not currently using)
+  # In that case, there are 2 categories of service exceptions we are interested in
+  # The FIRST is service exceptions that have a start time before the end of this week
+  # AND end time = None
+  se_n = se_active.filter(start__lte=cws.start + timedelta(7), end=None).all()
+
+  # The SECOND is service exceptions that have a start time before the end of this week
+  # AND end time after the start of this week. (Draw out the time intervals if you're not sure)
+  se_d = se_active.filter(start__lte=cws.start + timedelta(7), end__gte=cws.start).all()
+
+  # You can combine these query sets using:
+  se_used = se_n | se_d
+
+  # A dictionary of assignments that violate active exceptions.
+  # Maps exception to string of service name and worker name.
+  exception_to_service = {}
+
+  # A dictionary of worker to exception(s)
+  worker_to_exception = {}
+
+  # Populates worker_to_exception dictionary
+  for exception in se_used:
+    for w in exception.workers.all():
+      if w not in worker_to_exception:
+        worker_to_exception[w] = [exception]
+      else:
+        worker_to_exception[w].append(exception)
+
+  # Loops through every assignment. For each assignment, see if the worker is involved in any
+  # active exception. If so, check to see if the assigned service is also in the exception.
+  for assignment in current_assignments:
+    for worker in assignment.workers.all():
+      if worker in worker_to_exception:
+        # this third for-loop won't significantly increase the runtime because the number of
+        # active exceptions a single worker is assigned to is usually quite small.
+        for exception in worker_to_exception[worker]:
+          if assignment.service in exception.services.all():
+            if exception in exception_to_service:
+              exception_to_service[exception] += ", " + assignment.service.name + " " + worker.trainee.full_name
+            else:
+              exception_to_service[exception] = assignment.service.name + " " + worker.trainee.full_name
+
+  ctx = {
+      'exception_to_service': exception_to_service,
+  }
+
+  return render(request, 'services/services_check_exceptions.html', ctx)
 
 
 def generate_report(request, house=False):
@@ -806,5 +873,15 @@ def deactivate_guest(request, pk):
   if request.method == "POST" and request.is_ajax():
     w = Worker.objects.get(pk=pk)
     w.trainee.delete()
+    return JsonResponse({'success': True})
+  return JsonResponse({'success': False})
+
+
+@group_required(['training_assistant', 'service_schedulers'])
+def bulk_deactivate_guests(request):
+  if request.method == "POST" and request.is_ajax():
+    for key, value in request.POST.iteritems():
+      w = Worker.objects.get(pk=key)
+      w.trainee.delete()
     return JsonResponse({'success': True})
   return JsonResponse({'success': False})

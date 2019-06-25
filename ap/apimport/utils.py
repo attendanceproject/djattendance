@@ -610,12 +610,11 @@ def import_row(row):
     log.warning("Unable to set TA [%s] for trainee: %s %s" % (row['trainingAssistantID'], row['stName'], row['lastName']))
 
   # TA_secondary
-  ta_secondary = TrainingAssistant.objects.filter(groups__name="regular_training_assistant", firstname=row.get('TASecondary', "")).first()
+  ta_secondary = TrainingAssistant.objects.filter(groups__name="regular_training_assistant", firstname=row.get('secondTAID', "")).first()
   if ta_secondary and row.get('gender', user.gender) == 'S':
     user.TA_secondary = ta_secondary
   elif row.get('gender', user.gender) == 'S':
-    log.warning("Unable to set TA_secondary [%s] for trainee: %s %s" % (row['TASecondary'], row['stName'], row['lastName']))
-
+    log.warning("Unable to set secondTAID [%s] for trainee: %s %s" % (row['secondTAID'], row['stName'], row['lastName']))
   # Mentor
   if row.get('mentor', "") != "":
     lname, fname = row.get('mentor').split(", ")

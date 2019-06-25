@@ -54,7 +54,7 @@ class SemiView(TemplateView):
       show_attendance = True
     context['show_attendance'] = show_attendance
     context['term'] = semi_annual_training()
-    location_due_date = start_date - datetime.timedelta(days=3)
+    location_due_date = start_date - datetime.timedelta(days=7)
     context['location_due_date'] = location_due_date
     context['past_location_due_date'] = datetime.date.today() > location_due_date
     return context

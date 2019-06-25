@@ -9,14 +9,12 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.views.generic.edit import DeleteView, UpdateView
-from rest_framework.renderers import JSONRenderer
 from terms.models import Term
 
 from .forms import (HCRecommendationAdminForm, HCRecommendationForm,
                     HCSurveyAdminForm, HCSurveyForm, HCTraineeCommentForm)
 from .models import (HCRecommendation, HCRecommendationAdmin, HCSurvey,
                      HCSurveyAdmin, HCTraineeComment, House)
-from .serializers import HCRecommendationSerializer
 
 HCSA_FORM = 'hcsa_form'
 HCRA_FORM = 'hcra_form'
@@ -206,37 +204,51 @@ class HCRecommendationCreate(GroupRequiredMixin, TemplateView):
 
   def get_context_data(self, **kwargs):
     ctx = super(HCRecommendationCreate, self).get_context_data(**kwargs)
+
+    survey_admin = self.admin_model.objects.get_or_create(term=Term.current_term())[0]
+    house = House.objects.get(id=self.request.user.house.id)
+    eligible_hcs = house.residents.exclude(groups__name="HC").filter(current_term__in=[2, 3])
+    hc_recommendation_forms = []
+    for trainee in eligible_hcs:
+      try:
+        hcr = HCRecommendation.objects.get(recommended_hc=trainee, survey_admin=survey_admin)
+        hcr_form = HCRecommendationForm(house=house, instance=hcr)
+      except HCRecommendation.DoesNotExist:
+        hcr_form = HCRecommendationForm(house=house, initial={'recommended_hc': trainee})
+
+      hc_recommendation_forms.append(hcr_form)
+
     ctx['button_label'] = 'Submit'
     ctx['page_title'] = 'HC Recommendation'
     ctx['hc'] = Trainee.objects.get(id=self.request.user.id)
+<<<<<<< HEAD
     ctx['house'] = House.objects.get(id=self.request.user.house.id)
     hcrs = HCRecommendation.objects.filter(house=ctx['house'])
     ctx['hcrs'] = JSONRenderer().render(HCRecommendationSerializer(hcrs, many=True).data).decode('utf-8')
     ctx['form'] = HCRecommendationForm(user=self.request.user)
     survey_admin = self.admin_model.objects.get_or_create(term=Term.current_term())[0]
+=======
+    ctx['house'] = house
+    ctx['hc_recommendation_forms'] = hc_recommendation_forms
+>>>>>>> dev
     # if survey is open, but not within time range -> read-only
     if (datetime.now() > survey_admin.close_time or datetime.now() < survey_admin.open_time) and survey_admin.open_survey:
       ctx['read_only'] = True
+
     return ctx
 
   def post(self, request, *args, **kwargs):
     survey_admin = self.admin_model.objects.get_or_create(term=Term.current_term())[0]
 
-    field_names = ["recommended_hc", "choice", "recommendation"]
-    for i in range(len(request.POST) // len(field_names)):
+    recommended_hcs = request.POST.getlist("recommended_hc")
+    choices = request.POST.getlist("choice")
+    recommendations = request.POST.getlist("recommendation")
+
+    for i in range(len(recommended_hcs)):
       form_data = {}
-      if i == 0:
-        for name in field_names:
-          if name == "recommended_hc":
-            form_data[name] = Trainee.objects.get(id=request.POST.get(name))
-          else:
-            form_data[name] = request.POST.get(name)
-      else:
-        for name in field_names:
-          if name == "recommended_hc":
-              form_data[name] = Trainee.objects.get(id=request.POST.get(name + "_" + str(i)))
-          else:
-            form_data[name] = request.POST.get(name + "_" + str(i))
+      form_data['recommended_hc'] = Trainee.objects.get(id=recommended_hcs[i])
+      form_data['choice'] = choices[i]
+      form_data['recommendation'] = recommendations[i]
 
       check_existing = HCRecommendation.objects.filter(survey_admin=survey_admin, recommended_hc=form_data["recommended_hc"])
       if check_existing.count() != 0:
@@ -273,6 +285,7 @@ class HCSurveyTAView(GroupRequiredMixin, TemplateView):
     context['sis_reported'] = House.objects.filter(id__in=house_ids, gender="S")
     context['sis_not_reported'] = House.objects.exclude(id__in=house_ids).filter(gender="S")
     context['surveys_and_comments'] = surveys_and_comments
+    context['survey_number'] = index
     context['page_title'] = "HC Survey Report"
     return context
 

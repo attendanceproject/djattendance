@@ -56,6 +56,7 @@ GROUP_PERMISSIONS = [
     ('health_office', []),
     ('kitchen', ['meal_seating']),
     ('PSRP_facilitator', []),
+    ('house_inspectors', ['house_inspection'])
 ]
 
 

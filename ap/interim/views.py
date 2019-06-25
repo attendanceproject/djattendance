@@ -41,16 +41,21 @@ class InterimIntentionsView(UpdateView):
   def update_interim_itinerary(self, interim_intentions, data):
     start_list = data.pop('start')
     end_list = data.pop('end')
-    commments_list = data.pop('comments')
+    comments_list = data.pop('comments')
     itins = []
 
     for index in range(len(start_list)):
+<<<<<<< HEAD
       itins.append(InterimItineraryForm(data={
         'start': start_list[index],
         'end': end_list[index],
         'comments': commments_list[index],
         'interim_intentions': interim_intentions})
       )
+=======
+      print(start_list[index] + " to " + end_list[index] + ": " + comments_list[index]);
+      itins.append(InterimItineraryForm(data={'start':start_list[index], 'end':end_list[index], 'comments':comments_list[index], 'interim_intentions': interim_intentions}))
+>>>>>>> dev
     if all(f.is_valid() for f in itins):
       InterimItinerary.objects.filter(interim_intentions=interim_intentions).delete()
       for itin in itins:
@@ -76,8 +81,8 @@ class InterimIntentionsView(UpdateView):
     ctx['page_title'] = 'Interim Intentions'
     ctx['itinerary_forms'] = interim_itineraries_forms
     ctx['interim_start'] = Term.current_term().end + timedelta(days=1)
+    ctx['interim_end'] = admin.term_begin_date - timedelta(days=1)
     ctx['admin'] = admin
-    ctx['interim_last_day'] = admin.term_begin_date - timedelta(days=1)
 
     return ctx
 
@@ -169,13 +174,15 @@ class InterimIntentionsCalendarView(TemplateView, GroupRequiredMixin):
     term = Term.current_term()
 
     interim_start = term.end + timedelta(days=1)
-    if InterimIntentionsAdmin.objects.get(term=term).term_begin_date is None:
+    if not InterimIntentionsAdmin.objects.get(term=term).date_1yr_return or not InterimIntentionsAdmin.objects.get(term=term).date_2yr_return:
       interim_end = interim_start + timedelta(days=1)
-      ctx['subtitle'] = "Please enter the starting date for next term."
+      ctx['subtitle'] = "Please enter the return dates for next term."
     else:
-      interim_end = InterimIntentionsAdmin.objects.get(term=term).term_begin_date
+      date_1 = InterimIntentionsAdmin.objects.get(term=term).date_1yr_return
+      date_2 = InterimIntentionsAdmin.objects.get(term=term).date_2yr_return
+      interim_end = date_2.date() if (date_2 >= date_1) else date_1.date();
 
-    ctx['interim_length'] = (interim_end - interim_start).days
+    ctx['interim_length'] = (interim_end - interim_start).days + 1
     ctx['date_list'] = [interim_start + timedelta(days=x) for x in range(0, ctx['interim_length'])]
 
     ctx['trainees'] = Trainee.objects.values('firstname', 'lastname', 'id')

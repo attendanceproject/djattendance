@@ -40,28 +40,39 @@
 
 {% block content %}
 <h2>{{ page_title }}</h2>
+<h3>Max: {{rem_limit}} characters
 {% if object.due_date %}
-  <h3>Due: {{ object.due_date }}</h3>
+  <br>Due: {{ object.due_date }}
 {% endif %}
+</h3>
 <form id="id_grad_form" action="" method="post">
   {% csrf_token %}
 
-    <p>Prayerfully consider your remembrance, which should express your experience and be in accordance to the spirit of the Training.<br>
-    Acceptable quotes must be from <b>the Bible or the hymnal only</b>. You must list the reference for your quote.<br>
-    Remembrances must be <b>one continuous quote</b>. Please <b>no ellipses</b> (...) at the beginning, middle, or end of a quote.</p>
+    <p>Prayerfully consider your remembrance, which should express your experience and be in accordance to the spirit of the Training.</p>
+    <p>Acceptable quotes must be from <b>the Bible or the hymnal only</b>. You must list the reference for your quote.</p>
+
+    <p>Remembrances must be <strong>1) an entire verse</strong>, <strong>2) the first part of a verse including the beginning of the verse</strong>, or <strong>3) from part way in a verse to the very end of the verse</strong>.</p>
+
+    <p>If you are considering omitting part of a verse, please carefully and prayerfully consider, as omitting words or phrases could alter the context and meaning of the revelation in the verse.</p>
+    <ul>
+      <li>Example of a remembrance that is not usable because it is in the middle of the verse: "May it happen to me according to your word." Luke 1:38b</li>
+
+      <li>Example of a remembrance that is not usable as it cuts off the beginning of a verse: "For this very reason also, adding all diligence, supply bountifully in your faith virtue." 2 Pet. 1:5</li>
+    </ul>
+
 
     <div class="row"><div class="col-xs-12">
-      <p><strong>Sending Locality</strong>: {{object.trainee.locality}}<br>
+      <p><strong>Sending Locality</strong> {{object.trainee.locality}}<br>
       Please fellowship with the front office if this is incorrect.
       </p>
     </div></div>
 
     <div class="row"><div class="col-xs-12">
-      <p><strong>Remembrance</strong>: {{form.remembrance_text}} <span id="remaining_chars"></span></p>
+      <p><strong>Remembrance</strong> {{form.remembrance_text}} <span id="remaining_chars"></span></p>
     </div></div>
 
     <div class="row"><div class="col-xs-12">
-      <p><strong>Reference</strong>: {{form.remembrance_reference}}</p>
+      <p><strong>Reference</strong> {{form.remembrance_reference}}</p>
     </div></div>
 
     <div class="row">

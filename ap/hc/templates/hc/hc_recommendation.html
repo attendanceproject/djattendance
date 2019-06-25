@@ -13,9 +13,9 @@
     float: left;
   }
 
-  #add_row{
-    display: inline-block;
-    float: right;
+  .duplicate {
+    border: 1px solid red;
+    color: red;
   }
 
 </style>
@@ -24,53 +24,20 @@
 {% block scripts %}
 {{ block.super }}
 <script type="text/javascript">
-var hcrs = {{ hcrs|safe }};
-$(document).ready(() => {
-  const SIZE = $("#id_recommended_hc > option").length - 2;
-  const NULL_HCR = {"recommended_hc": null,
-                    "choice": null,
-                    "recommendation": null};
-
-  function addRow(values) {
-    let val = $("tr:last").attr('id').split("_").pop();
-
-    if (val < SIZE) {
-      val++;
-      var newRow = $("#row_0").clone();
-      $.each(newRow.children(), function(index, child) {
-        child.children[0].value = values[child.children[0].name];
-        child.children[0].setAttribute("name", child.children[0].name + "_" + val);
-      });
-      newRow.appendTo("#table");
-      $("tr:last").attr("id","row_" + val);
-    } else {
-      new Notification(Notification.SUCCESS, 'Not enough people').show();
+$('#id_hc_recommendation_form').submit(function(e) {
+  let inputs = $('select[name="recommended_hc"]');
+  let arr = [];
+  inputs.each(function(){
+    let value = $(this).val();
+    if (arr.indexOf(value) === -1){
+      arr.push(value);
     }
-  }
-
-  var hcr_1 = $("id_recommended_hc").val();
-
-  if (!hcr_1) {
-    $("#id_recommended_hc").val(hcrs[hcrs.length-1]["recommended_hc"])
-    $("#id_choice").val(hcrs[hcrs.length-1]["choice"])
-    $("#id_choice").attr("required", true);
-    $("#id_recommendation").val(hcrs[hcrs.length-1]["recommendation"])
-    $("#id_recommendation").attr("required", true);
-    hcrs.pop();
-  }
-
-  if (hcrs) {
-    for (var i = 0; i < hcrs.length; i++) {
-      if (hcrs[i]["recommended_hc"] != hcr_1 && hcrs[i] != NULL_HCR) {
-        addRow(hcrs[i]);
-      }
+    else {
+      $(this).addClass("duplicate");
+      e.preventDefault();
+      return false;
     }
-  }
-
-  $("#add_row").click(() => {
-    addRow(NULL_HCR);
   });
-
 });
 
 {% if read_only %}
@@ -129,15 +96,16 @@ $(document).ready(() => {
       <th>Choice</th>
       <th>Recommendation</th>
     </tr>
-    <tr id="row_0">
+    {% for form in hc_recommendation_forms %}
+    <tr>
       <td>{{form.recommended_hc}}</td>
       <td>{{form.choice}}</td>
       <td>{{form.recommendation}}
-      </tr>
+    </tr>
+    {% endfor %}
     </table>
 
     <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
   </form>
-  <button class="btn btn-primary" id="add_row">Add</button>
 
 {% endblock %}

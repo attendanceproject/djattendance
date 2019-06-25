@@ -1,5 +1,6 @@
 import datetime
 from collections import Counter, OrderedDict
+from datetime import datetime as dt
 from datetime import date, timedelta
 from itertools import combinations
 
@@ -134,7 +135,7 @@ def assign_leaveslips(service_scheduler, cws):
   assignments = Assignment.objects.filter(week_schedule=cws).select_related('service').prefetch_related('workers')
   # Delete old group leave slips
   GroupSlip.objects.filter(service_assignment__in=assignments).delete()
-  timestamp = datetime.now()
+  timestamp = dt.now()
   bulk_leaveslips_assignments = []
   bulk_groupslip_trainees = []
   for a in assignments.distinct('service'):
@@ -442,6 +443,8 @@ def unfinalized_service(user):
   # return list of service_id and week
   if has_designated_service(user):
     current_term = Term.current_term()
+    if date.today() < current_term.start:
+      return None
     # current week = up to week we want to access + 1
     current_week = Term.reverse_date(current_term, datetime.date.today())[0]
     worker = trainee_from_user(user).worker

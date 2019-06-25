@@ -17,5 +17,6 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/overview$', views.GenerateOverview.as_view(), name='overview'),
     url(r'^makeup$', views.ExamMakeupView.as_view(), name='makeups'),
     url(r'^makeup/(?P<pk>\d+)$', views.ExamMakeupView.as_view(), name='makeup'),
-    url(r'report/$', views.GenerateGradeReports.as_view(), name='report-all')
+    url(r'report/$', views.GenerateGradeReports.as_view(), name='report-all'),
+    url(r'^change_status$', views.OpenCloseExamView.as_view(), name='change_status')
 ]

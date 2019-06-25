@@ -4,7 +4,7 @@ from aputils.admin_utils import FilteredSelectMixin
 from accounts.models import Trainee
 
 from .models import Event, Schedule
-from .forms import EventForm, ScheduleForm
+from .forms import EventForm, BaseScheduleForm
 
 
 class EventAdmin(FilteredSelectMixin, admin.ModelAdmin):
@@ -18,7 +18,7 @@ class EventAdmin(FilteredSelectMixin, admin.ModelAdmin):
 
 # Works without mixin b/c relationship is explicitly defined
 class ScheduleAdmin(admin.ModelAdmin):
-  form = ScheduleForm
+  form = BaseScheduleForm
   save_as = True
   list_display = ("pk", "name", "comments", "priority", "term", "season", "weeks", "is_deleted")
   registered_filtered_select = [('trainees', Trainee), ('events', Event)]

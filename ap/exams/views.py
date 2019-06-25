@@ -123,7 +123,7 @@ class ExamTemplateListView(ListView):
     for makeup_exam in makeup:
       exams.append(makeup_exam.exam)
       makeup_exams.append(makeup_exam.exam)
-    exams = list(exams)
+    exams = list(reversed(exams))
     # TODO - Fix this. to show makeup
     for exam in exams:
       exam.visible = (exam.is_open and trainee_can_take_exam(user, exam)) or exam.is_graded_open
@@ -202,6 +202,7 @@ class SingleExamGradesListView(GroupRequiredMixin, TemplateView):
         trainee = Trainee.objects.get(id=trainee_id)
         exam = Exam.objects.get(pk=self.kwargs['pk'])
         Makeup.objects.get_or_create(trainee=trainee, exam=exam)
+<<<<<<< HEAD
 
         # need code to create session
         try:
@@ -210,6 +211,13 @@ class SingleExamGradesListView(GroupRequiredMixin, TemplateView):
         except Session.DoesNotExist:
           pass
         Session.objects.get_or_create(trainee=trainee, exam=exam)
+=======
+        session, created = Session.objects.get_or_create(trainee=trainee, exam=exam)
+        if not created:
+          session.time_finalized = None
+          session.is_graded = False
+          session.save()
+>>>>>>> dev
       except Trainee.DoesNotExist:
         pass
     elif 'close-makeup-trainee-id' in P:
@@ -352,7 +360,7 @@ class ExamMakeupView(GroupRequiredMixin, ListView):
 
 
 class PreviewExamView(GroupRequiredMixin, SuccessMessageMixin, ListView):
-  template_name = 'exams/exam_preview.html'
+  template_name = 'exams/exam.html'
   model = Session
   context_object_name = 'exam'
   fields = []
@@ -361,40 +369,8 @@ class PreviewExamView(GroupRequiredMixin, SuccessMessageMixin, ListView):
   def _get_exam(self):
     return Exam.objects.get(pk=self.kwargs['pk'])
 
-  def _get_most_recent_session(self):
-    return Session.objects.filter(exam=self._get_exam(), trainee=self.request.user).order_by('-time_started').first()
-
-  def _get_session(self):
-    if not self._exam_available():
-      return None
-
-    session = self._get_most_recent_session()
-    # Create a new exam session if there is no editable exam session
-    # TODO - Check if now - time_started is greater than exam.duration
-    if session is None:
-      session = Session(
-          trainee=trainee_from_user(self.request.user),
-          exam=self._get_exam(),
-          is_submitted_online=True)
-      session.save()
-
-    return session
-
   def _exam_available(self):
     return True
-    exam = self._get_exam()
-    user = self.request.user
-
-    if not trainee_can_take_exam(user, exam):
-      return False
-
-    # if the exam is in progress or doesn't exist, we're in business
-    most_recent_session = self._get_most_recent_session()
-
-    if (most_recent_session is None):
-      return True
-
-    return makeup_available(exam, user)
 
   def get_context_data(self, **kwargs):
     context = super(PreviewExamView, self).get_context_data(**kwargs)
@@ -642,3 +618,19 @@ class GradedExamView(TakeExamView):
         "View", True)
     ctx['graded_exam_available'] = self._get_exam().is_graded_open
     return ctx
+
+class OpenCloseExamView(ExamEditView):
+  def post(self, request, *args, **kwargs):
+
+    if request.method=="POST":
+      try:
+        pk = int(request.POST['exam_id'])
+
+        exam = Exam.objects.get(id=pk)
+        exam.is_open = not exam.is_open
+        exam.save()
+      except KeyError:
+        return HttpResponse('Error')
+      return HttpResponseRedirect(reverse_lazy('exams:manage'))
+    else:
+      raise Http404
