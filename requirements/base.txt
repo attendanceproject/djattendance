@@ -49,4 +49,4 @@ plan==0.5
 
 django-easy-pdf==0.2.0-dev1
 
-ortools==7.1.6722
+ortools==7.1.6720
