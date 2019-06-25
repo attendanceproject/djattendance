@@ -133,9 +133,9 @@ class Inspectors(models.Model):
 		)
 	def __str__(self):
 		return '%s' % (self.last_name)#(self.first_name, self.last_name)
-
+``
 class InspectableHouses(models.Model):
-	residence = models.ForeignKey('houses.House', null=True)
+	residence = models.ForeignKey('houses.House', null=True, on_delete=models.CASCADE)
 	residence_type = models.CharField(max_length=10)
 	uninspectable = models.BooleanField(default=False)
 	def __str__(self):
