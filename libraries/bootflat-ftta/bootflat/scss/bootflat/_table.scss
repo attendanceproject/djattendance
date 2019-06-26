@@ -212,8 +212,6 @@ $table-text-color:                darken($brown, 50%) !default;
   overflow: scroll;
   position: relative;
   max-height: 650px;
-  max-width: 1260px;
-
   > table {
     position: relative;
     border-collapse: separate; 
@@ -269,6 +267,21 @@ $table-text-color:                darken($brown, 50%) !default;
       > tr:nth-of-type(odd) {
         > th {
           background-color: $table-background-color;
+        }
+      }
+    }
+  }
+  @media screen and (max-width: 767px) {
+    > .table {
+      // Ensure the content does wrap
+      > thead,
+      > tbody,
+      > tfoot {
+        > tr {
+          > th,
+          > td {
+            white-space: inherit;
+          }
         }
       }
     }
