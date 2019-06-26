@@ -11,6 +11,8 @@
 
   // ajax call to database for inline editing
   function editDB(updated, rem_pk, field) {
+    var pass = false;
+
     $.ajax({
       async: false,
       type: "POST",
@@ -21,30 +23,39 @@
         f: field
       },
       success: function(response) {
+        pass = true;
         new Notification(Notification.SUCCESS, 'Saved').show();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         new Notification(Notification.ERROR, errorThrown).show();
       }
     });
+
+    return pass;
   }
 
 
   // set event for inline editing when you double click remembrance text or reference.
   function inlineEdit() {
     $("#graduation").on('dblclick', ".rem-text, .rem-ref", function(){
-      var clicked = $(this)
-      var text, orig = $(this).text(); // to compare
-      if (text = "None") {
-        text = "";
+      var clicked = $(this);
+      var orig = $(this).text(); // for comparison
+      if (orig == "None") {
+        orig = "";
       }
       var input = $('<input>', {
-        value: text,
+        value: orig,
         type: 'text',
         blur: function() { // clicking outside box when editing is finished
-          clicked.text(this.value);
+          var passed = false;
           if (this.value != orig) {
-            editDB(this.value, clicked.parent().attr("id"), clicked.attr("class")) // id gives remembrance pk; class gives whether it is text or reference;
+            passed = editDB(this.value, clicked.parent().attr("id"), clicked.attr("class")); // id gives remembrance pk; class gives whether it is text or reference; returns whether database successfully updated
+          }
+
+          if (passed) {
+            clicked.text(this.value);
+          } else {
+            clicked.text(orig);
           }
         },
         keyup: function(e) { // if pressing enter
