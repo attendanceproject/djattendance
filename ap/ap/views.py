@@ -86,7 +86,7 @@ def home(request):
   return render(request, 'index.html', context=data)
 
 
-def custom404errorview(request):
+def custom404errorview(request, exception=None):
   ctx = {
     'image_path': 'img/404error.png',
     'page_title': 'Page Not Found'
@@ -94,7 +94,7 @@ def custom404errorview(request):
   return render(request, 'error.html', context=ctx)
 
 
-def custom500errorview(request):
+def custom500errorview(request, exception=None):
   ctx = {
     'image_path': 'img/500error.png',
     'page_title': 'Internal Server Error'
@@ -102,7 +102,7 @@ def custom500errorview(request):
   return render(request, 'error.html', context=ctx)
 
 
-def custom502errorview(request):
+def custom502errorview(request, exception=None):
   ctx = {
     'image_path': 'img/502error.png',
     'page_title': 'Bad Gateway Error'
@@ -110,7 +110,7 @@ def custom502errorview(request):
   return render(request, 'error.html', context=ctx)
 
 
-def custom503errorview(request):
+def custom503errorview(request, exception=None):
   ctx = {
     'image_path': 'img/503error.png',
     'page_title': 'Service Unavailable'
@@ -118,7 +118,7 @@ def custom503errorview(request):
   return render(request, 'error.html', context=ctx)
 
 
-def custom504errorview(request):
+def custom504errorview(request, exception=None):
   ctx = {
     'image_path': 'img/504error.png',
     'page_title': 'Gateway Timeout'
