@@ -30,6 +30,16 @@
       <tbody>
         <tr id="service-row">
           <th>SERVICE</th>
+          {% for day in 0|get_weekday_codes %}
+          <td id="service-row-{{day}}" data-day="{{day}}">
+            {{day}}
+          </td>
+          {% endfor %}
+          <td>
+            <a href="{% url 'services:designated_service_hours' %}">
+              Hours
+            </a>
+          </td>
         </tr>
         <!-- COMMENT OUT: GOSPEL STATS ROW --
         <tr>
