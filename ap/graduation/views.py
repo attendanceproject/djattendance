@@ -170,6 +170,27 @@ class ReportView(GroupRequiredMixin, ListView):
     return context
 
 
+class ReportPostView(ReportView):
+  def post(self, request, *args, **kwargs):
+    return self.get(request, *args, **kwargs)
+
+  # abstract method
+  def updating(self, obj, field, value):
+    pass
+
+  def get_context_data(self, **kwargs):
+    if self.request.method == "POST" and self.request.user.has_group(['training_assistant']):
+      val = self.request.POST.get('change')
+      rpk = self.request.POST.get('pk')
+      f = self.request.POST.get('f')
+
+      obj = self.model.objects.get(pk=rpk)
+      self.updating(obj, f, val)
+
+    context = super(ReportPostView, self).get_context_data(**kwargs)
+    return context;
+
+
 class TestimonyReport(ReportView):
   model = Testimony
   template_name = 'graduation/testimony_report.html'
@@ -245,26 +266,14 @@ class MiscReport(ReportView):
     return context
 
 
-class RemembranceReport(ReportView):
+class RemembranceReport(ReportPostView):
   model = Remembrance
   template_name = 'graduation/rem_report.html'
 
-  def post(self, request, *args, **kwargs):
-    return self.get(request, *args, **kwargs)
+  def updating(self, obj, field, value):
+    if field == "rem-text":
+      obj.remembrance_text = value
+    elif field == "rem-ref":
+      obj.remembrance_reference = value
 
-  def get_context_data(self, **kwargs):
-    if self.request.method == "POST" and self.request.user.has_group(['training_assistant']):
-      val = self.request.POST.get('change')
-      rpk = self.request.POST.get('pk')
-      field = self.request.POST.get('f')
-      t = Remembrance.objects.get(pk=rpk)
-
-      if field == "rem-text":
-        t.remembrance_text = val
-      elif field == "rem-ref":
-        t.remembrance_reference = val
-
-      t.save()
-
-    context = super(RemembranceReport, self).get_context_data(**kwargs)
-    return context;
+    obj.save()
