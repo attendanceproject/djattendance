@@ -13,7 +13,6 @@ from services.models import (Assignment, Category, Qualification,
                              ServiceAttendance, ServiceException, ServiceRoll,
                              Worker, WorkerGroup)
 
-
 # This is written to improve query performance on admin backend
 class WorkerPrejoinMixin(forms.ModelForm):
   workers = forms.ModelMultipleChoiceField(
@@ -39,6 +38,18 @@ class ServiceRollForm(forms.ModelForm):
       "task_performed": forms.Textarea(attrs={'rows':2})
     }
 
+  def clean(self):
+    cleaned_data = self.cleaned_data
+    data_start = cleaned_data["start_datetime"]
+    data_end = cleaned_data["end_datetime"]
+
+    if data_start == data_end:
+      raise forms.ValidationError("Given start and end times should not be the same.")
+
+    if data_start > data_end:
+      raise forms.ValidationError("Given start time should not be after the end time.")
+
+    return cleaned_data
 
 class ServiceAttendanceForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):

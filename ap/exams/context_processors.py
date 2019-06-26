@@ -24,6 +24,6 @@ def exams_available(request):
   for session in sessions:
     if session.exam == None:
       session.delete()
-    elif session.exam.is_graded_open:
+    elif session.exam.is_graded_open and not makeup_available(session.exam, user):
       exam_count += 1
   return {'exams_available': exam_count}

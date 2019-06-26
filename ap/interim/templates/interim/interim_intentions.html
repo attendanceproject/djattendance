@@ -157,7 +157,9 @@
   select {
     background-color: white;
   }
-
+  textarea {
+    max-height: 25px;
+  }
 </style>
 {% endblock %}
 
@@ -410,7 +412,6 @@
             <label for="end_date">End Date</label>
             <label for="notes_comments">Notes/Comments</label>
           </div>
-
           {% for itin_form in itinerary_forms %}
             <div class="itin-row" id="row-{{forloop.counter0}}">
               {{itin_form.start}}
@@ -421,7 +422,6 @@
         </div>
         <br>
         <p>Note: if you set a date after the last date of the interim (auto-filled) the last row will be removed. Date changes will be automatically sorted. Additional rows will be added each time the end date is changed.</p>
-
         <label for="id_intent" style="margin-top: 30px">Intent to Return</label><br>
         {% for c in form.intent %}
           {{c}}&nbsp;&nbsp;
@@ -434,9 +434,7 @@
             </p>
             {{form.post_intent_comments}}
         </div>
-
       </div>
-
       <br>
       <button type="submit" class="btn btn-danger btn-save" id="submit">{{button_label|safe}}</button>
     </div>
