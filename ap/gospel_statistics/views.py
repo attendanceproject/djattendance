@@ -249,7 +249,7 @@ class GenerateReportView(GroupRequiredMixin, TemplateView):
       #return render(request, 'gospel_statistics/gospel_statistics_report_base.html', ctx)
       pdf_file = render_to_pdf('gospel_statistics/gospel_statistics_report_base.html', ctx)
       path = team.name+'.pdf'
-    
+
       with open(path, 'w+') as f:
         f.write(pdf_file.content)
       zfile.write(path)
