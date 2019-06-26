@@ -10,7 +10,7 @@
 <b>Word Count: </b><span class="char_count"></span>
 <div class="clearfix"></div>
 {% else %}
-<blockquote>{{ response|get_item:forloop.counter }}</blockquote>
+<blockquote>{{ response|get_item:forloop.counter|linebreaks }}</blockquote>
 <b>Word Count: </b>{{ response|get_item:forloop.counter|wordcount }}</span>
 {% endif %}
 </div>

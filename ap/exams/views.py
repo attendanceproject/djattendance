@@ -476,7 +476,7 @@ class TakeExamView(SuccessMessageMixin, CreateView):
     message = 'Exam submitted successfully.'
     if finalize:
       session = self._get_session()
-      if session.exam.is_open:
+      if session.exam.is_open or Makeup.objects.filter(trainee=session.trainee, exam=session.exam):
         session.time_finalized = datetime.now()
         session.grade = total_session_score
         session.is_graded = is_graded
