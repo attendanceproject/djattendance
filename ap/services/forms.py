@@ -13,7 +13,7 @@ from services.models import (Assignment, Category, Qualification,
                              ServiceAttendance, ServiceException, ServiceRoll,
                              Worker, WorkerGroup)
 from terms.models import Term
-from datetime import date, datetime, timedelta
+from datetime import date
 
 # This is written to improve query performance on admin backend
 class WorkerPrejoinMixin(forms.ModelForm):
