@@ -17,6 +17,7 @@ from leaveslips.models import GroupSlip, IndividualSlip
 from lifestudies.models import Summary
 from room_reservations.models import RoomReservation
 from terms.models import Term
+from web_access.models import WebRequest
 
 
 def get_popups(request):
