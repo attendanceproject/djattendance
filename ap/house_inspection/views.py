@@ -3,15 +3,15 @@ from __future__ import unicode_literals
 
 from itertools import chain
 
+from django.contrib import messages
+from django.db.models import Q
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.views import generic
+
 from accounts.models import Trainee
 from ap.base_datatable_view import BaseDatatableView
 from aputils.trainee_utils import is_TA, trainee_from_user
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
-from django.views import generic
-# Create your views here.
 from house_inspection.models import InspectableHouses, Inspectors
 from houses.models import House
 from terms.models import Term
@@ -22,50 +22,47 @@ from .models import HouseInspectionFaq
 from .utils import modify_question_status
 
 
-'''
-class HouseInspectionFaq(TemplateView):
-  template_name = 'house_inspection/faq.html'
-  model = FAQ
-  group_required = ['house_inspectors', 'training_assistant']
+# class HouseInspectionFaq(TemplateView):
+#   template_name = 'house_inspection/faq.html'
+#   model = FAQ
+#   group_required = ['house_inspectors', 'training_assistant']
 
-  def get_context_data(self, **kwargs)  :
-  	context = super(HouseInspectionFaq, self).get_context_data(**kwargs)
-  	context['page_title'] = "FAQ"
-  	context['list_questions'] = FAQ.objects.values('id', 'question', 'answer')
+#   def get_context_data(self, **kwargs)  :
+#   	context = super(HouseInspectionFaq, self).get_context_data(**kwargs)
+#   	context['page_title'] = "FAQ"
+#   	context['list_questions'] = FAQ.objects.values('id', 'question', 'answer')
 
-  	return context
-'''
+#   	return context
 
-'''
-def houseInspectionFaq(request):
-  #template_name = 'house_inspection/faq.html'
-  #model = FAQ
-  #group_required = ['house_inspectors', 'training_assistant']
-  # bound form
-  if request.method == "POST":
-    form = FaqForm(request.POST)
-    if form.is_valid():
-      question = form.cleaned_data['var']
-      name = form.cleaned_data['name']
+# def houseInspectionFaq(request):
+#   #template_name = 'house_inspection/faq.html'
+#   #model = FAQ
+#   #group_required = ['house_inspectors', 'training_assistant']
+#   # bound form
+#   if request.method == "POST":
+#     form = FaqForm(request.POST)
+#     if form.is_valid():
+#       question = form.cleaned_data['var']
+#       name = form.cleaned_data['name']
 
-  form = FaqForm() #unbound form
-  context = {    
-    form
-    #'page_title' = "FAQ",
-    #'list_questions' = FAQ.objects.values('id', 'question', 'answer')
-  }
-  return render(request, 'house_inspection/faq.html', context)
-'''
+#   form = FaqForm() #unbound form
+#   context = {
+#     form
+#     #'page_title' = "FAQ",
+#     #'list_questions' = FAQ.objects.values('id', 'question', 'answer')
+#   }
+#   return render(request, 'house_inspection/faq.html', context)
 
-'''
-This is the table under the cards.
-'''
+
+
+# This is the table under the cards.
+
 
 
 class QuestionRequestJSON(BaseDatatableView):
   model = HouseInspectionFaq
-  columns = ['id', 'trainee', 'question', 'date_submitted', 'status',] # add date_submitted and status to model  
-  order_columns = ['date_assigned',]  
+  columns = ['id', 'trainee', 'question', 'date_submitted', 'status',] # add date_submitted and status to model
+  order_columns = ['date_assigned',]
   max_display_length = 120
 
   def filter_queryset(self, qs):
@@ -191,7 +188,7 @@ def houseInspectionFaq(request):
 def manageInspectors(request):
   inspectors = Inspectors.objects.order_by('-last_name')
   context = {
-    'inspectors': inspectors
+      'inspectors': inspectors
   }
   if request.method == 'POST':
     # Get form values
@@ -199,19 +196,19 @@ def manageInspectors(request):
     first_name = request.POST['first_name']
     prefect_number = request.POST['prefect_number']
     # Use a manual form do a search for a trainee to connect it. Actually change the whole model.
-    if not Trainee.objects.filter(lastname=last_name,firstname=first_name).exists():
+    if not Trainee.objects.filter(lastname=last_name, firstname=first_name).exists():
         # Error
         messages.error(request, 'That trainee does not exist')
         return redirect('house_inspection:manage_inspectors')
-    elif Inspectors.objects.filter(last_name=last_name,first_name=first_name).exists():
+    elif Inspectors.objects.filter(last_name=last_name, first_name=first_name).exists():
       messages.error(request, 'The Inspector already exists')
       return redirect('house_inspection:manage_inspectors')
     else:
-      trainee = Trainee.objects.get(lastname=last_name,firstname=first_name)
+      trainee = Trainee.objects.get(lastname=last_name, firstname=first_name)
       term = trainee.current_term
       last_name = trainee.lastname
       first_name = trainee.firstname
-      inspector = Inspectors.objects.create(trainee=trainee, last_name=last_name, first_name=first_name,term=term,prefect_number=prefect_number)
+      inspector = Inspectors.objects.create(trainee=trainee, last_name=last_name, first_name=first_name, term=term, prefect_number=prefect_number)
       inspector.save()
 
   return render(request, 'house_inspection/manage_inspectors.html', context)
@@ -224,7 +221,7 @@ def manageInspectableHouses(request):
       inspectableHouses = InspectableHouses.objects.create(residence=house, residence_type=house.gender, uninspectable=False)
   inspectableHouses = InspectableHouses.objects.order_by('-residence')
   context = {
-    'inspectableHouses': inspectableHouses
+      'inspectableHouses': inspectableHouses
   }
   if request.method == 'POST':
     # Get Uninspectable
@@ -236,21 +233,19 @@ def manageInspectableHouses(request):
       house.save()
   return render(request, 'house_inspection/manage_inspectable_houses.html', context)
 
-'''
-class MyFormView(View):
-    form_class = MyForm
-    initial = {'key': 'value'}
-    template_name = 'form_template.html'
+# class MyFormView(View):
+#     form_class = MyForm
+#     initial = {'key': 'value'}
+#     template_name = 'form_template.html'
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form})
+#     def get(self, request, *args, **kwargs):
+#         form = self.form_class(initial=self.initial)
+#         return render(request, self.template_name, {'form': form})
 
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            # <process form cleaned data>
-            return HttpResponseRedirect('/success/')
+#     def post(self, request, *args, **kwargs):
+#         form = self.form_class(request.POST)
+#         if form.is_valid():
+#             # <process form cleaned data>
+#             return HttpResponseRedirect('/success/')
 
-        return render(request, self.template_name, {'form': form})
-'''
+#         return render(request, self.template_name, {'form': form})

@@ -1,6 +1,12 @@
 import json
 from datetime import date
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.http import HttpResponse
+from django.shortcuts import render
+
 from announcements.notifications import get_announcements, get_popups
 from aputils.trainee_utils import is_TA, is_trainee, trainee_from_user
 from aputils.utils import WEEKDAY_CODES
@@ -8,11 +14,6 @@ from bible_tracker.models import (EMPTY_WEEKLY_STATUS, UNFINALIZED_STR,
                                   BibleReading)
 from bible_tracker.views import EMPTY_WEEK_CODE_QUERY
 from dailybread.models import Portion
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.http import HttpResponse
-from django.shortcuts import render
 from house_requests.models import MaintenanceRequest
 from terms.models import Term
 

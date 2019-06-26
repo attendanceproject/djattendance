@@ -1,4 +1,5 @@
 exclude_paths:
   - ap/templates/bundles/*
+  - ap/verse_parse/*
   - webpack/*
 

@@ -1,22 +1,18 @@
-import datetime
 import re
 
-from accounts.models import Trainee, User
 from django.db.models import Q
-from django.http import (HttpResponse, HttpResponseBadRequest,
-                         HttpResponseRedirect)
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
-from django.template import Context, RequestContext, loader
-from django.urls import reverse, reverse_lazy
+from django.template import loader
 from django.views.generic import ListView
-from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from terms.models import Term
 
-from .forms import (BadgeForm, BadgePrintForm, BadgePrintSettingsUpdateForm,
-                    BadgeUpdateForm)
-from .models import Badge, BadgePrintSettings
-from .util import _image_upload_path, resize_image
+from accounts.models import Trainee
+from badges.forms import (BadgeForm, BadgePrintSettingsUpdateForm,
+                          BadgeUpdateForm)
+from badges.models import Badge, BadgePrintSettings
+from badges.util import resize_image
+from terms.models import Term
 
 
 class index(ListView):
@@ -32,7 +28,7 @@ def batch(request):
     # grab the trainee name. filename in form of:
     # /path/to/Ellis_Armad.jpg or /path/to/Ellis_Armad_1.jpg
     name = b.original.name.split('/')[-1].split('.')[0].split('_')[0]
-    nameList = re.sub("([a-z])([A-Z])","\g<1> \g<2>", name).split(' ')
+    nameList = re.sub("([a-z])([A-Z])", r"\g<1> \g<2>", name).split(' ')
 
     first = nameList[-1]
     last = nameList[0]
@@ -40,10 +36,9 @@ def batch(request):
     if len(nameList) > 2:
       middle = nameList[1]
     try:
-      badge = Badge.objects.get(Q(deactivated=False),
-                Q(firstname__exact=first),
-                Q(middlename__exact=middle),
-                Q(lastname__exact=last))
+      badge = Badge.objects.get(
+          Q(deactivated=False), Q(firstname__exact=first),
+          Q(middlename__exact=middle), Q(lastname__exact=last))
       if badge:
         print('Found badge, updating image', badge)
         badge.original = b.original
@@ -69,16 +64,16 @@ def badgeprintout(request):
   return render(request, 'badges/print.html', {'object_list': Badge.objects.filter(Q(term_created__exact=Term.current_term()) & Q(deactivated__exact=False))})
 
 def pictureRange(begin, end):
-  if begin>end:
+  if begin > end:
     return []
 
   pictureRangeArray = []
-  for num in range(int(begin-end)/8):
+  for num in range(int(begin - end) / 8):
     pictureRangeArray = pictureRangeArray.append(begin+num*8)
 
   return pictureRangeArray
 
-def printSelectedChoicesOnly(Badge, request, context):
+def printSelectedChoicesOnly(request, context):
   print('ids to print', request.POST.getlist('choice'))
   copies = int(request.POST.get('copies', 1))
 
@@ -107,7 +102,7 @@ class BadgePrintFrontView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgePrintFrontView, self).get_context_data(**kwargs)
-    printSelectedChoicesOnly(Badge, self.request, context)
+    printSelectedChoicesOnly(self.request, context)
 
     return context
 
@@ -158,7 +153,7 @@ class BadgePrintBostonFrontView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgePrintBostonFrontView, self).get_context_data(**kwargs)
-    printSelectedChoicesOnly(Badge, self.request, context)
+    printSelectedChoicesOnly(self.request, context)
     return context
 
 class BadgePrintMassBostonFrontView(ListView):
@@ -176,7 +171,7 @@ class BadgePrintMassBostonFrontView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgePrintMassBostonFrontView, self).get_context_data(**kwargs)
-    printSelectedChoicesOnly(Badge, self.request, context)
+    printSelectedChoicesOnly(self.request, context)
     return context
 
 
@@ -195,7 +190,7 @@ class BadgePrintAllInclusiveFrontView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgePrintAllInclusiveFrontView, self).get_context_data(**kwargs)
-    printSelectedChoicesOnly(Badge, self.request, context)
+    printSelectedChoicesOnly(self.request, context)
 
     return context
 
@@ -254,9 +249,9 @@ class BadgePrintFacebookView(ListView):
       yeartwo = termObject.year - 1
       yearthree = termObject.year - 1
       yearfour = termObject.year - 2
-      firstseason  = 'Spring'
+      firstseason = 'Spring'
       secondseason = 'Fall'
-      thirdseason  = 'Spring'
+      thirdseason = 'Spring'
       fourthseason = 'Fall'
 
     else:
@@ -264,68 +259,56 @@ class BadgePrintFacebookView(ListView):
       yeartwo = termObject.year
       yearthree = termObject.year - 1
       yearfour = termObject.year -1
-      firstseason  = 'Fall'
+      firstseason = 'Fall'
       secondseason = 'Spring'
-      thirdseason  = 'Fall'
+      thirdseason = 'Fall'
       fourthseason = 'Spring'
 
     def grouped(l, n):
-      for i in xrange(0, len(l), n):
+      for i in range(0, len(l), n):
         yield l[i:i+n]
 
     context['trainees'] = [
-      {
-        'header': 'First-Term Brothers',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearone, season=firstseason), gender__exact='M') & Q(type__exact='T') & Q(deactivated=False))), 6),
-      },
-      {
-        'header': 'First-Term Sisters',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearone, season=firstseason), gender__exact='F') & Q(type__exact='T') & Q(deactivated=False))), 6),
-      },
-      {
-        'header': 'Second-Term Brothers',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yeartwo, season=secondseason), gender__exact='M') & Q(type__exact='T') & Q(deactivated=False))), 6),
-      },
-      {
-        'header': 'Second-Term Sisters',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yeartwo, season=secondseason), gender__exact='F') & Q(type__exact='T') & Q(deactivated=False))), 6),
-      },
-      {
-        'header': 'Third-Term Brothers',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearthree, season=thirdseason), gender__exact='M') & Q(type__exact='T') & Q(deactivated=False))), 6),
-      },
-      {
-        'header': 'Third-Term Sisters',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearthree, season=thirdseason), gender__exact='F') & Q(type__exact='T') & Q(deactivated=False))), 6),
-      },
-      {
-        'header': 'Fourth-Term Brothers',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearfour, season=fourthseason), gender__exact='M') & Q(type__exact='T') & Q(deactivated=False))), 6),
-      },
-      {
-        'header': 'Fourth-Term Sisters',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearfour, season=fourthseason), gender__exact='F') & Q(type__exact='T') & Q(deactivated=False))), 6),
-      },
-      {
-        'header': 'First-Term Brothers',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearone, season=firstseason), gender__exact='M') & Q(type='X') & Q(deactivated=False))), 6),
-        'type': 'XB',
-      },
-      {
-        'header': 'First-Term Sisters',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearone, season=firstseason), gender__exact='F') & Q(type='X') & Q(deactivated=False))), 6),
-        'type': 'XB',
-      },
-      {
-        'header': 'Second-Term Brothers',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yeartwo, season=secondseason), gender__exact='M') & Q(type='X') & Q(deactivated=False))), 6),
-        'type': 'XB',
-      },
-      {
-        'header': 'Second-Term Sisters',
-        'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yeartwo, season=secondseason), gender__exact='F') & Q(type='X') & Q(deactivated=False))), 6),
-        'type': 'XB',
-      },
+        {'header': 'First-Term Brothers',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearone, season=firstseason), gender__exact='M') & Q(type__exact='T') & Q(deactivated=False))), 6),
+        },
+        {'header': 'First-Term Sisters',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearone, season=firstseason), gender__exact='F') & Q(type__exact='T') & Q(deactivated=False))), 6),
+        },
+        {'header': 'Second-Term Brothers',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yeartwo, season=secondseason), gender__exact='M') & Q(type__exact='T') & Q(deactivated=False))), 6),
+        },
+        {'header': 'Second-Term Sisters',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yeartwo, season=secondseason), gender__exact='F') & Q(type__exact='T') & Q(deactivated=False))), 6),
+        },
+        {'header': 'Third-Term Brothers',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearthree, season=thirdseason), gender__exact='M') & Q(type__exact='T') & Q(deactivated=False))), 6),
+        },
+        {'header': 'Third-Term Sisters',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearthree, season=thirdseason), gender__exact='F') & Q(type__exact='T') & Q(deactivated=False))), 6),
+        },
+        {'header': 'Fourth-Term Brothers',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearfour, season=fourthseason), gender__exact='M') & Q(type__exact='T') & Q(deactivated=False))), 6),
+        },
+        {'header': 'Fourth-Term Sisters',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearfour, season=fourthseason), gender__exact='F') & Q(type__exact='T') & Q(deactivated=False))), 6),
+        },
+        {'header': 'First-Term Brothers',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearone, season=firstseason), gender__exact='M') & Q(type='X') & Q(deactivated=False))), 6),
+         'type': 'XB',
+        },
+        {'header': 'First-Term Sisters',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yearone, season=firstseason), gender__exact='F') & Q(type='X') & Q(deactivated=False))), 6),
+         'type': 'XB',
+        },
+        {'header': 'Second-Term Brothers',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yeartwo, season=secondseason), gender__exact='M') & Q(type='X') & Q(deactivated=False))), 6),
+         'type': 'XB',
+        },
+        {'header': 'Second-Term Sisters',
+         'trainee_list': grouped(facebookOrder(Badge.objects.filter(Q(term_created=Term.objects.get(year=yeartwo, season=secondseason), gender__exact='F') & Q(type='X') & Q(deactivated=False))), 6),
+         'type': 'XB',
+        },
     ]
 
     return context
@@ -376,7 +359,7 @@ class BadgePrintStaffView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgePrintStaffView, self).get_context_data(**kwargs)
-    printSelectedChoicesOnly(Badge, self.request, context)
+    printSelectedChoicesOnly(self.request, context)
 
     return context
 
@@ -407,7 +390,7 @@ class BadgeTermView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgeTermView, self).get_context_data(**kwargs)
-    context['type'] = "1T";
+    context['type'] = "1T"
     return context
 
 class BadgeXBTermView(ListView):
@@ -422,7 +405,7 @@ class BadgeXBTermView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgeXBTermView, self).get_context_data(**kwargs)
-    context['type'] = "XB";
+    context['type'] = "XB"
     return context
 
 class BadgeStaffView(ListView):
@@ -437,7 +420,7 @@ class BadgeStaffView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgeStaffView, self).get_context_data(**kwargs)
-    context['type'] = "S";
+    context['type'] = "S"
     return context
 
 class BadgeListView(ListView):
@@ -447,13 +430,13 @@ class BadgeListView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(BadgeListView, self).get_context_data(**kwargs)
-    context['type'] = "All";
+    context['type'] = "All"
     return context
 
 class BadgeCreateView(CreateView):
   form_class = BadgeForm
   model = Badge
-  success_url='/badges/view/current'
+  success_url = '/badges/view/current'
 
   def get_context_data(self, **kwargs):
     context = super(BadgeCreateView, self).get_context_data(**kwargs)
@@ -483,7 +466,7 @@ class BadgeUpdateView(UpdateView):
 class BadgeDeleteView(DeleteView):
   model = Badge
   template_name = 'badges/badge_delete.html'
-  success_url='/badges/view/current'
+  success_url = '/badges/view/current'
 
 class BadgePrintUsherView(ListView):
 
@@ -580,7 +563,7 @@ class BadgePrintSettingsUpdateView(UpdateView):
   model = BadgePrintSettings
   template_name = 'badges/badge_print_settings.html'
   form_class = BadgePrintSettingsUpdateForm
-  success_url='/badges/view/current'
+  success_url = '/badges/view/current'
 
   def get_object(self, queryset=None):
     if BadgePrintSettings.objects.count() == 0:
