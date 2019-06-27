@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.utils.deprecation import MiddlewareMixin
 
 # TODO: we need to fix how our authorization works
-WEB_ACCESS_EX = [reverse('web_access:get-remote-address'), reverse('web_access:get-guest-requests'), reverse('web_access:create-guest-request')]
+WEB_ACCESS_EX = [reverse('web_access:get-remote-address'), reverse('web_access:get-guest-requests'), reverse('web_access:create-guest-request'), reverse('web_access:delete-guest-request')]
 IMPORT_EX = [reverse('apimport:process_csv'), reverse('apimport:term_details'), reverse('apimport:save_data')]
 ROOM_EX = [reverse('room_reservations:room-reservation-tv-page'), reverse('room_reservations:tv-page-reservations'), reverse('room_reservations:weather'), reverse('room_reservations:tv-page-ticker'), 'room_reservations:tv-page-version']
 EXEMPT_URLS = [reverse('login'), reverse('logout'), reverse('home')] + WEB_ACCESS_EX + IMPORT_EX + ROOM_EX
