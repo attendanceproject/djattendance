@@ -163,8 +163,8 @@
       scrollX: true,
       autoWidth: true,
       {% endif %}
-      dom: '<"row"<"col-sm-6"lB><"col-sm-6"f>>' +
-      '<"row"<"col-sm-12"<"table-responsive"tr>>>',
+      dom: '<"table-responsive"tr>' +
+      '<"align-buttons"lB>',
       buttons: [
         // only attendance monitors, devs, and tas can view these controls for the datatable
         // this allows the display of headers and filter by trainee year, gender and self attendance
@@ -174,7 +174,6 @@
           text: 'Filters',
           buttons: ["first_year", "second_year", "brothers", "sisters"]
         },
-
         "self_attendance",
         {% endifusergroup %}
       ],
@@ -286,7 +285,6 @@
 #bluebox{
   background-color: #095F80;
   height: 40px;
-  margin-bottom: 15px;
   }
 select {
   font-family: 'Yantramanav Light';
@@ -295,6 +293,16 @@ select {
 }
 .header-emphasis {
   font-weight: bold;
+}
+.align-buttons {
+  position:absolute;
+  margin-bottom: 10px;
+}
+.align-buttons2{
+  position: relative;
+}
+.buttons-collection {
+  margin-right: 7px;
 }
 
 </style>
@@ -314,6 +322,8 @@ select {
   <li role="presentation" class="active"><a href="#week-tab" aria-controls="home" role="tab" data-toggle="tab">Week</a></li>
 </ul>
   
+<div id="button_filter"></div>
+
   <div class="tab-content">
     <div id="week-tab" class="tab-pane active" role="tabpanel">
       <!--week label-->
@@ -432,7 +442,7 @@ select {
             {% endfor %}
           </tbody>
         </table>
-        <button id="finalize_rolls" class="btn btn-danger btn-default" style="float: right; margin-bottom: 10" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
+        <button id="finalize_rolls" class="btn btn-danger btn-default align-buttons2" style="float: right;" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
         {% else %}
         No rolls for this week
         {% endif %}
