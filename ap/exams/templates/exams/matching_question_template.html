@@ -1,5 +1,5 @@
 <div class="form-horizontal exam_question">
-  <li id='matching-{{ forloop.counter }}'> {{ question.prompt }} <b> (Points: {{ question.points }})</b></li>
+  <li id='matching-{{ forloop.counter }}'> {{ question.prompt|linebreak }} <b> (Points: {{ question.points }})</b></li>
   <select class="form-group" name="matching_answer_field">
     <option value=""></option>
     {% for item in question.matching_answers %}
