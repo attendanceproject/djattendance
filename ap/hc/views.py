@@ -266,8 +266,8 @@ class HCSurveyTAView(GroupRequiredMixin, TemplateView):
     context = super(HCSurveyTAView, self).get_context_data(**kwargs)
     hcsa = HCSurveyAdmin.objects.filter(term=Term.current_term()).filter(index=index)
     surveys_and_comments = []
-    house_ids = HCSurvey.objects.filter(survey_admin=hcsa, submitted=True).values_list('house', flat=True)
-    for hcs in HCSurvey.objects.filter(survey_admin=hcsa, submitted=True).exclude(house__gender='C').order_by('house__gender', 'house__name'):
+    house_ids = HCSurvey.objects.filter(survey_admin__in=hcsa, submitted=True).values_list('house', flat=True)
+    for hcs in HCSurvey.objects.filter(survey_admin__in=hcsa, submitted=True).exclude(house__gender='C').order_by('house__gender', 'house__name'):
       surveys_and_comments.append({
         'survey': hcs,
         'trainee_comments': HCTraineeComment.objects.filter(hc_survey=hcs)

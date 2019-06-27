@@ -99,7 +99,7 @@ class GospelStatisticsView(TemplateView):
     index = 0
     for i in list_of_pairs:
       pair = GospelPair.objects.filter(id=i)
-      stat = GospelStat.objects.filter(gospelpair=pair, week=current_week)[0]
+      stat = GospelStat.objects.filter(gospelpair__in=pair, week=current_week)[0]
       ## Why doesn't this work?
       # for i in range(13):
       #  eval('stat.'+_attributes[i]+' = list_of_stats['+str(index+i)+']')
