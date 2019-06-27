@@ -46,9 +46,8 @@
     for (var i in services_day) {
       // i is the index, day is the value of the element at index i in services_day
       var day = services_day[i];
-      var innerHTML = "<span id=\"service-tooltip\" data-toggle=\"tooltip\" title=\"" + services[i]
-        + "\" class=\"glyphicon glyphicon-ok\"></span>";
-      document.getElementById("service-row-" + weekdayCodes[day]).innerHTML = innerHTML;
+      document.getElementById("service-row-" + weekdayCodes[day]).innerHTML = "<span id=\"service-tooltip\" data-toggle=\"tooltip\" title=\""
+        + services[i] + "\" class=\"glyphicon glyphicon-ok\"></span>";
     }
 
     // show url link for designated hours if the trainee has designated service
