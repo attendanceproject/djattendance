@@ -37,11 +37,11 @@ const EventColumn = ({daysEsr, date, selectedEvents, onEventClick, onHeaderClick
   )
 }
 
-EventColumn.PropTypes = {
+EventColumn.propTypes = {
   daysEsr: PropTypes.arrayOf(PropTypes.shape({
     event: PropTypes.object.isRequired,
-    roll: PropTypes.object.isRequired,
-    slip: PropTypes.object.isRequired,
+    // roll: PropTypes.object.isRequired,
+    // slip: PropTypes.object.isRequired,
   }).isRequired).isRequired,
   selectedEvents: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
   onEventClick: PropTypes.func.isRequired
