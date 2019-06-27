@@ -32,54 +32,33 @@
     regex = /\d+/gm;
     var days = serviceDays.match(regex);
 
-    //processServices(services, days);
+    processServices(services, days);
 
   }
 
   function processServices(services, services_day) {
+    // clear all the cells
+    for (var i = 0; i < 7; i++) {
+      document.getElementById("service-row-" + weekdayCodes[i]).innerHTML = "";
+    }
 
-    // HTML inserts
-    var urlInsert = "<a href=\"{% url 'services:designated_service_hours' %}\">Hours</a>";
-    var htmlInitInsert = "<span id=\"service-tooltip\" data-toggle=\"tooltip\" title=\"";
-    var htmlLastInsert = "\"class=\"glyphicon glyphicon-ok\"></span>";
+    // insert check marks for the days that have rotational service
+    for (var i in services_day) {
+      // i is the index, day is the value of the element at index i in services_day
+      var day = services_day[i];
+      var innerHTML = "<span id=\"service-tooltip\" data-toggle=\"tooltip\" title=\"" + services[i]
+        + "\" class=\"glyphicon glyphicon-ok\"></span>";
+      document.getElementById("service-row-" + weekdayCodes[day]).innerHTML = innerHTML;
+    }
 
+    // show url link for designated hours if the trainee has designated service
     var regex = /'(.*?)'/gm;
     var designated = assignedDesignated.match(regex);
-    console.log(services, services_day, designated);
-
-    // for service week row
-    var numCols = $("#front-table").find('tr')[1].cells.length;
-    var row = document.getElementById("service-row");
-    var cell;
-    var tableIndex = 0;
-    var colCount = 1;
-    var reverseColCount = 8;
-    var serviceIndex;
-
-    // delete cells if already exist to load new data when the week changes
-    if (numCols > 1) {
-      while (reverseColCount > 0) {
-        row.deleteCell(reverseColCount);
-        reverseColCount--;
-      }
+    if (designated) {
+      var designatedHourUrlCell = document.getElementById("designated_service_hours_link");
+      var urlInsert = "<a href=\"{% url 'services:designated_service_hours' %}\">Hours</a>";
+      designatedHourUrlCell.innerHTML = urlInsert
     }
-
-    if (colCount < 8) {
-      while (colCount < 8) {
-        cell = row.insertCell(colCount);
-        for (serviceIndex = 0, len = services_day.length; serviceIndex < len; serviceIndex++) {
-          if (tableIndex == services_day[serviceIndex]) {
-            cell.innerHTML = htmlInitInsert + services[serviceIndex] + htmlLastInsert;
-          }
-        }
-        tableIndex++;
-        colCount++;
-      }
-    }
-
-    // redirect to designated hours if the trainee has designated service
-    cell = row.insertCell(colCount++);
-    (designated !== null) ? cell.innerHTML = urlInsert : cell.innerHTML = "";
   }
 
   function changeServiceWeek() {
