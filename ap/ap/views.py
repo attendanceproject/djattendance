@@ -78,7 +78,7 @@ def home(request):
       finalized_str = str(json_weekly_reading['finalized'])
 
     worker_assignments = worker.assignments.filter(week_schedule=cws)
-    designated_list = list(worker_assignments.filter(service__category__name="Designated Services").values_list('service__name', flat=True))
+    designated_list = list(service.encode("utf-8") for service in worker_assignments.filter(service__category__name="Designated Services").values_list('service__name', flat=True))
     assigned_list = list(service.encode("utf-8") for service in worker_assignments.exclude(service__category__name="Designated Services").values_list('service__name', flat=True))
     service_day = list(worker_assignments.exclude(service__category__name="Designated Services").values_list('service__weekday', flat=True))
 
