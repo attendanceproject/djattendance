@@ -164,8 +164,7 @@
       autoWidth: true,
       {% endif %}
       dom: '<"row"<"col-sm-6"lB><"col-sm-6"f>>' +
-      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
-      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>',
       buttons: [
         // only attendance monitors, devs, and tas can view these controls for the datatable
         // this allows the display of headers and filter by trainee year, gender and self attendance
@@ -284,64 +283,80 @@
 .dt-button.active {
   background-color: #A6C5D1;
 }
+#bluebox{
+  background-color: #095F80;
+  height: 40px;
+  margin-bottom: 15px;
+  }
+select {
+  font-family: 'Yantramanav Light';
+  font-size: 15px;
+  margin: 0px 5px 5px 10px;
+}
+.header-emphasis {
+  font-weight: bold;
+}
+
 </style>
 {% endblock %}
 
 
 {% block content %}
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-md-12">
-      <label>
-        <form method="post">
-          {% csrf_token %}
-          Week:
-          <select id="week_menu" name="week" size="0" ></select>
-          {% ifusergroup attendance_monitors %}
-            {% if event_type == "T" %}
-              Team:
-              <select id="team_menu" name="team" size="0" >
-                {% for t in teams %}
-                <option value="{{t.pk}}" {% if t.pk == selected_team_id %} selected="selected" {% endif %} >{{t.name}}</option>
-                {% endfor %}
-              </select>
-            {% elif event_type == "H" %}
-              House:
-              <select id="house_menu" name="house" size="0" >
-                {% for h in houses %}
-                <option value="{{h.pk}}" {% if h.pk == selected_house_id %} selected="selected" {% endif %}>{{h.name}}</option>
-                {% endfor %}
-
-              </select>
-            {% endif %}
-          {% endifusergroup %}
-        </form>
-      </label>
-    </div>
-  </div>
-  <p>If there's no roll entered, it's assumed as a Present.</p>
-  <div class="row">
-    <div class="col-md-12">
-      &nbsp;
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-12">
-      <div>
+{% if event_type == "T" %}
+  <h1>Team Roll</h1>
+{% elif event_type == "H" %}
+  <h1>House Roll</h1>
+{% endif %}
+<p style="margin-bottom: 40px; color: gray;">If there's no roll entered, it's assumed as a Present.</p>
+      
+<!--ul creates the tab-->
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active"><a href="#week-tab" aria-controls="home" role="tab" data-toggle="tab">Week</a></li>
+</ul>
+  
+  <div class="tab-content">
+    <div id="week-tab" class="tab-pane active" role="tabpanel">
+      <!--week label-->
+      <div id="bluebox">
+        <label>
+          <form method="post">
+            {% csrf_token %}
+            <select id="week_menu" name="week" size="0" ></select>
+            {% ifusergroup attendance_monitors %}
+              {% if event_type == "T" %}
+               <text style="color: white;">Team:</text>
+                <select id="team_menu" name="team" size="0" >
+                  {% for t in teams %}
+                  <option value="{{t.pk}}" {% if t.pk == selected_team_id %} selected="selected" {% endif %} >{{t.name}}</option>
+                  {% endfor %}
+                </select>
+              {% elif event_type == "H" %}
+              <text style="color: white;">House:</text>
+                <select id="house_menu" name="house" size="0" >
+                  {% for h in houses %}
+                  <option value="{{h.pk}}" {% if h.pk == selected_house_id %} selected="selected" {% endif %}>{{h.name}}</option>
+                  {% endfor %}
+  
+                </select>
+              {% endif %}
+            {% endifusergroup %}
+          </form>
+        </label>
+      </div>
         {% if event_list %}
         <table id="display_roll" class="table table-condensed table-bordered table-striped">
           <thead>
             <tr>
-              <th class="date">Date</th>
+              <th class="date header-emphasis">Date</th>
               <td></td>
               <td></td>
               <td></td>
               {% for event in event_list %}
-              <th class="date">{{event.start_datetime|date:"D (m/d)"}}</th>
+              <th class="date header-emphasis">{{event.start_datetime|date:"D (m/d)"}}</th>
               {% endfor %}
             </tr>
             <tr>
-              <th>Roll</th>
+              <th class="header-emphasis">Roll</th>
               <td></td>
               <td></td>
               <td></td>
@@ -350,7 +365,7 @@
               {% endfor %}
             </tr>
             <tr>
-              <th>Time</th>
+              <th class="header-emphasis">Time</th>
               <td></td>
               <td></td>
               <td></td>
@@ -359,7 +374,7 @@
               {% endfor %}
             </tr>
             <tr>
-              <th>Set all</th>
+              <th class="header-emphasis">Set all</th>
               <td></td>
               <td></td>
               <td></td>
@@ -376,7 +391,7 @@
 
             {% if event_type == 'RF' %}
             <tr>
-              <th>Roll Finalization</th>
+              <thclass="header-emphasis">Roll Finalization</th>
               <td></td>
               <td></td>
 
@@ -417,12 +432,10 @@
             {% endfor %}
           </tbody>
         </table>
-        <button id="finalize_rolls" class="btn btn-default" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
+        <button id="finalize_rolls" class="btn btn-danger btn-default" style="float: right; margin-bottom: 10" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
         {% else %}
         No rolls for this week
         {% endif %}
       </div>
     </div>
-  </div>
-</div>
 {% endblock %}
