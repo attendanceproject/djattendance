@@ -68,7 +68,7 @@ def pictureRange(begin, end):
     return []
 
   pictureRangeArray = []
-  for num in range(int(begin - end) / 8):
+  for num in range(int(begin - end) // 8):
     pictureRangeArray = pictureRangeArray.append(begin+num*8)
 
   return pictureRangeArray
