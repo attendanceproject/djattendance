@@ -1,5 +1,6 @@
 // ajax call to database for inline editing
-function editDB(updated, rem_pk, field, url) {
+// updated gives the change, pk the object id, field the model field, url the model POST url
+function editDB(updated, obj_pk, field, url) {
   var pass = false;
 
   $.ajax({
@@ -8,7 +9,7 @@ function editDB(updated, rem_pk, field, url) {
     url: url,
     data: {
       change: updated,
-      pk: rem_pk,
+      pk: obj_pk,
       f: field
     },
     success: function(response) {
@@ -23,31 +24,52 @@ function editDB(updated, rem_pk, field, url) {
   return pass;
 }
 
+// blur function - for clicking outside input when editing is finished
+function blurFunction(textbox, orig, clicked, url) {
+  var passed = false;
+  if (textbox.value != orig) {
+    passed = editDB(textbox.value, clicked.parent().attr("id"), clicked.attr("class"), url);
+  }
+
+  if (passed) {
+    clicked.text(textbox.value);
+  } else {
+    clicked.text(orig);
+  }
+}
+
 // set event for inline editing when you double click remembrance text or reference.
 function tableInlineEdit(clicked, url) {
   var orig = clicked.text(); // for comparison
   if (orig == "None") {
     orig = "";
   }
-  var input = $('<input>', {
-    value: orig,
-    type: 'text',
-    blur: function() { // clicking outside box when editing is finished
-      var passed = false;
-      if (this.value != orig) {
-        passed = editDB(this.value, clicked.parent().attr("id"), clicked.attr("class"), url); // id gives pk; class gives field changed; returns whether database successfully updated
-      }
 
-      if (passed) {
-        clicked.text(this.value);
-      } else {
-        clicked.text(orig);
+  var input;
+  if (url == "/graduation/testimony_report") {
+    input = $('<textarea>', {
+      rows: orig.length/23, // estimate height of text to minimize table resizing
+      blur: function() {
+        blurFunction(this, orig, clicked, url);
+      },
+      keyup: function(e) { // if pressing enter
+        if (e.which === 13) input.blur();
       }
-    },
-    keyup: function(e) { // if pressing enter
-      if (e.which === 13) input.blur();
-    }
-  });
+    });
+
+    input.val(orig);
+  } else {
+    input = $('<input>', {
+      value: orig,
+      type: 'text',
+      blur: function() {
+        blurFunction(this, orig, clicked, url);
+      },
+      keyup: function(e) { // if pressing enter
+        if (e.which === 13) input.blur();
+      }
+    });
+  }
 
   input.appendTo( clicked.empty() ).focus();
 }
