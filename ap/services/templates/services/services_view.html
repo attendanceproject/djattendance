@@ -101,6 +101,58 @@ Service Scheduling
 {% block scripts %}
 {{ block.super }}
   <script>
+    function checkall() {
+      //Get the checkbox 
+      var checkBox = document.getElementsByName("pinbox");
+      var i;
+      for (i = 0; i < checkBox.length; i++) {
+          checkBox[i].checked = true;
+        }
+    }
+    function checka(e) {
+      var data = [];
+      var inputgroups = $('.pin-input');
+      var id, ig, val
+      for (var i = 0; i < inputgroups.length; i++) {
+        val = true;
+        ig = $(inputgroups[i]);
+        id = ig.data('id');
+        if (!id || id == '') {
+          continue;
+        }
+        data.push({
+          id: id,
+          pin: val,
+        });
+      }
+      sendBulkAjax(assignment_pin_url, data);
+    }
+    function unchecka(e) {
+      var data = [];
+      var inputgroups = $('.pin-input');
+      var id, ig, val
+      for (var i = 0; i < inputgroups.length; i++) {
+        val = false;
+        ig = $(inputgroups[i]);
+        id = ig.data('id');
+        if (!id || id == '') {
+          continue;
+        }
+        data.push({
+          id: id,
+          pin: val,
+        });
+      }
+      sendBulkAjax(assignment_pin_url, data);
+    }
+    function uncheckall() {
+      //Get the checkbox
+      var checkBox = document.getElementsByName("pinbox");
+      var i;
+      for (i = 0; i < checkBox.length; i++) {
+          checkBox[i].checked = false;
+        }
+    }
     $(document).ready(function() {
       $(".shorten").shorten();
     });
@@ -151,6 +203,12 @@ Service Scheduling
       <div>
         <a href="#" class="manual-mode">Go into Manual Mode</a>.
       </div>
+      <button type = "button" onclick = "checka()">
+          Pin All
+        </button>
+      <button type = "button" onlick = "uncheckall()">
+          Un-Pin All
+        </button>
       {% for category in categories %}
         <h3>{{ category }}</h3>
         {% for service in category.services.all %}
@@ -233,7 +291,7 @@ Service Scheduling
                       </a>
                     </td>
                     <td class="shrink">
-                      <input type="checkbox" class="pin-input" data-id="">
+                      <input type="checkbox" name = "pinbox" class="pin-input" data-id="">
                     </td>
                   </tr>
                 {% endif %}
