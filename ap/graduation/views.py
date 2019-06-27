@@ -191,9 +191,21 @@ class ReportPostView(ReportView):
     return context;
 
 
-class TestimonyReport(ReportView):
+class TestimonyReport(ReportPostView):
   model = Testimony
   template_name = 'graduation/testimony_report.html'
+
+  def updating(self, obj, field, value):
+    if field == "test-top":
+      obj.top_experience = value
+    elif field == "test-enc":
+      obj.encouragement = value
+    elif field == "test-bur":
+      obj.overarching_burden = value
+    elif field == "test-hi":
+      obj.highlights = value
+
+    obj.save()
 
   def get_context_data(self, **kwargs):
     context = super(TestimonyReport, self).get_context_data(**kwargs)
@@ -254,9 +266,17 @@ class SpeakingReport(ReportView):
     return context
 
 
-class MiscReport(ReportView):
+class MiscReport(ReportPostView):
   model = Misc
   template_name = 'graduation/misc_report.html'
+
+  def updating(self, obj, field, value):
+    if field == "misc-inv":
+      obj.grad_invitations = value
+    elif field == "misc-dvd":
+      obj.grad_dvd = value
+
+    obj.save()
 
   def get_context_data(self, **kwargs):
     context = super(MiscReport, self).get_context_data(**kwargs)

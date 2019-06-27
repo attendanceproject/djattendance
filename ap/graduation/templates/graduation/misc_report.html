@@ -8,6 +8,9 @@
 {% block scripts %}
 {{ block.super }}
 <script type="text/javascript">
+
+  {% include "tables/table_inline_editing.js" %}
+
   $(document).ready(function() {
     $("#graduation").DataTable({
       info: false,
@@ -51,6 +54,9 @@
 
     });
 
+    $("#graduation").on('dblclick', ".misc-inv, .misc-dvd", function() {
+      tableInlineEdit($(this), "{% url 'graduation:misc-report' %}");
+    });
 
   });
 
@@ -75,11 +81,11 @@ Total Invitations Requested: {{invite_totals}}</p>
     </thead>
     <tbody>
       {% for m in data %}
-      <tr>
+      <tr id="{{m.id}}">
         <td>{{m.trainee.firstname}}</td>
         <td>{{m.trainee.lastname}}</td>
-        <td>{{m.grad_invitations}}</td>
-        <td>{{m.grad_dvd}}</td>
+        <td class="misc-inv">{{m.grad_invitations}}</td>
+        <td class="misc-dvd">{{m.grad_dvd}}</td>
       </tr>
       {% endfor %}
     </tbody>
