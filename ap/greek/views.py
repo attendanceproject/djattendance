@@ -1,13 +1,12 @@
 from django.shortcuts import render
 from django.views.generic import ListView
+from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from .models import Vocab
+import json
 
 def index(request):
-
-    greek_list = []
-    english_list = []
-
     # By default, Greek page loads vocabs in chapter 1
     greek_list = Vocab.objects.filter(chapter=1)
 
@@ -22,3 +21,13 @@ def index(request):
     }
 
     return render(request, 'greek_helper/vocab_list.html', context=context)
+
+def changeChapter(request):
+    if request.is_ajax():
+        chapter = request.GET['chapter']
+    try:
+        greek_list = Vocab.objects.filter(chapter=chapter)
+        json_greek_list = serializers.serialize('json', greek_list)
+        return HttpResponse(json_greek_list, content_type='application/json')
+    except ObjectDoesNotExist:
+        return HttpResponse('Error from ajax call')
