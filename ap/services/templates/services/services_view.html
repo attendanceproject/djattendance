@@ -111,7 +111,7 @@ Service Scheduling
     }
     function checka(e) {
       var data = [];
-      var inputgroups = $('.pin-input');
+        
       var id, ig, val
       for (var i = 0; i < inputgroups.length; i++) {
         val = true;
@@ -125,6 +125,20 @@ Service Scheduling
           pin: val,
         });
       }
+      var checkBox = document.getElementsByName("pinbox");
+      var i;
+      for (i = 0; i < checkBox.length; i++) {
+        val = true;
+        ig = $(inputgroups[i]);
+        id = ig.data('id');
+        if (!id || id == '') {
+          continue;
+        }
+        data.push({
+          id: id,
+          pin: val,
+        });
+        }
       sendBulkAjax(assignment_pin_url, data);
     }
     function unchecka(e) {
@@ -615,7 +629,8 @@ Service Scheduling
 
   var week_schedule_id = {{ cws.id }};
 
-  function sendBulkAjax(url, data) {
+  function 
+  sendBulkAjax(url, data) {
     $.ajax({
       contentType: 'application/json',
       dataType: 'json',
