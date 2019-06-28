@@ -115,6 +115,7 @@ $(document).ready(() => {
       var clonedRow = $("#id_service_hours_table tr[id]:last").clone();
       clonedRow.find('input').val('');
       clonedRow.find('textarea').val('');
+      clonedRow.find('td:last-child').text('0.00');
       clonedRow.appendTo("#id_service_hours_table");
       val++;
       $("#id_service_hours_table tr[id]:last").attr("id","row_" + val);
