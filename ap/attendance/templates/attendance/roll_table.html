@@ -163,8 +163,8 @@
       scrollX: true,
       autoWidth: true,
       {% endif %}
-      dom: '<"table-responsive"tr>' +
-      '<"align-buttons"lB>',
+      dom: 'lB'+
+      '<"table-responsive"tr>' ,
       buttons: [
         // only attendance monitors, devs, and tas can view these controls for the datatable
         // this allows the display of headers and filter by trainee year, gender and self attendance
@@ -282,9 +282,16 @@
 .dt-button.active {
   background-color: #A6C5D1;
 }
+th {
+    color: rgb(219, 194, 161);      
+        }
 #bluebox{
   background-color: #095F80;
   height: 40px;
+  /*absolute to fit filter buttons in box*/
+  position: absolute;
+  width: -webkit-fill-available;
+  margin-right: 30px;
   }
 select {
   font-family: 'Yantramanav Light';
@@ -293,45 +300,64 @@ select {
 }
 .header-emphasis {
   font-weight: bold;
+  color:rgb(126, 126, 126);
 }
+/*to style and align the filter/self-attendance buttons on the top left*/
 .align-buttons {
-  position:absolute;
-  margin-bottom: 10px;
-}
-.align-buttons2{
-  position: relative;
+  margin-left: 1000px;
 }
 .buttons-collection {
   margin-right: 7px;
 }
-
+.table-responsive {
+    padding-top: 34px;
+}
+.btn-group, .btn-group-vertical {
+    right: 0;
+    position: absolute;
+    margin-right: 23px;
+    margin-top: 2px;
+    }
+.btn {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 7px;
+    padding-left: 7px;
+    font-size: 13px;
+}
+.btn2 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 7px;
+    padding-left: 7px;
+    font-size: 13px;
+}
 </style>
 {% endblock %}
 
-
 {% block content %}
+<!--Header, alternates between team and house-->
 {% if event_type == "T" %}
   <h1>Team Roll</h1>
 {% elif event_type == "H" %}
   <h1>House Roll</h1>
 {% endif %}
 <p style="margin-bottom: 40px; color: gray;">If there's no roll entered, it's assumed as a Present.</p>
-      
 <!--ul creates the tab-->
 <ul class="nav nav-tabs" role="tablist">
   <li role="presentation" class="active"><a href="#week-tab" aria-controls="home" role="tab" data-toggle="tab">Week</a></li>
 </ul>
-  
-<div id="button_filter"></div>
-
   <div class="tab-content">
     <div id="week-tab" class="tab-pane active" role="tabpanel">
-      <!--week label-->
+      <!--creates the thick blue line that will sit the week and filters inside-->
       <div id="bluebox">
+        <!--week and house/team label-->
         <label>
           <form method="post">
             {% csrf_token %}
+            <!--week -->
             <select id="week_menu" name="week" size="0" ></select>
+            <!--team/house filter for attendance monitors-->
             {% ifusergroup attendance_monitors %}
               {% if event_type == "T" %}
                <text style="color: white;">Team:</text>
@@ -346,13 +372,13 @@ select {
                   {% for h in houses %}
                   <option value="{{h.pk}}" {% if h.pk == selected_house_id %} selected="selected" {% endif %}>{{h.name}}</option>
                   {% endfor %}
-  
                 </select>
               {% endif %}
             {% endifusergroup %}
           </form>
         </label>
       </div>
+      <!--filter/self-attendance buttons are coded in Jquery and stylized in CSS-->
         {% if event_list %}
         <table id="display_roll" class="table table-condensed table-bordered table-striped">
           <thead>
@@ -398,13 +424,11 @@ select {
               </select></th>
               {% endfor %}
             </tr>
-
             {% if event_type == 'RF' %}
             <tr>
               <thclass="header-emphasis">Roll Finalization</th>
               <td></td>
               <td></td>
-
               {% for event in event_list %}
               <th>
                 <button id="tardy-btn" class="btn btn-default" data-index="{{ forloop.counter0 }}">Remove Tardies</button>
@@ -413,7 +437,6 @@ select {
               {% endfor %}
             </tr>
             {% endif %}
-
           </thead>
           <tbody>
             {% for t in trainees %}
@@ -442,7 +465,7 @@ select {
             {% endfor %}
           </tbody>
         </table>
-        <button id="finalize_rolls" class="btn btn-danger btn-default align-buttons2" style="float: right;" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
+        <button id="finalize_rolls" class="btn btn-danger btn-default" style="float: right; margin-bottom: 10px;" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
         {% else %}
         No rolls for this week
         {% endif %}
