@@ -52,7 +52,7 @@
     });
 
     $("#graduation").on('dblclick', ".test-top, .test-enc, .test-bur, .test-hi", function() {
-      tableInlineEdit($(this), "{% url 'graduation:testimony-report' %}");
+      tableInlineEdit($(this), "{% url 'graduation:testimony-report' %}", true);
     });
 
   });

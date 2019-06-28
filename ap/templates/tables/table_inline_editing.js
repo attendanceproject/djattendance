@@ -39,14 +39,15 @@ function blurFunction(textbox, orig, clicked, url) {
 }
 
 // set event for inline editing when you double click remembrance text or reference.
-function tableInlineEdit(clicked, url) {
+// parameters: clicked is table field; POST url; textarea Boolean
+function tableInlineEdit(clicked, url, textarea) {
   var orig = clicked.text(); // for comparison
   if (orig == "None") {
     orig = "";
   }
 
   var input;
-  if (url == "/graduation/testimony_report") {
+  if (textarea) {
     input = $('<textarea>', {
       rows: orig.length/23, // estimate height of text to minimize table resizing
       blur: function() {

@@ -52,7 +52,7 @@
     });
 
     $("#graduation").on('dblclick', ".rem-text, .rem-ref", function() {
-      tableInlineEdit($(this), "{% url 'graduation:rem-report' %}");
+      tableInlineEdit($(this), "{% url 'graduation:rem-report' %}", false);
     });
 
   });

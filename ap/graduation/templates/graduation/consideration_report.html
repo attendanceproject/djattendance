@@ -23,7 +23,6 @@
         exportOptions:{
           columns: ':visible'
         },
-        // messageTop: '{{xb_display}} \n {{fellowshipped_display}},'
       },
       {
         extend: 'csvHtml5',
@@ -65,8 +64,10 @@
 {% block content %}
 <h1>{{title}}</h1>
 
-<pre>{{ xb_display }}<br>
-{{ fellowshipped_display }}</pre>
+<pre>
+  {{ xb_display }}<br>
+  {{ fellowshipped_display }}
+</pre>
 
 <div class="data-table-container">
   <table id="graduation" class="table table-striped table-bordered">

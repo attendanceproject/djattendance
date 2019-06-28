@@ -55,7 +55,7 @@
     });
 
     $("#graduation").on('dblclick', ".misc-inv, .misc-dvd", function() {
-      tableInlineEdit($(this), "{% url 'graduation:misc-report' %}");
+      tableInlineEdit($(this), "{% url 'graduation:misc-report' %}", false);
     });
 
   });
@@ -66,8 +66,8 @@
 {% block content %}
 <h1>{{title}}</h1>
 
-<p class="export-message">Total DVDs Requested: {{dvd_totals}}<br>
-Total Invitations Requested: {{invite_totals}}</p>
+<p class="export-message"><strong>Total DVDs Requested</strong>: {{dvd_totals}}<br>
+<strong>Total Invitations Requested</strong>: {{invite_totals}}</p><br>
 
 <div class="data-table-container">
   <table id="graduation" class="table table-striped table-bordered">
