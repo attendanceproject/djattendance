@@ -1,5 +1,5 @@
 <div class="question_section">
-<li>{{ question.prompt }}</li>
+<li>{{ question.prompt|linebreaks }}</li>
 <b> (Points: {{ question.points }})</b>
 <div class="clearfix"></div>
 {% if role == 'Take' and not is_finalized %}
@@ -10,6 +10,7 @@
 <b>Word Count: </b><span class="char_count"></span>
 <div class="clearfix"></div>
 {% else %}
-<blockquote>{{ response|get_item:forloop.counter }}</blockquote>
+<blockquote>{{ response|get_item:forloop.counter|linebreaks }}</blockquote>
+<b>Word Count: </b>{{ response|get_item:forloop.counter|wordcount }}</span>
 {% endif %}
 </div>
