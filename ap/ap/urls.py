@@ -1,33 +1,40 @@
 # coding: utf-8
 import django
+from accounts.views import *
+from attendance.views import (AllAttendanceViewSet, AllRollViewSet,
+                              AttendanceViewSet, RollViewSet)
+from audio.views import AudioRequestViewSet
+from books.views import BooksViewSet
+from classnotes.views import ClassNoteViewSet
 from django.conf import settings
 from django.conf.urls import include, url
-from django.contrib.auth.views import login as auth_login, logout_then_login
-from django.contrib import admin
 from django.conf.urls.static import static
+from django.contrib import admin
+from django.contrib.auth.views import login as auth_login
+from django.contrib.auth.views import logout_then_login
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-
-from .views import home, custom404errorview, custom500errorview, custom503errorview
-from accounts.views import *
-from audio.views import AudioRequestViewSet
-from schedules.views import EventViewSet, ScheduleViewSet, AllEventViewSet, AllScheduleViewSet
-from attendance.views import RollViewSet, AllRollViewSet, AttendanceViewSet, AllAttendanceViewSet
-from leaveslips.views import IndividualSlipViewSet, GroupSlipViewSet, AllIndividualSlipViewSet, AllGroupSlipViewSet
-from books.views import BooksViewSet
-from lifestudies.views import DisciplineSummariesViewSet
-from seating.views import ChartViewSet, SeatViewSet, PartialViewSet
-from terms.views import TermViewSet
-from services.views import UpdateWorkersViewSet, ServiceSlotWorkloadViewSet, ServiceActiveViewSet, AssignmentViewSet, AssignmentPinViewSet, ServiceTimeViewSet, ExceptionActiveViewSet
-from meal_seating.views import TableViewSet
-from web_access.forms import WebAccessRequestGuestCreateForm as form
-from classnotes.views import ClassNoteViewSet
-
-from rest_framework_swagger.views import get_swagger_view
-from rest_framework_nested import routers
-from rest_framework_bulk.routes import BulkRouter
-
-from wiki.urls import get_pattern as get_wiki_pattern
 from django_nyt.urls import get_pattern as get_nyt_pattern
+from leaveslips.views import (AllGroupSlipViewSet, AllIndividualSlipViewSet,
+                              GroupSlipViewSet, IndividualSlipViewSet)
+from lifestudies.views import DisciplineSummariesViewSet
+from meal_seating.views import TableViewSet
+from rest_framework_bulk.routes import BulkRouter
+from rest_framework_nested import routers
+from rest_framework_swagger.views import get_swagger_view
+from schedules.views import (AllEventViewSet, AllScheduleViewSet, EventViewSet,
+                             ScheduleViewSet)
+from seating.views import ChartViewSet, PartialViewSet, SeatViewSet
+from services.views import (AssignmentPinViewSet, AssignmentViewSet,
+                            ExceptionActiveViewSet, ServiceActiveViewSet,
+                            ServiceSlotWorkloadViewSet, ServiceTimeViewSet,
+                            UpdateWorkersViewSet)
+from terms.views import TermViewSet
+from web_access.forms import WebAccessRequestGuestCreateForm as form
+from wiki.urls import get_pattern as get_wiki_pattern
+
+from .views import (custom404errorview, custom500errorview, custom502errorview,
+                    custom503errorview, custom504errorview, home)
+from . import views
 
 admin.autodiscover()
 
@@ -61,9 +68,12 @@ urlpatterns = [
   url(r'^house_requests/', include('house_requests.urls', namespace="house_requests")),
   url(r'^hc/', include('hc.urls', namespace="hc")),
   url(r'^room_reservations/', include('room_reservations.urls', namespace="room_reservations")),
+  url(r'^gospel_trips/', include('gospel_trips.urls', namespace="gospel_trips")),
   url(r'^graduation/', include('graduation.urls', namespace="graduation")),
   url(r'^xb/', include('xb_application.urls', namespace="xb")),
   url(r'^interim/', include('interim.urls', namespace="interim")),
+  url(r'^gospel_statistics/', include('gospel_statistics.urls', namespace="gospel_statistics")),
+  url(r'^house_inspection/', include('house_inspection.urls', namespace='house_inspection')),
   # admin urls
   url(r'^adminactions/', include('adminactions.urls')),  # django-adminactions pluggable app
   url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -80,7 +90,10 @@ urlpatterns = [
   url(r'^forms/', include('fobi.urls.edit')),
   url(r'^404/$', custom404errorview),  # for development
   url(r'^500/$', custom500errorview),  # for development
+  url(r'^502/$', custom502errorview),  # for development
   url(r'^503/$', custom503errorview),  # for development
+  url(r'^504/$', custom504errorview),  # for development
+  url(r'^printer/$', views.printerinstructions),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 router = BulkRouter()
@@ -157,4 +170,6 @@ urlpatterns += [
 
 handler404 = 'ap.views.custom404errorview'  # if settings.DEBUG = FALSE
 handler500 = 'ap.views.custom500errorview'  # if settings.DEBUG = FALSE
+handler500 = 'ap.views.custom502errorview'  # if settings.DEBUG = FALSE
 handler503 = 'ap.views.custom503errorview'  # if settings.DEBUG = FALSE
+handler500 = 'ap.views.custom504errorview'  # if settings.DEBUG = FALSE

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+{% bootstrap_messages %}
+
+{% block content %}
+
+  {% ifusergroup house_inspectors%}
+    <h2>Answer {{ view.model|model_verbose_name }}<br>
+  {% endifusergroup %}
+  {% ifusergroup training_assistant%}  
+    <h2>TA comment {{ view.model|model_verbose_name }}<br>
+  {% endifusergroup %}
+  <small>Submitted on {{ object.get_date_created }} by {{ object.get_trainee_requester }}</small>
+  </h2>
+  {% if object.get_table_template %}
+    {% include object.get_table_template %}
+  {% else %}
+    {% include object.get_detail_template %}
+  {% endif %}
+  <div>
+    <form action="" method="post">{% csrf_token %}
+      {% bootstrap_form form %}
+
+      {% buttons %}
+        <a href="{{ request.get_update_url }}">
+          <button type="submit" class="btn btn-primary" data-id="request.id">
+            Submit
+          </button>
+        </a>
+      {% endbuttons %}
+    </form>
+  </div>
+
+{% endblock %}

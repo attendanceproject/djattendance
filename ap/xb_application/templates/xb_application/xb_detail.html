@@ -23,7 +23,7 @@
 </style>
 {% endblock %}
 
-<h2>Application for the Boston Extension Training ({{term}})</h2>
+<h2>{{page_title}}</h2>
 <h3>Applicant Full Name: {{trainee}}</h3>
 
 
@@ -83,21 +83,24 @@
 
 <dl class="dl-horizontal">
   <dt>Education</dt>
-  <dd>Obtained a {{object.degree1}} degree majoring in {{object.major1}} at {{object.college1}}</dd>
-  <dt></dt>
-  {% if object.degree2 is not None %}
-    <dd>Obtained a {{object.degree2}} degree majoring in {{object.major2}} at {{object.college2}}</dd>
+  <dd><strong>College/University:</strong> {{object.college1}} &emsp; <strong>Major:</strong> {{object.major1}} &emsp; <strong>Degree:</strong> {{object.degree1}}</dd>
+  {% if object.college2 is not None and object.degree2 is not None and object.major2 is not None %}
+    <dt></dt><dd><strong>College/University:</strong> {{object.college2}} &emsp; <strong>Major:</strong> {{object.major2}} &emsp; <strong>Degree:</strong> {{object.degree2}}</dd>
   {% endif %}
 </dl>
 
 <dl class="dl-horizontal">
-  <dt>Salvation</dt>
-  <dd>Saved on {{object.date_saved}} and baptized on {{object.date_baptized}}</dd>
-  <dt>Church Life</dt>
-  <dd>Entered into the church life in {{object.first_church}} on {{object.first_church_date}}</dd>
+  <dt>Saved</dt><dd>{{object.date_saved}}</dd>
+  <dt>Baptized</dt><dd>{{object.date_baptized}}</dd>
+</dl>
+
+<dl class="dl-horizontal">
+  <dt>Entered Church Life</dt>
+  <dd><strong>Locality:</strong> {{object.first_church}}</dd>
+  <dt></dt><dd><strong>Date:</strong> {{object.first_church_date}}</dd>
   {% if object.ftt_location is not None %}
     <dt>Previously Attended</dt>
-    <dd>{{object.ftt_location}} and graduated on {{object.grad_date}}</dd>
+    <dd>{{object.ftt_location}} &emsp; <strong>Graduated:</strong> {{object.grad_date}}</dd>
   {% endif %}
   </dd>
 </dl>
@@ -122,7 +125,7 @@
     <dt>Spouse Occupation</dt>
     <dd>{{object.spouse_occupation}}</dd>
     <dt>Date of Marriage</dt>
-    <dd>{{object.date_mariage}} with {{object.dependents}} dependents</dd>
+    <dd>{{object.date_mariage}} &emsp; <strong>Dependents</strong> {{object.dependents}}</dd>
     <dt>Spouse's Attitude</dt>
     <dd>
       {% if object.spouse_attitude == "A" %}

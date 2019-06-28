@@ -43,7 +43,8 @@ class Announcement(models.Model, RequestMixin):
 
   ANNOUNCE_TYPE = (
       ('CLASS', 'In-class'),
-      ('SERVE', 'On the server')
+      ('SERVE', 'On the server'),
+      ('TV', 'On TV page')
   )
 
   status = models.CharField(max_length=1, choices=ANNOUNCE_STATUS, default='P')

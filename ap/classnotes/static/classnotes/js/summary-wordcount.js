@@ -11,7 +11,7 @@ $().ready(function (){
   wc_text.after(wc_span);
   wc_span.after('<br />');
 
-  Countable.live(content.get(0), function(counter){
+  Countable.on(content.get(0), function(counter){
     var span = $('#count').get(0);
     span.innerHTML = counter.words;
     $("#summary_submit").get(0).disabled = counter.words >= minCount ? false : true;

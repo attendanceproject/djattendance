@@ -1,0 +1,34 @@
+.loading-container {
+  display: block;
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 99;
+}
+
+.loading-image {
+  left: 45%;
+  position: absolute;
+  top: 40%;
+  z-index: 100;
+}
+
+[draggable="true"] {
+  -khtml-user-drag: element;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: element;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.sortable-section.over {
+  border-left: 2px solid blue;
+}
+
+.new-form, .new-form textarea, .new-form input {
+  background-color: #b3ffcc;
+}

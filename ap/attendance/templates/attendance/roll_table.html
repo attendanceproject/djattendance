@@ -242,22 +242,29 @@
       $("td[data-col='"+col+"'").text(select.val().trim()).blur();
     }).on('click', '#finalize_rolls', function(e) {
       data = {}
+      wk = {{week}}
       data.trainee_id = []
       $("th[data-row]").each(function(){
         data.trainee_id.push($(this).attr('data-row'))
       })
       data.event_type = '{{event_type}}'
       data.week = $("#week_menu").find(":selected").val()
-
-      $.ajax({
-        type: "POST",
-        url: "{% url 'attendance:finalize-rolls'%}",
-        data: JSON.stringify(data),
-        success: function(response) {
-          new Notification(Notification.SUCCESS, 'Saved').show();
-          location.reload();
-        },
-      });
+      if (wk > data.week) {
+        if (confirm("Are you sure you want to finalize?")) {
+          $.ajax({
+            type: "POST",
+            url: "{% url 'attendance:finalize-rolls'%}",
+            data: JSON.stringify(data),
+            success: function(response) {
+              new Notification(Notification.SUCCESS, 'Saved').show();
+              $("td[contenteditable]").attr("contenteditable", false);
+              $("#finalize_rolls").attr('disabled', true);
+            },
+          });
+        }
+      } else {
+        new Notification(Notification.ERROR, "Can't finalize now").show();
+      }
     });
 
     $("#week_menu, #team_menu, #house_menu").on("change", function(e) {

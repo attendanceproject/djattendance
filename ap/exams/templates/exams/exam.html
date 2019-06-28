@@ -11,12 +11,7 @@
   <div class="panel panel-default">
     <div class="panel-heading exam-panel-heading">
       <div class="btn-group pull-right">
-        <a href="
-        {% if role == 'Take' %}
-          {% url 'exams:list' %}
-        {% else %}
-          {% url 'exams:grades' exam.id %}
-        {% endif %}">
+        <a href="javascript:history.go(-1)">
           <button type="button" class="btn btn-default">Back</button>
         </a>
       </div>
@@ -36,9 +31,8 @@
           {% csrf_token %}
           <ol id="question-list">
             {% for section, response, score, comments in data %}
-              <h4> {{ section.section_type }} section </h4>
               <b> Instructions: </b> {{ section.instructions|linebreaks }}
-              You must answer at least {{ section.required_number_to_submit }} questions for this section in order to submit the exam.
+              You must answer at least {{ section.required_number_to_submit }} question(s) for this section in order to submit the exam.
               <br></br>
               {% if section.section_type == 'Matching' %}
                 Matching Options:
@@ -53,19 +47,21 @@
               {% for question in section.questions %}
                 {% if question.prompt.strip != '' %}
                   {% include section.template %}
-                  <br>
                 {% endif %}
               {% endfor %}
+            <br>
             {% empty %}
               <i>No exam questions to view.</i><br />
             {% endfor %}
           </ol>
+          {% if not is_finalized %}
           <div class="pull-right">
-            <button id="save_button" name="Save" class="btn btn-success">Save</button>
-            <button id="finalize_button" name="Submit" class="btn btn-primary">
+            <button id="save_button" name="Save" class="btn btn-success" {% if preview %}disabled{% endif %}>Save</button>
+            <button id="finalize_button" name="Submit" class="btn btn-primary" {% if preview %}disabled{% endif %}>
               Finalize
             </button>
           </div>
+          {% endif %}
         </form>
       {% endif %}
     {% else %}
@@ -159,9 +155,15 @@
         }
       });
       if (e.currentTarget.id === "finalize_button") {
-        rtn_data['Submit'] ='true';
+        var confirmed = confirm("Are you sure you want to finalize your exam? You will not be able to edit afterwards.");
+        if (confirmed) {
+          rtn_data['Submit'] ='true';
+        } else {
+          rtn_data['Submit'] ='false';
+          return
+        }
       } else {
-        rtn_data['Submit'] ='false';
+        rtn_data['Submit'] = 'false';
       }
       $.ajax({
         type: 'POST',
@@ -175,7 +177,7 @@
               location.reload();
             }
           } else {
-            alert('Error saving exam: ' + data.msg);
+            alert('Exam Error: ' + data.msg);
           }
         },
         error: function (jqXHR, textStatus, errorThrown ) {

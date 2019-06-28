@@ -1,18 +1,24 @@
 from datetime import datetime
+
 from terms.models import Term
 
 ROLL_STATUS = (
-    ('A', 'Attended'),
+    ('P', 'Present'),
     ('S', 'Service'),
-    ('I', 'Illness'),
-    ('F', 'Fellowship'),
-    ('U', 'Unexcused Absence')
+    ('A', 'Absent')
 )
 
 LOCATIONS = (
     ('TC', 'Training Center'),
     ('MCC', 'Ministry Conference Center'),
     ('Other', 'Other')
+)
+
+REQUEST_STATUS = (
+    ('P', 'Pending'),
+    ('A', 'Accepted'),
+    ('D', 'Denied'),
+    ('F', 'Fellowship'),
 )
 
 
@@ -26,15 +32,18 @@ def attendance_stats(semi):
   d = {}
   for code, status in ROLL_STATUS:
     d[status.split(' ')[0]] = count(att, code)
-  d['Absences'] = 5 - d['Attended']
+  d['Absences'] = 5 - d['Present']
   return d
 
 
-def location_form_available():
+def semi_form_available():
   week = Term.current_term().term_week_of_date(datetime.now())
   return week >= 17 and week <= 19
 
 
-def attendance_form_available():
-  week = Term.current_term().term_week_of_date(datetime.now())
-  return week >= 18 and week <= 19
+def semi_annual_training():
+  ct = Term.current_term()
+  if ct.season == 'Spring':
+    return 'July ' + str(ct.year)
+  else:
+    return 'December ' + str(ct.year)

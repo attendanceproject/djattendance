@@ -15,6 +15,34 @@
   </a>
 {% endif %}
 
-<button class="btn btn-danger delete-request-button" type="submit" title="Delete" data-url="{{ request.get_delete_url }}" data-id="{{ request.id }}">
+<!-- <button class="btn btn-danger delete-request-button" type="submit" title="Delete" data-url="{{ request.get_delete_url }}" data-id="{{ request.id }}">
   <span class="glyphicon glyphicon-trash"></span>
-</button>
+</button> -->
+
+<a id="{{ request.id }}" onclick="deleteGuestRequest(this)">
+  <button class="btn btn-danger delete-request-button" type="submit" title="Delete"/>
+    <span class="glyphicon glyphicon-trash"></span>
+  </button>
+</a>
+{% csrf_token %}
+
+{% block scripts %}
+<script type=text/javascript>
+function deleteGuestRequest(request) {
+  $.ajax({
+    type: "POST",
+    url: "{%url 'web_access:delete-guest-request' %}",
+    data: {
+      csrfmiddlewaretoken: "{{ csrf_token }}",
+      request_id: request.id,
+    },
+    success: function(data) {
+      $("#request-" + request.id).hide();
+    },
+    error: function(xhr, textStatus, errorThrown) {
+      console.log("Error deleting guest web access request.");
+    }
+    });
+}
+</script>
+{% endblock %}

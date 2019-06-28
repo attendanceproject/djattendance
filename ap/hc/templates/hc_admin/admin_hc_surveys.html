@@ -23,7 +23,7 @@
     </table>
 </div>
 
-<form id='id_hcsa_form' action="" method="post">
+<form id='id_hcsa_form' action="" method="post" autocomplete="off">
   {% csrf_token %}
 
   {% bootstrap_field hcsa_form.open_time %}

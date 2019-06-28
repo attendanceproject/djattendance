@@ -1,5 +1,10 @@
 {% extends "leaveslips/leaveslip_update.html" %}
 
+{% block scripts %}
+  {{ block.super }}
+  {% include 'leaveslips/_ta_actions_js.html' with individual=False %}
+{% endblock %}
+
 {% block ls_link %}
 href="{{next_ls_url}}"
 {% endblock %}

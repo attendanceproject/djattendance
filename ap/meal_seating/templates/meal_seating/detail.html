@@ -35,7 +35,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for row in cols|dictsort:"last_name" %}
+          {% for row in cols %}
             <tr>
               <td>
                 {{row.last_name|truncatechars:20}}, {{row.first_name|truncatechars:15}}

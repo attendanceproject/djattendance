@@ -9,6 +9,7 @@ from django_select2.forms import Select2MultipleWidget
 
 from services.serializers import ServiceCalendarSerializer
 from rest_framework.renderers import JSONRenderer
+from datetime import date
 
 
 class DatePicker(DateInput):
@@ -23,7 +24,6 @@ class DatePicker(DateInput):
         'js/datepicker.js',
     )
 
-
 class DatetimePicker(DateTimeInput):
   format = '%m/%d/%Y %I:%M %p'
 
@@ -37,7 +37,6 @@ class DatetimePicker(DateTimeInput):
         'js/datetimepicker.js',
     )
 
-
 class TimePicker(TimeInput):
   format = '%I:%M %p'
 
@@ -49,7 +48,6 @@ class TimePicker(TimeInput):
     js = (
         'js/timepicker.js',
     )
-
 
 class MultipleSelectFullCalendar(SelectMultiple):
   def __init__(self, queryset, name, attrs=None, choices=()):

@@ -20,21 +20,21 @@
 {{form.media}}
 {% endblock %}
 
--{% if form.errors %} 
--<!-- Error messaging --> 
-<div id="errors">  
-  <div class="inner">  
-    <p>There were some errors in the information you entered. Please correct the following:</p>  
-    {{ form.non_field_errors }}  
-    <ul> 
-      {% for field in form %}  
-        {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %} 
-      {% endfor %} 
-    </ul>  
-  </div> 
-</div> 
--<!-- /Error messaging -->  
--{% endif %}  
+{% if form.errors %}
+<!-- Error messaging -->
+<div id="errors">
+  <div class="inner">
+    <p>There were some errors in the information you entered. Please correct the following:</p>
+    {{ form.non_field_errors }}
+    <ul>
+      {% for field in form %}
+        {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+<!-- /Error messaging -->
+{% endif %}
 
 
 {% block content %}
@@ -46,5 +46,6 @@
   {% bootstrap_form form %}
   <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
   <a href="{% url 'interim:interim_intentions_ta_view' %}" class="btn btn-primary">Report</a>
+  <a href="{% url 'interim:interim_intentions_calendar_view' %}" class="btn btn-primary">Calendar</a>
 </form>
 {% endblock %}

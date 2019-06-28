@@ -2,12 +2,20 @@ from django import forms
 
 from .models import Discipline, Summary
 from accounts.models import Trainee, Statistics
+from accounts.widgets import TraineeSelect2MultipleInput
 from houses.models import House
 from books.models import Book
 from aputils.widgets import DatetimePicker
 
 
 class NewDisciplineForm(forms.ModelForm):
+
+  trainee = forms.ModelMultipleChoiceField(
+    queryset=Trainee.objects.all(),
+    required=True,
+    widget=TraineeSelect2MultipleInput,
+  )
+
   class Meta:
     model = Discipline
     fields = '__all__'
@@ -19,6 +27,7 @@ class NewDisciplineForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     super(NewDisciplineForm, self).__init__(*args, **kwargs)
     self.fields['missed_service'].widget.attrs['placeholder'] = 'If this is a missed service, type in the date and service of the service'
+    self.fields['trainee'].widget.attrs['id'] = 'id_trainees'
 
   def save(self, commit=True):
     discipline = super(NewDisciplineForm, self).save(commit=False)
@@ -31,7 +40,7 @@ class NewSummaryForm(forms.ModelForm):
 
   class Meta:
     model = Summary
-    exclude = ('approved', 'discipline', 'deleted', 'fellowship', 'hard_copy')
+    exclude = ('approved', 'discipline', 'deleted', 'fellowship')
     widgets = {'minimum_words': forms.HiddenInput()}
 
   def __init__(self, *args, **kwargs):
@@ -49,6 +58,7 @@ class NewSummaryForm(forms.ModelForm):
         self.initial['chapter'] = int(chpt) + 1
 
     self.fields['book'].queryset = Book.objects.all().order_by('id')
+    self.fields['content'].required = False
 
   def save(self, commit=True):
     summary = super(NewSummaryForm, self).save(commit=False)
@@ -66,7 +76,7 @@ class EditSummaryForm(forms.ModelForm):
 
   class Meta:
     model = Summary
-    exclude = ('book', 'chapter', 'discipline', 'approved', 'deleted', 'fellowship', 'hard_copy')
+    exclude = ('book', 'chapter', 'discipline', 'approved', 'deleted', 'fellowship')
     widgets = {'minimum_words': forms.HiddenInput()}
 
   def save(self, commit=True):
@@ -74,13 +84,3 @@ class EditSummaryForm(forms.ModelForm):
     if commit:
       summary.save()
     return summary
-
-
-class HouseDisciplineForm(forms.ModelForm):
-
-  class Meta:
-    model = Discipline
-    exclude = ('trainee',)
-    widgets = {'due': DatetimePicker()}
-
-  House = forms.ModelChoiceField(House.objects)

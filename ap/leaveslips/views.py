@@ -38,7 +38,7 @@ class LeaveSlipUpdate(GroupRequiredMixin, generic.UpdateView):
     ctx['Today'] = self.get_object().get_date().strftime('%m/%d/%Y')
     ctx['isTAView'] = 1
     ctx['SelectedEvents'] = listJSONRenderer.render(AttendanceEventWithDateSerializer(self.get_object().events, many=True).data)
-    ctx['default_transfer_ta'] = trainee.TA_secondary if (self.request.user.gender == 'S') else self.get_object().TA
+    ctx['default_transfer_ta'] = trainee.TA_secondary if (trainee.gender == 'S') else trainee.TA
     ctx['assigned_TA'] = self.get_object().TA
     ctx['sister'] = self.request.user.gender == 'S'
     return ctx
@@ -74,14 +74,15 @@ class IndividualSlipUpdate(LeaveSlipUpdate):
     return ctx
 
   def post(self, request, **kwargs):
-    update = {}
+    update = request.POST.dict()
     if request.POST.get('events'):
       update['events'] = json.loads(request.POST.get('events'))
-    if request.POST.get('status'):
-      update['status'] = request.POST.get('status')
+    # 'on' is the POSTed value for checked checkboxes, 'off' for unchecked
+    update['ta_sister_approved'] = request.POST.get('ta_sister_approved') == 'on'
+    update['texted'] = request.POST.get('texted') == 'on'
+    update['does_not_count'] = request.POST.get('does_not_count') == 'on'
 
     IndividualSlipSerializer().update(self.get_object(), update)
-    super(IndividualSlipUpdate, self).post(request, **kwargs)
     return HttpResponse('ok')
 
 
@@ -107,11 +108,13 @@ class GroupSlipUpdate(LeaveSlipUpdate):
     return ctx
 
   def post(self, request, **kwargs):
-    update = {}
-    if request.POST.get('status'):
-      update['status'] = request.POST.get('status')
+    update = request.POST.dict()
+    # 'on' is the POSTed value for checked checkboxes, 'off' for unchecked
+    update['ta_sister_approved'] = request.POST.get('ta_sister_approved') == 'on'
+    update['texted'] = request.POST.get('texted') == 'on'
+    update['does_not_count'] = request.POST.get('does_not_count') == 'on'
+
     GroupSlipSerializer().update(self.get_object(), update)
-    super(GroupSlipUpdate, self).post(request, **kwargs)
     return HttpResponse('ok')
 
 
@@ -210,58 +213,11 @@ class TALeaveSlipList(GroupRequiredMixin, generic.TemplateView):
     ctx['TA_list'] = TrainingAssistant.objects.filter(groups__name='regular_training_assistant')
     ctx['leaveslips'] = slips
     ctx['selected_ta'] = ta
-    ctx['status_list'] = LeaveSlip.LS_STATUS[:-1]  # Removes Sister Approved Choice
+    ctx['status_list'] = LeaveSlip.LS_STATUS  # Removes Sister Approved Choice
     ctx['selected_status'] = status
     ctx['selected_trainee'] = tr
     ctx['trainee_list'] = Trainee.objects.all()
     return ctx
-
-
-@group_required(('training_assistant',), raise_exception=True)
-def modify_status(request, classname, status, id):
-  model = IndividualSlip
-  if classname == "group":
-    model = GroupSlip
-  list_link = modify_model_status(model, reverse_lazy('leaveslips:ta-leaveslip-list'))(
-      request, status, id, lambda obj: "%s's %s was %s" % (obj.requester_name, obj._meta.verbose_name, obj.get_status_for_message())
-    )
-  if "update" in request.META.get('HTTP_REFERER'):
-    next_ls = IndividualSlip.objects.filter(status__in=['P'], TA=request.user).first()
-    if next_ls:
-      return redirect(reverse_lazy('leaveslips:individual-update', kwargs={'pk': next_ls.pk}))
-    next_ls = GroupSlip.objects.filter(status__in=['P'], TA=request.user).first()
-    if next_ls:
-      return redirect(reverse_lazy('leaveslips:group-update', kwargs={'pk': next_ls.pk}))
-  return list_link
-
-
-@group_required(('training_assistant',), raise_exception=True)
-def ta_sister_actions(request, classname, status, ls_id):
-  model = IndividualSlip
-  if classname == "group":
-    model = GroupSlip
-  obj = get_object_or_404(model, pk=ls_id)
-  if status in ('L', 'I'):
-    obj.ta_sister_approved = True
-    if (status == 'L'):
-      obj.TA = obj.trainee.TA_secondary
-    obj.save()
-    message = "%s's %s was marked as TA-sister-approved and transferred to %s" % (obj.requester_name, obj._meta.verbose_name, obj.TA.full_name)
-    messages.add_message(request, messages.SUCCESS, message)
-  if (status == 'K'):
-    obj.TA = obj.trainee.TA_secondary
-    obj.save()
-    message = "%s's %s was transferred to %s" % (obj.requester_name, obj._meta.verbose_name, obj.TA.full_name)
-    messages.add_message(request, messages.SUCCESS, message)
-
-  if status in ('I', 'T'):
-    next_ls = IndividualSlip.objects.filter(status__in=['P'], TA=request.user).first()
-    if next_ls:
-      return redirect(reverse_lazy('leaveslips:individual-update', kwargs={'pk': next_ls.pk}))
-    next_ls = GroupSlip.objects.filter(status__in=['P'], TA=request.user).first()
-    if next_ls:
-      return redirect(reverse_lazy('leaveslips:group-update', kwargs={'pk': next_ls.pk}))
-  return redirect(reverse_lazy('leaveslips:ta-leaveslip-list'))
 
 
 @group_required(('training_assistant',), raise_exception=True)
@@ -273,13 +229,31 @@ def bulk_modify_status(request, status):
       individual.append(key)
     else:
       group.append(key)
-  if individual:
-    IndividualSlip.objects.filter(pk__in=individual).update(status=status)
-  if group:
-    GroupSlip.objects.filter(pk__in=group).update(status=status)
-  sample = IndividualSlip.objects.get(pk=individual[0]) if individual else GroupSlip.objects.get(pk=group[0])
-  message = "%s %ss were %s" % (len(individual) + len(group), LeaveSlip._meta.verbose_name, sample.get_status_for_message())
-  messages.add_message(request, messages.SUCCESS, message)
+
+  if status in ["A", "D"]:
+    if individual:
+      IndividualSlip.objects.filter(pk__in=individual).update(status=status)
+    if group:
+      GroupSlip.objects.filter(pk__in=group).update(status=status)
+    sample = IndividualSlip.objects.get(pk=individual[0]) if individual else GroupSlip.objects.get(pk=group[0])
+    message = "%s %ss were %s" % (len(individual) + len(group), LeaveSlip._meta.verbose_name, sample.get_status_for_message())
+    messages.add_message(request, messages.SUCCESS, message)
+
+  if status in ["S", "T"]:
+    if status == "S":
+      IndividualSlip.objects.filter(pk__in=individual).update(ta_sister_approved=True)
+    for pk in individual:
+      i = IndividualSlip.objects.get(pk=pk)
+      i.TA = i.trainee.TA_secondary
+      i.save()
+    for pk in group:
+      g = GroupSlip.objects.get(pk=pk)
+      g.TA = g.trainee.TA_secondary
+      g.save()
+    status_message = "approved and transferred" if status == "S" else "transferred"
+    message = "%s %ss were %s" % (len(individual) + len(group), LeaveSlip._meta.verbose_name, status_message)
+    messages.add_message(request, messages.SUCCESS, message)
+
   return redirect(reverse_lazy('leaveslips:ta-leaveslip-list'))
 
 

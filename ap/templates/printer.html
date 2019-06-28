@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+{% load static %}
+<title>{{page_title}}</title>
+  <style>
+  body, html {
+    height: 100%;
+    margin: 20;
+  }
+
+  </style>
+
+{% block title %}{{page_title}}{% endblock %}
+
+{% block content %}
+
+    <h1>Trainee Commons Printer Drivers</h1>
+    <img src= "{% static image_path %}" class="center" style="width: 50%">
+
+
+<div class="row">
+        <h2>Installation:</h2>
+
+        <div class="col-md-12">
+            <p>Install the printer drivers according to your OS.</p>
+        </div>
+
+        <div class="col-md-6">
+            <p><a class="btn btn-sm btn-primary" role="button"
+                  href="{% get_media_prefix %}office/windows_trainee_commons_printer_drivers.exe">Download Window (64-bit) Drivers</a></p>
+
+            <p><a class="btn btn-sm btn-primary" role="button"
+                  href="{% get_media_prefix %}office/mac_trainee_commons_printer_drivers.dmg">Download Mac OSX Drivers</a></p>
+        </div>
+</div>
+
+        <h4>For Windows devices: </h4>
+
+        <p>Open the file and extract it in your Program Files by clicking "Browse" and opening "My Computer". </p>
+        <p> Click "Windows (C:)" and then "Program Files" and extract the file.</p>
+
+        <p>Open "Devices and Printers by finding it on your start menu or searching for it. Then do the following:</p>
+
+        <p>1. Add a printer</p>
+
+        <p>2. Add a network, wireless or Bluetooth printer</p>
+        
+        <p>3. Find "RICOH MP 2501" and click next</p>
+
+
+        <h4>For Mac OS:</h4>
+
+        <p>Open System Prefrences in the Apple menu.</p>
+
+        <p>Click "Print & Scan"</p>
+
+        <p>Click the plus (+) to add a printer</p>
+
+        <p>Find and add the "RICOH MP 2501" pinter</p>
+
+        <p>You should now be able to print from your laptop.</p>
+
+<div class="row">
+        <h2>Scanning:</h2>
+
+        <p>After you install the printer drivers, the programs on your laptop should be able to use the Trainee
+            Commons Printer as a scanner.</p>
+
+        <p>Follow the instructions in your program of choice and "RICOH MP 2501" should be an option to use to
+            scan.</p>
+
+        <br>
+        <br>
+
+</div>
+
+
+{% endblock %}

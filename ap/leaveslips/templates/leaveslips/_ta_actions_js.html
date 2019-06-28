@@ -1,0 +1,126 @@
+<script type="text/javascript">
+$(document).ready(() => {
+  var ACTION_DATA = {
+    "approve-transfer": "ta_sister_approved=on",
+    "transfer": "",
+    "approve": "status=A",
+    "deny": "status=D",
+    "fellowship": "status=F",
+    "unfellowship": "status=P",
+    "brother-save": "",
+    "sister-save": "",
+  };
+
+  function checkForm() {
+    if ($("#leaveslip-form").length == 1) {
+      return $("#leaveslip-form").serialize() + "&";
+    }
+    return "";
+  }
+
+  function checkRedirect() {
+    if ($("#ajax-redirect").length == 1) {
+      return $("#ajax-redirect").attr("href");
+    }
+    return "";
+  }
+
+  $(".ls-action").on("click", function(e) {
+    {% if individual %}populate_events();{% endif %}
+
+    var action = e.currentTarget.dataset.lsAction;
+    var slipType = e.currentTarget.dataset.lsType;
+    var slipData = checkForm();
+    if (slipData == "" && action.indexOf("transfer") !== -1) {
+      slipData += "TA=" + e.currentTarget.dataset.transferTa + "&"
+    }
+
+    var statusData = "";
+    if (action in ACTION_DATA) {
+      statusData = ACTION_DATA[action];
+      slipData += statusData;
+    }
+
+    var ignore = ["fellowship", "unfellowship", "sister-save"];
+    if (ignore.indexOf(action) !== -1 || ($("#id_TA").length && !$("#id_TA").val())) {
+      var i = slipData.indexOf("TA=");
+      if (i !== -1) {
+        for (i; i < slipData.length; i++) {
+          if (slipData[i] == "&") {break;}
+        }
+        slipData = slipData.substring(0, slipData.indexOf("TA=")) + slipData.substring(i+1);
+      }
+    }
+
+    if (slipType == "group") {
+      var trainees = [];
+      while (slipData.indexOf("trainees=") !== -1) {
+        var i = slipData.indexOf("trainees=");
+        if (i !== -1) {
+          for (i; i < slipData.length; i++) {
+            if (slipData[i] == "&") {break;}
+          }
+          trainees.push(parseInt(slipData.substring(slipData.indexOf("trainees=") + "trainees=".length, i)));
+          slipData = slipData.substring(0, slipData.indexOf("trainees=")) + slipData.substring(i+1);
+        }
+      }
+      if (trainees.length) {slipData += "&trainees=" + JSON.stringify(trainees);}
+    }
+
+    var slipId = e.currentTarget.dataset.lsId;
+    var redirect = checkRedirect();
+    if (slipData) {
+      $.ajax({
+        type: "POST",
+        url: "/leaveslips/" + slipType + "/update/" + slipId,
+        data: slipData,
+        success: (data) => {
+          if (redirect) {
+            window.location.href = redirect;
+          } else {
+            new Notification(Notification.SUCCESS, "Success!").show();
+            var tr = $(e.currentTarget.closest("tr"));
+            tr.fadeOut(1000);
+          }
+        },
+        error: (jXHR, textStatus, errorThrown) => {
+          alert(errorThrown);
+        }
+      });
+    }
+  });
+
+  $(".delete-slip").click(function (e) {
+    var redirect = checkRedirect();
+    if (redirect) {
+      var confirmText = "Are you sure you want to delete this leaveslip?";
+    } else {
+      var tr = $(e.currentTarget.closest("tr"));
+      var trainee = tr.children(".trainee-name").text();
+      var date = tr.children(".slip-date").text().trim();
+      var confirmText = "Are you sure you want to delete this leaveslip for " + trainee + " on " + date + "?"
+    }
+    var check = confirm(confirmText);
+    if (check) {
+      var slipType = e.currentTarget.dataset.lsType;
+      var slipId = e.currentTarget.dataset.lsId;
+      $.ajax({
+        type: "DELETE",
+        url: "/api/" + slipType + "slips/" + slipId,
+        success: function(data, status, jqXHR) {
+          if (redirect) {
+            window.location.href = redirect;
+          } else {
+            new Notification(Notification.SUCCESS, "Leave slip deleted!").show();
+            tr.fadeOut(1000);
+          }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          alert(errorThrown);
+        }
+      });
+    }
+  });
+
+});
+</script>

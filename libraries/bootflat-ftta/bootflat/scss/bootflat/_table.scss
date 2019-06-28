@@ -155,6 +155,20 @@ $table-text-color:                darken($brown, 50%) !default;
       }
     }
   }
+  // Addition styling for Service hours input page
+  .table.no-border{
+    border-top: none;
+  }
+  .table.no-border>tbody>tr>th {
+    border-top: none;
+  }
+  .table.no-border>tbody>tr>td {
+    border-top: none;
+  }
+  .table.no-border>tbody>tr {
+    border: none;
+  }
+
 
   // Zebra-striping
   //
@@ -184,7 +198,7 @@ $table-text-color:                darken($brown, 50%) !default;
     text-align: center;
   }
 
-  tr.bibleTrackerButton{
+  tr.bt-button{
     padding: 0;
   }
 }

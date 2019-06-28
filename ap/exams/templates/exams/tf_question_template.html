@@ -1,12 +1,12 @@
-<li>{{ question.prompt }}</li> <b> (Points: {{ question.points }})</b>
+<li>{{ question.prompt|linebreak }}</li> <b> (Points: {{ question.points }})</b>
 <div class="form-group no-bottom col-xs-12 col-sm-12" id="tf_answer">
   {% with count=forloop.counter|get_index_for_tf|split_string:'##,0' %}
   <input type='radio' name="tf_{{ count }}" id="tf_{{ count }}" value="true"
-  {% if response|get_item:forloop.counter == 'true' %} checked {% endif %}>
+  {% if preview is False and response|get_item:forloop.counter == 'true' %} checked {% endif %}>
   True
   <div class="clearfix"></div>
   <input type='radio' name="tf_{{ count }}" id="tf_{{ count }}" value="false"
-  {% if response|get_item:forloop.counter == 'false' %} checked {% endif %}>
+  {% if preview is False and response|get_item:forloop.counter == 'false' %} checked {% endif %}>
   False
   <div class="clearfix"></div>
   {% endwith %}

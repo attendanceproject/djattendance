@@ -1,0 +1,140 @@
+hr {
+  margin: 15px 0;
+}
+
+body {
+  color: #334353;
+  font-family: "OpenSansLight";
+  font-weight: 100;
+}
+
+:root {
+  --accent-color: #4f7e90;
+}
+
+#title {
+  background-color: var(--accent-color);
+  color: white;
+  font-size: 2em;
+  font-weight: 100;
+  padding: .4em;
+  padding-top: 1em;
+}
+
+#main {
+  margin-top: 1em;
+}
+
+#clock {
+  font-size: 11.5em;
+  white-space: pre;
+}
+#clock-container {
+  margin-left: -10em;
+}
+#ampm {
+  font-size: 3em;
+}
+
+#date {
+  font-size: 2em;
+  font-weight: 400;
+}
+
+.weather-item {
+  margin-left: -30px;
+}
+.not-today {
+  color: var(--accent-color);
+}
+.wi {
+  font-size: 4em;
+  margin: .25em;
+  margin-top: .5em;
+}
+.weather-today, .weather-not-today {
+  font-size: 1.5em;
+}
+.today-temp-container {
+  margin-left: -3em;
+  margin-right: 2em;
+  margin-top: -.7em;
+}
+#today-temp {
+  font-size: 4em;
+  margin-bottom: .1em;
+}
+#today-low, #today-high, #tomorrow-low, #tomorrow-high, #daft-low, #daft-high {
+  font-size: 1.5em;
+}
+
+#reservations {
+  font-size: 2em;
+}
+
+#ticker{
+  bottom:1.51em;
+  color:#393A42;
+  font-size: 1.5em;
+  left:0;
+  position:fixed;
+  z-index:10;
+}
+
+#ticker-heading{
+  bottom:1.98em;
+  color:white;
+  font-size: 1.5em;
+  left:2em;
+  position:fixed;
+  z-index:12;
+}
+
+#ticker-wrap{
+  background-color:#A6C5D1;
+  bottom:2.4em;
+  display:block;
+  height:2.5em;
+  left:0;
+  position:fixed;
+  width:100%;
+  z-index:9;
+}
+
+#ticker-heading-wrap{
+  background-color:#3A7F99;
+  bottom:2.4em;
+  height:2.5em;
+  left:0;
+  position:fixed;
+  width:16.5em;
+  z-index:11;
+}
+
+#schedule {
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  font-size: 1.2em;
+  margin-top: 1em;
+}
+td {
+  text-align: center !important;
+}
+.top-row {
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
+.cell {
+  padding-bottom: 1.05em;
+  padding-top: 1.05em;
+}
+.occupied {
+  background-color: #eee;
+}
+
+table {
+  font-weight: 100;
+}
+.table-bordered td {
+  border: 1px solid #ddd;
+}

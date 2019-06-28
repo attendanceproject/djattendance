@@ -3,7 +3,6 @@ from exams import views
 
 urlpatterns = [
     url(r'^$', views.ExamTemplateListView.as_view(), name='list'),
-    url(r'taken/$', views.ExamTemplateListView.as_view(), {'taken': True}, name='taken'),
     url(r'manage/$', views.ExamTemplateListView.as_view(), {'manage': True}, name='manage'),
     url(r'new/$', views.ExamCreateView.as_view(), name='new'),
     url(r'manage/delete/(?P<pk>\d+)$', views.ExamDelete.as_view(), name='delete'),
@@ -16,5 +15,6 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/overview$', views.GenerateOverview.as_view(), name='overview'),
     url(r'^makeup$', views.ExamMakeupView.as_view(), name='makeups'),
     url(r'^makeup/(?P<pk>\d+)$', views.ExamMakeupView.as_view(), name='makeup'),
-    url(r'report/$', views.GenerateGradeReports.as_view(), name='report-all')
+    url(r'report/$', views.GenerateGradeReports.as_view(), name='report-all'),
+    url(r'^change_status$', views.OpenCloseExamView.as_view(), name='change_status')
 ]

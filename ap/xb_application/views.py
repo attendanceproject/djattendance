@@ -7,6 +7,8 @@ from .models import *
 from .forms import XBApplicationForm
 from terms.models import Term
 
+term = Term.current_term()
+
 
 class XBApplicationView(UpdateView):
   model = XBApplication
@@ -14,7 +16,7 @@ class XBApplicationView(UpdateView):
   template_name = 'xb_application/application_form.html'
 
   def get_object(self):
-    admin, created = XBAdmin.objects.get_or_create(term=Term.current_term())
+    admin, created = XBAdmin.objects.get_or_create(term=term)
     xbApp, created = XBApplication.objects.get_or_create(trainee=self.request.user, xb_admin=admin)
     return xbApp
 
@@ -24,7 +26,7 @@ class XBApplicationView(UpdateView):
 
   def form_valid(self, form):
     xbApp = form.save(commit=False)
-    xbApp.xb_admin = XBAdmin.objects.get_or_create(term=Term.current_term())[0]
+    xbApp.xb_admin = XBAdmin.objects.get_or_create(term=term)[0]
     xbApp.trainee = self.request.user
 
     if 'submit' in self.request.POST:
@@ -45,7 +47,7 @@ class XBApplicationView(UpdateView):
     if self.object.xb_admin.xb_due_date:
       ctx['due_date'] = self.object.xb_admin.xb_due_date
     today = datetime.now().date()
-    if self.object.xb_admin.xb_show_status == 'SHOW' or today > self.object.xb_admin.xb_due_date:
+    if self.object.xb_admin.xb_show_status == 'SHOW':
       ctx['read_only'] = True
     if not self.object.submitted:
       ctx['save_button'] = '<button type="submit" class="btn btn-primary btn-save">Save</button>'
@@ -62,7 +64,7 @@ class XBReportView(ListView):
 
   def get_context_data(self, **kwargs):
     ctx = super(XBReportView, self).get_context_data(**kwargs)
-    ctx['trainees'] = self.model.objects.filter(trainee__current_term=4, last_updated__isnull=False)
+    ctx['trainees'] = self.model.objects.filter(xb_admin__term=term, trainee__current_term=4, last_updated__isnull=False)
     ctx['page_title'] = 'FTTA-XB Application Report List'
     return ctx
 
@@ -76,8 +78,9 @@ class XBApplicationDetails(DetailView):
     obj = self.get_object()
     ctx['object'] = self.model.objects.filter(pk=obj.id).values()[0]
     ctx['trainee'] = obj.trainee
-    ctx['term'] = obj.xb_admin.term.next_term
     ctx['narrative_wc'] = 0
     if obj.narrative is not None and obj.narrative != "":
       ctx['narrative_wc'] = len(obj.narrative.split(" "))
+    term = obj.xb_admin.term.next_term()
+    ctx['page_title'] = 'Application for the Boston Extension Training (' + term.name + ')'
     return ctx

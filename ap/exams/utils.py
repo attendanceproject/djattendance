@@ -10,7 +10,7 @@ from .models import Exam, Makeup, Responses, Section
 
 @register.filter
 def get_letter_for_multiple_choice_index(index):
-    return chr(64+int(index))
+  return chr(64 + int(index))
 
 
 # Returns the section referred to by the args, None if it does not exist
@@ -193,15 +193,15 @@ def save_exam_creation(request, pk):
   if exam_description == "":
     return (False, "No exam description given.")
   is_open = mdata.get('is_open', False)
+  is_graded_open = mdata.get('is_graded_open', False)
   duration = mdata.get('duration', 90)
   if not is_float(duration):
     duration_regex = re.match('^(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)$', duration)
     try:
-      #okay match to regex pattern hh:mm:ss
+      # okay match to regex pattern hh:mm:ss
       duration_regex.group(0)
-    except AttributeError :
+    except AttributeError:
       return (False, 'Invalid duration given for exam.')
-
 
   total_score = mdata.get('exam-total-point', '')
   if total_score == '':
@@ -212,6 +212,7 @@ def save_exam_creation(request, pk):
   exam.term_id = term
   exam.description = exam_description
   exam.is_open = is_open
+  exam.is_graded_open = is_graded_open
   exam.duration = duration
   exam.category = exam_category
   exam.total_score = total_score
@@ -223,12 +224,6 @@ def save_exam_creation(request, pk):
   for section in sections:
     section_id = int(section.get('section_id', -1))
     section_instructions = section['instructions']
-    if section_instructions == "":
-      exam.delete()
-      for section in Section.objects.all():
-        if section.exam == None:
-          section.delete()
-      return (False, "No section instructions given.")
     section_questions = section['questions']
     section_type = section['section_type']
     required_number_to_submit = section['required_number_to_submit']
@@ -239,14 +234,14 @@ def save_exam_creation(request, pk):
     # Start packing questions
     for question in section_questions:
       # Avoid saving hidden questions that are blank
-      if question['question-prompt'] == '':
+      if question['question-prompt'].strip() == '':
         if section_type == "M" and question["question-match"] != '':
           matching_answers.add(question["question-match"])
           continue
         else:
           exam.delete()
           for section in Section.objects.all():
-            if section.exam == None:
+            if section.exam is None:
               section.delete()
           return (False, "No prompt given for question.")
       qPack = {}
@@ -259,12 +254,12 @@ def save_exam_creation(request, pk):
         else:
           exam.delete()
           for section in Section.objects.all():
-            if section.exam == None:
+            if section.exam is None:
               section.delete()
           return (False, "No point value for question given.")
       qPack['prompt'] = question['question-prompt']
       qPack['points'] = question_point
-      #total_score += question_point
+      # total_score += question_point
       options = ""
       answer = ""
       if section_type == "MC":
@@ -307,11 +302,11 @@ def save_exam_creation(request, pk):
     except ValueError:
       exam.delete()
       for section in Section.objects.all():
-        if section.exam == None:
+        if section.exam is None:
           section.delete()
       return (False, "No 'required number of questions to answer for section' given.")
     if section_obj.section_type == "M":
-      #append all possible matching answers
+      # append all possible matching answers
       for question_index in question_hstore:
         question_to_append_matching_answers = ast.literal_eval(question_hstore[str(question_index)])
         question_to_append_matching_answers['matching_answers'] = list(matching_answers)
@@ -321,6 +316,10 @@ def save_exam_creation(request, pk):
     section_obj.question_count = len(section_obj.questions)
     section_index += 1
 
+    if section_obj.required_number_to_submit > (section_obj.question_count):
+      section_type = dict(Section.SECTION_CHOICES)[section_type]
+      return(False, "For a {} section, there are {} required questions to answer but only {} questions.".format(section_type, int(section_obj.required_number_to_submit), int(section_obj.question_count)))
+
     section_obj.save()
 
   # Delete old sections that are not touched
@@ -328,7 +327,7 @@ def save_exam_creation(request, pk):
     Section.objects.filter(id=remaining_id).delete()
 
   # Update total score
-  #exam.total_score = total_score
+  # exam.total_score = total_score
   exam.save()
 
   # We made it!
@@ -346,13 +345,12 @@ def get_exam_context_data(context, exam, is_available, session, role, include_an
     context['exam_available'] = False
     return context
   context['is_graded'] = session.is_graded
-  if session.time_finalized != None and exam.is_open and session.is_graded:
-    context['exam_available'] = True
-  elif session.time_finalized != None or not exam.is_open:
+  context['is_finalized'] = session.time_finalized is not None
+  if not exam.is_open:
     context['exam_available'] = False
   else:
     context['exam_available'] = True
-  #check if exam is available
+  # check if exam is available
   if hasattr(session, 'trainee') and not exam.is_open:
     context['exam_available'] = makeup_available(exam, session.trainee)
   questions = get_exam_questions(exam, include_answers)
@@ -362,6 +360,36 @@ def get_exam_context_data(context, exam, is_available, session, role, include_an
 
   context['data'] = zip(questions, responses, score_for_responses, comments_for_responses)
 
+  context['preview'] = False
+  return context
+
+
+def get_exam_preview_context_data(context, exam):
+  context['role'] = "Take"
+  context['exam'] = exam
+  context['is_finalized'] = False
+  context['exam_available'] = True
+  questions = get_exam_questions(exam, False)
+
+  sections = Section.objects.filter(exam=exam)
+  responses = []
+  score_for_responses = []
+  comments_for_responses = []
+  for section in sections:
+    r = {}
+    for i in range(section.first_question_index, section.question_count + 1):
+      if section.section_type == 'FB':
+        regex = re.compile('[^##]')
+        r[i] = json.loads('"' + regex.sub('', section.questions[str(i)]) + '"')
+      else:
+        r[i] = json.loads('""')
+
+    responses.append(r)
+    score_for_responses.append({})
+    comments_for_responses.append({})
+
+  context['data'] = zip(questions, responses, score_for_responses, comments_for_responses)
+  context['preview'] = True
   return context
 
 
@@ -395,7 +423,8 @@ def save_grader_scores_and_comments(session, section, responses):
   if section.section_type == 'E' and responses['comments'] == "NOT GRADED YET":
     responses_obj.comments = "GRADED"
   else:
-    responses_obj.comments = responses['comments']
+    comments = responses['comments']
+    responses_obj.comments = comments.replace("\"", "\\\"") #used to properly save and load the string with the escape character
   responses_obj.save()
 
 

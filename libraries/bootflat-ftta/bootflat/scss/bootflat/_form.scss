@@ -15,7 +15,7 @@ $message-warning:                  $tan !default;
 $form-font-color:                  $black !default;
 $form-placeholder-font-color:      $brown !default;
 
-$form-disabled-color:              $grey !default;
+$form-disabled-color:              $grey-disabled !default;
 
 $search-query-value:               17px !default;
 
@@ -210,6 +210,32 @@ $search-icon-line-height:          30px !default;
     }
     & .form-control-feedback {
       color:  $message-danger;
+    }
+  }
+
+  .new-form {
+    & label {
+      color: $blue-light;
+      text-transform: uppercase;
+      font-size: 18pt;
+      margin: 0;
+    }
+
+    & .text, select, textarea, input {
+      border: solid 1px $blue-light;
+    }
+
+    & .readonly {
+      background-color: $form-disabled-color;
+    }
+
+
+    & select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      -ms-appearance: none;
+      -o-appearance: none;
+      appearance: none;
     }
   }
 

@@ -1,9 +1,9 @@
 <div class="form-horizontal exam_question">
-  <li id='matching-{{ forloop.counter }}'> {{ question.prompt }} <b> (Points: {{ question.points }})</b></li>
+  <li id='matching-{{ forloop.counter }}'> {{ question.prompt|linebreak }} <b> (Points: {{ question.points }})</b></li>
   <select class="form-group" name="matching_answer_field">
     <option value=""></option>
     {% for item in question.matching_answers %}
-      <option value="{{ item }}" {% if response|get_item:forloop.parentloop.counter == item %} selected {% endif %}>{{ item }}</option>
+      <option value="{{ item }}" {% if preview is False and response|get_item:forloop.parentloop.counter == item %} selected {% endif %}>{{ item }}</option>
     {% empty %} {# if this is the grader/graded view with the answer #}
       <option selected value="{{ response|get_item:forloop.counter }}">{{ response|get_item:forloop.counter }}</option>
     {% endfor %}

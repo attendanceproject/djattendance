@@ -92,7 +92,7 @@ p {
                       <br>{{badge.lastname}}
                       <br>
                     </b>
-                    {{badge.locality}}
+                    {{badge.locality|default_if_none:""}}
                   </p>
                 </div>
               </div>

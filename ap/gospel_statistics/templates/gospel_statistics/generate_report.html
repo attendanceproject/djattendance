@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}Gospel Statistics{% endblock %}
+{% block references %}
+<style>
+.reports {
+  margin-top:15px;
+}
+th,td {
+  padding: 5px;
+  text-align: left;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+<div>
+  <a href="{% url 'gospel_statistics:ta-gospel-statistics-view' %}">
+    <button type="button" class="btn btn-primary" title="Go back to gospel statistics view">Back</button>
+  </a>
+</div>
+
+<form action="" method="post">
+  {% csrf_token %}
+  <table class="reports">
+    <thead>
+      <tr>
+        <th>
+          Teams:
+        </th>
+        <th>
+          Weeks:
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div>
+            <select name="teams" multiple style="height:300px">
+              {% for campus in campuses %}
+              <option value={{ campus.id }}>{{ campus }}</option>
+              {% endfor %}
+              {% for community in communities %}
+              <option value={{ community.id }}>{{ community }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </td>
+        <td>
+          <div>
+            <select name="weeks" multiple style="height:300px">
+              {% for week in weeks %}
+              <option value={{ week }}>Week {{ week }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan=2>
+          <label>
+            <input type="radio" name="report_type" checked="checked" value=1>
+            Full Report
+            <span margin-right='20px'> </span>
+          </label>
+          <label>
+            <input type="radio" name="report_type" value=2>
+            Week & Total
+          </label>
+          <label>
+            <input type="radio" name="report_type" value=3>
+            Total Only
+          </label>
+        </td>
+      </tr>
+      <tr>
+        <td colspan=2>
+          <label>
+            <input type="radio" name="save_type" checked="checked" value=1>
+            Team Save
+          </label>
+          <label>
+            <input type="radio" name="save_type" value=2>
+            All Save
+          </label>
+        </td>
+      </tr>
+      <tr>
+        <td colspan=2 text-align='left'>
+          <button type="submit" class="btn btn-primary" title="Generate gospel statistics report">Generate</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+ 
+{% endblock %}

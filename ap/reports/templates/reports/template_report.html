@@ -13,10 +13,9 @@
 <div>
   <p>Averages (across all trainees)</p>
   <ul>
-    <li>Average % Unex. Abs.: {{unexcused_absences_percentage}}</li>
-    <li>Average % Tardy: {{tardy_percentage}}</li>
-    <li>Average % Sickness: {{sickness_percentage}}</li>
-    <li>Average % Classes Missed: {{classes_missed_percentage}}</li>
+    {% for key, value in averages.items %}
+    <li>{{key}}: {{value}}% </li>
+    {% endfor %}
   </ul>
 </div>
 

@@ -22,9 +22,8 @@ class NameInputPlugin(FormFieldPlugin):
 
   def submit_plugin_form_data(self, form_entry, request, form, form_element_entries=None, **kwargs):
     props = self.get_form_field_instances()[0][2]
-    if props['required']:
-      form.cleaned_data[props['label']] = request.user.full_name
-      return form
+    form.cleaned_data[props['label']] = request.user.full_name
+    return form
 
 
 form_element_plugin_registry.register(NameInputPlugin)

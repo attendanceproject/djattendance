@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.safestring import mark_safe
 
 from accounts.widgets import TraineeSelect2MultipleInput
 from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget
@@ -14,10 +15,8 @@ class LeaveslipForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     super(LeaveslipForm, self).__init__(*args, **kwargs)
     self.fields['type'].label = 'Reason'
-    # TODO: uncomment after we add a group for TA sisters
-    # self.fields['TA'].queryset = TrainingAssistant.objects.filter(Q(groups__name='regular_training_assistant') || Q(groups__name='sister_training_assistant'))
     if self.instance.TA:
-      self.fields['TA'].label = "TA assigned to leaveslip: %s. Transfer to" % self.instance.TA.full_name
+      self.fields['TA'].label = mark_safe("TA assigned to leaveslip: <strong><u>%s</u></strong>. Transfer to" % self.instance.TA.full_name)
     else:
       self.fields['TA'].label = 'No TA assigned'
     self.fields['TA_informed'].label = 'Training office informed? ' + ('Yes' if self.instance.informed else 'No')
@@ -45,7 +44,7 @@ class IndividualSlipForm(LeaveslipForm):
   class Meta:
     model = IndividualSlip
     fields = ['type', 'description', 'location', 'host_name', 'host_phone', 'hc_notified',
-              'TA_informed', 'texted', 'comments', 'private_TA_comments', 'TA']
+              'TA_informed', 'texted', 'does_not_count', 'comments', 'private_TA_comments', 'TA']
 
 
 class GroupSlipForm(LeaveslipForm):
@@ -63,7 +62,7 @@ class GroupSlipForm(LeaveslipForm):
 
   class Meta:
     model = GroupSlip
-    fields = ['trainees', 'type', 'description', 'start', 'end', 'TA_informed', 'texted', 'comments', 'private_TA_comments', 'TA']
+    fields = ['trainees', 'type', 'description', 'start', 'end', 'TA_informed', 'texted', 'does_not_count', 'comments', 'private_TA_comments', 'TA']
 
 
 class IndividualSlipAdminForm(forms.ModelForm):

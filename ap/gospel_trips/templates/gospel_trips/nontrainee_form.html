@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}Non-Trainees{% endblock %}
+
+{% block scripts %}
+{{nontrainee_form.media}}
+{{application_form.media}}
+{{passport_form.media}}
+{% for form in flight_formset %}
+  {{form.media}}
+{% endfor %}
+<script type="text/javascript">
+  $(document).ready(() => {
+
+    $("#non-trainee-select").select2()
+    .on("select2:select", (e) => {
+      window.location.href = e.target.value;
+    });
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>Gospel Trip Non-Trainees</h2>
+<p>Add non-trainee information or select a non-trainee to edit.</p>
+{% if nontrainees %}
+  <select class="select-fk" name="non-trainee" id="non-trainee-select">
+    <option value="">-----------</option>
+  {% for nt in nontrainees %}
+    <option value="{{nt.get_absolute_url}}">{{nt.firstname}} {{nt.lastname}}</option>
+  {% endfor %}
+  </select>
+{% endif %}
+<form action="" method="post">
+  {% csrf_token %}
+  <h2>General Information</h2>
+  {% bootstrap_form nontrainee_form %}
+  <h2>Application Information</h2>
+  {% bootstrap_form application_form %}
+  <h2>Passport Information</h2>
+  {% bootstrap_form passport_form %}
+  <h2>Flight Information</h2>
+  {{ flight_formset.management_form }}
+  {% for form in flight_formset %}
+    {% bootstrap_form form %}
+    <hr /><hr />
+  {% endfor %}
+
+  <div class="row">
+    <div class="col-md-12">
+      <button type="submit" class="btn btn-primary btn-save">Submit</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

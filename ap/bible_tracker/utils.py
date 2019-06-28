@@ -1,8 +1,10 @@
-from datetime import timedelta, date
-from .models import BibleReading
-from terms.models import Term
-from aputils.trainee_utils import is_trainee, trainee_from_user
 import json
+from datetime import date, timedelta
+
+from aputils.trainee_utils import is_trainee, trainee_from_user
+from terms.models import Term
+
+from .models import BibleReading
 
 
 def is_week_finalized(user, week):

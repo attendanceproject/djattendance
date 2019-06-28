@@ -14,7 +14,6 @@ def assign_classnotes(week=None):
   start = term.start
   end = term.end
   if week is not None:
-    start = term.startdate_of_week(week)
     end = term.enddate_of_week(week)
   for trainee in Trainee.objects.all().iterator():
     update_classnotes_list(trainee)
@@ -31,38 +30,41 @@ def assign_individual_classnotes(trainee, start, end):
   '''
   # look at trainee's absences (for class event).
   # Increment absence_counts based on classname (HStore)
-  print trainee
   regular_absence_counts = {}
   rolls = trainee.rolls.all().filter(date__gte=start, date__lte=end, status='A', event__type='C').order_by('date').select_related('event')
-  for roll in rolls.iterator():
-      classname = roll.event.name
-      number_classnotes = calculate_number_classnotes(trainee, roll)
-      leavesliplist = get_leaveslip(trainee, roll)
-      if leavesliplist:
-        for leaveslip in leavesliplist:
-          # Special: Wedding, Graduation, Funeral, Interview.
-          if leaveslip.type in ['INTVW', 'GRAD', 'WED', 'FUNRL']:
-            generate_classnotes(trainee, roll, 'S')
 
-          # Regular: Sickness, Unexcused, Others, Fellowship, Notif only
-          if leaveslip.type in ['OTHER', 'SICK', 'FWSHP', 'SPECL', 'NOTIF']:
-            if classname in regular_absence_counts:
-              regular_absence_counts[classname] += 1
-              if (regular_absence_counts[classname] - number_classnotes) > 2:
-                generate_classnotes(trainee, roll, 'R')
-                regular_absence_counts[classname] -= 1
-            else:
-              regular_absence_counts[classname] = 1
-          # Missed classes with conference or service leave slips results in no class notes
+  # Afternoon classes
+  rolls = rolls.exclude(event__class_type='AFTN')
+  # Monday Revival Meeting
+  rolls = rolls.exclude(event__name='Monday Revival Meeting')
+  rolls = rolls.exclude(event__name='Morning Revival Fellowship')
+
+  for roll in rolls.iterator():
+    classname = roll.event.name
+    leavesliplist = list(get_leaveslip(trainee, roll))
+    if len(leavesliplist) > 0:
+      for leaveslip in leavesliplist:
+        # Special: Wedding, Graduation, Funeral, Interview.
+        if leaveslip.type in ['INTVW', 'GRAD', 'WED', 'FUNRL']:
+          generate_classnotes(trainee, roll, 'S')
+
+        # Regular: Sickness, Unexcused, Others, Fellowship, Notif only
+        if leaveslip.type in ['OTHER', 'SICK', 'FWSHP', 'SPECL', 'NOTIF']:
+          if classname in regular_absence_counts:
+            regular_absence_counts[classname] += 1
+            if (regular_absence_counts[classname]) > 2:
+              generate_classnotes(trainee, roll, 'R')
+          else:
+            regular_absence_counts[classname] = 1
+        # Missed classes with conference or service leave slips results in no class notes
+    else:
+      # no leave slip == unexcused absence
+      if classname in regular_absence_counts:
+        regular_absence_counts[classname] += 1
+        if (regular_absence_counts[classname]) > 2:
+          generate_classnotes(trainee, roll, 'R')
       else:
-        # no leave slip == unexcused absence
-        if classname in regular_absence_counts:
-          regular_absence_counts[classname] += 1
-          if (regular_absence_counts[classname] - number_classnotes) > 2:
-            generate_classnotes(trainee, roll, 'R')
-            regular_absence_counts[classname] -= 1
-        else:
-          regular_absence_counts[classname] = 1
+        regular_absence_counts[classname] = 1
 
 
 # Delete classnotes that are no longer needed based on changes
@@ -91,7 +93,7 @@ def get_leaveslip(trainee, roll):
   individualslips = IndividualSlip.objects.filter(trainee=trainee, status='A', rolls__in=[roll])
   roll_start_datetime = datetime.combine(roll.date, roll.event.start)
   roll_end_datetime = datetime.combine(roll.date, roll.event.end)
-  groupslips = GroupSlip.objects.filter(trainee=trainee, status='A', start__lte=roll_start_datetime, end__gte=roll_end_datetime)
+  groupslips = GroupSlip.objects.filter(trainees=trainee, status='A', start__lte=roll_end_datetime, end__gte=roll_start_datetime)
   return chain(individualslips, groupslips)
 
 

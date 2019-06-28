@@ -19,14 +19,16 @@
       {% endfor %}
       {% if role == 'Grade' %}
         <b>Score for Section: </b>
-        <input class="score form-control" id="score-{{forloop.counter}}" type="number" step=".01" name="question-score" value="{{ score|get_item:1 }}">
+        <input class="score form-control" id="score-{{forloop.counter}}" type="number" step=".1" name="section-score" {% if  score|get_item:1 %}value="{{ score|get_item:1 }}"{% else %}value="0"{% endif %} min="0">
         <br>
         <b>Comment: </b>
-        <input class="grader-comment form-control" id="comment-{{forloop.counter}}" type="text" name="grader-comment" value="{{ comments|get_item:0 }}">
+        <input class="grader-comment form-control" id="comment-{{forloop.counter}}" type="text" name="grader-comment" value="{{ comments|get_item:1 }}">
         <hr/>
       {% else %}
+        <br>
         <b>Score for {{section.get_section_type_display}} Section: {{ score|get_item:1 }}</b>
-        <b>Comment: {{ comments|get_item:0 }}</b>
+        <br>
+        <b>Comment: {{ comments|get_item:1 }}</b>
       {% endif %}
     {% empty %}
       <i>No exam questions to view.</i><br />

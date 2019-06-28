@@ -122,13 +122,13 @@ class XBApplication(models.Model):
 
   degree2 = models.CharField(max_length=100, null=True, blank=True)
 
-  date_saved = models.CharField(max_length=10, null=True, blank=True)
+  date_saved = models.CharField(max_length=40, null=True, blank=True)
 
-  date_baptized = models.CharField(max_length=10, null=True, blank=True)
+  date_baptized = models.CharField(max_length=40, null=True, blank=True)
 
   first_church = models.CharField(max_length=150, null=True, blank=True)
 
-  first_church_date = models.CharField(max_length=10, null=True, blank=True)
+  first_church_date = models.CharField(max_length=40, null=True, blank=True)
 
   ftta_service = models.CharField(max_length=300, null=True, blank=True)
 

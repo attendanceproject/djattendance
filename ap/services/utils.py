@@ -1,24 +1,24 @@
-from collections import OrderedDict, Counter
-from datetime import datetime
+import datetime
+from collections import Counter, OrderedDict
+from datetime import datetime as dt
+from datetime import date, timedelta
 from itertools import combinations
-from sets import Set
-
-from django.db.models import Q, Count
-from django.template.defaulttags import register
 
 from accounts.models import User
+from aputils.trainee_utils import is_trainee, trainee_from_user
 from aputils.utils import memoize, timeit
+from django.db.models import Q, Count
+from django.template.defaulttags import register
 from leaveslips.models import GroupSlip
+from sets import Set
+from terms.models import Term
 
+from .constants import (MAX_PREPS_PER_WEEK, MAX_SERVICE_CATEGORY_PER_WEEK,
+                        MAX_SERVICES_PER_DAY, PREP)
 from .models import (Assignment, Prefetch, SeasonalServiceSchedule, Service,
-                     ServiceException, ServiceSlot, Sum, WorkerGroup)
+                     ServiceAttendance, ServiceException, ServiceSlot, Sum,
+                     WorkerGroup)
 from .service_scheduler import ServiceScheduler
-from .constants import (
-      MAX_PREPS_PER_WEEK,
-      MAX_SERVICE_CATEGORY_PER_WEEK,
-      MAX_SERVICES_PER_DAY,
-      PREP,
-)
 
 
 '''
@@ -136,7 +136,7 @@ def assign_leaveslips(service_scheduler, cws):
   assignments = Assignment.objects.filter(week_schedule=cws).select_related('service').prefetch_related('workers')
   # Delete old group leave slips
   GroupSlip.objects.filter(service_assignment__in=assignments).delete()
-  timestamp = datetime.now()
+  timestamp = dt.now()
   bulk_leaveslips_assignments = []
   bulk_groupslip_trainees = []
   for a in assignments.distinct('service'):
@@ -408,19 +408,56 @@ class ServiceCheck(object):
         over_limit = True
     return over_limit
 
+
 def assignment_day(assignment):
   return assignment.service.weekday
+
 
 def assignment_cat(assignment):
   cat = assignment.service.category
   return cat if not assignment.service.designated else None
 
+
 def assignment_prep(assignment):
   service = assignment.service
-  return PREP if PREP in service.name and not "Breakfast" in service.name else None
+  return PREP if PREP in service.name and "Breakfast" not in service.name else None
+
 
 SERVICE_CHECKS = [
     ServiceCheck(assignment_day, MAX_SERVICES_PER_DAY, '> {0} service/day'.format(MAX_SERVICES_PER_DAY)),
     ServiceCheck(assignment_cat, MAX_SERVICE_CATEGORY_PER_WEEK, '> {0} category/week'.format(MAX_SERVICE_CATEGORY_PER_WEEK)),
     ServiceCheck(assignment_prep, MAX_PREPS_PER_WEEK, '> {0} prep/week'.format(MAX_PREPS_PER_WEEK)),
 ]
+
+
+def has_designated_service(user):
+  if is_trainee(user):
+    worker = trainee_from_user(user).worker
+    w_designated_services = worker.designated.all()
+    if w_designated_services.exists():
+      return True
+
+  return None
+
+
+def unfinalized_service(user):
+  # return list of service_id and week
+  if has_designated_service(user):
+    current_term = Term.current_term()
+    if date.today() < current_term.start:
+      return None
+    # current week = up to week we want to access + 1
+    current_week = Term.reverse_date(current_term, datetime.date.today())[0]
+    worker = trainee_from_user(user).worker
+    designated_services = worker.designated.all()
+    if date.today() <= current_term.startdate_of_week(current_week) + timedelta(1):
+      # Cannot access past week's because today is less than Wednesday
+      current_week = current_week - 1
+    for service in designated_services:
+      for week in range(0, current_week):
+        serv_att = ServiceAttendance.objects.filter(designated_service=service, worker=worker, term=current_term, week=week)
+        if not serv_att.exists():
+          return [service.id, week]
+        elif not serv_att.first().excused and serv_att.first().get_service_hours() == 0:
+          return [service.id, week]
+  return None

@@ -9,13 +9,13 @@
   $( document ).ready(() => {
     $("#collapse_all").on('click', function(){
       if (stat){
-        $("#content .collapse").collapse("show") 
+        $("#content .collapse").collapse("show")
         stat = false
       } else{
-        $("#content .collapse").collapse("hide") 
+        $("#content .collapse").collapse("hide")
         stat = true
       }
-      
+
     })
   })
 </script>
@@ -24,31 +24,29 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<h2>HC Survey Admin</h2>
+<h2>HC Survey #{{survey_number}} Report</h2>
 <div id="content">
   <h3>Summary</h3>
   <table class="table table-bordered" id="summary_table">
     <thead>
       <tr>
         <th>Brothers Reported</th>
-        <th>Sisters Reported</th>        
+        <th>Sisters Reported</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td>
-          {% for h in bro_reported %}
-          {{h}},
-          {% empty %}
-          None reported
-          {% endfor %}
+          {{ bro_reported|join:", " }}
+          {% if not bro_reported %}
+            None reported
+          {% endif %}
         </td>
         <td>
-          {% for h in sis_reported %}
-          {{h}},
-          {% empty %}
-          None reported
-          {% endfor %}
+          {{ sis_reported|join:", " }}
+          {% if not sis_reported %}
+            None reported
+          {% endif %}
         </td>
       </tr>
       <tr>
@@ -57,18 +55,16 @@
       </tr>
       <tr>
         <td>
-          {% for h in bro_not_reported %}
-          {{h}},
-          {% empty %}
-          All reported
-          {% endfor %}
+          {{ bro_not_reported|join:", " }}
+          {% if not bro_not_reported %}
+            All reported
+          {% endif %}
         </td>
         <td>
-          {% for h in sis_not_reported %}
-          {{h}},
-          {% empty %}
-          All reported
-          {% endfor %}
+          {{ sis_not_reported|join:", " }}
+          {% if not sis_not_reported %}
+            All reported
+          {% endif %}
         </td>
       </tr>
     </tbody>
@@ -90,6 +86,7 @@
         <th>Atmosphere</th>
         <th>Situations</th>
         <th>Comment</th>
+        <th>HCs</th>
       </tr>
     </thead>
     <tbody>
@@ -97,6 +94,7 @@
         <td>{{snc.survey.atmosphere}}</td>
         <td>{{snc.survey.situations}}</td>
         <td>{{snc.survey.comment}}</td>
+        <td>{{snc.survey.house.get_hcs}}</td>
       </tr>
     </tbody>
   </table>

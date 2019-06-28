@@ -1,15 +1,18 @@
-from django.shortcuts import render
-from django.views import generic
-from django.core.urlresolvers import reverse_lazy
-from django.core.serializers import serialize
+from itertools import chain
 
+from ap.base_datatable_view import BaseDatatableView  # , DataTableViewerMixin
 from aputils.trainee_utils import is_TA
 from aputils.utils import modify_model_status
-from .models import MaintenanceRequest, LinensRequest, FramingRequest
-from .forms import MaintenanceRequestForm, FramingRequestForm
-from houses.models import Room
-from ap.base_datatable_view import BaseDatatableView, DataTableViewerMixin
+from django.core.serializers import serialize
+from django.core.urlresolvers import reverse_lazy
 from django.db.models import Q
+from django.shortcuts import render
+from django.views import generic
+from houses.models import Room
+from terms.models import Term
+
+from .forms import FramingRequestForm, MaintenanceRequestForm
+from .models import FramingRequest, LinensRequest, MaintenanceRequest
 
 
 class HouseGenericJSON(BaseDatatableView):
@@ -79,8 +82,8 @@ def MaintenanceReport(request):
 
 
 modify_maintenance_status = modify_model_status(MaintenanceRequest, reverse_lazy('house_requests:maintenance-list'))
-modify_linens_status = modify_model_status(LinensRequest, reverse_lazy('house_requests:linens-list'))
-modify_framing_status = modify_model_status(FramingRequest, reverse_lazy('house_requests:framing-list'))
+modify_linens_status = modify_model_status(LinensRequest, reverse_lazy('house_requests:linens-list'), ['linens'])
+modify_framing_status = modify_model_status(FramingRequest, reverse_lazy('house_requests:framing-list'), ['frames'])
 
 
 class MaintenanceRequestTAComment(generic.UpdateView):
@@ -183,7 +186,7 @@ class LinensRequestDetail(generic.DetailView):
   template_name = 'requests/detail_request.html'
 
 
-class RequestList(DataTableViewerMixin, generic.ListView):
+class RequestList(generic.ListView):
   template_name = 'request_list/list.html'
   DataTableView = None
   source_url = ''
@@ -191,19 +194,20 @@ class RequestList(DataTableViewerMixin, generic.ListView):
   def get_queryset(self):
     user_has_service = self.request.user.groups.filter(name__in=['facility_maintenance', 'linens', 'frames']).exists()
     if is_TA(self.request.user) or user_has_service:
-      qs = self.model.objects.filter(status='P') | self.model.objects.filter(status='F')
+      qs = self.model.objects.filter(status='P').filter(date_requested__gte=Term.current_term().get_date(0, 0)) | self.model.objects.filter(status='F').filter(date_requested__gte=Term.current_term().get_date(0, 0))
       return qs.order_by('date_requested')
     else:
       trainee = self.request.user
-      return self.model.objects.filter(trainee_author=trainee).order_by('status')
+      return self.model.objects.filter(trainee_author=trainee).filter(date_requested__gte=Term.current_term().get_date(0, 0)).order_by('status')
 
   def get_context_data(self, **kwargs):
     context = super(RequestList, self).get_context_data(**kwargs)
     user_has_service = self.request.user.groups.filter(name__in=['facility_maintenance', 'linens', 'frames']).exists()
-    if not is_TA(self.request.user) and not user_has_service:
-      del context['source_url']
-      del context['header']
-      del context['targets_list']
+    if is_TA(self.request.user) or user_has_service:
+      reqs = self.model.objects.none()
+      for status in ['P', 'F', 'C']:
+        reqs = chain(reqs, self.model.objects.filter(status=status).filter(date_requested__gte=Term.current_term().get_date(0, 0)).order_by('date_requested'))
+      context['reqs'] = reqs
     return context
 
 

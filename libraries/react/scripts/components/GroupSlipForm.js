@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Button, Collapse, OverlayTrigger, Popover } from 'react-bootstrap'
+import { Alert, Button, Collapse, OverlayTrigger, Popover } from 'react-bootstrap'
 import Form from 'react-formal'
 import types from 'react-formal-inputs'
-import yup from 'yup'
 
 import { GROUP_SLIP_TYPES, INFORMED } from '../constants'
 import { changeGroupSlipForm } from '../actions'
@@ -52,6 +51,13 @@ const GroupSlipForm = ({...props}) => {
   }
   return (
     <div className="dt-leaveslip">
+
+    <div>
+      <Alert bsStyle="notice" className="dt-leaveslip__note">
+        *Please note: Multiple group slips maybe submitted if there are one or more events that should not be covered in between the first and last events covered by the slip. (Due to different personal schedules, group slips automatically include everything from the first event to the last event selected.)
+      </Alert>
+    </div>
+
       <SlipTitle {...props} />
       {isTAView ? '' : <TAComments comments={props.form.comments} />}
       {isTAView ? <TALabels {...props.groupslip} /> : ''}

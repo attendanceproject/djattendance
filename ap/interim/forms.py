@@ -14,6 +14,7 @@ class InterimItineraryForm(forms.ModelForm):
     model = InterimItinerary
     fields = ["start", "end", "comments", ]
     widgets = {
+      "start": DatePicker(),
       "end": DatePicker(),
       "comments": forms.Textarea(attrs={'rows': 2})
     }
@@ -21,6 +22,7 @@ class InterimItineraryForm(forms.ModelForm):
 
 class InterimIntentionsForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
+    kwargs.setdefault('label_suffix', '')
     super(InterimIntentionsForm, self).__init__(*args, **kwargs)
     self.fields['cell_phone'].label = 'Cell Phone'
     self.fields['email'].label = 'E-mail'
@@ -42,6 +44,32 @@ class InterimIntentionsForm(forms.ModelForm):
       "intent": forms.RadioSelect,
       "post_intent_comments": forms.Textarea(attrs={'rows': 4})
     }
+
+  def clean_post_training_intentions(self):
+    intent = self.cleaned_data.get("intent")
+    post_intent = self.cleaned_data.get("post_training_intentions")
+
+    if intent == "R":
+      return "NON"
+    return post_intent
+
+
+  def clean_post_intent_comments(self):
+    intent = self.cleaned_data.get("intent")
+    comments = self.cleaned_data.get("post_intent_comments")
+
+    if intent == "R":
+      return ""
+    return comments
+
+
+  def clean(self):
+    post_intent = self.cleaned_data.get("post_training_intentions")
+    post_comment = self.cleaned_data.get("post_intent_comments")
+
+    needs_comment = ["USC", "OCC", "LSM", "OTH", "UND", "JOB", "SCH"]
+    if post_intent in needs_comment and not post_comment:
+      raise forms.ValidationError("Please elaborate on your post-training intentions.")
 
 
 class InterimIntentionsAdminForm(forms.ModelForm):

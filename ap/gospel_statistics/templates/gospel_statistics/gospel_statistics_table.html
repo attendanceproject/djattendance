@@ -1,0 +1,62 @@
+<table class="table table-bordered-wkly-sum">
+  <thead>
+    <tr>
+      <th scope="col" class="col-md-1">Team Statistics - Total</th>
+      {% for each in cols %}
+      <th scope="col" class="col-md-1">{{each}}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for each in all_stat %}
+    <tr>
+      <th>
+        <input style="display:none" name="pairs" value={{each.gospel_pair.id}}>
+        {% for every in each.gospel_pair.trainees.all %}
+          {{every}}, 
+        {% endfor %}
+      </th>
+      <td>
+        {{each.tracts_distributed}}
+      </td>
+      <td>
+        {{each.bibles_distributed}}
+      </td>
+      <td>
+        {{each.contacted_30_sec}}
+      </td>
+      <td>
+        {{each.led_to_pray}}
+      </td>
+      <td>
+        {{each.baptized}}
+      </td>
+      <td>
+        {{each.second_appointment}}
+      </td>
+      <td>
+        {{each.regular_appointment}}
+      </td>
+      <td>
+        {{each.minutes_on_gospel}}
+      </td>
+      <td>
+        {{each.minutes_in_appointment}}
+      </td>
+      <td>
+        {{each.bible_study}}
+      </td>
+      <td>
+        {{each.small_group}}
+      </td>
+      <td>
+        {{each.district_meeting}}
+      </td>
+      <td>
+        {{each.conference}}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

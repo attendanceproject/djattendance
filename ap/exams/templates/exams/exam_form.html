@@ -12,7 +12,8 @@
 <script>
   /* Store global variables here */
   const SUCCESS_URL = "{{view.get_success_url}}";
-
+  const PREVIEW_URL = "{{view.get_preview_url}}";
+  
   function addSection(e) {
     var section_div = $("#exam_section_blank").clone();
     section_div.removeAttr("id");
@@ -88,7 +89,13 @@
 {% block content %}
 <form action="" id="surveyForm" method="post" class="form-horizontal">
   {% csrf_token %}
-  <h3>{% if exam_edit %}Edit{% else %}Create{% endif %} Exam</h3>
+  <h3>{% if exam_edit %}Edit{% else %}Create{% endif %} Exam
+  <div class="btn-group pull-right">
+    <a href="{% url 'exams:manage' %}">
+      <button type="button" class="btn btn-default">Back</button>
+    </a>
+  </div>
+  </h3>
   <hr>
   <div class="form-horizontal" name="exam_metadata">
     {% bootstrap_field form.training_class label_class="col-md-2" field_class="col-md-4" %}
@@ -106,17 +113,30 @@
 
     <!-- Is the exam open -->
     <div class="form-group">
-      <label class="col-md-2 control-label" for="is_open">Is Open</label>
+      <label class="col-md-2 control-label" for="is_open">Exam</label>
       <div class="col-md-4">
         <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-default {% if is_open %}active{% endif %}">
-            <input type="radio" autocomplete="off" name="is_open" value="True" {% if is_open %}checked{% endif %}> Yes
+            <input type="radio" autocomplete="off" name="is_open" value="True" {% if is_open %}checked{% endif %}> Open
           </label>
           <label class="btn btn-default {% if not is_open %}active{% endif %}">
-            <input type="radio" autocomplete="off" name="is_open" value="False" {% if not is_open %}checked{% endif %}> No
+            <input type="radio" autocomplete="off" name="is_open" value="False" {% if not is_open %}checked{% endif %}> Close
           </label>
         </div>
-        (Note: after training office has finalized the grades for every trainee, toggle this option back to 'Yes' for the trainees to see their graded exams.)
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-md-2 control-label" for="is_graded_open">Graded Exam</label>
+      <div class="col-md-4">
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-default {% if is_graded_open %}active{% endif %}">
+            <input type="radio" autocomplete="off" name="is_graded_open" value="True" {% if is_graded_open %}checked{% endif %}> Open
+          </label>
+          <label class="btn btn-default {% if not is_graded_open %}active{% endif %}">
+            <input type="radio" autocomplete="off" name="is_graded_open" value="False" {% if not is_graded_open %}checked{% endif %}> Close
+          </label>
+        </div>
       </div>
     </div>
 
@@ -140,11 +160,7 @@
   </div>
 
   <!-- Empty div for creating sections -->
-  <h3>Sections
-    <div class="pull-right">
-      <input class="btn btn-danger btnAddSection" type="button" value="Add Section" />
-    </div>
-  </h3>
+  <h3>Sections</h3>
   <hr>
   <div id="sections">
   <!--fix: for section in data (from utils get_edit_context_data) include each as an exam_section-->
@@ -153,12 +169,15 @@
     {% endfor %}
   </div>
 
+  <div class="pull-right">
+    <input class="btn btn-danger btnAddSection" type="button" value="Add Section" />
+  </div>
+
 <!-- Hidden template section for copying and adding -->
 {% include 'exams/exam_section.html' with id="id='exam_section_blank'" hidden='hidden' %}
 {% for section_type, template in section_templates.items %}
   {% include template with attrs='class=hidden id='|add:section_type|add:'-question-template-blank' %}
 {% endfor %}
-
 
   <!-- Create Exam Button -->
   <button id="exam-submit" name="" class="btn btn-success">
@@ -168,6 +187,13 @@
       Create Exam
     {% endif %}
   </button>
+
+   <!-- Preview Exam Button -->
+  {% if exam_edit %}
+    <button id="exam-submit-preview" name="" class="btn btn-success">
+        Save & Preview Exam
+    </button>
+  {% endif %}
 
 </form>
 

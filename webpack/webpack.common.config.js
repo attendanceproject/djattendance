@@ -18,6 +18,9 @@ module.exports = {
     select_2: [
       '../ap/templates/bundles/select_2.js',
     ],
+    tinymce: [
+      '../ap/templates/bundles/tinymce.js',
+    ],
   },
 
   output: {
@@ -57,7 +60,14 @@ module.exports = {
         }],
       }, {
         test: /\.woff2?$|\.ttf$|\.eot$|\.svg$|\.png$|\.gif$/,
-        loader: "file-loader"
+        loader: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name]-[hash].[ext]'
+            }
+          }
+        ]
       }
     ]
   },
@@ -65,6 +75,10 @@ module.exports = {
   plugins: [
     new BundleTracker({path: __dirname, filename: './webpack-stats.json'}),
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment\/js$/), // to not to load all locales
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery"
+    })
   ],
 
   resolve: {

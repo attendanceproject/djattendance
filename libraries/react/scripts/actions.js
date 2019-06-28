@@ -108,6 +108,9 @@ export const finalizeRoll = () => {
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify(dateDetails),
+      beforeSend: function(xhr, settings){
+        xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);  //see attendance_react.html
+      },
       success: function(data, status, jqXHR) {
         let weeks = JSON.parse(data.finalized_weeks).weeks.split(',')
         dispatch(finalizeWeeks(weeks))
@@ -207,6 +210,9 @@ export const postRoll = (values) => {
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify(rolls),
+      beforeSend: function(xhr, settings){
+        xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);  //see attendance_react.html
+      },
       success: function(data, status, jqXHR) {
         dispatch(submitRoll(rolls));
         dispatch(resetRollForm());
@@ -354,10 +360,20 @@ export const postLeaveSlip = (values) => {
     "host_name": values.hostName,
     "host_phone": values.hostPhone,
     "hc_notified": values.hcNotified,
-    ...taInformedToServerFormat(values.taInformed),
+    "does_not_count": values.slipType.id == 'CONF' || values.slipType.id == 'FWSHP' || values.slipType.id == 'SERV' || values.slipType.id == 'TTRIP',
+    ...taInformedToServerFormat(values.ta_informed),
   };
 
   return (dispatch, getState) => {
+    var userId = getState().trainee.id
+    var tas = getState().tas
+    for (var ta of tas) {
+      if (ta.id == userId) {
+        slip.status = "A";
+        break
+      }
+    }
+
     let slipId = getState().form.leaveSlip.id || null
     slip.id = slipId
     return $.ajax({
@@ -365,6 +381,9 @@ export const postLeaveSlip = (values) => {
       type: slipId ? 'PUT' : 'POST',
       contentType: 'application/json',
       data: JSON.stringify(slipId ? [slip] : slip),
+      beforeSend: function(xhr, settings){
+        xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);  //see attendance_react.html
+      },
       success: function(data, status, jqXHR) {
         console.log("returned data", data, status, jqXHR);
         dispatch(submitLeaveSlip(data));
@@ -442,7 +461,11 @@ export const deleteLeaveSlip = (slip) => {
     return $.ajax({
       url: '/api/individualslips/' + slip.id.toString(),
       type: 'DELETE',
+      beforeSend: function(xhr, settings){
+        xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);  //see attendance_react.html
+      },
       success: function(data, status, jqXHR) {
+        dispatch(resetLeaveslipForm());
         new Notification(Notification.SUCCESS, "Leave slip deleted!").show();
       },
       error: function(jqXHR, textStatus, errorThrown) {
@@ -489,10 +512,20 @@ export const postGroupSlip = (gSlip) => {
     "TA_informed": taInformed,
     "trainee": gSlip.traineeView.id,
     "trainees": gSlip.trainees.map(t => t.id),
-    ...taInformedToServerFormat(gSlip.taInformed),
+    "does_not_count": gSlip.slipType.id == 'CONF' || gSlip.slipType.id == 'FWSHP' || gSlip.slipType.id == 'SERV' || gSlip.slipType.id == 'TTRIP',
+    ...taInformedToServerFormat(gSlip.ta_informed),
   }
 
   return function(dispatch, getState) {
+    var userId = getState().trainee.id
+    var tas = getState().tas
+    for (var ta of tas) {
+      if (ta.id == userId) {
+        slip.status = "A";
+        break
+      }
+    }
+
     let slipId = getState().form.groupSlip.id || null
     slip.id = slipId
     return $.ajax({
@@ -500,6 +533,9 @@ export const postGroupSlip = (gSlip) => {
       type: slipId ? 'PUT' : 'POST',
       contentType: 'application/json',
       data: JSON.stringify(slipId ? [slip] : slip),
+      beforeSend: function(xhr, settings){
+        xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);  //see attendance_react.html
+      },
       success: function(data, status, jqXHR) {
         // only add the groupslip to display if the trainee is in it
         if (slip.trainees.indexOf(getState().form.traineeView.id) >= 0) {
@@ -531,7 +567,11 @@ export const deleteGroupSlip = (slip) => {
     return $.ajax({
       url: '/api/groupslips/' + slip.id.toString(),
       type: 'DELETE',
+      beforeSend: function(xhr, settings){
+        xhr.setRequestHeader("X-CSRFToken", CSRF_TOKEN);  //see attendance_react.html
+      },
       success: function(data, status, jqXHR) {
+        dispatch(resetGroupslipForm());
         new Notification(Notification.SUCCESS, "Group slip deleted!").show();
       },
       error: function(jqXHR, textStatus, errorThrown) {

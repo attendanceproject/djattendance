@@ -1,13 +1,4 @@
-{% extends "base.html" %}
-{% load staticfiles %}
 {% load bootstrap3 %}
-{% load common_tags %}
-
-{% block title %}{{ page_title }}{% endblock %}
-
-{% block scripts %}
-{{form.media}}
-{% endblock %}
 
 {% block references %}
 <style type="text/css">
@@ -24,12 +15,10 @@
 {% endblock %}
 
 {% block content %}
-<h2>Semi-Annual Training {{ term }}</h2>
-<h2>{{ page_title }}</h2>
+<h3>Study Attendance Form</h3>
 
 <form id="id_attendance_form" action="" method="post">
   {% csrf_token %}
-  {% bootstrap_field form.location %}
   <table id="attendance_table" class="table">
     <thead>
       <tr>
@@ -40,17 +29,15 @@
     </thead>
   {% for field in form %}
     <tbody>
-    {% if forloop.counter0 > 0 %}
     <tr>
     <th>{{field.label}}:</th>
     {% for c in field %}
       <td>{{c.tag}}</td>
     {% endfor %}
     </tr>
-    {% endif %}
     </tbody>
   {% endfor %}
   </table>
-  <button type="submit" class="btn btn-primary btn-save" id="submit">{{button_label|safe}}</button>
+  <input type="submit" class="btn btn-primary btn-save" name="attendance_form" id="submit" value="{{button_label}}"></input>
 </form>
 {% endblock %}

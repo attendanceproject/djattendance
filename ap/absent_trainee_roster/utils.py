@@ -93,7 +93,7 @@ def calculate_trainee_absent_freq(date):
       if is_unreported:
         unreported.add(absentee.id)
       if absentee.id in trainees or is_unreported:
-        days += 1 + m
+        days += 1
         m = 0
       else:
         break

@@ -1,0 +1,4 @@
+exclude_paths:
+  - ap/templates/bundles/*
+  - webpack/*
+

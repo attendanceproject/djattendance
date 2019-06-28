@@ -22,12 +22,12 @@ class AnnouncementForm(forms.ModelForm):
     user = kwargs.pop('user', None)
     super(AnnouncementForm, self).__init__(*args, **kwargs)
     # if the user can see/modify the status, not trainee, so make it easy for approved announcements to be created by non-trainees
-    self.fields['announcement_end_date'].widget.attrs['class'] += ' hide-if-in-class hide-if-popup'
+    self.fields['announcement_end_date'].widget.attrs['class'] += ' hide-if-in-class hide-if-popup show-if-on-tv-page'
     attrs = {'class': 'hide-if-in-class', 'id': 'id_trainees'}
     self.fields['trainees_show'].widget.attrs = attrs
-    self.fields['is_popup'].widget.attrs['class'] = 'hide-if-in-class'
+    self.fields['is_popup'].widget.attrs['class'] = 'hide-if-in-class hide-if-on-tv-page'
     self.fields['is_popup'].label = 'Show announcement as a popup.'
-    self.fields['all_trainees'].widget.attrs['class'] = 'hide-if-in-class'
+    self.fields['all_trainees'].widget.attrs['class'] = 'hide-if-in-class hide-if-on-tv-page'
     self.fields['all_trainees'].label = "Show announcement to all trainees."
     self.fields['trainee_comments'].label = "Trainee's comments/description for why this announcement is necessary."
     self.fields['fellowshipped'].initial = False
@@ -48,7 +48,7 @@ class AnnouncementForm(forms.ModelForm):
     type = cleaned_data.get('type')
     end_date = cleaned_data.get('announcement_end_date')
     is_popup = cleaned_data.get('is_popup')
-    if type == 'SERVE' and not end_date and not is_popup:
+    if (type == 'SERVE' or type == 'TV') and not end_date and not is_popup:
       self._errors["announcement_end_date"] = self.error_class(["This is a required field."])
     return cleaned_data
 

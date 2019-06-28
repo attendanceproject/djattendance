@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $("#id_destination_select").select2()
+    .on("select2:select", (e) => {
+      $('#id_get_form').submit();
+    });
+
+    $("#id_choose_trainees").select2();
+
+    $('#id_post_form').submit(function(){
+      $('input#id_ds').val($('#id_destination_select').val());
+      return true;
+    });
+  });
+
+</script>
+{% endblock scripts%}
+
+{% block content %}
+<h2>{{page_title}}</h2>
+
+{% if no_destinations %}
+<p>No destinations created.</p>
+
+{% else %}
+<div class="panel">
+  <form action="" method="get" id="id_get_form">
+    {% csrf_token %}
+
+    <label for="id_destination_select">Destination</label>
+    <select id="id_destination_select" name="destination">
+    {% for dest in all_destinations %}
+      <option value="{{ dest.id }}" {% if dest.id == destinit %} selected="selected" {% endif %}>{{ dest.name }}</option>
+    {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="panel">
+  <form action="{{post_url}}" method="post" id="id_post_form">
+    {% csrf_token %}
+
+    <label for="id_choose_trainees">Choose Trainees</label>
+    <select id="id_choose_trainees" name="choose_trainees" multiple="multiple">
+    {% for trainee in choose_from %}
+      <option value="{{trainee.id}}" {% if trainee.id in chosen %} selected="selected" {% endif %}>{{trainee.full_name}}</option>
+    {% endfor %}
+    </select>
+    <input type="hidden" name="destination" id="id_ds">
+    <button class="btn btn-primary btn-save" type="submit">Submit</button>
+  </form>
+</div>
+
+<div class="panel">
+    <strong>Unassigned Trainees</strong>
+    <table class="table table-bordered" id="trainee_table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Locality</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for trainee in unassigned %}
+        <tr>
+          <td>{{trainee.full_name}}</td>
+          <td>{{trainee.locality.city.name}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% endblock %}

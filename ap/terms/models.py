@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 from aputils.utils import ensure_date
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.db import models
+from django.db import ProgrammingError, models
 from django.db.models import Q
 
 """ TERM models.py

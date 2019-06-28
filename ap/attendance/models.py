@@ -137,5 +137,8 @@ class RollsFinalization(models.Model):
     return "%s for %s" % (self.trainee, self.get_events_type_display())
 
   def has_week(self, week):
-    weeks = [int(x) for x in self.weeks.split(',')]
-    return week in weeks
+    if self.weeks != '':
+      weeks = [int(x) for x in self.weeks.split(',')]
+      return week in weeks
+    else:
+      return False

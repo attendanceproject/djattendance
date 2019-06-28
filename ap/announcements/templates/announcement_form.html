@@ -13,25 +13,58 @@
     // Reason: edge case if form is submitted with errors page will reload
     // but values will still be checked/unchecked as before so we want to still
     // display all fields correctly
-    let toggled = [
-      $('.hide-if-in-class').parent(),
-      $('.hide-if-popup').parent(),
-      $('.trainee-select').parent(),
-    ];
-    let controls = [
-      [$('#id_type'), e => e.val() == 'CLASS'],
-      [$('#id_is_popup'), e => e.is(':checked')],
-      [$('#id_all_trainees'), e => e.is(':checked') && $('#id_type').val() == 'CLASS'],
-    ];
-    for (let [index, toggle] of toggled.entries()) {
-      let [control, check] = controls[index];
-      if (check(control)) {
-        toggle.hide();
-      }
-      control.change(() => {
-        toggle.fadeToggle();
-      });
+    if ($('#id_type').val() == 'CLASS') {
+      $('.hide-if-in-class').parent().hide();
     }
+    if ($('#id_type').val() == 'TV') {
+      $('.hide-if-on-tv-page').parent().hide();
+    }
+    if ($('#id_is_popup').is(':checked')) {
+      $('.hide-if-popup').parent().hide();
+    }
+    if ($('#id_all_trainees').is(':checked') && $('#id_type').val() != 'SERVE') {
+      $('.trainee-select').parent().hide();
+    }
+
+    $('#id_type').change(function() {
+      if (this.value == 'CLASS') {
+        $('.hide-if-in-class').parent().fadeOut();
+        $('.trainee-select').parent().fadeOut();
+      }
+      if (this.value == 'SERVE') {
+        $('.hide-if-in-class').parent().fadeIn();
+        if ($('#id_is_popup').is(':checked')) {
+          $('.hide-if-popup').parent().hide();
+        }
+        if ($('#id_all_trainees').is(':checked')) {
+          $('.trainee-select').parent().fadeOut();
+        }
+        else {
+          $('.trainee-select').parent().fadeIn();
+        }
+      }
+      if (this.value == 'TV') {
+        $('.hide-if-on-tv-page').parent().fadeOut();
+        $('.show-if-on-tv-page').parent().fadeIn();
+        $('.trainee-select').parent().fadeOut();
+      }
+    });
+    $('#id_is_popup').change(function() {
+      if ($('#id_is_popup').is(':checked')) {
+        $('.hide-if-popup').parent().fadeOut();
+      }
+      else {
+        $('.hide-if-popup').parent().fadeIn();
+      }
+    });
+    $('#id_all_trainees').change(function() {
+      if ($('#id_all_trainees').is(':checked')) {
+        $('.trainee-select').parent().fadeOut();
+      }
+      else {
+        $('.trainee-select').parent().fadeIn();
+      }
+    });
   });
   </script>
 {% endblock %}

@@ -18,7 +18,7 @@ def upload(request):
     return redirect(reverse('classes:index'))
 
 
-@group_required(['training_assistant'])
+@group_required(['training_assistant', 'special_projects'])
 def delete_file(request, pk):
   ClassFile.objects.get(id=pk).delete()
   return redirect(reverse('classes:index'))

@@ -1,6 +1,11 @@
 {% extends "leaveslips/leaveslip_update.html" %}
 {% load common_tags %}
 
+{% block scripts %}
+  {{ block.super }}
+  {% include 'leaveslips/_ta_actions_js.html' with individual=True %}
+{% endblock %}
+
 {% block ls_link %}
 href="{{next_ls_url}}"
 {% endblock %}
@@ -50,7 +55,6 @@ $(document).ready(extraFields());
 $('#id_type').change(function() {
   extraFields();
 });
-
 </script>
 {% endblock %}
 
