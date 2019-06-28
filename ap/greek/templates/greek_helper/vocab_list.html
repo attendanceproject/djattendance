@@ -14,8 +14,6 @@
   // Changing the chapter reloads the table to load the vocab list in that chapter
   function changeChapter() {
     var chap = document.getElementById("chapter_select").value;
-    // var url = "/greek/?chap=" + chap;
-    // history.pushState({ urlPath: url }, "", url);
 
     $.ajax({
       type: "GET",
@@ -54,7 +52,8 @@
 
   <!-- NAVIGATION TABS -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#files" aria-controls="home" role="tab" data-toggle="tab">Files</a></li>
+    <li role="presentation" class="active"><a href="#files" aria-controls="home" role="tab" data-toggle="tab">Files</a>
+    </li>
     <li role="presentation"><a href="#list" aria-controls="home" role="tab" data-toggle="tab">Vocabulary</a></li>
     <!--
     <li role="presentation"><a href="#flashcard" aria-controls="home" role="tab" data-toggle="tab">Flashcards</a></li>
@@ -68,16 +67,24 @@
     <!-- FILES TAB -->
     <div id="files" class="greek tab-pane active" role="tabpanel">
       <div>
-        <table class="table">
-          <tr>
-            <th>Dates</th>
-            <th>Files</th>
-          </tr>
-          <tr>
-            <td> </td>
-            <td> </td>
-          </tr>
-        </table>
+          <table class="table">
+              <thead>
+              <tr>
+                <th>File</th>
+                <th>Class</th>
+              </tr>
+              </thead>
+              <tbody>
+                {% for cf in class_files %}
+                <tr>
+                  <td><a href='{{cf.file.url}}'>{{ cf.label }}</a></td>
+                  <td>{{ cf.for_class }}</td>
+                </tr>
+                {% empty %}
+                  <i>No {{classname}} files to display.</i>
+                {% endfor %}
+              </tbody>
+            </table>
       </div>
     </div>
 

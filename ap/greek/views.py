@@ -4,14 +4,15 @@ from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from .models import Vocab
-from classes.models import ClassFile
+from classes.models import ClassFile, CLASS_CHOICES_ALL
+from classes.forms import ClassFileForm
 
 def index(request):
 
     ### FOR FILES TAB ###
-    class_files = ClassFile.objects.all()
+    class_files = ClassFile.objects.filter(for_class='Greek')
     print class_files
-          
+
     ### FOR VOCAB LIST TAB ###
 
     # By default, the page loads vocabs in chapter 1
@@ -27,6 +28,11 @@ def index(request):
         "greekVocab": greek_list,
         "classFiles": class_files,
     }
+    
+    context['classname'] = 'Greek'
+    # context['form'] = ClassFileForm(limit_choices=CLASS_CHOICES_ALL)
+    context['class_files'] = ClassFile.objects.filter(for_class="Greek")
+    context['page_title'] = '%s Files' % (class_files)
 
     return render(request, 'greek_helper/vocab_list.html', context=context)
 
