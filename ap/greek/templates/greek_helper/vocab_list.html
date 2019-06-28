@@ -25,19 +25,12 @@
         "chapter": chap,
       },
       success: function (data) {
-        console.log("chapter changed to", chap);
         $("#vocab_table td").remove();
 
         for (var row of data) {
           var fields = row['fields']
-          console.log("greek: ", fields['greek'], "english: ", fields['english'], "chapter: ", fields['chapter']);
           $("#vocab_table tbody").append(
-            "<tr>" +
-            "<td>" + fields['greek'] + "</td>" +
-            "<td>" + fields['english'] + "</td>" +
-            "<td>" + fields['chapter'] + "</td>" +
-            "<td>" + fields['parsing'] + "</td>" +
-            "</tr>"
+            "<tr>" + "<td>" + fields['greek'] + "</td>" + "<td>" + fields['english'] + "</td>" + "</tr>"
           );
         }
       }
@@ -74,15 +67,11 @@
     <tr>
       <th>Greek</th>
       <th>English</th>
-      <th>Chapter</th>
-      <th>Parsing</th>
     </tr>
     {% for g in greekVocab %}
     <tr class="vocab_list" id="vocab_list">
       <td> {{g.greek}} </td>
       <td> {{g.english}} </td>
-      <td> {{g.chapter}} </td>
-      <td> {{g.parsing}} </td>
     </tr>
     {% endfor %}
   </table>
