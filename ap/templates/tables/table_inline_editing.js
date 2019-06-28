@@ -1,22 +1,22 @@
 // ajax call to database for inline editing
 // updated gives the change, pk the object id, field the model field, url the model POST url
-function editDB(updated, obj_pk, field, url) {
+function editDB(updated, objPK, field, url) {
   var pass = false;
 
   $.ajax({
     async: false,
     type: "POST",
-    url: url,
+    url,
     data: {
       change: updated,
-      pk: obj_pk,
+      pk: objPK,
       f: field
     },
-    success: function(response) {
+    success(response) {
       pass = true;
-      new Notification(Notification.SUCCESS, 'Saved').show();
+      new Notification(Notification.SUCCESS, "Saved").show();
     },
-    error: function(jqXHR, textStatus, errorThrown) {
+    error(jqXHR, textStatus, errorThrown) {
       new Notification(Notification.ERROR, "Could not update").show();
     }
   });
@@ -48,26 +48,26 @@ function tableInlineEdit(clicked, url, textarea) {
 
   var input;
   if (textarea) {
-    input = $('<textarea>', {
+    input = $("<textarea>", {
       rows: orig.length/23, // estimate height of text to minimize table resizing
-      blur: function() {
+      blur() {
         blurFunction(this, orig, clicked, url);
       },
-      keyup: function(e) { // if pressing enter
-        if (e.which === 13) input.blur();
+      keyup(e) { // if pressing enter
+        if (e.which === 13) { input.blur() };
       }
     });
 
     input.val(orig);
   } else {
-    input = $('<input>', {
+    input = $("<input>", {
       value: orig,
-      type: 'text',
-      blur: function() {
+      type: "text",
+      blur() {
         blurFunction(this, orig, clicked, url);
       },
-      keyup: function(e) { // if pressing enter
-        if (e.which === 13) input.blur();
+      keyup(e) { // if pressing enter
+        if (e.which === 13) { input.blur() };
       }
     });
   }
