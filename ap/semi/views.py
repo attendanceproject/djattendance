@@ -102,7 +102,7 @@ class AttendanceReport(GroupRequiredMixin, TemplateView):
       if semis.filter(trainee=t).exists():
         semi = semis.get(trainee=t)
         if '' in semi.attendance.values() or 'N' in semi.attendance.values():
-          #todelete: includes both because old default attendance had 'N'
+          #todelete: includes both '' and 'N' because old default attendance had 'N'
           d['completed'] = "No"
           d['semi'] = semi
           d['stats'] = attendance_stats(semi)
