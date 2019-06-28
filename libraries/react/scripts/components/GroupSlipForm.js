@@ -56,6 +56,7 @@ const GroupSlipForm = ({...props}) => {
         <SelectedEventsField />
 
         <SlipTypesField slipTypes={GROUP_SLIP_TYPES} lastSlips={[]} />
+        <small> *Notification only is for record-keeping purposes. </small>
 
         <h4 className='dt-leaveslip__title'>Description</h4>
         <Form.Field type='textarea' name='description' className='dt-leaveslip__description'/>

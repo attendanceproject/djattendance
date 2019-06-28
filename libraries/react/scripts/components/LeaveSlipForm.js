@@ -33,6 +33,8 @@ const LeaveSlipForm = (props) => {
         <SelectedEventsField />
 
         <SlipTypesField slipTypes={SLIP_TYPES} lastSlips={props.lastSlips} />
+        <small> *Notification only is for record-keeping purposes. </small>
+
 
         {
           (props.form.slipType.id == 'MEAL' || props.form.slipType.id == 'NIGHT') &&
