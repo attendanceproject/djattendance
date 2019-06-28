@@ -96,10 +96,6 @@ $table-text-color:                darken($brown, 50%) !default;
           border-top: 1px solid $table-border-color;
           border-left: 1px solid $table-border-color;
         }
-        > td[contenteditable="true"] {
-          border-top: 1px solid $table-border-editable;
-          border-left: 1px solid $table-border-editable;
-        }
         > td[contenteditable="true"]:hover {
           border: 1.5px solid $table-border-color;
         }
