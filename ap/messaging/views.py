@@ -19,6 +19,6 @@ class MessagingView(TemplateView):
     notifications = get_announcements(self.request)
     for notification in notifications:
       tag, content = notification
-    messages.add_message(self.request, tag, content)
+      messages.add_message(self.request, tag, content)
     ctx['popups'] = get_popups(self.request)
     return ctx

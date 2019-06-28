@@ -1,0 +1,34 @@
+{% load smart_cards %}
+<div class="row">
+  <div class="row-md-12">
+    <div class="card_container">
+      {% generate_cards as cards %} {% for card in cards %} {% if card.condition %}
+      <div class="card">
+        <span class="card-header h3"> {{ card.header_title }} </span>
+        <span class=card-content>
+          {% for card_link in card.card_links %}
+          <span class="card-item">
+            <a href="{{ card_link.url }}" class="card-list">{{ card_link.title }}</a>
+            {% if card_link.number is not None %}
+              {% if card_link.ta_number is None %}
+                {% if card_link.number == 0 %}
+                  <div class="card-num">0</div>
+                {% else %}
+                  <div class="card-num-alert">{{ card_link.number }}</div>
+                {% endif %}
+              {% else %}
+                {% if card_link.ta_number == 0 %}
+                  <div class="card-num">0 ({{ card_link.number }})</div>
+                {% else %}
+                  <div class="card-num-alert">{{ card_link.ta_number }} ({{ card_link.number }})</div>
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          </span>
+          {% endfor %}
+        </span>
+      </div>
+      {% endif %} {% endfor %}
+    </div>
+  </div>
+</div>
