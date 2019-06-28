@@ -69,6 +69,7 @@ class IndividualSlipUpdate(LeaveSlipUpdate):
     ctx['verbose_name'] = current_ls._meta.verbose_name
     current_ls.is_late = current_ls.late
     ctx['leaveslip'] = current_ls
+    ctx['TA'] = self.request
     return ctx
 
   def post(self, request, **kwargs):

@@ -16,7 +16,7 @@ from audio.models import AudioRequest
 from room_reservations.models import RoomReservation
 from terms.models import Term
 from attendance.models import RollsFinalization
-from aputils.trainee_utils import is_trainee, trainee_from_user
+from aputils.trainee_utils import is_trainee, trainee_from_user, is_TA
 from datetime import timedelta
 
 
@@ -38,6 +38,9 @@ def get_announcements(request):
                           request_statuses(trainee),
                           attendance_announcements(trainee),
                           hc_reminder(trainee))
+  if is_TA(request.user):
+    ## motified request_statuses
+    notifications = []
   # sort on severity level of message
   return sorted(notifications, lambda a, b: b[0] - a[0])
 
@@ -55,8 +58,8 @@ def request_statuses(trainee):
       Summary.objects.filter(discipline__trainee=trainee, fellowship=True),
       RoomReservation.objects.filter(requester=trainee, status='F')
   )
-  message = 'Your <a href="{url}">{request}</a> has been marked for fellowship'
-  return [(messages.ERROR, message.format(url=reverse('attendance:attendance-submit'), request=req._meta.verbose_name)) if isinstance(req, IndividualSlip) else (messages.ERROR, message.format(url=req.get_absolute_url(), request=req._meta.verbose_name)) for req in requests]
+  message = '<a href="{url}"><u>You have a new message from {ta} regarding your {request}</u></a>'
+  return [(messages.ERROR, message.format(url=reverse('attendance:attendance-submit'), request=req._meta.verbose_name, ta=req.TA.firstname + ' ' + req.TA.lastname)) if isinstance(req, IndividualSlip) else (messages.ERROR, message.format(url=req.get_absolute_url(), request=req._meta.verbose_name, ta=req.TA.firstname + ' ' + req.TA.lastname)) for req in requests]
 
 
 def bible_reading_announcements(trainee):

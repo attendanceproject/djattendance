@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 from django.db import models
 from django.core.urlresolvers import reverse
 
-from accounts.models import Trainee
+from accounts.models import Trainee, TrainingAssistant
 from aputils.utils import RequestMixin
 
 
@@ -47,6 +47,7 @@ class WebRequest(models.Model, RequestMixin):
       (300, '5 hours'),
   )
 
+  TA = models.ForeignKey(TrainingAssistant, blank=True, null=True, related_name="%(class)sslips", on_delete=models.SET_NULL)
   status = models.CharField(choices=TYPE_APPROVAL_STATUS_CHOICES, max_length=2, default='P')
   reason = models.CharField(choices=TYPE_REASON_CHOICES, max_length=2)
   minutes = models.PositiveSmallIntegerField(choices=MINUTES_CHIOCES)

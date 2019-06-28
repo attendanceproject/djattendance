@@ -7,8 +7,8 @@ from accounts.models import User
 # Create your models here.
 class Message(models.Model):
   text = models.TextField(null=True, blank=True)
-  sent_by = models.ForeignKey(User, null=True, blank=True)
-  read_by = models.ManyToManyField(User, null=True, blank=True)
+  sent_by = models.ForeignKey(User, null=True, blank=True, related_name='sent')
+  read_by = models.ManyToManyField(User, null=True, blank=True, related_name='read')
   time_sent = models.DateTimeField(editable=False)
 
   def save(self, *args, **kwargs):
@@ -25,5 +25,3 @@ class Conversation(models.Model):
     if not self.id:
       self.time_created = timezone.now()
     return super(User, self).save(*args, **kwargs)
-
-
