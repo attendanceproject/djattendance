@@ -5,6 +5,7 @@ from django.views.generic.edit import UpdateView
 from django.views.generic import ListView
 from django.template.defaultfilters import title
 from django.shortcuts import redirect
+from django.forms import ValidationError
 
 from terms.models import Term
 from graduation.models import *
@@ -272,7 +273,10 @@ class MiscReport(ReportPostView):
 
   def updating(self, obj, field, value):
     if field == "misc-inv":
-      obj.grad_invitations = value
+      if int(value) % 5 == 0:
+        obj.grad_invitations = value
+      else:
+        raise ValidationError("Invite number must be a multiple of 5.")
     elif field == "misc-dvd":
       obj.grad_dvd = value
 
@@ -292,7 +296,11 @@ class RemembranceReport(ReportPostView):
 
   def updating(self, obj, field, value):
     if field == "rem-text":
-      obj.remembrance_text = value
+      limit = GradAdmin.objects.get(term=term).remembrance_char_limit
+      if len(str(value)) > limit:
+        raise ValidationError("Remembrance surpasses character limit of " + str(limit).decode("utf-8"))
+      else:
+        obj.remembrance_text = value
     elif field == "rem-ref":
       obj.remembrance_reference = value
 

@@ -17,7 +17,7 @@ function editDB(updated, obj_pk, field, url) {
       new Notification(Notification.SUCCESS, 'Saved').show();
     },
     error: function(jqXHR, textStatus, errorThrown) {
-      new Notification(Notification.ERROR, errorThrown).show();
+      new Notification(Notification.ERROR, "Could not update").show();
     }
   });
 
