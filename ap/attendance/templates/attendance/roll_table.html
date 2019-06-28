@@ -296,8 +296,7 @@ select {
   margin: 0px 5px 5px 10px;
 }
 .header-emphasis {
-  font-weight: bold;
-  color:rgb(126, 126, 126);
+  color:#095F80;
 }
 /*to style and align the filter/self-attendance buttons on the top left*/
 .align-buttons {
@@ -438,7 +437,7 @@ select {
           <tbody>
             {% for t in trainees %}
             <tr>
-              <th data-row='{{t.id}}' data-term='{{t.current_term}}' data-gender='{{t.gender}}'>
+              <th class="header-emphasis" data-row='{{t.id}}' data-term='{{t.current_term}}' data-gender='{{t.gender}}'>
                 <div class="full_name2">{{t.full_name2}}</div>
                 {# <div class="full_name" hidden>{{t.full_name}}</div> #}
               </th>
