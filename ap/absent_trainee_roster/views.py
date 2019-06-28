@@ -70,11 +70,11 @@ def absent_trainee_form(request):
     stat = "Submitted"
 
   read_only = True
-  if time(6) <= datetime.now().time() <= time(8, 5):
+  if time(6) <= datetime.now().time() <= time(8, 24):
     read_only = False
 
   if datetime.today().weekday() == 6:
-    if time(6) <= datetime.now().time() <= time(8, 20):
+    if time(6) <= datetime.now().time() <= time(8, 24):
       read_only = False
   c = {
       'formset': formset,
