@@ -14,8 +14,8 @@
   // Changing the chapter reloads the table to load the vocab list in that chapter
   function changeChapter() {
     var chap = document.getElementById("chapter_select").value;
-    var url = "/greek/?chap=" + chap;
-    history.pushState({ urlPath: url }, "", url);
+    // var url = "/greek/?chap=" + chap;
+    // history.pushState({ urlPath: url }, "", url);
 
     $.ajax({
       type: "GET",
@@ -50,43 +50,80 @@
 
 {% block content %}
 <div class="container">
-  <h1> Greek Vocab Helper</h1>
+  <h1> Greek Vocabulary Helper</h1>
 
   <!-- NAVIGATION TABS -->
   <ul class="nav nav-tabs" role="tablist">
-    <li><a href="{% url 'greek:index'%}" role="tab">Files</a></li>
-    <li><a href="{% url 'greek:index'%}" role="tab">Vocabulary</a></li>
-    <li><a href="{% url 'greek:index'%}" role="tab">Flashcards</a></li>
-    <li><a href="{% url 'greek:index'%}" role="tab">Multiple Choice</a></li>
+    <li role="presentation" class="active"><a href="#files" aria-controls="home" role="tab" data-toggle="tab">Files</a></li>
+    <li role="presentation"><a href="#list" aria-controls="home" role="tab" data-toggle="tab">Vocabulary</a></li>
+    <!--
+    <li role="presentation"><a href="#flashcard" aria-controls="home" role="tab" data-toggle="tab">Flashcards</a></li>
+    <li role="presentation"><a href="#mc" aria-controls="home" role="tab" data-toggle="tab">Multiple Choice</a></li>
+    -->
   </ul>
 
-  <form class="row">
-    <div class="col-sm-2">
-      Sort by chapter:
+  <!-- TAB PANES -->
+  <div class="tab-content">
+
+    <!-- FILES TAB -->
+    <div id="files" class="greek tab-pane active" role="tabpanel">
+      <div>
+        <table class="table">
+          <tr>
+            <th>Dates</th>
+            <th>Files</th>
+          </tr>
+          <tr>
+            <td> </td>
+            <td> </td>
+          </tr>
+        </table>
+      </div>
     </div>
-    <div class="col-sm-1">
-      <!-- Pick a chapter -->
-      <select id="chapter_select" class="form-control" name="chapter" size="0">
-        {% for i in chapters %}
-        <option value="{{i}}">{{i}}</option>
+
+    <!-- VOCAB LIST TAB -->
+    <div id="list" class="greek tab-pane" role="tabpanel">
+      <form class="row">
+        <div class="col-sm-2">
+          Sort by chapter:
+        </div>
+        <div class="col-sm-1">
+          <!-- Pick a chapter -->
+          <select id="chapter_select" class="form-control" name="chapter" size="0">
+            {% for i in chapters %}
+            <option value="{{i}}">{{i}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+      <br />
+      <table class="table vocab_table" id="vocab_table">
+        <tr>
+          <th>Greek</th>
+          <th>English</th>
+        </tr>
+        {% for g in greekVocab %}
+        <tr class="vocab_list" id="vocab_list">
+          <td> {{g.greek}} </td>
+          <td> {{g.english}} </td>
+        </tr>
         {% endfor %}
-      </select>
+      </table>
     </div>
-  </form>
 
-  <br />
+    <!-- FLASHCARDS TAB -->
+    <!--
+    <div id="flashcard" class="greek tab-pane" role="tabpanel">
 
-  <table class="table vocab_table" id="vocab_table">
-    <tr>
-      <th>Greek</th>
-      <th>English</th>
-    </tr>
-    {% for g in greekVocab %}
-    <tr class="vocab_list" id="vocab_list">
-      <td> {{g.greek}} </td>
-      <td> {{g.english}} </td>
-    </tr>
-    {% endfor %}
-  </table>
+    </div>
+    -->
+
+    <!-- MULTIPLE CHOICE TAB -->
+    <!--
+    <div id="mc" class="greek tab-pane" role="tabpanel">
+
+    </div>
+    -->
+  </div>
 </div>
 {% endblock %}
