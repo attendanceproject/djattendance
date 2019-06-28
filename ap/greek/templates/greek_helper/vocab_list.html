@@ -41,11 +41,24 @@
     $("#chapter_select").on('change', changeChapter);
   });
 </script>
+<style>
+  .table {
+    table-layout: fixed;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
   <h1> Greek Vocab Helper</h1>
+
+  <!-- NAVIGATION TABS -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li><a href="{% url 'greek:index'%}" role="tab">Files</a></li>
+    <li><a href="{% url 'greek:index'%}" role="tab">Vocabulary</a></li>
+    <li><a href="{% url 'greek:index'%}" role="tab">Flashcards</a></li>
+    <li><a href="{% url 'greek:index'%}" role="tab">Multiple Choice</a></li>
+  </ul>
 
   <form class="row">
     <div class="col-sm-2">
