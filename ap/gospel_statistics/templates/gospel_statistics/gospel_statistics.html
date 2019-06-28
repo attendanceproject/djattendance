@@ -158,82 +158,83 @@ input {
    </div>
   
 
-<!--Current week stats-->
-<div id="input-stats" class="tab-pane" role="tabpanel">
-  <div id="bluebox">
-    <select id="gospelWeek" onchange="switchStats(this.value)"/>
-  </div>
-  <form action="" method="post">
-  {% csrf_token %}
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped">
-        <thead>
-          <tr>
-            <th scope="col" style="width: 200px;">Week {{week}} Statistics</th>
-            {% for each in cols %}
-            <th scope="col" style="width: 125px;">{{each}}</th>
-            {% endfor %}
-            <th scope="col" style="width: 125px;">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for each in current %}
-          <tr>
-            <th>
-              <input style="display:none" name="pairs" value={{each.gospel_pair.id}}>
-              {% for every in each.gospel_pair.trainees.all %}
-                {{every}},
-              {% endfor %}
-            </th>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.minutes_on_gospel}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.tracts_distributed}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.bibles_distributed}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.contacted_30_sec}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.led_to_pray}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.baptized}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.minutes_in_appointment}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.second_appointment}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.regular_appointment}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.bible_study}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.small_group}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.district_meeting}}>
-            </td>
-            <td>
-              <input type="text" name="inputs" size="4" maxlength="4" value={{each.conference}}>
-            </td>
-            <td>
-                <button class="btn btn-primary" onclick="deletePair({{each.gospel_pair.id}});" title="Delete gospel pair">
-                    <span class="glyphicon glyphicon-trash"></span>
-                  </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <!--Current week stats-->
+  <div id="input-stats" class="tab-pane" role="tabpanel">
+    <div id="bluebox">
+      <select id="gospelWeek" onchange="switchStats(this.value)"/>
     </div>
+    <form action="" method="post">
+    {% csrf_token %}
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th scope="col" style="width: 200px;">Week {{week}} Statistics</th>
+              {% for each in cols %}
+              <th scope="col" style="width: 125px;">{{each}}</th>
+              {% endfor %}
+              <th scope="col" style="width: 125px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for each in current %}
+            <tr>
+              <th>
+                <input style="display:none" name="pairs" value={{each.gospel_pair.id}}>
+                {% for every in each.gospel_pair.trainees.all %}
+                  {{every}},
+                {% endfor %}
+              </th>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.minutes_on_gospel}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.tracts_distributed}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.bibles_distributed}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.contacted_30_sec}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.led_to_pray}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.baptized}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.minutes_in_appointment}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.second_appointment}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.regular_appointment}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.bible_study}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.small_group}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.district_meeting}}>
+              </td>
+              <td>
+                <input type="text" name="inputs" size="4" maxlength="4" value={{each.conference}}>
+              </td>
+              <td>
+                  <button class="btn btn-primary" onclick="deletePair({{each.gospel_pair.id}});" title="Delete gospel pair">
+                      <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
     <div style="padding-top:10px;">
       <button type="submit" class="btn btn-danger btn-primary" style="float: right;" title="Save current statistics">Save</button>
     <!--below is the old button which opens separate page; please remove and un-comment button below it-->
@@ -242,36 +243,36 @@ input {
       </a>
       <button type="button" class="btn btn-primary" data-toggle="modal" title="Add a new gospel pair modal" data-target="#new-pair">Create Gospel group</button>
     </div>
-    <!-- Modal popup for 'create gospel group' button -->
-    <div class="modal fade" id="new-pair" tabindex="-1" role="dialog" aria-labelledby="new-pair-label" aria-hidden="true">
-      <div class="vertical-alignment-helper">
-      <div class="modal-dialog vertical-align-center" role="document">
-        <div class="modal-content">
-          <div class="modal-header" style="border-bottom-style: solid; border-bottom-width: medium; border-bottom-color: #a6c5d1;">
-            <h4 class="modal-title" Style="float: left; font-size: 20px;" id="new-pair-label">Choose Trainees</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <form action="" method="post">
-          <div class="modal-body">
-                {% csrf_token %}
-                {% for member in members %}
-                <input type="checkbox" name="inputs" value = {{member.id}}>{{member}}</br>
-                {% endfor %}
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-dismiss="modal" aria-label="Close">Close</button>
-            <button type="submit" class="btn btn-danger btn-primary" title="Create a new gospel pair">Create</button>  
-          </div>
-          </form>
-        </div>
-      </div>
-      </div>
-    </div>
-    </form>
   </div>
 </div>
+<!-- Modal popup for 'create gospel group' button -->
+<div class="modal fade" id="new-pair" tabindex="-1" role="dialog" aria-labelledby="new-pair-label" aria-hidden="true">
+  <div class="vertical-alignment-helper">
+    <div class="modal-dialog vertical-align-center" role="document">
+      <div class="modal-content">
+        <div class="modal-header" style="border-bottom-style: solid; border-bottom-width: medium; border-bottom-color: #a6c5d1;">
+          <h4 class="modal-title" Style="float: left; font-size: 20px;" id="new-pair-label">Choose Trainees</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="" method="post">
+        <div class="modal-body">
+              {% csrf_token %}
+              {% for member in members %}
+              <input type="checkbox" name="inputs" value = {{member.id}}>{{member}}</br>
+              {% endfor %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal" aria-label="Close">Close</button>
+          <button type="submit" class="btn btn-danger btn-primary" title="Create a new gospel pair">Create</button>  
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+    
 
 </br></br>
 {% endblock %}
