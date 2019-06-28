@@ -37,7 +37,7 @@ const GroupSlipForm = ({...props}) => {
 
     <div>
       <Alert bsStyle="notice" className="dt-leaveslip__note">
-        *Please note: Multiple group slips maybe submitted if there are one or more events that should not be covered in between the first and last events covered by the slip. (Due to different personal schedules, group slips automatically include everything from the first event to the last event selected.)
+        *Please note: Multiple group slips may be submitted if there are one or more events that should not be covered in between the first and last events covered by the slip. (Due to different personal schedules, group slips automatically include everything from the first event to the last event selected.)
       </Alert>
     </div>
 
