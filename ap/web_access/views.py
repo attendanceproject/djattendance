@@ -153,9 +153,13 @@ def createGuestWebAccess(request):
     return HttpResponse('Error: This is a private endpoint, only accept post')
 
 
-def deleteGuestWebAccess(request, id):
-  WebRequest.objects.filter(id=id).delete()
-  return getGuestRequests(request)
+class DeleteGuestRequestForm(generic.DeleteView):
+  model = WebRequest
+
+  def post(self, request, *args, **kwargs):
+    if request.method == 'POST':
+      toDelete = WebRequest.objects.filter(id=request.POST['request_id']).delete()
+      return HttpResponse('Success!')
 
 
 @group_required(('training_assistant', 'networks'), raise_exception=True)

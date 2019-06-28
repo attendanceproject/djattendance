@@ -24,19 +24,6 @@ class DatePicker(DateInput):
         'js/datepicker.js',
     )
 
-class RoomDatePicker(DateInput):
-  format = '%m/%d/%Y'
-
-  def __init__(self, *args, **kwargs):
-    kwargs['attrs'] = {'class': 'datepicker'}
-    kwargs['attrs']['placeholder'] = "01/01/2019"
-    super(RoomDatePicker, self).__init__(*args, **kwargs)
-
-  class Media:
-    js = (
-        'js/datepicker.js',
-    )
-
 class DatetimePicker(DateTimeInput):
   format = '%m/%d/%Y %I:%M %p'
 
@@ -56,32 +43,6 @@ class TimePicker(TimeInput):
   def __init__(self, *args, **kwargs):
     kwargs['attrs'] = {'class': 'timepicker'}
     super(TimePicker, self).__init__(*args, **kwargs)
-
-  class Media:
-    js = (
-        'js/timepicker.js',
-    )
-
-class RoomStartTimePicker(TimeInput):
-  format = '%I:%M %p'
-
-  def __init__(self, *args, **kwargs):
-    kwargs['attrs'] = {'class': 'timepicker'}
-    kwargs['attrs']['placeholder'] = "8:30 AM"
-    super(RoomStartTimePicker, self).__init__(*args, **kwargs)
-
-  class Media:
-    js = (
-        'js/timepicker.js',
-    )
-
-class RoomEndTimePicker(TimeInput):
-  format = '%I:%M %p'
-
-  def __init__(self, *args, **kwargs):
-    kwargs['attrs'] = {'class': 'timepicker'}
-    kwargs['attrs']['placeholder'] = "10:30 PM"
-    super(RoomEndTimePicker, self).__init__(*args, **kwargs)
 
   class Media:
     js = (

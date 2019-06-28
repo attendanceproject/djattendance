@@ -1,12 +1,9 @@
 import datetime
-
 from aputils.trainee_utils import is_TA
-from aputils.widgets import DatePicker, TimePicker, RoomStartTimePicker, RoomEndTimePicker, RoomDatePicker
+from aputils.widgets import DatePicker, TimePicker
 from django import forms
 from terms.models import Term
-
 from .models import RoomReservation
-
 
 class RoomReservationForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
@@ -22,13 +19,15 @@ class RoomReservationForm(forms.ModelForm):
       self.fields['reason'].required = False
 
     self.fields['group'].widget.attrs['placeholder'] = 'Group making reservation (will be displayed on TV)'
-    self.fields['start'].widget = RoomStartTimePicker()
-    self.fields['end'].widget = RoomEndTimePicker()
-    self.fields['date'].widget = RoomDatePicker()
 
   class Meta:
     model = RoomReservation
     fields = ['group', 'date', 'start', 'end', 'room', 'frequency', 'reason']
+    widgets = {
+      "start": TimePicker(),
+      "end": TimePicker(),
+      "date": DatePicker()
+    }
 
   def clean(self):
     cleaned_data = self.cleaned_data

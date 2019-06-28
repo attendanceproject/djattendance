@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^start-access/(?P<id>\d+)$', utils.startAccess, name='start-access'),
     url(r'^eshepherding-access$', views.eShepherdingRequest, name='eshepherding-access'),
     url(r'^createGuestWebAccess$', views.createGuestWebAccess, name='create-guest-request'),
+    url(r'^deleteGuestWebAccess$', views.DeleteGuestRequestForm.as_view(), name='delete-guest-request'),
     url(r'^getGuestRequests$', views.getGuestRequests, name='get-guest-requests'),
     url(r'^direct-web-access$', views.directWebAccess, name='direct-web-access'),
     url(r'^get-remote-address$', utils.getRemoteAddress, name='get-remote-address'),
