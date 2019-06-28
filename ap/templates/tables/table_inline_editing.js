@@ -47,14 +47,19 @@ function tableInlineEdit(clicked, url, textarea) {
   }
 
   var input;
+  console.log("/");
+  var cols = $("table thead tr th").eq($("td").index(clicked)%7).width()/9;
+  console.log($("td").index(clicked));
+  console.log(cols);
   if (textarea) {
     input = $("<textarea>", {
-      rows: orig.length/23, // estimate height of text to minimize table resizing
+      rows: orig.length/cols, // estimate height of text to minimize table resizing
+      cols,
       blur() {
         blurFunction(this, orig, clicked, url);
       },
       keyup(e) { // if pressing enter
-        if (e.which === 13) { input.blur() };
+        if (e.which === 13) { input.blur() }
       }
     });
 
@@ -67,7 +72,7 @@ function tableInlineEdit(clicked, url, textarea) {
         blurFunction(this, orig, clicked, url);
       },
       keyup(e) { // if pressing enter
-        if (e.which === 13) { input.blur() };
+        if (e.which === 13) { input.blur() }
       }
     });
   }
