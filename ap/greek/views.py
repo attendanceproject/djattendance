@@ -9,7 +9,6 @@ import json
 def index(request):
     # By default, Greek page loads vocabs in chapter 1
     greek_list = Vocab.objects.filter(chapter=1)
-
     # Vocab landing page is filtered by chapter
     chapters = []
     for c in range(1, 17):
@@ -23,10 +22,14 @@ def index(request):
     return render(request, 'greek_helper/vocab_list.html', context=context)
 
 def changeChapter(request):
+
+    vocab = []
     if request.is_ajax():
         chapter = request.GET['chapter']
     try:
         greek_list = Vocab.objects.filter(chapter=chapter)
+        
+        # SERIALIZE METHOD:
         json_greek_list = serializers.serialize('json', greek_list)
         return HttpResponse(json_greek_list, content_type='application/json')
     except ObjectDoesNotExist:

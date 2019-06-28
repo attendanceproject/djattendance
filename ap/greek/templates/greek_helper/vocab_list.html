@@ -20,31 +20,28 @@
     $.ajax({
       type: "GET",
       url: urlString,
-      ataType: "json",
+      dataType: "json",
       data: {
         "chapter": chap,
       },
       success: function (data) {
         console.log("chapter changed to", chap);
-        updateTable(data);
+        $("#vocab_table td").remove();
+
+        for (var row of data) {
+          var fields = row['fields']
+          console.log("greek: ", fields['greek'], "english: ", fields['english'], "chapter: ", fields['chapter']);
+          $("#vocab_table tbody").append(
+            "<tr>" +
+            "<td>" + fields['greek'] + "</td>" +
+            "<td>" + fields['english'] + "</td>" +
+            "<td>" + fields['chapter'] + "</td>" +
+            "<td>" + fields['parsing'] + "</td>" +
+            "</tr>"
+          );
+        }
       }
     });
-  }
-
-  function updateTable(data) {
-    $("#vocab_list td").remove();
-    $.each(data, function (key, value) {
-      console.log(data);
-
-      // var vocabKey = key;
-      // var new_greek = value.greek;
-      // var new_eng = value.english;
-      // var new_chap = value.chapter;
-      // var new_parsing = value.parsing;
-      // $("#vocab_list td").append(
-      //   "<tr><td>" + new_greek + "</td><td>" + new_eng + "</td><td>" + new_chap + "</td><td>" + new_parsing + "</td></tr>"
-      // )
-    })
   }
 
   $(document).ready(function () {
@@ -73,7 +70,7 @@
 
   <br />
 
-  <table class="table">
+  <table class="table vocab_table" id="vocab_table">
     <tr>
       <th>Greek</th>
       <th>English</th>
