@@ -1,7 +1,7 @@
 from django.db import models
 
 class Vocab(models.Model):
-    
+
     PARSING_CODES = (
         ('1', 'Noun (1D)'),
         ('2', 'Noun (2D)'),
@@ -30,4 +30,3 @@ class Vocab(models.Model):
             return self.greek
         except AttributeError as e:
             return str(self.greek) + ": " + str(e)
-
