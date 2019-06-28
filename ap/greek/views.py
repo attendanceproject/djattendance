@@ -1,11 +1,9 @@
 from django.shortcuts import render
-from django.views.generic import ListView
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from .models import Vocab
-from classes.models import ClassFile, CLASS_CHOICES_ALL
-from classes.forms import ClassFileForm
+from classes.models import ClassFile
 
 def index(request):
 
@@ -30,7 +28,6 @@ def index(request):
     }
     
     context['classname'] = 'Greek'
-    # context['form'] = ClassFileForm(limit_choices=CLASS_CHOICES_ALL)
     context['class_files'] = ClassFile.objects.filter(for_class="Greek")
     context['page_title'] = '%s Files' % (class_files)
 
