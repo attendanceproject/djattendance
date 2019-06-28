@@ -130,13 +130,28 @@ Service Scheduling
     <a class="btn btn-primary" href="?week_schedule={{next_week}}"> > </i></a>
   </h3>
 
+ Current view: LOCKED
+  <div class="btn-group">
+    <a href="" class="btn btn-success">Show Unlocked Schedule</a>
+  </div>
+
   <!-- Tab panes -->
   <div class="tab-content">
   <!-- Assign Tab -->
     <div role="tabpanel" class="tab-pane active" id="assign">
       <div class="pull-right" role="group">
-        <div class="btn-group">
+
+         <div class="btn-group">
           <a href="{% url 'services:services_generate_leaveslips' %}?week_schedule={{current_week}}" class="btn btn-primary" onclick="return confirm('Are you sure? This could overwrite existing leaveslips.')">Generate Leave Slips</a>
+        </div>
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        <div class="btn-group">
+          <a href="{% url 'services:lock' %}?week_schedule={{current_week}}" class="btn btn-success">Lock Schedule</a>
         </div>
         &nbsp;
         &nbsp;

@@ -15,6 +15,7 @@ urlpatterns = [
   url(r'^generate_signink$', views.generate_signin, {'k': True}, name='kservices_signin'),
   url(r'^generate_signino$', views.generate_signin, {'o': True}, name='oservices_signin'),
   url(r'^import-guests$', views.ImportGuestsView.as_view(), name='import-guests'),
+  url(r'^lock$', views.lock, name='lock-assignments'),
   url(r'^deactivate-guest/(?P<pk>\d+)$', views.deactivate_guest, name='deactivate-guest'),
   url(r'^deactivate-guest/bulk$', views.bulk_deactivate_guests, name="bulk-deactivate-guests"),
   url(r'^process-guests$', views.process_guests, name='process-guests'),

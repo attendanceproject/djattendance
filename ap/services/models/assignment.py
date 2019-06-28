@@ -21,6 +21,8 @@ class Assignment(models.Model):
 
   workers = models.ManyToManyField('Worker', related_name="assignments", blank=True)
 
+  locked = models.BooleanField(default=False)
+
   @property
   def workers_needed(self):
     return self.service_slot.workers_required - self.workers.count()

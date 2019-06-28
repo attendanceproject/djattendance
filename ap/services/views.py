@@ -35,7 +35,6 @@ from .serializers import (AssignmentPinSerializer, ExceptionActiveSerializer,
 from .utils import (SERVICE_CHECKS, assign, assign_leaveslips, merge_assigns,
                     save_designated_assignments)
 
-
 @timeit
 @group_required(['training_assistant', 'service_schedulers'])
 def services_view(request, run_assign=False, generate_leaveslips=False):
@@ -69,7 +68,7 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
     # The Django implementation produces a SQL query for each delete item =(
     # Source : https://code.djangoproject.com/ticket/9519
     # Need a better solution for this (maybe sometime in the future when we update Django)
-    Assignment.objects.filter(week_schedule=cws, pin=False).delete()
+    Assignment.objects.filter(week_schedule=cws, pin=False, locked=False).delete()
     assign(cws)
     return HttpResponseRedirect(reverse_lazy('services:services_view') + '?week_schedule=' + str(current_week))
 
@@ -141,6 +140,26 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
       'service_checks': SERVICE_CHECKS,
   }
   return render(request, 'services/services_view.html', ctx)
+
+@group_required(['training_assistant', 'service_schedulers'])
+def lock(request):
+  print("in LOCK")
+  user = request.user
+  trainee = trainee_from_user(user)
+  if request.GET.get('week_schedule'):
+    print("got week_schedule")
+    current_week = request.GET.get('week_schedule')
+    current_week = int(current_week)
+    current_week = current_week if current_week < LAST_WEEK else LAST_WEEK
+    current_week = current_week if current_week > FIRST_WEEK else FIRST_WEEK
+    cws = WeekSchedule.get_or_create_week_schedule(trainee, current_week)
+  else:
+    print("didn't get week_schedule")
+    ct = Term.current_term()
+    current_week = ct.term_week_of_date(date.today())
+    cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
+  print("setting cws assignments to locked")
+  Assignment.objects.filter(week_schedule=cws).update(locked = true)
 
 @group_required(['training_assistant', 'service_schedulers'])
 def check_exceptions_view(request):
