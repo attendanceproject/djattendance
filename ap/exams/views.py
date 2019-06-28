@@ -476,10 +476,15 @@ class TakeExamView(SuccessMessageMixin, CreateView):
     message = 'Exam submitted successfully.'
     if finalize:
       session = self._get_session()
-      session.time_finalized = datetime.now()
-      session.grade = total_session_score
-      session.is_graded = is_graded
-      session.save()
+      if session.exam.is_open or Makeup.objects.filter(trainee=session.trainee, exam=session.exam):
+        session.time_finalized = datetime.now()
+        session.grade = total_session_score
+        session.is_graded = is_graded
+        session.save()
+      else:
+        finalize = False
+        message = 'Cannot finalize because exam is closed. Exam progress saved.'
+        return JsonResponse({'bad': False, 'finalize': finalize, 'msg': message})
     else:
       message = 'Exam progress saved.'
 
