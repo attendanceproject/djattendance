@@ -20,20 +20,12 @@
   var finalizeStatusUrl = "{% url 'bible_tracker:finalizeStatus' %}";
   var designatedHoursUrl = "{% url 'services:designated_service_hours' %}";
   var serviceUrl = "{% url 'services:changeWeek' %}";
-  var assignedServices = "{{assigned_list|safe}}";
-  var assignedDesignated = "{{designated_list|safe}}";
-  var serviceDays = "{{service_day|safe}}";
+  var assignedServices = {{assigned_list|safe}};
+  var assignedDesignated = {{designated_list|safe}};
+  var serviceDays = {{service_day|safe}};
 
   function initProcessServices() {
-
-    // regex to get services from string
-    var regex = /'(.*?)'/gm;
-    var services = assignedServices.match(regex);
-    regex = /\d+/gm;
-    var days = serviceDays.match(regex);
-
-    processServices(services, days);
-
+    processServices(assignedServices, serviceDays);
   }
 
   function processServices(services, services_day) {
@@ -46,14 +38,12 @@
     for (var i in services_day) {
       // i is the index, day is the value of the element at index i in services_day
       var day = services_day[i];
-      document.getElementById("service-row-" + weekdayCodes[day]).innerHTML = "<span id=\"service-tooltip\" data-toggle=\"tooltip\" title=\""
+      document.getElementById("service-row-" + weekdayCodes[day]).innerHTML = "<span data-toggle=\"tooltip\" title=\""
         + services[i] + "\" class=\"glyphicon glyphicon-ok\"></span>";
     }
 
     // show url link for designated hours if the trainee has designated service
-    var regex = /'(.*?)'/gm;
-    var designated = assignedDesignated.match(regex);
-    if (designated) {
+    if (assignedDesignated && assignedDesignated.length > 0) {
       var designatedHourUrlCell = document.getElementById("designated_service_hours_link");
       var urlInsert = "<a href=\"{% url 'services:designated_service_hours' %}\">Hours</a>";
       designatedHourUrlCell.innerHTML = urlInsert
@@ -71,7 +61,6 @@
         "week": weekId,
       },
       success: function (data) {
-        console.log(data);
         var services = new Array();
         var services_day = new Array();
 
@@ -82,7 +71,7 @@
         processServices(services, services_day);
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        console.log(jqXHR, textStatus, errorThrown);
+        console.error(jqXHR, textStatus, errorThrown);
       }
     });
   }

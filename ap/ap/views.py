@@ -82,12 +82,6 @@ def home(request):
     assigned_list = list(service.encode("utf-8") for service in worker_assignments.exclude(service__category__name="Designated Services").values_list('service__name', flat=True))
     service_day = list(worker_assignments.exclude(service__category__name="Designated Services").values_list('service__weekday', flat=True))
 
-    print designated_list
-    # for a in assigned_list:
-      # print a
-    print assigned_list
-    print service_day
-
   data = {
       'daily_nourishment': Portion.today(),
       'user': user,
@@ -99,9 +93,9 @@ def home(request):
       'weeks': Term.all_weeks_choices(),
       'finalized': finalized_str,
       'weekday_codes': json.dumps(WEEKDAY_CODES),
-      'service_day': service_day,
-      'assigned_list': assigned_list,
-      'designated_list': designated_list,
+      'service_day': json.dumps(service_day),
+      'assigned_list': json.dumps(assigned_list),
+      'designated_list': json.dumps(designated_list),
   }
 
   notifications = get_announcements(request)
