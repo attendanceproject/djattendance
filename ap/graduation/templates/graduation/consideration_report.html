@@ -56,6 +56,10 @@
 
     });
 
+    $(".incompleted").toggle();
+    $(".buttons-show").on("click", function() {
+      $(".incompleted").toggle();
+    })
 
   });
 
@@ -65,6 +69,11 @@
 {% block content %}
 <h1>{{title}}</h1>
 
+<a class="btn btn-default buttons-show">Show/Hide Incompleted</a>
+<br><div class="incompleted"><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
+<strong>Total</strong>: {{ not_completed_number }}</div>
+
+<br>
 <pre>{{ xb_display }}<br>
 {{ fellowshipped_display }}</pre>
 
