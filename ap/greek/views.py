@@ -26,7 +26,8 @@ def index(request):
         "greekVocab": greek_list,
         "classFiles": class_files,
     }
-    
+
+    ## CONTINUATION OF FILES TAB ###
     context['classname'] = 'Greek'
     context['class_files'] = ClassFile.objects.filter(for_class="Greek")
     context['page_title'] = '%s Files' % (class_files)
