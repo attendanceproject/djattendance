@@ -32,6 +32,9 @@ class WeekSchedule(models.Model):
   # exceptions inactive for just this week
   silenced_exceptions = models.ManyToManyField('ServiceException', blank=True, verbose_name='Exceptions to ignore this week')
 
+  # once a week's schedule has been locked, it cannot be locked again, and its locked assignments cannot be deleted.
+  locked = models.BooleanField(default=False)
+
   @property
   def week(self):
     return Term.current_term().term_week_of_date(self.start)

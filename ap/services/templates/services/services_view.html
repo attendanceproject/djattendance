@@ -129,11 +129,18 @@ Service Scheduling
     Services Scheduling ({{ cws }})
     <a class="btn btn-primary" href="?week_schedule={{next_week}}"> > </i></a>
   </h3>
-
+ 
+ {% if locked_view %}
  Current view: LOCKED
   <div class="btn-group">
-    <a href="" class="btn btn-success">Show Unlocked Schedule</a>
+    <a class="btn btn-primary" href="?week_schedule={{current_week}}">Show Unlocked Schedule</a>
   </div>
+  {% else %}
+  Current view: UNLOCKED
+  <div class="btn-group">
+    <a class="btn btn-primary" href="{% url 'services:services_locked_view' %}?week_schedule={{current_week}}">Show Locked Schedule</a>
+  </div>
+  {% endif %}
 
   <!-- Tab panes -->
   <div class="tab-content">
@@ -150,9 +157,15 @@ Service Scheduling
         &nbsp;
         &nbsp;
         &nbsp;
+        {% if cws.locked %}
         <div class="btn-group">
-          <a href="{% url 'services:lock' %}?week_schedule={{current_week}}" class="btn btn-success">Lock Schedule</a>
+          <a class="btn btn-primary disabled" id="lock-assignments" onclick="lockAssignments(this)">Lock Assignments</a>
         </div>
+        {% else %}
+        <div class="btn-group">
+          <a class="btn btn-primary" id="lock-assignments" onclick="lockAssignments(this)">Lock Assignments</a>
+        </div>
+        {% endif %}
         &nbsp;
         &nbsp;
         &nbsp;
@@ -587,6 +600,31 @@ Service Scheduling
         new Notification(Notification.SUCCESS, 'Saved').show();
       }
     })
+  }
+
+  function lockAssignments(request) {
+    console.log("in lockAssignments");
+    $.ajax({
+      type: "POST",
+      url: "{%url 'services:lock-assignments' %}?week_schedule={{current_week}}",
+      data: {
+      },
+      success: function(data) {
+        new Notification(Notification.SUCCESS, "Schedule Locked").show();
+        $("#lock-assignments").addClass("disabled");
+      },
+      error: function(xhr, textStatus, errorThrown) {
+        console.log("Error locking assignments.");
+      }
+    });
+  }
+
+  function showLockedSchedule() {
+
+  }
+
+  function showUnlockedSchedule() {
+
   }
 
   var workers = {{ workers_bb|safe }};

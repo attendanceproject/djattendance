@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import F, Q, Count
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView
@@ -37,8 +37,10 @@ from .utils import (SERVICE_CHECKS, assign, assign_leaveslips, merge_assigns,
 
 @timeit
 @group_required(['training_assistant', 'service_schedulers'])
-def services_view(request, run_assign=False, generate_leaveslips=False):
+def services_view(request, locked_view=False, run_assign=False, generate_leaveslips=False):
   # status, soln = 'OPTIMAL', [(1, 2), (3, 4)]
+  print "locked_view: ", locked_view
+  print "generate_leaveslips: ", generate_leaveslips
   user = request.user
   trainee = trainee_from_user(user)
   if request.GET.get('week_schedule'):
@@ -138,10 +140,10 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
       'prev_week': (current_week - 1),
       'next_week': (current_week + 1),
       'service_checks': SERVICE_CHECKS,
+      'locked_view': locked_view,
   }
   return render(request, 'services/services_view.html', ctx)
 
-@group_required(['training_assistant', 'service_schedulers'])
 def lock(request):
   print("in LOCK")
   user = request.user
@@ -158,8 +160,23 @@ def lock(request):
     ct = Term.current_term()
     current_week = ct.term_week_of_date(date.today())
     cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
-  print("setting cws assignments to locked")
-  Assignment.objects.filter(week_schedule=cws).update(locked = true)
+  if not cws.locked:
+    print("setting cws assignments to locked")
+    Assignment.objects.filter(week_schedule=cws).update(locked = True)
+    print("cloning assignments")
+    cloneAssignments(cws)
+    print("setting cws locked to True")
+    cws.locked = True
+    cws.save()
+  return HttpResponse('Success locking weekly schedule')
+
+# helper function to clone an unlocked version of assignments after locking assignments
+def cloneAssignments(cws):
+  current_assignments = Assignment.objects.filter(week_schedule=cws)
+  new_assignments = []
+  for a in current_assignments:
+    new_assignments.append(Assignment(week_schedule = a.week_schedule, service = a.service, service_slot = a.service_slot, workers = a.workers, pin = a.pin, workload = a.workload, locked = False))
+  Assignment.objects.bulk_create(new_assignments)
 
 @group_required(['training_assistant', 'service_schedulers'])
 def check_exceptions_view(request):

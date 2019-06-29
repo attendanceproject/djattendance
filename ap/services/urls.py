@@ -5,6 +5,7 @@ urlpatterns = [
   url(r'^$', views.services_view, name='services_view'),
   url(r'^assign$', views.services_view, {'run_assign': True}, name='services_assign_view'),
   url(r'^generate_leaveslips$', views.services_view, {'generate_leaveslips': True}, name='services_generate_leaveslips'),
+  url(r'^locked_view$', views.services_view, {'locked_view': True}, name='services_locked_view'),
   url(r'^add_exception/$', views.AddExceptionView.as_view(), name='services-exception-add'),
   url(r'^update_exception/(?P<pk>\d+)$', views.UpdateExceptionView.as_view(), name='services-exception-update'),
   url(r'^delete_exception/(?P<pk>\d+)$', views.UpdateExceptionView.as_view(), name='services-exception-delete'),
