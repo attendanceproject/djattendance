@@ -108,7 +108,7 @@ class TARoomReservationList(GroupRequiredMixin, TemplateView):
 
   def get_context_data(self, **kwargs):
     ctx = super(TARoomReservationList, self).get_context_data(**kwargs)
-    reservations = RoomReservation.objects.all()
+    reservations = RoomReservation.objects.all().select_related("requester").select_related("room")
     ctx['reservations'] = reservations
     return ctx
 
