@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
   url(r'^$', views.services_view, name='services_view'),
+  url(r'^changeWeek/$', views.changeWeek, name='changeWeek'),
   url(r'^assign$', views.services_view, {'run_assign': True}, name='services_assign_view'),
   url(r'^generate_leaveslips$', views.services_view, {'generate_leaveslips': True}, name='services_generate_leaveslips'),
   url(r'^add_exception/$', views.AddExceptionView.as_view(), name='services-exception-add'),
