@@ -1,0 +1,16 @@
+<form action="{% url 'house_inspection:create_inspector' %}" method="POST">
+	{% csrf_token %}
+	<div class="form-group">
+		<label for="last_name">Last Name</label>
+		<input type="text" name="last_name" class="form-control" required>
+	</div>
+	<div class="form-group">
+		<label for="first_name">First Name</label>
+		<input type="text" name="first_name" class="form-control" required>
+	</div>
+	<div class="form-group">
+		<label for="prefect_number">Prefect Number</label>
+		<input type="text" name="prefect_number" class="form-control" required>
+	</div>
+    <input type="submit" value="Add" class="btn" name="mybtn">
+</form>

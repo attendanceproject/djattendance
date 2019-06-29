@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+
+{% block scripts %}
+{{ block.super }}
+<script type="text/javascript">
+
+  $(document).ready(function() {
+    const size = 10;
+    var dt_options = {
+      format: 'm/d/Y g:i A',
+      formatTime: 'g:i A',
+      ampm: true,
+      step: 10,
+      defaultSelect: false,
+      allowBlank: false,
+      validateOnBlur: false
+    };
+
+    $('.datetimepicker').datetimepicker(dt_options);
+
+
+    $("#id_itemized_report_table").DataTable({
+      info: false,
+      paging: false,
+      autoWidth: true,
+      
+      dom: '<"row"<"col-sm-6"Bl><"col-sm-6"f>>' +
+      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      fixedHeader: {
+        header: true
+      },      
+      ],
+    });
+  });
+
+</script>
+{% endblock %}
+
+
+
+{% block content %}
+<h1>Itemized Inspection Report</h1>
+
+<div class="data-table-container">
+  <table id="id_itemized_report_table" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>House</th>
+        <th>Score</th>
+        <th>RIC</th>
+        <th>Date</th>
+        <th>Inspectors</th>
+        <th>Notes</th>
+        <th>Uninspectable</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in scores %}
+      <tr>
+        <td>{{item.house}}</td>
+        <td>{{item.score}}</td>
+        <td>{{item.ric}}</td>
+        <td>{{item.date}}</td>
+        <td>
+          {% for inspector in item.inspectors.all %}
+            {{inspector}} 
+            {% endfor %}
+          </td>
+        <td>{{item.notes}}</td>
+        <td>{{item.uninspectable}}</td>
+        <td>{{item.uninspectable_reason}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+  <table id="id_itemized_report_table_s" class="table table-striped table-bordered">
+    
+    <thead>
+      {% for report_date_form in score %}
+      <tr>
+        <th>{% bootstrap_field report_date_form.date layout='inline' %}</th>        
+      </tr>
+      {% endfor %}
+    </thead>   
+    
+    <thead>
+      <tr>              
+        <th>House</th>
+        <th>Score</th>
+        <th>RIC</th>
+        <th>Date</th>
+        <th>Inspectors</th>
+        <th>Notes</th>
+        <th>Uninspectable</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in scores_s %}
+      <tr>
+
+        <td>{{item.house}}</td>
+        <td>{{item.score}}</td>
+        <td>{{item.ric}}</td>
+        <td>{{item.date}}</td>
+        <td>
+          {% for inspector in item.inspectors.all %}
+            {{inspector}} 
+            {% endfor %}
+          </td>
+        <td>{{item.notes}}</td>
+        <td>{{item.uninspectable}}</td>
+        <td>{{item.uninspectable_reason}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

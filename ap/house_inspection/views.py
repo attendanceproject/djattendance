@@ -4,13 +4,13 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 
 # Create your views here.
-from house_inspection.models import Inspectors, InspectableHouses
+from house_inspection.models import Inspectors, InspectableHouses, Scores
 from accounts.models import Trainee
 from django.contrib import messages
 from django.shortcuts import redirect
 from houses.models import House
-from .forms import FaqForm, QuestionRequestCreateForm, HouseInspectionFaqAnswerForm, HouseInspectionFaqCommentForm
-from .models import HouseInspectionFaq
+from .forms import FaqForm, QuestionRequestCreateForm, HouseInspectionFaqAnswerForm, HouseInspectionFaqCommentForm, ScoresForm
+from .models import HouseInspectionFaq, ItemizedInspectionReport
 from terms.models import Term
 from ap.base_datatable_view import BaseDatatableView
 from django.views import generic
@@ -20,6 +20,7 @@ from itertools import chain
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .utils import modify_question_status
+from django.views.generic.edit import FormView
 '''
 class HouseInspectionFaq(TemplateView):
   template_name = 'house_inspection/faq.html'
@@ -59,6 +60,98 @@ def houseInspectionFaq(request):
 This is the table under the cards.
 '''
 
+'''
+class ItemizedInspectionReportJSON(BaseDatatableView):
+  model = ItemizedInspectionReport
+  columns = ['score_report.house', 'score_report.score', 'score_report.ric', 'score_report.date', 'score_report.inspectors', 'score_report.notes', 'score_report.uninspectable', 'score_report.uninspectable_reason',]
+  max_display_length = 120
+
+  
+  def filter_queryset(self, qs):
+    #search = self.request.GET.get(u'search[value]', None)
+    ret = qs.none()
+    if search:
+      filters = []
+      filters.append(Q(id=search))
+      for f in filters:
+        try:
+          ret = ret | qs.filter(f)
+        except ValueError:
+          continue
+      return ret
+    else:
+      return qs
+'''
+'''
+class MyView(ListView):
+    model = Update
+    template_name = "updates/update.html"
+    paginate_by = 10
+
+    def get_queryset(self):
+        filter_val = self.request.GET.get('filter', 'give-default-value')
+        order = self.request.GET.get('orderby', 'give-default-value')
+        new_context = Update.objects.filter(
+            state=filter_val,
+        ).order_by(order)
+        return new_context
+
+    def get_context_data(self, **kwargs):
+        context = super(MyView, self).get_context_data(**kwargs)
+        context['filter'] = self.request.GET.get('filter', 'give-default-value')
+        context['orderby'] = self.request.GET.get('orderby', 'give-default-value')
+        return context
+'''
+
+class ItemizedInspectionReport(generic.ListView):
+  model = ItemizedInspectionReport
+  template_name = 'house_inspection/itemized_inspection_report.html'
+
+  def post(self, request, *args, **kwargs):
+    return self.get(request, *args, **kwargs)
+
+  def get_queryset(self):
+    # filter by date
+    filter_val = self.request.GET.get('filter', '')
+
+    new_context = Foo.objects.filter(
+        state = filter_val,
+      )
+    return new_context
+
+
+  def get_context_data(self, **kwargs):
+    context = super(ItemizedInspectionReport, self).get_context_data(**kwargs)
+    # maybe go through inspectable hosues...
+    #brothers_houses = InspectableHouses.objects.filter(residence_type='B')   
+    context['scores'] = Scores.objects.filter(house__in=House.objects.filter(gender='B'))
+
+    context['scores_s'] = Scores.objects.filter(house__in=House.objects.filter(gender='S'))
+
+
+
+    return context
+
+'''
+class ItemizedInspectionReport(generic.ListView):
+  model = ItemizedInspectionReport
+  template_name = 'house_inspection/itemized_inspection_report.html'
+  DataTableView = ItemizedInspectionReportJSON
+  source_url = reverse_lazy("house_inspection:itemized_inspection_report-json")
+
+  def get_queryset(self):
+    #I think we edit the tables here or constrain them by gender
+    qs = Scores.objects.all()
+    return qs
+  def get_context_data(self, **kwargs):
+    # We can manipulate context data by gender/date
+    context = super(ItemizedInspectionReport, self).get_context_data(**kwargs)
+    scores = Scores.objects.none()
+    scores = chain(scores, Scores.objects.all())
+    
+    context['scores'] = scores
+    return context
+'''
 
 class QuestionRequestJSON(BaseDatatableView):
   model = HouseInspectionFaq
@@ -239,9 +332,45 @@ def manageInspectableHouses(request):
       print house_id
       house = InspectableHouses.objects.get(id=house_id)
       print house
-      house.uninspectable = True
+      if house.uninspectable == False:
+        house.uninspectable = True
+      else:
+        house.uninspectable = False
       house.save()
   return render(request, 'house_inspection/manage_inspectable_houses.html', context)
+
+class ManageScores(FormView):
+  template_name = 'house_inspection/manage_scores.html'
+  form_class = ScoresForm
+
+  def get_success_url(self):
+    return reverse('house_inspection:manage_scores')
+
+  def form_valid(self, form):
+    if form.is_valid():      
+      house = form.cleaned_data.get('house')      
+      date = form.cleaned_data.get('date')
+      ric = form.cleaned_data.get('ric')
+      inspectors = form.cleaned_data.get('inspectors')
+      score = form.cleaned_data.get('score')
+      notes = form.cleaned_data.get('notes')
+      uninspectable_reason = form.cleaned_data.get('uninspectable_reason')
+      uninspectable = False
+      if uninspectable_reason:
+        uninspectable = True      
+      obj, created = Scores.objects.get_or_create(house=house, date=date, ric=ric, score=score, notes=notes, uninspectable_reason=uninspectable_reason, uninspectable=uninspectable)
+      if created:        
+        for inspector in inspectors:
+          obj.inspectors.add(inspector)        
+        obj.save()      
+    return super(ManageScores, self).form_valid(form)
+
+  def get_context_data(self, **kwargs):
+    context = super(ManageScores, self).get_context_data(**kwargs)
+    context ['page_title'] = 'Manage Scores'
+    
+    context ['scores'] = Scores.objects.all()
+    return context
 
 '''
 class MyFormView(View):
