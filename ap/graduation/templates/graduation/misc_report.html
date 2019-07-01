@@ -51,8 +51,6 @@
 
     });
 
-    $(".totals").toggle();
-    $(".incompleted").toggle();
     $(".buttons-show-totals").on("click", function() {
       $(".totals").toggle();
     })
@@ -69,12 +67,12 @@
 <h1>{{title}}</h1>
 
 <a class="btn btn-default buttons-show-totals">Show/Hide Totals</a>
-<a class="btn btn-default buttons-show">Show/Hide Incompleted</a>
+<a class="btn btn-default buttons-show">Show/Hide Incompleted</a><br>
 
-<div class="totals"><strong>Total DVDs Requested</strong>: {{dvd_totals}}<br>
+<div class="totals" style="display: none"><br><strong>Total DVDs Requested</strong>: {{dvd_totals}}<br>
 <strong>Total Invitations Requested</strong>: {{invite_totals}}</div>
 
-<br><div class="incompleted"><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
+<div class="incompleted" style="display: none"><br><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
 <strong>Total</strong>: {{ not_completed_number }}</div>
 
 <br>
