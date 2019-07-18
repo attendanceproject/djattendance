@@ -19,7 +19,7 @@
     "bootstrap-sass": "^3.4.0",
     "bootstrap-toggle": "^2.2.2",
     "countable": "^3.0.0",
-    "css-loader": "^2.0.2",
+    "css-loader": "^3.1.0",
     "datatables.net-bs": "^1.10.19",
     "datatables.net-buttons": "^1.5.4",
     "datatables.net-buttons-bs": "^1.5.4",
