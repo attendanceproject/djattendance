@@ -91,7 +91,6 @@ def pictureRange(begin, end):
   return pictureRangeArray
 
 
-@group_required(['training_assistant', 'badges'])
 def printSelectedChoicesOnly(Badge, request, context):
   print 'ids to print', request.POST.getlist('choice')
   copies = int(request.POST.get('copies', 1))
