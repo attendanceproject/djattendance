@@ -108,6 +108,9 @@ class TARoomReservationList(GroupRequiredMixin, TemplateView):
 
   def get_context_data(self, **kwargs):
     ctx = super(TARoomReservationList, self).get_context_data(**kwargs)
+    # Leaving the query call to be just "RoomReservations.objects.all()" does thousands of the same query call
+    # causing it to be extremely slow. select_related uses foreign-keys relationships of "requester" and "room" 
+    # that don't require databause queries significantly improving performance to be within usable load times for the user.
     reservations = RoomReservation.objects.all().select_related("requester").select_related("room")
     ctx['reservations'] = reservations
     return ctx
