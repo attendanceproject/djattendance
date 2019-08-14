@@ -251,7 +251,6 @@ class BadgePrintGeneralBackView(BadgesGroupRequiredMixin, ListView):
     return context
 
 
-@group_required(['training_assistant', 'badges'])
 def facebookOrder(queryset):
   return queryset.order_by('lastname', 'firstname')
 
