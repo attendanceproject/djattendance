@@ -91,7 +91,6 @@ def pictureRange(begin, end):
   return pictureRangeArray
 
 
-@group_required(['training_assistant', 'badges'])
 def printSelectedChoicesOnly(Badge, request, context):
   print 'ids to print', request.POST.getlist('choice')
   copies = int(request.POST.get('copies', 1))
@@ -252,7 +251,6 @@ class BadgePrintGeneralBackView(BadgesGroupRequiredMixin, ListView):
     return context
 
 
-@group_required(['training_assistant', 'badges'])
 def facebookOrder(queryset):
   return queryset.order_by('lastname', 'firstname')
 
