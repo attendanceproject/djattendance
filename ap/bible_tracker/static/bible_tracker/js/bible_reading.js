@@ -28,7 +28,7 @@ function setWeeks() {
     var firstDayofWeek = moment(first_day_term, "YYYYMMDD");
     var lastDayofWeek = firstDayofWeek.clone().add(6, "days");
     for (var i = 0; i <= currentWeek; i++) {
-        $("#week_select").append($("<option />").val("week-" + i).text("Week " + i + ": " + firstDayofWeek.format("ddd MMM D") + " - " + lastDayofWeek.format("ddd MMM D")).attr("id", i));
+        $("#week_select").append($("<option />").val(i).text("Week " + i + ": " + firstDayofWeek.format("ddd MMM D") + " - " + lastDayofWeek.format("ddd MMM D")).attr("id", i));
         firstDayofWeek = lastDayofWeek.add(1, "day");
         lastDayofWeek = firstDayofWeek.clone().add(6, "days");
     }
@@ -166,7 +166,7 @@ function getWeeklyStatus() {
 
 /****** functions used in index and bible_tracker page ******/
 function changeWeek() {
-    var weekId = $("#week-select").val();
+    var weekId = $("#week_select").val();
     var userId = $("input#userId").val();
     var url = "/bible_tracker/?week=" + weekId;
     history.pushState({ urlPath: url }, "", url);
