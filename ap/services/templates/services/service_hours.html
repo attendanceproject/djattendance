@@ -112,7 +112,11 @@ $(document).ready(() => {
     val = parseInt($("#id_service_hours_table tr[id]:last").attr('id').split("_").pop());
 
     if (val < size) {
-      $("#id_service_hours_table tr[id]:last").clone().appendTo("#id_service_hours_table");
+      var clonedRow = $("#id_service_hours_table tr[id]:last").clone();
+      clonedRow.find('input').val('');
+      clonedRow.find('textarea').val('');
+      clonedRow.find('td:last-child').text('0.00');
+      clonedRow.appendTo("#id_service_hours_table");
       val++;
       $("#id_service_hours_table tr[id]:last").attr("id","row_" + val);
       $('.datetimepicker').datetimepicker(dt_options);

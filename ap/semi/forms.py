@@ -5,11 +5,11 @@ from semi.utils import LOCATIONS, REQUEST_STATUS, ROLL_STATUS
 
 class AttendanceForm(forms.Form):
 
-  tuesday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect)
-  wednesday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect)
-  thursday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect)
-  friday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect)
-  saturday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect)
+  tuesday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect, required=False)
+  wednesday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect, required=False)
+  thursday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect, required=False)
+  friday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect, required=False)
+  saturday = forms.ChoiceField(choices=ROLL_STATUS, widget=forms.RadioSelect, required=False)
 
 
 class LocationForm(forms.ModelForm):
