@@ -27,7 +27,7 @@ let populate_events = () => {
 };
 
 function updatePerfectAttendanceCheckBox() {
-  var exceptionalReasons = ['SERV', 'CONF', 'TTRIP', 'FWSHP'];
+  var exceptionalReasons = ['CONF', 'FWSHP', 'SERV', 'TTRIP'];
   var reason = $('#id_type').val();
   // set the checkbox by default for the reason that does not
   // count for the perfect attendance
