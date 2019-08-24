@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 
 from aputils.trainee_utils import is_trainee, trainee_from_user
 from terms.models import Term
