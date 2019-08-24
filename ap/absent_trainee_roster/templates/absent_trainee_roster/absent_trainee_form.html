@@ -17,10 +17,26 @@
 
 {% block references %}
     <link href="{% static 'absent_trainee_roster/css/abs_trn_roster.css' %}" rel="stylesheet">
+    <style>
+        .col-sm-3 {
+          font-family: 'Yantramanav Medium';
+          text-transform: uppercase;
+          font-size: 20px;
+          color: #a6c5d1;
+          font-weight: 500;
+        }
+        #content form {
+           margin-top: 2px;
+        }
+        .form-control.disabled, .form-control[disabled] {
+          border-color: #e6e8e1;
+          background-color: #f1f2f2;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<h3>Absent Trainee Roster</h3>
+<h1>Absent Trainee Roster</h1>
 
 <div class="row">
   <div class="col-xs-12 col-sm-6">
@@ -37,15 +53,15 @@
 </div>
 <hr>
 
-<form action="" method="post" role="form">
+
   {% csrf_token %}
-
-  <div class="row hidden-xs" style ="name">
-    <div class="col-sm-3"><strong>Name</strong></div>
-    <div class="col-sm-3"><strong>Reason</strong></div>
-    <div class="col-sm-3" style="coming"><strong>Comments</strong></div>
+<form action="" method="post" role="form">
+  <div class="row" style ="name">
+    <div class="col-sm-3">Name</strong></div>
+    <div class="col-sm-3">Reason</strong></div>
+    <div class="col-sm-3" style="coming">Comments</div>
   </div>
-
+  
   {{ formset.management_form }}
   {{ formset.non_field_errors }}
   {{ formset.non_form_errors }}

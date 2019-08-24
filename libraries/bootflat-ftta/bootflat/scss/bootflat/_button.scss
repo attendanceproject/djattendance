@@ -2,6 +2,7 @@
 //------------------------------------------------------
 
 $button-background:              $white !default;
+$button-background-diabled-hover:#f1f2f2;
 
 $button-normal:                  $blue !default;
 $button-default:                 $blue !default;
@@ -58,6 +59,11 @@ $button-panel-shadow:		 3px 2px;
     &.disabled,
     &[disabled] {
       @include opacity($opacity: $button-opacity, $filter: true);
+    }
+
+    &:hover:disabled, {
+      background-color: $button-background-diabled-hover;
+      border-color: $button-border;
     }
 
     @at-root &-bible-dropdown {
