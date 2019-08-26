@@ -62,7 +62,7 @@
     "react-formal": "0.25.4",
     "react-formal-inputs": "2.1.1",
     "react-hot-loader": "^3.0.0-beta.7",
-    "react-redux": "^5.1.1",
+    "react-redux": "^7.1.1",
     "react-select": "^2.4.0",
     "react-widgets": "^4.4.8",
     "redux": "3.3.1",
