@@ -44,3 +44,4 @@ def unfinalized_week(user):
   for week in range(0, current_week):
     if not is_week_finalized(user, week):
       return week
+  return None
