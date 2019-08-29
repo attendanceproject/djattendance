@@ -197,6 +197,7 @@ APPS = (
     'gospel_statistics',
     'gospel_trips',
     'graduation',
+    'greek',    # greek helper
     'hc',
     'house_requests',
     'interim',
