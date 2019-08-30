@@ -1,5 +1,5 @@
 import json
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 
 from aputils.trainee_utils import is_trainee, trainee_from_user
 from terms.models import Term
@@ -33,6 +33,14 @@ def is_week_finalized(user, week):
 
 
 def unfinalized_week(user):
-  for week in range(Term.current_term().term_week_of_date(date.today()) - 1, 0, -1):
+  current_term = Term.current_term()
+  if date.today() < current_term.start:
+      return None
+    # current week = up to week we want to access + 1
+  current_week = Term.reverse_date(current_term, date.today())[0]
+  if date.today() <= current_term.startdate_of_week(current_week) + timedelta(1):
+      # Cannot access past week's because today is less than Wednesday
+      current_week = current_week - 1
+  for week in range(0, current_week):
     if not is_week_finalized(user, week):
       return week
