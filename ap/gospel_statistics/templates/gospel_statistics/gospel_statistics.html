@@ -70,6 +70,7 @@ input {
 }
 .table-responsive {
   max-height: 448px;
+  margin-bottom: 30px;
 } 
 /* creates a blue box to go around the week dropdown*/
 #bluebox{
@@ -82,18 +83,14 @@ input {
   margin: 0px 5px 5px 10px;
 }
   </style>
-
 <h1 style="padding-top: 30px;">Gospel Statistics</h1>
-
 <h4 style="color: #a6c5d1; padding-top: 30px; padding-bottom: 30px;">Team: {{team}}</h4>
-<!--The ul creates the tabs, must use with divs for tab-content and tab-pane-->
-  <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="#summary" aria-controls="home" role="tab" data-toggle="tab">Summary</a></li>
-      <li role="presentation"><a href="#input-stats" aria-controls="profile" role="tab" data-toggle="tab">Input Statistics</a></li>
-    </ul>
-
-<div class="tab-content">
-  <div id="summary" class="tab-pane active" role="tabpanel">
+<!--The ul creates the tabs, must use with divs for tab-content and tab-pane****CURRENTLY INACTIVE: ISSUE IF FORM IS WRAPPED IN DIV-->
+<ul class="nav nav-tabs" role="tablist"> <!--This is for the navigation tabs, currently inactive-->
+  <li role="presentation" class="active"><a href="#summary" aria-controls="home" role="tab" data-toggle="tab">Summary</a></li>
+</ul>
+<div class="tab-content"> <!--This is for the ul tabs, currently inactive-->
+  <div id="summary" class="tab-pane active" role="tabpanel"> <!--This is for the ul tabs, currently inactive-->
     <div class="table-responsive">
       <table class="table table-bordered table-striped">
         <thead>
@@ -156,95 +153,93 @@ input {
       </table>
     </div>
    </div>
-  
+</div>
 
-  <!--Current week stats-->
-  <div id="input-stats" class="tab-pane" role="tabpanel">
+<!--Current week stats-->
+<form action="" method="post">
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#input-stats" aria-controls="profile" role="tab" data-toggle="tab">Input Statistics</a></li>
+  </ul>
     <div id="bluebox">
       <select id="gospelWeek" onchange="switchStats(this.value)"/>
     </div>
-    <form action="" method="post">
     {% csrf_token %}
-      <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <th scope="col" style="width: 200px;">Week {{week}} Statistics</th>
-              {% for each in cols %}
-              <th scope="col" style="width: 125px;">{{each}}</th>
-              {% endfor %}
-              <th scope="col" style="width: 125px;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for each in current %}
-            <tr>
-              <th>
-                <input style="display:none" name="pairs" value={{each.gospel_pair.id}}>
-                {% for every in each.gospel_pair.trainees.all %}
-                  {{every}},
-                {% endfor %}
-              </th>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.minutes_on_gospel}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.tracts_distributed}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.bibles_distributed}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.contacted_30_sec}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.led_to_pray}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.baptized}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.minutes_in_appointment}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.second_appointment}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.regular_appointment}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.bible_study}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.small_group}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.district_meeting}}>
-              </td>
-              <td>
-                <input type="text" name="inputs" size="4" maxlength="4" value={{each.conference}}>
-              </td>
-              <td>
-                  <button class="btn btn-primary" onclick="deletePair({{each.gospel_pair.id}});" title="Delete gospel pair">
-                      <span class="glyphicon glyphicon-trash"></span>
-                    </button>
-              </td>
-            </tr>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 200px;">Week {{week}} Statistics</th>
+            {% for each in cols %}
+            <th scope="col" style="width: 125px;">{{each}}</th>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </form>
-    <div style="padding-top:10px;">
-      <button type="submit" class="btn btn-danger btn-primary" style="float: right;" title="Save current statistics">Save</button>
-    <!--below is the old button which opens separate page; please remove and un-comment button below it-->
-      <a href="{% url 'gospel_statistics:new-pair' %}">
-          <button type="button" class="btn btn-primary" title="Add a new gospel pair">Add new pair</button>
-      </a>
-      <button type="button" class="btn btn-primary" data-toggle="modal" title="Add a new gospel pair modal" data-target="#new-pair">Create Gospel group</button>
+            <th scope="col" style="width: 125px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for each in current %}
+          <tr>
+            <th>
+              <input style="display:none" name="pairs" value={{each.gospel_pair.id}}>
+              {% for every in each.gospel_pair.trainees.all %}
+                {{every}},
+              {% endfor %}
+            </th>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.minutes_on_gospel}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.tracts_distributed}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.bibles_distributed}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.contacted_30_sec}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.led_to_pray}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.baptized}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.minutes_in_appointment}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.second_appointment}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.regular_appointment}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.bible_study}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.small_group}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.district_meeting}}>
+            </td>
+            <td>
+              <input type="text" name="inputs" size="4" maxlength="4" value={{each.conference}}>
+            </td>
+            <td>
+                <button class="btn btn-primary" onclick="deletePair({{each.gospel_pair.id}});" title="Delete gospel pair">
+                    <span class="glyphicon glyphicon-trash"></span>
+                  </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-  </div>
-</div>
+    <button type="submit" class="btn btn-primary" style="float: right;" title="Save current statistics">Save</button>
+    <!--below is the old button which opens separate page; please remove and un-comment button below it-->
+    <a href="{% url 'gospel_statistics:new-pair' %}">
+      <button type="button" class="btn btn-primary" title="Add a new gospel pair">Add new pair</button>
+    </a>
+    <!--<button type="button" class="btn btn-primary" data-toggle="modal" title="Add a new gospel pair modal" data-target="#new-pair">Create Gospel group</button>-->
+</form>
 <!-- Modal popup for 'create gospel group' button -->
 <div class="modal fade" id="new-pair" tabindex="-1" role="dialog" aria-labelledby="new-pair-label" aria-hidden="true">
   <div class="vertical-alignment-helper">
