@@ -134,7 +134,7 @@ def react_attendance_context(trainee, request_params=None):
   term_bb = listJSONRenderer.render(TermSerializer([CURRENT_TERM], many=True).data)
 
   if trainee.self_attendance:
-    finalize_obj = RollsFinalization.objects.get_or_create(trainee=trainee, events_type='EV')[0]
+    finalize_obj = RollsFinalization.objects.get_or_create(trainee=trainee, term = CURRENT_TERM, events_type='EV')[0]
   finalize_bb = listJSONRenderer.render(RollsFinalizationSerializer(finalize_obj).data)
 
   am_groups = Group.objects.filter(name__in=['attendance_monitors', 'training_assistant'])
@@ -468,7 +468,7 @@ class HouseRollsView(TableRollsView):
   group_required = [u'HC', u'attendance_monitors', u'training_assistant']
 
   def checkfinalize(self, trainees, e_type, week):
-    rfs = RollsFinalization.objects.filter(trainee__in=trainees, events_type=e_type)
+    rfs = RollsFinalization.objects.filter(trainee__in=trainees, term = CURRENT_TERM, events_type=e_type)
     for rf in rfs:
       if not rf.has_week(week):
         rfs = rfs.exclude(id=rf.id)
@@ -519,7 +519,7 @@ class TeamRollsView(TableRollsView):
   group_required = [u'team_monitors', u'attendance_monitors', u'training_assistant']
 
   def checkfinalize(self, trainees, e_type, week):
-    rfs = RollsFinalization.objects.filter(trainee__in=trainees, events_type=e_type)
+    rfs = RollsFinalization.objects.filter(trainee__in=trainees, term = CURRENT_TERM, events_type=e_type)
     for rf in rfs:
       if not rf.has_week(week):
         rfs = rfs.exclude(id=rf.id)
@@ -589,7 +589,7 @@ def finalize_rolls(request):
   else:
     e_type = 'AM'
   for t_id in trainee_ids:
-    new_finalizerolls, created = RollsFinalization.objects.get_or_create(trainee=Trainee.objects.get(pk=t_id), events_type=e_type)
+    new_finalizerolls, created = RollsFinalization.objects.get_or_create(trainee=Trainee.objects.get(pk=t_id), term = CURRENT_TERM, events_type=e_type)
     if created:
       new_finalizerolls.weeks = str(week)
     else:
@@ -686,7 +686,7 @@ def finalize_personal(request):
   period_start = dateutil.parser.parse(data['weekStart'])
   # period_end = dateutil.parser.parse(data['weekEnd'])
   week = Term.objects.get(current=True).reverse_date(period_start.date())[0]
-  new_finalizerolls, created = RollsFinalization.objects.get_or_create(trainee=trainee, events_type='EV')
+  new_finalizerolls, created = RollsFinalization.objects.get_or_create(trainee=trainee, term = CURRENT_TERM, events_type='EV')
   if new_finalizerolls.weeks == '':
     new_finalizerolls.weeks = str(week)
   elif str(week) not in new_finalizerolls.weeks.split(","):  # prevent duplicates
@@ -697,7 +697,7 @@ def finalize_personal(request):
   # rolls = listJSONRenderer.render(RollSerializer(Roll.objects.filter(trainee=trainee, submitted_by=trainee), many=True).data)
   # return JsonResponse({'rolls': json.loads(rolls)})
 
-  finalize_obj = listJSONRenderer.render(RollsFinalizationSerializer(RollsFinalization.objects.get(trainee=trainee, events_type='EV')).data)
+  finalize_obj = listJSONRenderer.render(RollsFinalizationSerializer(RollsFinalization.objects.get(trainee=trainee, term = CURRENT_TERM, events_type='EV')).data)
   return JsonResponse({'finalized_weeks': finalize_obj})
 
 

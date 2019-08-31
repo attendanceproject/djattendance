@@ -102,7 +102,7 @@ def attendance_announcements(trainee):
   week = term.term_week_of_date(today)
   if trainee.self_attendance:
     try:
-      trainee_rf = RollsFinalization.objects.get(trainee=trainee, events_type='EV')
+      trainee_rf = RollsFinalization.objects.get(trainee=trainee, term = Term.current_term(), events_type='EV')
       finalized_weeks = [int(x) for x in trainee_rf.weeks.split(',')]
     except (RollsFinalization.DoesNotExist, ValueError):
       finalized_weeks = []
