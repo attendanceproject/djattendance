@@ -198,7 +198,7 @@ def changeWeek(request):
   if request.is_ajax():
     if is_TA(my_user):
       my_user = Trainee.objects.get(pk=request.GET['userId'])
-    week_id = request.GET['week']
+    week_id = request.GET.get('week','')
     current_term = Term.current_term()
     term_id = current_term.id
     term_week_code = str(term_id) + "_" + str(week_id)
