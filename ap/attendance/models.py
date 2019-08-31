@@ -125,7 +125,7 @@ class RollsFinalization(models.Model):
   )
 
   trainee = models.ForeignKey(Trainee)
-  term = models.ForeignKey(Term)
+
   weeks = models.CharField(validators=[validate_comma_separated_integer_list], max_length=50, blank=True, null=False)
 
   events_type = models.CharField(max_length=2, choices=EVENT_TYPES)
