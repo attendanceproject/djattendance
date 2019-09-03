@@ -26,14 +26,17 @@ function switchStats(week) {
   document.location = url+week;
 };
 function deletePair(pair_id) {
-  $.ajax({
-    type: "POST",
-    url: "{% url 'gospel_statistics:delete-pair' %}",
-    data: {
-      "pair_id": pair_id,
-    },
-    success: location.reload(),
-  });
+  var confirmed = confirm("Are you sure you want to erase this pair? This will delete the associated data for the entire term.");
+  if (confirmed) {
+    $.ajax({
+      type: "POST",
+      url: "{% url 'gospel_statistics:delete-pair' %}",
+      data: {
+        "pair_id": pair_id,
+      },
+      success: location.reload(),
+    });
+  }
 };
 </script>
 {% endblock %}
