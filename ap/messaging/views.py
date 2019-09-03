@@ -8,7 +8,6 @@ from announcements.notifications import get_announcements, get_popups
 
 from .models import Conversation
 
-# Create your views here.
 class MessagingView(TemplateView):
   template_name = "messaging/inbox.html"
 

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.db import models
 from accounts.models import User
 
-# Create your models here.
 class Message(models.Model):
   text = models.TextField(null=True, blank=True)
   sent_by = models.ForeignKey(User, null=True, blank=True, related_name='sent')
@@ -16,6 +15,7 @@ class Message(models.Model):
       self.time_sent = timezone.now()
     return super(User, self).save(*args, **kwargs)
 
+#Conversation is composed of multiple Message instances
 class Conversation(models.Model):
   participants = models.ManyToManyField(User, null=True, blank=True)
   messages = models.ManyToManyField(Message, null=True, blank=True)
