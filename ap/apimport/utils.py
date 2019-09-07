@@ -588,7 +588,7 @@ def import_row(row):
   user.gender = row.get('gender', user.gender)
   user.lrhand = lrhand_code(row.get('LRHand'))  # TODO: This is prone to errors
   if row.get('birthDate') != "":
-    user.date_of_birth = datetime.strptime(row.get('birthDate'), "%m/%d/%y %H:%M").date()
+    user.date_of_birth = datetime.strptime(row.get('birthDate'), "%m/%d/%Y %H:%M").date()
   user.is_active = True
 
   term = Term.current_term()

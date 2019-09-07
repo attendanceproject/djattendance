@@ -12,6 +12,8 @@ from services.models import (Assignment, Category, Qualification,
                              SeasonalServiceSchedule, Service,
                              ServiceAttendance, ServiceException, ServiceRoll,
                              Worker, WorkerGroup)
+from terms.models import Term
+from datetime import date
 
 # This is written to improve query performance on admin backend
 class WorkerPrejoinMixin(forms.ModelForm):
@@ -195,6 +197,17 @@ class ServiceForm(forms.Form):
 
     for group in groups_cleaned:
       group.user_set.add(*list(Trainee.objects.filter(worker__in=workers_cleaned)))
+
+    # populating the designated hours for newly added trainees so that the force page doesn't show.
+    current_term = Term.current_term()
+    week_range = range(0, current_term.term_week_of_date(date.today()))
+    for worker in workers_cleaned:
+      services = worker.designated.all()
+      for service in services:
+        for week in week_range:
+          service_attendance = ServiceAttendance.objects.get_or_create(designated_service=service, worker=worker, term=current_term, week=week)[0]
+          service_attendance.excused = True
+          service_attendance.save()
 
   def __init__(self, *args, **kwargs):
     super(ServiceForm, self).__init__(*args, **kwargs)
