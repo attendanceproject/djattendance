@@ -2,7 +2,7 @@
 //------------------------------------------------------
 
 $button-background:              $white !default;
-$button-background-diabled-hover:#f1f2f2;
+$button-background-disabled-hover:#f1f2f2;
 
 $button-normal:                  $blue !default;
 $button-default:                 $blue !default;
@@ -62,7 +62,7 @@ $button-panel-shadow:		 3px 2px;
     }
 
     &:hover:disabled, {
-      background-color: $button-background-diabled-hover;
+      background-color: $button-background-disabled-hover;
       border-color: $button-border;
     }
 
