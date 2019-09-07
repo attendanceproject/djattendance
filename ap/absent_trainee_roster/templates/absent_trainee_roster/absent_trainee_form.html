@@ -38,36 +38,31 @@
           margin-top: 42px; 
           margin-bottom: 48px;
         }
+        p {
+          color: #095f80; 
+          margin-bottom: 25px;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
 <h1>Absent Trainee Roster</h1>
-
-<div style="color: #095f80; margin-bottom: 25px;">
   <p><b>DATE:</b> {% now "l, F d, Y" %}</p>
   {% ifusergroup HC %}
   <p><b>HOUSE:</b> {{ user.house }}</p>
   <p><b>STATUS:</b> {{ status }}</p>
-  {% endifusergroup %}
-</div>
-
 <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 20px;">
   <li role="presentation" class="active"><a href="#summary" aria-controls="home" role="tab" data-toggle="tab">Input Attendance</a></li>
 </ul>
-  {% csrf_token %}
+  {% endifusergroup %}
+
 <form action="" method="post" role="form">
-  <!--<div class="row heading" style="margin-bottom: 5px;">
-    <div class="col-sm-3 col-xs-3">Name</div>
-    <div class="col-sm-3 col-xs-3">Reason</div>
-    <div class="col-sm-5 col-xs-5">Comments</div>
-  </div>-->
-  
+    {% csrf_token %}
   {{ formset.management_form }}
   {{ formset.non_field_errors }}
   {{ formset.non_form_errors }}
   {% for form in formset %}
-
+  
     <div class="row row-data entry {% if form.DELETE.value %}hidden{% endif %}" id="form-{{ form.instance.pk }}" style="form-top">
       <div class="hidden">
           {{ form.id }}{{ form.instance.pk }}
