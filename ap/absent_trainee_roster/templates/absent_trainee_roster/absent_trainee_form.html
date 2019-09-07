@@ -46,7 +46,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>Absent Trainee Roster</h1>
+<h1>Daily Attendance</h1>
   <p><b>DATE:</b> {% now "l, F d, Y" %}</p>
   {% ifusergroup HC %}
   <p><b>HOUSE:</b> {{ user.house }}</p>
@@ -62,7 +62,7 @@
   {{ formset.non_field_errors }}
   {{ formset.non_form_errors }}
   {% for form in formset %}
-  
+
     <div class="row row-data entry {% if form.DELETE.value %}hidden{% endif %}" id="form-{{ form.instance.pk }}" style="form-top">
       <div class="hidden">
           {{ form.id }}{{ form.instance.pk }}
