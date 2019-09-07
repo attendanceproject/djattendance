@@ -163,9 +163,8 @@
       scrollX: true,
       autoWidth: true,
       {% endif %}
-      dom: '<"row"<"col-sm-6"lB><"col-sm-6"f>>' +
-      '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
-      '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+      dom: 'lB'+
+      '<"table-responsive"tr>' ,
       buttons: [
         // only attendance monitors, devs, and tas can view these controls for the datatable
         // this allows the display of headers and filter by trainee year, gender and self attendance
@@ -175,7 +174,6 @@
           text: 'Filters',
           buttons: ["first_year", "second_year", "brothers", "sisters"]
         },
-
         "self_attendance",
         {% endifusergroup %}
       ],
@@ -284,64 +282,113 @@
 .dt-button.active {
   background-color: #A6C5D1;
 }
+#bluebox{
+  background-color: #095F80;
+  height: 40px;
+  /*absolute to fit filter buttons in box*/
+  position: absolute;
+  width: -webkit-fill-available;
+  margin-right: 30px;
+  }
+select {
+  font-family: 'Yantramanav Light';
+  font-size: 15px;
+  margin: 0px 5px 5px 10px;
+}
+.header-emphasis {
+  color:#095F80;
+}
+/*to style and align the filter/self-attendance buttons on the top left*/
+.align-buttons {
+  margin-left: 1000px;
+}
+.buttons-collection {
+  margin-right: 7px;
+}
+.table-responsive {
+    padding-top: 34px;
+}
+.btn-group, .btn-group-vertical {
+    right: 0;
+    position: absolute;
+    margin-right: 23px;
+    margin-top: 2px;
+    }
+.btn {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 7px;
+    padding-left: 7px;
+    font-size: 13px;
+}
+.btn2 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 7px;
+    padding-left: 7px;
+    font-size: 13px;
+}
 </style>
 {% endblock %}
 
-
 {% block content %}
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-md-12">
-      <label>
-        <form method="post">
-          {% csrf_token %}
-          Week:
-          <select id="week_menu" name="week" size="0" ></select>
-          {% ifusergroup attendance_monitors %}
-            {% if event_type == "T" %}
-              Team:
-              <select id="team_menu" name="team" size="0" >
-                {% for t in teams %}
-                <option value="{{t.pk}}" {% if t.pk == selected_team_id %} selected="selected" {% endif %} >{{t.name}}</option>
-                {% endfor %}
-              </select>
-            {% elif event_type == "H" %}
-              House:
-              <select id="house_menu" name="house" size="0" >
-                {% for h in houses %}
-                <option value="{{h.pk}}" {% if h.pk == selected_house_id %} selected="selected" {% endif %}>{{h.name}}</option>
-                {% endfor %}
-
-              </select>
-            {% endif %}
-          {% endifusergroup %}
-        </form>
-      </label>
-    </div>
-  </div>
-  <p>If there's no roll entered, it's assumed as a Present.</p>
-  <div class="row">
-    <div class="col-md-12">
-      &nbsp;
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-12">
-      <div>
+<!--Header, alternates between team and house-->
+{% if event_type == "T" %}
+  <h1>Team Roll</h1>
+{% elif event_type == "H" %}
+  <h1>House Roll</h1>
+{% endif %}
+<p style="margin-bottom: 40px; color: gray;">If there's no roll entered, it's assumed as a Present.</p>
+<!--ul creates the tab-->
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active"><a href="#week-tab" aria-controls="home" role="tab" data-toggle="tab">Week</a></li>
+</ul>
+  <div class="tab-content">
+    <div id="week-tab" class="tab-pane active" role="tabpanel">
+      <!--creates the thick blue line that will sit the week and filters inside-->
+      <div id="bluebox">
+        <!--week and house/team label-->
+        <label>
+          <form method="post">
+            {% csrf_token %}
+            <!--week -->
+            <select id="week_menu" name="week" size="0" ></select>
+            <!--team/house filter for attendance monitors-->
+            {% ifusergroup attendance_monitors %}
+              {% if event_type == "T" %}
+               <text style="color: white;">Team:</text>
+                <select id="team_menu" name="team" size="0" >
+                  {% for t in teams %}
+                  <option value="{{t.pk}}" {% if t.pk == selected_team_id %} selected="selected" {% endif %} >{{t.name}}</option>
+                  {% endfor %}
+                </select>
+              {% elif event_type == "H" %}
+              <text style="color: white;">House:</text>
+                <select id="house_menu" name="house" size="0" >
+                  {% for h in houses %}
+                  <option value="{{h.pk}}" {% if h.pk == selected_house_id %} selected="selected" {% endif %}>{{h.name}}</option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+            {% endifusergroup %}
+          </form>
+        </label>
+      </div>
+      <!--filter/self-attendance buttons are coded in Jquery and stylized in CSS-->
         {% if event_list %}
         <table id="display_roll" class="table table-condensed table-bordered table-striped">
           <thead>
             <tr>
-              <th class="date">Date</th>
+              <th class="date header-emphasis">Date</th>
               <td></td>
               <td></td>
               <td></td>
               {% for event in event_list %}
-              <th class="date">{{event.start_datetime|date:"D (m/d)"}}</th>
+              <th class="date header-emphasis">{{event.start_datetime|date:"D (m/d)"}}</th>
               {% endfor %}
             </tr>
             <tr>
-              <th>Roll</th>
+              <th class="header-emphasis">Roll</th>
               <td></td>
               <td></td>
               <td></td>
@@ -350,7 +397,7 @@
               {% endfor %}
             </tr>
             <tr>
-              <th>Time</th>
+              <th class="header-emphasis">Time</th>
               <td></td>
               <td></td>
               <td></td>
@@ -359,7 +406,7 @@
               {% endfor %}
             </tr>
             <tr>
-              <th>Set all</th>
+              <th class="header-emphasis">Set all</th>
               <td></td>
               <td></td>
               <td></td>
@@ -373,13 +420,11 @@
               </select></th>
               {% endfor %}
             </tr>
-
             {% if event_type == 'RF' %}
             <tr>
-              <th>Roll Finalization</th>
+              <thclass="header-emphasis">Roll Finalization</th>
               <td></td>
               <td></td>
-
               {% for event in event_list %}
               <th>
                 <button id="tardy-btn" class="btn btn-default" data-index="{{ forloop.counter0 }}">Remove Tardies</button>
@@ -388,12 +433,11 @@
               {% endfor %}
             </tr>
             {% endif %}
-
           </thead>
           <tbody>
             {% for t in trainees %}
             <tr>
-              <th data-row='{{t.id}}' data-term='{{t.current_term}}' data-gender='{{t.gender}}'>
+              <th class="header-emphasis" data-row='{{t.id}}' data-term='{{t.current_term}}' data-gender='{{t.gender}}'>
                 <div class="full_name2">{{t.full_name2}}</div>
                 {# <div class="full_name" hidden>{{t.full_name}}</div> #}
               </th>
@@ -417,12 +461,10 @@
             {% endfor %}
           </tbody>
         </table>
-        <button id="finalize_rolls" class="btn btn-default" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
+        <button id="finalize_rolls" class="btn btn-danger btn-default" style="float: right; margin-bottom: 10px;" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
         {% else %}
         No rolls for this week
         {% endif %}
       </div>
     </div>
-  </div>
-</div>
 {% endblock %}
