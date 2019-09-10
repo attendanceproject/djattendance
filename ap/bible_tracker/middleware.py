@@ -18,6 +18,6 @@ class BibleReadingMiddleware(MiddlewareMixin):
       return None
     if request.path not in url_list:
       week = unfinalized_week(request.user)
-      if week and not settings.DEBUG:
+      if week is not None and not settings.DEBUG:
         return HttpResponseRedirect(reverse('bible_tracker:index') + '?week=' + str(week))
     return None

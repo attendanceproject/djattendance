@@ -37,7 +37,7 @@ const GroupSlipForm = ({...props}) => {
 
     <div>
       <Alert bsStyle="notice" className="dt-leaveslip__note">
-        *Please note: Multiple group slips maybe submitted if there are one or more events that should not be covered in between the first and last events covered by the slip. (Due to different personal schedules, group slips automatically include everything from the first event to the last event selected.)
+        *Please note: Multiple group slips may be submitted if there are one or more events that should not be covered in between the first and last events covered by the slip. (Due to different personal schedules, group slips automatically include everything from the first event to the last event selected.)
       </Alert>
     </div>
 
@@ -56,6 +56,7 @@ const GroupSlipForm = ({...props}) => {
         <SelectedEventsField />
 
         <SlipTypesField slipTypes={GROUP_SLIP_TYPES} lastSlips={[]} />
+        <small> *Notification only is for record-keeping purposes. </small>
 
         <h4 className='dt-leaveslip__title'>Description</h4>
         <Form.Field type='textarea' name='description' className='dt-leaveslip__description'/>

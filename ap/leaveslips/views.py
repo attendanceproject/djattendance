@@ -56,7 +56,7 @@ class IndividualSlipUpdate(LeaveSlipUpdate):
     if current_ls.type in ['MEAL', 'NIGHT']:
       IS_list = IndividualSlip.objects.filter(status='A', trainee=current_ls.get_trainee_requester(), type=current_ls.type).order_by('-submitted')
       most_recent_IS = IS_list.first()
-      if most_recent_IS and most_recent_IS != current_ls:
+      if most_recent_IS:# and most_recent_IS != current_ls:
         last_date = most_recent_IS.rolls.all().order_by('date').last().date
         ctx['last_date'] = last_date
         ctx['days_since'] = (current_ls.rolls.first().date - last_date).days

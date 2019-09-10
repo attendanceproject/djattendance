@@ -12,7 +12,7 @@ import { isAM } from '../constants'
 const ActionBar = ({show, trainee, onSelectTab, traineeView}) => {
   return (
     <div className="dt">
-      <h2 className="dt__actionbar-heading">View Personal Attendance</h2>
+      <h1 className="dt__actionbar-heading">View Personal Attendance</h1>
         { isAM(trainee) ?
           <TraineeSelectorContainer />
           : ''
