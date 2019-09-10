@@ -11,7 +11,7 @@ from aputils.utils import RequestMixin
 
 
 def default_attendance():
-  return {"tuesday": "N", "wednesday": "N", "thursday": "N", "friday": "N", "saturday": "N"}
+  return {"tuesday": "", "wednesday": "", "thursday": "", "friday": "", "saturday": ""}
 
 
 class SemiAnnual(models.Model, RequestMixin):

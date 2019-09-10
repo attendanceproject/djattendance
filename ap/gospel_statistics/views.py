@@ -22,14 +22,16 @@ from .models import GospelPair, GospelStat
 
 # ctx[cols] = attributes
 attributes = [
-    'Tracts Distributed', 'Bibles Distributed', 'Contacted (>30 sec)', 'Led to Pray', 'Baptized',
-    '2nd Appointment', 'Regular Appointment', 'Minutes on the Gospel', 'Minutes in Appointment',
+    'Minutes on the Gospel', 'Tracts Distributed', 'Bibles Distributed', 'Contacted (>30 sec)',
+    'Led to Pray', 'Baptized',
+    'Minutes in Appointment', '2nd Appointment', 'Regular Appointment',
     'Bible Study', 'Small Groups', 'District Meeting (New Student)', 'Conference'
 ]
 
 _attributes = [
-    'tracts_distributed', 'bibles_distributed', 'contacted_30_sec', 'led_to_pray', 'baptized',
-    'second_appointment', 'regular_appointment', 'minutes_on_gospel', 'minutes_in_appointment',
+    'minutes_on_gospel', 'tracts_distributed', 'bibles_distributed', 'contacted_30_sec',
+    'led_to_pray', 'baptized',
+    'minutes_in_appointment', 'second_appointment', 'regular_appointment',
     'bible_study', 'small_group', 'district_meeting', 'conference'
 ]
 ctx = dict()
@@ -73,15 +75,15 @@ class GospelStatisticsView(TemplateView):
       stats = gospel_statistics.filter(gospelpair=p)
       # Aggregate all the stats from all the different weeks
       for stat in stats:
-        entry[_attributes[0]] += stat.tracts_distributed
-        entry[_attributes[1]] += stat.bibles_distributed
-        entry[_attributes[2]] += stat.contacted_30_sec
-        entry[_attributes[3]] += stat.led_to_pray
-        entry[_attributes[4]] += stat.baptized
-        entry[_attributes[5]] += stat.second_appointment
-        entry[_attributes[6]] += stat.regular_appointment
-        entry[_attributes[7]] += stat.minutes_on_gospel
-        entry[_attributes[8]] += stat.minutes_in_appointment
+        entry[_attributes[0]] += stat.minutes_on_gospel
+        entry[_attributes[1]] += stat.tracts_distributed
+        entry[_attributes[2]] += stat.bibles_distributed
+        entry[_attributes[3]] += stat.contacted_30_sec
+        entry[_attributes[4]] += stat.led_to_pray
+        entry[_attributes[5]] += stat.baptized
+        entry[_attributes[6]] += stat.minutes_in_appointment
+        entry[_attributes[7]] += stat.second_appointment
+        entry[_attributes[8]] += stat.regular_appointment
         entry[_attributes[9]] += stat.bible_study
         entry[_attributes[10]] += stat.small_group
         entry[_attributes[11]] += stat.district_meeting
@@ -104,15 +106,15 @@ class GospelStatisticsView(TemplateView):
       # for i in range(13):
       #  eval('stat.'+_attributes[i]+' = list_of_stats['+str(index+i)+']')
       ## Make sure type is int
-      stat.tracts_distributed = list_of_stats[index]
-      stat.bibles_distributed = list_of_stats[index + 1]
-      stat.contacted_30_sec = list_of_stats[index + 2]
-      stat.led_to_pray = list_of_stats[index + 3]
-      stat.baptized = list_of_stats[index + 4]
-      stat.second_appointment = list_of_stats[index + 5]
-      stat.regular_appointment = list_of_stats[index + 6]
-      stat.minutes_on_gospel = list_of_stats[index + 7]
-      stat.minutes_in_appointment = list_of_stats[index + 8]
+      stat.minutes_on_gospel = list_of_stats[index]
+      stat.tracts_distributed = list_of_stats[index + 1]
+      stat.bibles_distributed = list_of_stats[index + 2]
+      stat.contacted_30_sec = list_of_stats[index + 3]
+      stat.led_to_pray = list_of_stats[index + 4]
+      stat.baptized = list_of_stats[index + 5]
+      stat.minutes_in_appointment = list_of_stats[index + 6]
+      stat.second_appointment = list_of_stats[index + 7]
+      stat.regular_appointment = list_of_stats[index + 8]
       stat.bible_study = list_of_stats[index + 9]
       stat.small_group = list_of_stats[index + 10]
       stat.district_meeting = list_of_stats[index + 11]
@@ -135,6 +137,7 @@ class GospelStatisticsView(TemplateView):
     ctx['cols'] = attributes
     ctx['current'] = []
     ctx['atts'] = _attributes
+    ctx['members'] = Trainee.objects.filter(team=current_user.team)
     week = get_week()
     if 'week' in self.kwargs:
       week = self.kwargs['week']

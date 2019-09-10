@@ -173,7 +173,7 @@ Service Scheduling
             </thead>
             <tbody>
               {% for slot in service.serviceslot_set.all %}
-                {% if slot.workers_required > 0 %}
+                {% if slot.workers_required > 0 or slot.workers_count > 0 %}
                   <tr class="{% if slot.workers_count < slot.workers_required %}warning incomplete-assignment{% endif %}">
                     <td class="shrink">{{ slot.name }}</td>
                     <td class="shrink worker-count">{{ slot.workers_count }}/{{ slot.workers_required }}</td>

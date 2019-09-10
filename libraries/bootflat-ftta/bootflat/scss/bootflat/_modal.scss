@@ -39,3 +39,28 @@ $modal-shadow:                0 1px 2px rgba(0, 0, 0, .2) !default;
   }
 
 }
+
+/* to center modal- see gospel_statistics.html page*/
+  /*wraps around modal-dialog*/
+    .vertical-alignment-helper {
+      display:table;
+      height: 100%;
+      width: 100%;
+      pointer-events:none;
+    }
+  /*class added to modal-dialog*/
+    .vertical-align-center {
+        /* To center vertically */
+        display: table-cell;
+        vertical-align: middle;
+        pointer-events:none;
+    }
+  .modal-content {
+      /* Bootstrap sets the size of the modal in the modal-dialog class, we need to inherit it */
+      width:inherit;
+      max-width:inherit; /* For Bootstrap 4 - to avoid the modal window stretching full width */
+      height:inherit;
+      /* To center horizontally */
+      margin: 0 auto;
+      pointer-events:all;
+  }

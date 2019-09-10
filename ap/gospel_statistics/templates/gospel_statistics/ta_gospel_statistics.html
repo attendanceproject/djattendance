@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% load bootstrap3 %}
+{% load common_tags %}
 
 {% block title %}Gospel Statistics{% endblock %}
 {% block references %}
@@ -15,46 +16,100 @@ function createTable() {
 {% endblock %}
 
 {% block content %}
-<h2>{{ page_title }}</h2>
-<p>
+<style>
+  /* to make the table boxes uniform*/
+    html {
+    box-sizing: border-box;
+    }
+    *,
+    *:before,
+    *:after {
+      box-sizing: inherit;
+    }
+    .table > tbody > tr > td {
+      vertical-align: middle;
+    }
+    .table {
+      table-layout: fixed;
+    }
+    .table > thead > th {
+      color: #C2b59b;
+    }
+    input {
+      text-align: center;
+      background-color: inherit;
+      border-style: solid;
+      border-color: inherit;
+      border-width: inherit;
+    }
+</style>
+<h1 style="padding-top: 30px;">Gospel Team Statistics Summary</h1>
+
+<div style="padding-top: 30px; padding-bottom: 45px;">
   <a href="{% url 'gospel_statistics:generate-report' %}">
     <button type="button" class="btn btn-primary" title="Generate Reports">Generate Reports</button>
   </a>
-</p>
-*GPT means the total divided by the number of trainees who are registered on the gospel stats page for the particular group.
-<table id="allStat" class="table table-bordered-wkly-sum">
-  <thead id="tableHead">
-    <th>Team Type</th>
-    {% for each in attributes %}
-    <th>{{each}}</th>
-    {% endfor %}
-  </thead>
-  <tbody>
-    <tr>
-      <th>Campus Total</th>
-      {% for each in campus_total %}
-      <th>{{each}}</th>
-      {% endfor %}
-    </td>
-    <tr>
-      <th>Community Total</th>
-      {% for each in community_total %}
-      <th>{{each}}</th>
-      {% endfor %}
-    </tr>
-    <tr><th colspan='14'></th></tr>
-    <tr>
-      <th>Campus *GPT Average</th>
-      {% for each in campus_average %}
-      <th>{{each}}</th>
-      {% endfor %}
-    </tr>
-    <tr>
-      <th>Community *GPT Average</th>
-      {% for each in community_average %}
-      <th>{{each}}</th>
-      {% endfor %}
-    </tr>
-  </tbody>
-</table>
+</div>
+
+<!--The ul creates the tabs, must use with divs for tab-content and tab-pane-->
+  <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#team-totals" aria-controls="home" role="tab" data-toggle="tab">Team Totals</a></li>
+      <li role="presentation"><a href="#team-averages" aria-controls="profile" role="tab" data-toggle="tab">Team Averages</a></li>
+    </ul>
+
+<div class="tab-content">
+  <div id="team-totals" class="tab-pane active" role="tabpanel">
+    <div class="table-responsive">
+      <table id="allStat" class="table table-bordered table-striped">
+        <thead id="tableHead">
+            <th scope="col" style="width: 200px;">Team Totals</th>
+            {% for each in attributes %}
+            <th scope="col" style="width: 125px;">{{each}}</th>
+            {% endfor %}
+        </thead>
+        <tbody>
+          <tr>
+            <th style="width: 200px;">Campus</th>
+            {% for each in campus_total %}
+            <td>{{each}}</td>
+            {% endfor %}
+          </td>
+          <tr>
+            <th>Community</th>
+            {% for each in community_total %}
+            <td>{{each}}</td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div id="team-averages" class="tab-pane" role="tabpanel">
+    <div class="table-responsive">
+      <table id="allStat" class="table table-bordered table-striped">
+        <thead id="tableHead">
+            <th scope="col" style="width: 200px;">Team Averages</th>
+            {% for each in attributes %}
+            <th scope="col" style="width: 125px;">{{each}}</th>
+            {% endfor %}
+        </thead>
+        <tbody>
+          <tr>
+            <th>Campus</th>
+            {% for each in campus_average %}
+            <td>{{each}}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th>Community</th>
+            {% for each in community_average %}
+            <td>{{each}}</td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    Displying the total divided by the number of trainees who are registered on the gospel stats page for each team.
+  </div>
+</div>
 {% endblock %}
