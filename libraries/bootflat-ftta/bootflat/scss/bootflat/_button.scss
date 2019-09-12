@@ -59,6 +59,20 @@ $button-panel-shadow:		 3px 2px;
     &[disabled] {
       @include opacity($opacity: $button-opacity, $filter: true);
     }
+    @at-root &-glyphicons {
+      padding-top: 3px;
+      padding-bottom: 3px;
+      padding-right: 4px;
+      padding-left: 4px;
+      font-size: 10px;
+      border-radius: 50%;
+      @at-root &-red {
+
+      }
+      @at-root &-tan {
+        border-radius: $button-info;
+      }
+    }
 
     @at-root &-bible-dropdown {
       height: 100%;

@@ -20,56 +20,48 @@ $(function() {
     $("#classnotes_ta_filter").submit();
   });
 });
-
 </script>
 
 {% endblock %}
+
 <div class="panel-group" id="accordion">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h2> Class Notes TA List </h2>
+  <div class="row">
+    <div class="col-md-1"><h2>TA List:</h2></div>
+    <div class="col-md-2" style="margin-top: 22px;">
+      <form id="classnotes_ta_filter" action="" method="get">
+        <select id="classnotes_ta_list" name="classnotes_ta_list">
+          <option {% if selected_ta == None %}selected="selected"{% endif %} value="-1">Filter By TA</option>
+          {% for ta in TA_list %}
+            <option {% if ta.id == selected_ta %}selected="selected"{% endif %} value="{{ta.id}}">{{ta.full_name}}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+    <div class="col-md-2" style="margin-top: 25px;">
+      <button class="btn btn-primary" id="received_button">Show Received</button>
     </div>
   </div>
-  <br>
-  <div>
-    <form id="classnotes_ta_filter" action="" method="get">
-      View class notes for:
-      <select id="classnotes_ta_list" name="classnotes_ta_list">
-        <option {% if selected_ta == None %}selected="selected"{% endif %} value="-1">All TA's</option>
-        {% for ta in TA_list %}
-          <option {% if ta.id == selected_ta %}selected="selected"{% endif %} value="{{ta.id}}">{{ta.full_name}}</option>
-        {% endfor %}
-      </select>
-    </form>
-  </div>
-  <br>
-  <button class="btn btn-primary" id="received_button">Show Received</button>
   <div class="panel-body">
     <form role="form" action="{% url 'classnotes:classnotes_list' %}" method="post">
     {% csrf_token %}
+    <div class="table-responsive">
     <table class="table table-hover table-condensed" id="mytable">
       <thead>
         <tr>
-          <th><input type="checkbox" id="checkall" /></th>
-          <th> Edit </th>
           <th> Name </th>
           <th> Class Name </th>
           <th> Class Date </th>
           <th> Status</th>
           <th> Date Assigned </th>
           <th> Due Date </th>
+          <th> Actions </th>
+          <th><input type="checkbox" id="checkall" /></th>
         </tr>
       </thead>
 
       <tbody>
       {% for classnote in classnotes_list %}
       <tr>
-        <td><input type="checkbox" name="selection" value="{{classnote.pk}}"></input></td>
-        <td>
-          <a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn btn-primary btn-xs" role="button">
-            <span class="glyphicon glyphicon-pencil"></span>
-          </a>
-        </td>
         <td>{{classnote.trainee.full_name}}</td>
         <td>{{classnote.event.name}}</td>
         <td>{{classnote.date}}</td>
@@ -89,14 +81,30 @@ $(function() {
         </td>
         <td>{{classnote.date_assigned | date:"m/d/y"}}</td>
         <td>{{classnote.date_due | date:"m/d/y"}}</td>
+        <td>
+          <a href="#" class="btn btn-glyphicons" role="button">
+              <span class="glyphicon glyphicon-ok"></span>
+          </a>
+          <a href="#" class="btn btn-glyphicons" role="button">
+            <span class="glyphicon glyphicon-remove"></span>
+          </a>
+          <a href="#" class="btn btn-glyphicons" role="button">
+              ?
+            </a>
+          <a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn btn-glyphicons" role="button">
+              <span class="glyphicon glyphicon-pencil"></span>
+            </a>
+          <a href="#" class="btn btn-glyphicons" role="button">
+              <span class="glyphicon glyphicon-trash"></span>
+            </a>
+        </td>
+        <td><input type="checkbox" name="selection" value="{{classnote.pk}}"></input></td>
       </tr>
       {% endfor %}
       </tbody>
 
       </table>
-      <p class="col-lg-6 well legend">
-        <b>N</b>o || <b>L</b>EGEND || <b>Y</b>ET
-      </p>
+      </div>
       <div class="pull-right">
       <button type="submit" name="approve" class="btn btn-success">Approve Selected</button>
       <button type="submit" name="hard_copy_approve" class="btn btn-success">Hard Copy Approve</button>
