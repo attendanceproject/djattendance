@@ -3,6 +3,7 @@
 {% load bootstrap3 %}
 {% load common_tags %}
 {% block title %}Greek{% endblock %}
+<link rel="stylesheet" href="{% static 'greek/css/style.css' %}" />
 
 {% block scripts %}
 <script type="text/javascript" src="{% static 'js/bootstrap-tab-history.js' %}"></script>
@@ -55,8 +56,8 @@
     <li role="presentation" class="active"><a href="#files" aria-controls="home" role="tab" data-toggle="tab">Files</a>
     </li>
     <li role="presentation"><a href="#list" aria-controls="home" role="tab" data-toggle="tab">Vocabulary</a></li>
-    <!--
     <li role="presentation"><a href="#flashcard" aria-controls="home" role="tab" data-toggle="tab">Flashcards</a></li>
+    <!--
     <li role="presentation"><a href="#mc" aria-controls="home" role="tab" data-toggle="tab">Multiple Choice</a></li>
     -->
   </ul>
@@ -119,11 +120,12 @@
     </div>
 
     <!-- FLASHCARDS TAB -->
-    <!--
     <div id="flashcard" class="greek tab-pane" role="tabpanel">
-
+      Flash cards
+      <div class="flashcard">
+        example
+      </div>
     </div>
-    -->
 
     <!-- MULTIPLE CHOICE TAB -->
     <!--
