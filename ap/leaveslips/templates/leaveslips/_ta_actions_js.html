@@ -41,7 +41,7 @@ $(document).ready(() => {
       slipData += statusData;
     }
 
-    var ignore = ["fellowship", "unfellowship", "sister-save"];
+    var ignore = ["fellowship", "unfellowship"];
     if (ignore.indexOf(action) !== -1 || ($("#id_TA").length && !$("#id_TA").val())) {
       var i = slipData.indexOf("TA=");
       if (i !== -1) {
