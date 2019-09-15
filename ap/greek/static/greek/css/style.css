@@ -1,5 +1,19 @@
 .flashcard {
-  border: 1px solid #095F80;
-  width: 215;
-  height: 105;
+  border: 1px solid #095f80;
+  width: 400px;
+  height: 150px;
+}
+
+.flashcard-text {
+  font: 36px Arial, sans-serif;
+  line-height: 150px;
+  text-align: center;
+}
+
+.flashcard-front {
+  background: #eee;
+}
+
+.flashcard-back {
+  background: #fff;
 }

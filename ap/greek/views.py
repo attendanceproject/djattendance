@@ -4,12 +4,15 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from .models import Vocab
 from classes.models import ClassFile
+import json
 
 def index(request):
 
     ### FOR FILES TAB ###
     class_files = ClassFile.objects.filter(for_class='Greek')
-    print class_files
+
+    #for files in class_files:
+    #    print json.dumps(files, default=lambda x: x.__dict__)
 
     ### FOR VOCAB LIST TAB ###
 
@@ -32,7 +35,7 @@ def index(request):
     context['class_files'] = ClassFile.objects.filter(for_class="Greek")
     context['page_title'] = '%s Files' % (class_files)
 
-    return render(request, 'greek_helper/vocab_list.html', context=context)
+    return render(request, 'greek_helper/index.html', context=context)
 
 def changeChapter(request):
 
