@@ -12,6 +12,7 @@ venv
 ap/media/
 *.log
 *.sql
+*.swp
 migrations/
 node_modules/
 ap/services/debug/data.js
