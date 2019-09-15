@@ -1,0 +1,28 @@
+<div id="list" class="greek tab-pane" role="tabpanel">
+  <form class="row">
+    <div class="col-sm-2">
+      Sort by chapter:
+    </div>
+    <div class="col-sm-1">
+      <!-- Pick a chapter -->
+      <select id="chapter_select" class="form-control" name="chapter" size="0">
+        {% for i in chapters %}
+        <option value="{{i}}">{{i}}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+  <br />
+  <table class="table vocab_table" id="vocab_table">
+    <tr>
+      <th>Greek</th>
+      <th>English</th>
+    </tr>
+    {% for g in greekVocab %}
+    <tr class="vocab_list" id="vocab_list">
+      <td> {{g.greek}} </td>
+      <td> {{g.english}} </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>

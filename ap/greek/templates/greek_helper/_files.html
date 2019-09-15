@@ -1,0 +1,22 @@
+<div id="files" class="greek tab-pane active" role="tabpanel">
+  <div>
+      <table class="table">
+          <thead>
+          <tr>
+            <th>File</th>
+            <th>Class</th>
+          </tr>
+          </thead>
+          <tbody>
+            {% for cf in class_files %}
+            <tr>
+              <td><a href='{{cf.file.url}}'>{{ cf.label }}</a></td>
+              <td>{{ cf.for_class }}</td>
+            </tr>
+            {% empty %}
+              <i>No {{classname}} files to display.</i>
+            {% endfor %}
+          </tbody>
+        </table>
+  </div>
+</div>
