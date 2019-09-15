@@ -1,7 +1,17 @@
-<div id="flashcard" class="greek tab-pane" role="tabpanel">
-  <div class="flashcard">
+<div id="flashcards" class="greek tab-pane" role="tabpanel">
+  <div id="flashcard" class="flashcard">
     <div class="flashcard-text">
       example
     </div>
   </div>
 </div>
+
+<script type="text/javascript">
+  flipCard() {
+    console.log("flip");
+  }
+
+  $(document).ready(function() {
+    $('#flashcard').click(flipCard);
+  });
+</script>
