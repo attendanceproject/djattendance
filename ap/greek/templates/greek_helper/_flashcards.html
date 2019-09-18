@@ -7,8 +7,11 @@
 </div>
 
 <script type="text/javascript">
-  flipCard() {
-    console.log("flip");
+  var isFront = true;
+
+  function flipCard() {
+    console.log(isFront);
+    isFront = !isFront;
   }
 
   $(document).ready(function() {
