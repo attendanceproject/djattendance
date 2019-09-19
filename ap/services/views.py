@@ -85,7 +85,7 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
   # For Services Tab
   service_categories = Category.objects.filter(services__designated=False).prefetch_related(
       Prefetch('services', queryset=Service.objects.filter(designated=False).order_by('weekday', 'start')),
-      Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.all().order_by('-worker_group__assign_priority'))
+      Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.all().order_by('-worker_group__assign_priority').order_by('-name')),
   ).distinct()
 
   # For Designated Tab
