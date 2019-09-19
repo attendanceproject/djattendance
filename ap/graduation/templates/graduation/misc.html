@@ -55,6 +55,7 @@
 {% if object.due_date %}
   <h3>Due: {{ object.due_date }}</h3>
 {% endif %}
+<h4>If you do not want to order invitations and/or DVDs, please indicate it by saving a "0" for your order.</h4>
 <form id="id_grad_form" action="" method="post">
   {% csrf_token %}
   <div class="row"><div class="col-xs-12"><div class="panel">
