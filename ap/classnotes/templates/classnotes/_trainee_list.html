@@ -16,50 +16,51 @@
         <div class="panel-body">
    <!--set up a responsive table and table header above "For classnote"-->
           <div class="table-responsive">
-          <table>
+          <table class="table table-bordered">
             <thead>
                 <tr>
                   <th>Class</th>
                   <th>Date Missed</th>
                   <th>Status</th>
                   <th>Action</th>
+                  <th>Excerpt from Notes</th>
                 </tr>
             </thead>
             <tbody>
             {% for classnote in classnotes_unsubmitted %}
-                <tr>
-                  <td>
-                    <h3 class="no-top-margin">{{classnote.event.name}}</h3>
-                  </td>
-                  <td>
-                    <h3 class="no-top-margin">{{classnote.date}}</h3>
-                  </td>
-                  <td>
-                    {% if classnote.date_submitted %}
-                      <span class="badge alert-info">{{classnote.date_submitted}}</span>
-                    {% endif %}
-                    {% if classnote.approved %}
-                      <span class="badge alert-success">approved</span>
-                    {% elif classnote.pending %}
-                      <span class="badge alert-warning">pending</span>
-                    {% else %}
-                      <span class="badge alert-danger">not approved</span>
-                    {% endif %}
-                    {% if classnote.fellowship %}
-                    <span class="badge alert-warning">marked for fellowship</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if classnote.approved == False %}
-                    <form action="{% url 'classnotes:classnotes_detail' classnote.pk %}" method="get">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success btn-xs">Turn In</button>
-                    </form>
-                    {% endif %}
-                  </td>
-                </tr>
               <tr>
-                <p>{{classnote.content|truncatechars:300 }}</p>
+                <td style="vertical-align: middle; width: 200px">
+                  {{classnote.event.name}}
+                </td>
+                <td style="vertical-align: middle;">
+                  {{classnote.date}}
+                </td>
+                <td style="vertical-align: middle;">
+                  {% if classnote.date_submitted %}
+                    <span class="badge alert-info">{{classnote.date_submitted}}</span>
+                  {% endif %}
+                  {% if classnote.approved %}
+                    <span class="badge alert-success">approved</span>
+                  {% elif classnote.pending %}
+                    <span class="badge alert-warning">pending</span>
+                  {% else %}
+                    <span class="badge alert-danger">not approved</span>
+                  {% endif %}
+                  {% if classnote.fellowship %}
+                  <span class="badge alert-warning">marked for fellowship</span>
+                  {% endif %}
+                </td>
+                <td style="vertical-align: middle;">
+                  {% if classnote.approved == False %}
+                  <form action="{% url 'classnotes:classnotes_detail' classnote.pk %}" method="get">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success btn-xs">Turn In</button>
+                  </form>
+                  {% endif %}
+                </td>
+                <td style="max-width: 500px;">
+                  <p>{{classnote.content|truncatechars:300 }}</p>
+                </td>
               </tr>
             {% endfor %}
             </tbody>
