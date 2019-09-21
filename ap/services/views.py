@@ -815,6 +815,7 @@ class ServiceCategoryCountsViewer(FormView):
           count_list.append({'id': w.trainee.id,
                              'full_name2': w.trainee.full_name2,
                              'times_done': 1,
+                             'all_services': a.service.name,
                              'last_service': a.service.name,
                              'ws_of_last': a.week_schedule.start,
                              'wn_of_last': CURRENT_TERM.term_week_of_date(a.week_schedule.start),
@@ -823,6 +824,7 @@ class ServiceCategoryCountsViewer(FormView):
         else:
           t = filter(lambda person: person['id'] == w.trainee.id, count_list)
           t[0]['times_done'] += 1
+          t[0]['all_services'] += ", " + a.service.name
           if (a.week_schedule.start > t[0]['ws_of_last']):
             t[0]['ws_of_last'] = a.week_schedule.start
             t[0]['wn_of_last'] = CURRENT_TERM.term_week_of_date(a.week_schedule.start)
