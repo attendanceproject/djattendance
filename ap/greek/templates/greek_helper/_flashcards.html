@@ -1,7 +1,7 @@
 <div id="flashcards" class="greek tab-pane" role="tabpanel">
   <div class="flashcard-chapters">
     <div class="flashcard-chapter">
-      <select class="form-control" name="chapter-begin">
+      <select id="chapter-start" class="form-control">
       {% for ch in chapters %}
         <option value="{{ch}}">
           Chapter {{ch}}
@@ -13,7 +13,7 @@
       to
     </div>
     <div class="flashcard-chapter">
-      <select class="form-control" name="chapter-end">
+      <select id="chapter-end" class="form-control" >
       {% for ch in chapters %}
         <option value="{{ch}}">
           Chapter {{ch}}
@@ -35,9 +35,37 @@
 </div>
 
 <script type="text/javascript">
-  var isFront = true;
-  var greekVocab_json = "{{greekVocab_json}}";
+  let isFront = true;
+  let greekVocab_json = "{{greekVocab_json}}";
+  let startingChapter = 1;
+  let endingChapter = 1;
   console.log(greekVocab_json);
+
+  function changeStartingChapter() {
+    startingChapter = document.getElementById("chapter-start").value;
+    console.log("Starting chapter:", startingChapter);
+
+    // if the new starting chapter is greater than the ending chapter,
+    // do not update greek vocabs
+    if (startingChapter > endingChapter) {
+      return;
+    }
+
+    // TODO: Add ajex to update vocab list
+  }
+
+  function changeEndingChapter() {
+    endingChapter = document.getElementById("chapter-end").value;
+    console.log("Ending chapter:", endingChapter);
+
+    // if the new ending chapter is smaller than the starting chapter,
+    // do not update greek vocabs
+    if (endingChapter < startingChapter ) {
+      return;
+    }
+
+    // TODO: Add ajex to update vocab list
+  }
 
   function flipCard() {
     console.log(isFront);
@@ -45,6 +73,8 @@
   }
 
   $(document).ready(function() {
-    $('#flashcard').click(flipCard);
+    $("#chapter-start").on('change', changeStartingChapter);
+    $("#chapter-end").on('change', changeEndingChapter);
+    $("#flashcard").click(flipCard);
   });
 </script>
