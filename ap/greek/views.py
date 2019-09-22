@@ -27,8 +27,12 @@ def index(request):
     context={
         "chapters": chapters,
         "greekVocab": greek_list,
+        # TODO: Convert QuerySet to list
+        "greekVocab_json": list(greek_list.values()),
         "classFiles": class_files,
     }
+    print(context["greekVocab"])
+    print(context["greekVocab_json"])
 
     ## CONTINUATION OF FILES TAB ###
     context['classname'] = 'Greek'
