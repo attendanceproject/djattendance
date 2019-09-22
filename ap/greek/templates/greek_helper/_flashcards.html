@@ -1,13 +1,43 @@
 <div id="flashcards" class="greek tab-pane" role="tabpanel">
-  <div id="flashcard" class="flashcard">
-    <div class="flashcard-text">
-      example
+  <div class="flashcard-chapters">
+    <div class="flashcard-chapter">
+      <select class="form-control" name="chapter-begin">
+      {% for ch in chapters %}
+        <option value="{{ch}}">
+          Chapter {{ch}}
+        </option>
+      {% endfor %}
+      </select>
+    </div>
+    <div class="text-center flashcard-chapter-text">
+      to
+    </div>
+    <div class="flashcard-chapter">
+      <select class="form-control" name="chapter-end">
+      {% for ch in chapters %}
+        <option value="{{ch}}">
+          Chapter {{ch}}
+        </option>
+      {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="flashcard-container">
+    <div id="flashcard" class="flashcard-card">
+      <div class="flashcard-text">
+        example
+      </div>
+    </div>
+    <div class="flashcard-number">
+      1/{{greekVocab.count}}
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
   var isFront = true;
+  var greekVocab_json = "{{greekVocab_json}}";
+  console.log(greekVocab_json);
 
   function flipCard() {
     console.log(isFront);
