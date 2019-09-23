@@ -286,9 +286,8 @@
   background-color: #095F80;
   height: 40px;
   /*absolute to fit filter buttons in box*/
-  position: absolute;
   width: -webkit-fill-available;
-  margin-right: 30px;
+  width: 100%;
   }
 select {
   font-family: 'Yantramanav Light';
@@ -298,21 +297,17 @@ select {
 .header-emphasis {
   color:#095F80;
 }
-/*to style and align the filter/self-attendance buttons on the top left*/
-.align-buttons {
-  margin-left: 1000px;
-}
+/*to style and align the filter/self-attendance buttons on the top*/
 .buttons-collection {
   margin-right: 7px;
 }
 .table-responsive {
-    padding-top: 34px;
+    max-height: 650px;
 }
 .btn-group, .btn-group-vertical {
-    right: 0;
-    position: absolute;
-    margin-right: 23px;
-    margin-top: 2px;
+  margin-top: 10px;
+  margin-bottom: 8px;
+  margin-left: 11px;
     }
 .btn {
     padding-top: 5px;
@@ -340,11 +335,9 @@ select {
 {% endif %}
 <p style="margin-bottom: 40px; color: gray;">If there's no roll entered, it's assumed as a Present.</p>
 <!--ul creates the tab-->
-<ul class="nav nav-tabs" role="tablist">
+<ul class="nav nav-tabs" role="tablist" style="border: none;">
   <li role="presentation" class="active"><a href="#week-tab" aria-controls="home" role="tab" data-toggle="tab">Week</a></li>
 </ul>
-  <div class="tab-content">
-    <div id="week-tab" class="tab-pane active" role="tabpanel">
       <!--creates the thick blue line that will sit the week and filters inside-->
       <div id="bluebox">
         <!--week and house/team label-->
@@ -376,6 +369,7 @@ select {
       </div>
       <!--filter/self-attendance buttons are coded in Jquery and stylized in CSS-->
         {% if event_list %}
+        <div class="table-responsive">
         <table id="display_roll" class="table table-condensed table-bordered table-striped">
           <thead>
             <tr>
@@ -461,10 +455,9 @@ select {
             {% endfor %}
           </tbody>
         </table>
+        </div>
         <button id="finalize_rolls" class="btn btn-danger btn-default" style="float: right; margin-bottom: 10px;" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
         {% else %}
         No rolls for this week
         {% endif %}
-      </div>
-    </div>
 {% endblock %}
