@@ -5,15 +5,11 @@
   <button type="button" data-transfer-ta="{{leaveslip.trainee.TA_secondary.id}}" data-ls-action="transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="transfer-ls">Transfer</button>
 </div>
 {% else %}
-<!-- I'm commenting out this block of code. David Tien originally wrote it and he's not sure why it was needed
-without using a time machine because a TA sister should never get brother's leave slip. In the event that it does (like it has been), we should probably not allow the TA sister to accept or deny - rather only let them transfer it. That being said, it means there's another bug causing brother group leave slips to be assigned to TA sisters. We'll leave this block of code to allow TA sisters to transfer in case this does happen. -->
-<!--   <button type="button" data-ls-action="approve" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Approve" class="ls-action btn-lg btn-success" id="approve-ls">
-    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-  </button>
-  <button type="button" data-ls-action="deny" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Deny" class="ls-action btn-lg btn-danger" id="deny-ls">
-    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-  </button> -->
-  <button type="button" data-transfer-ta="{{leaveslip.trainee.TA_secondary.id}}" data-ls-action="transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="transfer-ls">Transfer</button>
+<!--
+  This is for an edge case where a trainee brother would submit a groupleave slip, but then a sister would then edit it before it gets approved. It doesn't happen too often, but what happens is that the slip gets transferred to the TA sister of the sister who re-submitted it. As per Jerome, transfer it back to the original TA brother. 
+
+  data-transfer-ta="{{leaveslip.trainee.TA.id}}" instead of "TA_secondary" because the original submitter would have been a brother and they don't have a secondary TA -->
+  <button type="button" data-transfer-ta="{{leaveslip.trainee.TA.id}}" data-ls-action="transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="transfer-ls">Transfer</button>
 
 {% endif %}
 
