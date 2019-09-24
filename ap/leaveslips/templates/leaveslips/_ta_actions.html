@@ -8,7 +8,8 @@
 <!--
   This is for an edge case where a trainee brother would submit a groupleave slip, but then a sister would then edit it before it gets approved. It doesn't happen too often, but what happens is that the slip gets transferred to the TA sister of the sister who re-submitted it. As per Jerome, transfer it back to the original TA brother. 
 
-  data-transfer-ta="{{leaveslip.trainee.TA.id}}" instead of "TA_secondary" because the original submitter would have been a brother and they don't have a secondary TA -->
+  In the code, it is changed to {{leaveslip.trainee.TA.id}} instead of "{{leaveslip.trainee.TA_secondary.id}}" because the original submitter would have been a brother and they don't have a secondary TA 
+-->
   <button type="button" data-transfer-ta="{{leaveslip.trainee.TA.id}}" data-ls-action="transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="transfer-ls">Transfer</button>
 
 {% endif %}
