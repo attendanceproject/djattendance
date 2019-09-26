@@ -2,6 +2,7 @@
 //------------------------------------------------------
 
 $button-background:              $white !default;
+$button-background-disabled-hover:#f1f2f2;
 
 $button-normal:                  $blue !default;
 $button-default:                 $blue !default;
@@ -58,6 +59,11 @@ $button-panel-shadow:		 3px 2px;
     &.disabled,
     &[disabled] {
       @include opacity($opacity: $button-opacity, $filter: true);
+    }
+
+    &:hover:disabled, {
+      background-color: $button-background-disabled-hover;
+      border-color: $button-border;
     }
 
     @at-root &-bible-dropdown {
@@ -303,7 +309,7 @@ $button-panel-shadow:		 3px 2px;
     }
   }
 
-  #bibleTrackerButton{
+  #bt-button{
     border: 0;
     color: green;
 
@@ -316,7 +322,7 @@ $button-panel-shadow:		 3px 2px;
     }
   }
 
-  .bibleTrackerUpdate{
+  .bt-update{
     color: #095F80;
   }
 }

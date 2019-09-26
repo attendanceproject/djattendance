@@ -125,7 +125,7 @@ def generate_zip(request):
 
   # we're using a deep copy because we'll modify and adjust them for teams and for localities
   # for locality files we don't need to render which locality the trainee is from
-  # for team files we don't need ot render which team the trainee is on
+  # for team files we don't need to render which team the trainee is on
   records_duplicate = copy.deepcopy(stash.get_records())
   date_range = [date_from, date_to]
   in_memory = StringIO()
@@ -256,14 +256,14 @@ def attendance_report_trainee(request):
         count[ev] = 1
 
   # CALCULATE %TARDY
-  total_possible_rolls_count = sum(count[ev] for ev in count if ev.monitor is not None)
+  total_possible_rolls_count = max(1,sum(count[ev] for ev in count if ev.monitor is not None))
   tardy_rolls = rolls.exclude(status='A').filter(~(Q(leaveslips__does_not_count=True) & Q(leaveslips__status='A')))
   tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips.filter(does_not_count=True))
 
   res["tardy_percentage"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
   # CALCULATE %CLASSES MISSED
-  possible_class_rolls_count = sum(count[ev] for ev in count if ev.monitor == 'AM' and ev.type == 'C')
+  possible_class_rolls_count = max(1,sum(count[ev] for ev in count if ev.monitor == 'AM' and ev.type == 'C'))
   missed_classes = rolls.filter(event__monitor='AM', event__type='C')
 
   # currently counts rolls excused by individual and group slips

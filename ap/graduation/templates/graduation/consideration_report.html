@@ -55,6 +55,12 @@
 
     });
 
+    $(".buttons-show").on("click", function() {
+      $(".incompleted").toggle();
+    })
+    $(".buttons-show-stats").on("click", function() {
+      $(".stats").toggle();
+    })
 
   });
 
@@ -68,6 +74,15 @@
   {{ xb_display }}<br>
   {{ fellowshipped_display }}
 </pre>
+
+<a class="btn btn-default buttons-show-stats">Show/Hide Stats</a>
+<a class="btn btn-default buttons-show">Show/Hide Incompleted</a><br>
+
+<div class="stats" style="display: none"><br><pre>{{ xb_display }}<br>
+{{ fellowshipped_display }}</pre></div>
+
+<div class="incompleted" style="display: none"><br><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
+<strong>Total</strong>: {{ not_completed_number }}</div><br>
 
 <div class="data-table-container">
   <table id="graduation" class="table table-striped table-bordered">

@@ -11,12 +11,7 @@
   <div class="panel panel-default">
     <div class="panel-heading exam-panel-heading">
       <div class="btn-group pull-right">
-        <a href="
-        {% if role == 'Take' %}
-          {% url 'exams:list' %}
-        {% else %}
-          {% url 'exams:grades' exam.id %}
-        {% endif %}">
+        <a href="javascript:history.go(-1)">
           <button type="button" class="btn btn-default">Back</button>
         </a>
       </div>
@@ -52,19 +47,21 @@
               {% for question in section.questions %}
                 {% if question.prompt.strip != '' %}
                   {% include section.template %}
-                  <br>
                 {% endif %}
               {% endfor %}
+            <br>
             {% empty %}
               <i>No exam questions to view.</i><br />
             {% endfor %}
           </ol>
+          {% if not is_finalized %}
           <div class="pull-right">
-            <button id="save_button" name="Save" class="btn btn-success">Save</button>
-            <button id="finalize_button" name="Submit" class="btn btn-primary">
+            <button id="save_button" name="Save" class="btn btn-success" {% if preview %}disabled{% endif %}>Save</button>
+            <button id="finalize_button" name="Submit" class="btn btn-primary" {% if preview %}disabled{% endif %}>
               Finalize
             </button>
           </div>
+          {% endif %}
         </form>
       {% endif %}
     {% else %}
@@ -180,7 +177,7 @@
               location.reload();
             }
           } else {
-            alert('Error saving exam: ' + data.msg);
+            alert('Exam Error: ' + data.msg);
           }
         },
         error: function (jqXHR, textStatus, errorThrown ) {

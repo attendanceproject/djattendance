@@ -36,10 +36,10 @@ export const GROUP_SLIP_TYPES = [
   {id: 'CONF', name: 'Conference'},
   {id: 'FWSHP', name: 'Fellowship'},
   {id: 'GOSP', name: 'Gospel'},
+  {id: 'NOTIF', name: '*Notification Only'},
   {id: 'OTHER', name: 'Other'},
   {id: 'SERV', name: 'Service'},
   {id: 'TTRIP', name: 'Team Trip'},
-  {id: 'NOTIF', name: 'Notification Only'},
 ]
 
 export const SLIP_TYPES = [
@@ -48,6 +48,7 @@ export const SLIP_TYPES = [
   {id: 'GOSP', name: 'Gospel'},
   {id: 'MEAL', name: 'Meal Out'},
   {id: 'NIGHT', name: 'Night Out'},
+  {id: 'NOTIF', name: '*Notification Only'},
   {id: 'OTHER', name: 'Other'},
   {id: 'SERV', name: 'Service'},
   {id: 'SICK', name: 'Sickness'},
@@ -56,7 +57,6 @@ export const SLIP_TYPES = [
   {id: 'INTVW', name: 'Special: Graduate School or Job Interview'},
   {id: 'GRAD', name: 'Special: Graduation'},
   {id: 'WED', name: 'Special: Wedding'},
-  {id: 'NOTIF', name: 'Notification Only'},
 ]
 
 export const TA_IS_INFORMED = {id: 'true', name: 'Yes, informed a TA'}

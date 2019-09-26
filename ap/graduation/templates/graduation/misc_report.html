@@ -56,8 +56,13 @@
 
     $("#graduation").on('dblclick', ".misc-inv, .misc-dvd", function() {
       tableInlineEdit($(this), "{% url 'graduation:misc-report' %}", false);
+    })
+    $(".buttons-show-totals").on("click", function() {
+      $(".totals").toggle();
+    })
+    $(".buttons-show").on("click", function() {
+      $(".incompleted").toggle();
     });
-
   });
 
 </script>
@@ -69,6 +74,16 @@
 <p class="export-message"><strong>Total DVDs Requested</strong>: {{dvd_totals}}<br>
 <strong>Total Invitations Requested</strong>: {{invite_totals}}</p><br>
 
+<a class="btn btn-default buttons-show-totals">Show/Hide Totals</a>
+<a class="btn btn-default buttons-show">Show/Hide Incompleted</a><br>
+
+<div class="totals" style="display: none"><br><strong>Total DVDs Requested</strong>: {{dvd_totals}}<br>
+<strong>Total Invitations Requested</strong>: {{invite_totals}}</div>
+
+<div class="incompleted" style="display: none"><br><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
+<strong>Total</strong>: {{ not_completed_number }}</div>
+
+<br>
 <div class="data-table-container">
   <table id="graduation" class="table table-striped table-bordered">
     <thead>

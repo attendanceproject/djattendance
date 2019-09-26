@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import F, Q, Count
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView
@@ -85,7 +85,7 @@ def services_view(request, run_assign=False, generate_leaveslips=False):
   # For Services Tab
   service_categories = Category.objects.filter(services__designated=False).prefetch_related(
       Prefetch('services', queryset=Service.objects.filter(designated=False).order_by('weekday', 'start')),
-      Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.all().order_by('-worker_group__assign_priority'))
+      Prefetch('services__serviceslot_set', queryset=ServiceSlot.objects.all().order_by('-worker_group__assign_priority').order_by('-name')),
   ).distinct()
 
   # For Designated Tab
@@ -363,6 +363,45 @@ def generate_signin(request, k=False, r=False, o=False):
         others.append(items[index][1] + items[index + 1][1] if index + 1 < len(items) else [])
     ctx['others'] = filter(lambda x: x, others)  # remove empty querysets
     return render(request, 'services/signinsheetso.html', ctx)
+
+
+def changeWeek(request):
+
+  user = request.user
+  trainee = trainee_from_user(user)
+  service_db = {}
+  designated_list = []
+
+  if request.is_ajax():
+    week_id = request.GET['week']
+    current_week = int(week_id)
+    current_week = current_week if current_week < LAST_WEEK else LAST_WEEK
+    current_week = current_week if current_week > FIRST_WEEK else FIRST_WEEK
+    cws = WeekSchedule.get_or_create_week_schedule(trainee, week_id)
+  else:
+    ct = Term.current_term()
+    current_week = ct.term_week_of_date(date.today())
+    cws = WeekSchedule.get_or_create_current_week_schedule(trainee)
+
+  worker_assignments = Worker.objects.select_related('trainee').prefetch_related(Prefetch(
+      'assignments',
+      queryset=Assignment.objects.filter(week_schedule=cws).select_related('service').order_by('service__weekday'),
+      to_attr='week_assignments')
+  )
+
+  # Find services related to the user
+  for current_worker in worker_assignments:
+    trainee = str(trainee)
+    if trainee == current_worker.full_name:
+      for a in current_worker.week_assignments:
+        if a.service.category.name == "Designated Services":
+          designated_list.append(a.service)
+        else:
+          # service_db.setdefault(a.service.name, []).append((a.service.weekday, a.service_slot.name))
+          service_db.setdefault(a.service.name, a.service.weekday)
+
+  service_data = json.dumps(service_db)
+  return HttpResponse(service_data, content_type='application/json')
 
 
 # API Views
@@ -776,6 +815,7 @@ class ServiceCategoryCountsViewer(FormView):
           count_list.append({'id': w.trainee.id,
                              'full_name2': w.trainee.full_name2,
                              'times_done': 1,
+                             'all_services': a.service.name,
                              'last_service': a.service.name,
                              'ws_of_last': a.week_schedule.start,
                              'wn_of_last': CURRENT_TERM.term_week_of_date(a.week_schedule.start),
@@ -784,6 +824,7 @@ class ServiceCategoryCountsViewer(FormView):
         else:
           t = filter(lambda person: person['id'] == w.trainee.id, count_list)
           t[0]['times_done'] += 1
+          t[0]['all_services'] += ", " + a.service.name
           if (a.week_schedule.start > t[0]['ws_of_last']):
             t[0]['ws_of_last'] = a.week_schedule.start
             t[0]['wn_of_last'] = CURRENT_TERM.term_week_of_date(a.week_schedule.start)

@@ -54,7 +54,7 @@ class SemiView(TemplateView):
       show_attendance = True
     context['show_attendance'] = show_attendance
     context['term'] = semi_annual_training()
-    location_due_date = start_date - datetime.timedelta(days=3)
+    location_due_date = start_date - datetime.timedelta(days=7)
     context['location_due_date'] = location_due_date
     context['past_location_due_date'] = datetime.date.today() > location_due_date
     return context
@@ -101,14 +101,17 @@ class AttendanceReport(GroupRequiredMixin, TemplateView):
       d = {'name': t.full_name, 'term': t.current_term}
       if semis.filter(trainee=t).exists():
         semi = semis.get(trainee=t)
-        if 'N' in semi.attendance.values():
-          d['submitted'] = "No"
+        if '' in semi.attendance.values() or 'N' in semi.attendance.values():
+          #todelete: includes both '' and 'N' because old default attendance had 'N'
+          d['completed'] = "No"
+          d['semi'] = semi
+          d['stats'] = attendance_stats(semi)
         else:
-          d['submitted'] = "Yes"
+          d['completed'] = "Yes"
           d['semi'] = semi
           d['stats'] = attendance_stats(semi)
       else:
-        d['submitted'] = "No"
+        d['completed'] = "No"
       data.append(d)
     return data
 

@@ -1,11 +1,16 @@
-{% extends "base.html" %} {% load staticfiles %} {% load bootstrap3 %} {% load panels %} {% load smart_cards %} {% load common_tags
-%} {% block title %}Home{% endblock %} {% block scripts %}
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load common_tags %}
+{% block title %} Home {% endblock %}
+{% block scripts %}
 <script type="text/javascript" src="{% static 'js/bootstrap-tab-history.js' %}"></script>
 {% if isTrainee %}
 <script type="text/javascript" src="{% static 'bible_tracker/js/bible_reading.js' %}"></script>
 <script type="text/javascript">
 
   var isTrainee = "{{isTrainee}}";
+  var worker = "{{worker}}";
   var currentWeek = "{{current_week}}";
   var finalized = "{{finalized}}";
   var bibleReadingStatus = "{{weekly_status}}";
@@ -13,27 +18,86 @@
   var changeWeekUrl = "{% url 'bible_tracker:changeWeek' %}";
   var updateStatusUrl = "{% url 'bible_tracker:updateStatus' %}";
   var finalizeStatusUrl = "{% url 'bible_tracker:finalizeStatus' %}";
+  var designatedHoursUrl = "{% url 'services:designated_service_hours' %}";
+  var serviceUrl = "{% url 'services:changeWeek' %}";
+  var assignedServices = {{assigned_list|safe}};
+  var assignedDesignated = {{designated_list|safe}};
+  var serviceDays = {{service_day|safe}};
+
+  function initProcessServices() {
+    processServices(assignedServices, serviceDays);
+  }
+
+  function processServices(services, services_day) {
+    // clear all the cells
+    for (var i = 0; i < 7; i++) {
+      document.getElementById("service-row-" + weekdayCodes[i]).innerHTML = "";
+    }
+
+    // insert check marks for the days that have rotational service
+    for (var i in services_day) {
+      // i is the index, day is the value of the element at index i in services_day
+      var day = services_day[i];
+      document.getElementById("service-row-" + weekdayCodes[day]).innerHTML = "<span data-toggle=\"tooltip\" title=\""
+        + services[i] + "\" class=\"glyphicon glyphicon-ok\"></span>";
+    }
+
+    // show url link for designated hours if the trainee has designated service
+    if (assignedDesignated && assignedDesignated.length > 0) {
+      var designatedHourUrlCell = document.getElementById("designated_service_hours_link");
+      var urlInsert = "<a href=\"{% url 'services:designated_service_hours' %}\">Hours</a>";
+      designatedHourUrlCell.innerHTML = urlInsert
+    }
+  }
+
+  function changeServiceWeek() {
+    var weekId = $("#week-select").val();
+
+    $.ajax({
+      type: "GET",
+      url: serviceUrl,
+      dataType: "json",
+      data: {
+        "week": weekId,
+      },
+      success: function (data) {
+        var services = new Array();
+        var services_day = new Array();
+
+        for (var key in data) {
+          services.push(key);
+          services_day.push(data[key]);
+        }
+        processServices(services, services_day);
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error(jqXHR, textStatus, errorThrown);
+      }
+    });
+  }
 
   $(document).ready(function () {
-    $("#week_select option[value='{{current_week}}']").attr("selected", "selected");
+    $("#week-select option[value='{{current_week}}']").attr("selected", "selected");
 
+    initProcessServices();
     changetoFinalize();
     getWeeklyStatus();
 
-    $("#week_select").on('change', changeHomepageWeek);
+    $("#week-select").on('change', changeHomepageWeek);
+    $("#week-select").on('change', changeServiceWeek);
 
-    $("#bibleTrackerButton").click(function (e) {
+    $("#bt-button").click(function (e) {
       e.preventDefault();
-      if ($('#bibleTrackerButton').val() == "Finalize") {
+      if ($('#bt-button').val() == "Finalize") {
         finalizeStatusFromHomepage();
       }
       else {
-        updateStatusFromHomepage
-          (finalized);
+        updateStatusFromHomepage(finalized);
       }
     });
 
     $(".bible-selector").on('change', changetoFinalize);
+
   });
 </script>
 {% endif %}
@@ -56,6 +120,7 @@
   }
 </style>
 {% endblock %} {% block content %}
+
 <div class="container">
   <div class="row">
     <h1 class="col-md-12"> Welcome, {{ user.firstname }}! </h1>
@@ -64,55 +129,24 @@
   {% if user.type == 'T' %}
   <!-- Trainee Search Box for TAs -->
   <!--
-  <div class="row">
-    <div class="col-md-4">
-      <div class="btn-group-vertical">
-        <div class="btn btn-panel trainee-search-container">
-          <input class="btn-txt trainee-search-input" type="text" placeholder="TRAINEE SEARCH"></input>
-          <span class="trainee-search-box"></span>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="btn-group-vertical">
+          <div class="btn btn-panel trainee-search-container">
+            <input class="btn-txt trainee-search-input" type="text" placeholder="TRAINEE SEARCH"></input>
+            <span class="trainee-search-box"></span>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-  -->
-
-  {% elif user.type == 'R' or user.type == 'C' %}
-
-  <div class="row">
-    <!-- Panels -->
-    <div class="col-md-4">
-      <div id="panelsDiv" class="btn-group-vertical">
-        {% generate_panels as panels %} {% for panel in panels %}
-        <a class="btn btn-panel" href="{{ panel.url }}">
-          {# moved number first to fix firefox rendering issue #} {% if panel.num is not None %} {% if panel.num == 0 %}
-          <span class="btn-num-nought"> {{ panel.num }}</span>
-          {% else %}
-          <span class="btn-num"> {{ panel.num }}</span>
-          {% endif %} {% endif %}
-          <span class="btn-txt"> {{ panel.name }} </span>
-        </a>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Weekly Summary -->
-    <div class="col-md-8 ml-auto">
-      <div class="row">
-        <form>
-          <div class="col-sm-1">
-            Week:
-          </div>
-          <div class="col-sm-4">
-            <!-- Pick a week of a term -->
-            <select id="week_select" class="form-control" name="week" size="0">
-              {% for i, week in weeks %}
-              <option value="{{i}}" {% if i > current_week %} disabled {% endif %}>{{week}}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </form>
-      </div>
       <br />
+    -->
+</div>
+
+{% elif user.type == 'R' or user.type == 'C' %}
+
+<div class="row">
+  <!-- Panels -->
+  {% include "_panels.html" %}
 
       <table class="table table-bordered-wkly-sum">
         <thead>
@@ -191,44 +225,16 @@
       </table>
     </div>
   </div>
+  <!-- Weekly Summary -->
+  {% include "_weekly_summary.html" %}
   {% endif %}
 
   <!-- Cards -->
   {% spaceless %}
-  <div class="row">
-    <div class="row-md-12">
-      <div class="card_container">
-        {% generate_cards as cards %} {% for card in cards %} {% if card.condition %}
-        <div class="card">
-          <span class="card-header h3"> {{ card.header_title }} </span>
-          <span class=card-content>
-            {% for card_link in card.card_links %}
-            <span class="card-item">
-              <a href="{{ card_link.url }}" class="card-list">{{ card_link.title }}</a>
-              {% if card_link.number is not None %}
-                {% if card_link.ta_number is None %}
-                  {% if card_link.number == 0 %}
-                    <div class="card-num">0</div>
-                  {% else %}
-                    <div class="card-num-alert">{{ card_link.number }}</div>
-                  {% endif %}
-                {% else %}
-                  {% if card_link.ta_number == 0 %}
-                    <div class="card-num">0 ({{ card_link.number }})</div>
-                  {% else %}
-                    <div class="card-num-alert">{{ card_link.ta_number }} ({{ card_link.number }})</div>
-                  {% endif %}
-                {% endif %}
-              {% endif %}
-            </span>
-            {% endfor %}
-          </span>
-        </div>
-        {% endif %} {% endfor %}
-      </div>
-    </div>
-  </div>
-  {% endspaceless %} {% if schedule %}
+  {% include "_cards.html" %}
+  {% endspaceless %}
+
+  {% if schedule %}
   <div class="panel panel-primary">
     <div class="panel-heading">
       <h5 class="panel-title">Today's Schedule</h5>

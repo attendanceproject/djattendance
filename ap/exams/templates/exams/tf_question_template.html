@@ -1,4 +1,4 @@
-<li>{{ question.prompt }}</li> <b> (Points: {{ question.points }})</b>
+<li>{{ question.prompt|linebreak }}</li> <b> (Points: {{ question.points }})</b>
 <div class="form-group no-bottom col-xs-12 col-sm-12" id="tf_answer">
   {% with count=forloop.counter|get_index_for_tf|split_string:'##,0' %}
   <input type='radio' name="tf_{{ count }}" id="tf_{{ count }}" value="true"

@@ -8,7 +8,7 @@ function disableButtons() {
     $(".btn-group :input").attr("disabled", true);
 
     // for homepage (index.html)
-    $("#bibleTrackerButton").prop("disabled", true);
+    $("#bt-button").prop("disabled", true);
     $(".bible-selector").prop("disabled", true);
 }
 
@@ -19,7 +19,7 @@ function enableButtons() {
     $(".btn-group :input").attr("disabled", false);
 
     // for homepage (index.html)
-    $("#bibleTrackerButton").prop("disabled", false);
+    $("#bt-button").prop("disabled", false);
     $(".bible-selector").prop("disabled", false);
 }
 
@@ -28,7 +28,7 @@ function setWeeks() {
     var firstDayofWeek = moment(first_day_term, "YYYYMMDD");
     var lastDayofWeek = firstDayofWeek.clone().add(6, "days");
     for (var i = 0; i <= currentWeek; i++) {
-        $("#week_select").append($("<option />").val("week-" + i).text("Week " + i + ": " + firstDayofWeek.format("ddd MMM D") + " - " + lastDayofWeek.format("ddd MMM D")).attr("id", i));
+        $("#week_select").append($("<option />").val(i).text("Week " + i + ": " + firstDayofWeek.format("ddd MMM D") + " - " + lastDayofWeek.format("ddd MMM D")).attr("id", i));
         firstDayofWeek = lastDayofWeek.add(1, "day");
         lastDayofWeek = firstDayofWeek.clone().add(6, "days");
     }
@@ -47,7 +47,7 @@ function setDatesforWeek(week) {
         currentDayofWeek.add(1, "days");
     }
     //finalize is disabled on Wednesday of next week (with HH:mm of 00:00) or before week is over (Sunday midnight+20 minutes)
-    if (isTrainee && (now > WedofNextWeek || now < lastDayofWeek.clone().add(20, "minutes"))) {
+    if (isTrainee && (/*now > WedofNextWeek || */now < lastDayofWeek.clone().add(20, "minutes"))) {
         $("#finalize").prop("disabled", true);
     }
     //save button is disabled for more than this week"s Bible reading
@@ -136,7 +136,7 @@ function checkBibleReadingStatus() {
 function changetoFinalize() {
     // check if bible reading for the week is already finalized
     if (finalized === isFinalize) {
-        $("#bibleTrackerButton").val("Finalize");
+        $("#bt-button").val("Finalize");
         disableButtons();
     }
 
@@ -148,11 +148,11 @@ function changetoFinalize() {
     if (!checkBibleReadingStatus()) {
         // check if date is valid for user if they can finalize (from Lord"s Day to Tuesday)
         if (moment(timeNow).isBetween(start, end, "second")) {
-            $("#bibleTrackerButton").val("Finalize");
+            $("#bt-button").val("Finalize");
         }
     }
     else {
-        $("#bibleTrackerButton").val("Save");
+        $("#bt-button").val("Save");
     }
 }
 
@@ -166,7 +166,7 @@ function getWeeklyStatus() {
 
 /****** functions used in index and bible_tracker page ******/
 function changeWeek() {
-    var weekId = $("#week_select").find("option:selected").attr("id");
+    var weekId = $("#week_select").val();
     var userId = $("input#userId").val();
     var url = "/bible_tracker/?week=" + weekId;
     history.pushState({ urlPath: url }, "", url);
@@ -211,7 +211,7 @@ function changeWeek() {
 
 // Changing the week reloads the table to load the bible reading status of that week
 function changeHomepageWeek() {
-    var weekId = document.getElementById("week_select").value;
+    var weekId = $("#week-select").val();
     currentWeek = weekId;
 
     $.ajax({
@@ -341,6 +341,6 @@ function finalizeStatusFromHomepage() {
         });
     } else {
         //makes sure button does not stay pressed
-        $("#bibleTrackerButton").blur();
+        $("#bt-button").blur();
     }
 }

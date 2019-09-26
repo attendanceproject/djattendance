@@ -106,6 +106,7 @@ class SwitchUserForm(forms.Form):
       required=True,
       widget=ModelSelect2Widget(
           model=User,
+          queryset=User.objects.filter(is_active=True),
           search_fields=['firstname__icontains', 'lastname__icontains'],
       ),
   )

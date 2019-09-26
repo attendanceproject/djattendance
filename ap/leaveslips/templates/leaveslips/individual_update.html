@@ -26,6 +26,18 @@ let populate_events = () => {
   $('form').append($(input));
 };
 
+function updatePerfectAttendanceCheckBox() {
+  var exceptionalReasons = ['CONF', 'FWSHP', 'SERV', 'TTRIP'];
+  var reason = $('#id_type').val();
+  // set the checkbox by default for the reason that does not
+  // count for the perfect attendance
+  if (exceptionalReasons.includes(reason)) {
+    $('#id_does_not_count').prop("checked", true);
+  } else {
+    $('#id_does_not_count').prop("checked", false);
+  }
+}
+
 function extraFields() {
   var reason = $('#id_type').val();
 
@@ -51,8 +63,13 @@ function extraFields() {
   }
 }
 
-$(document).ready(extraFields());
+$(document).ready(() => {
+  updatePerfectAttendanceCheckBox();
+  extraFields();
+});
+
 $('#id_type').change(function() {
+  updatePerfectAttendanceCheckBox();
   extraFields();
 });
 </script>
