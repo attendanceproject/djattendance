@@ -64,11 +64,6 @@
 {% block content %}
 <h1>{{title}}</h1>
 
-{% if not_completed_number != 0 %}
-  <div><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}</div>
-{% endif %}
-<div><strong>Total incompleted</strong>: {{ not_completed_number }}</div><br>
-
 <a class="btn btn-default buttons-show">Show/Hide Incompleted</a>
 <br><div class="incompleted" style="display: none"><br><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
 <strong>Total</strong>: {{ not_completed_number }}</div></br>

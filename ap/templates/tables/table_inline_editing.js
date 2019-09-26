@@ -69,7 +69,7 @@ function tableInlineEdit(clicked, url, textarea) {
         blurFunction(this, orig, clicked, url);
       },
       keyup(e) { // if pressing enter
-        if (e.which === 13) { input.blur() }
+        if (e.which === 13) { input.blur(); }
       }
     });
   }
