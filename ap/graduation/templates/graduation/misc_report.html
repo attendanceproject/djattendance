@@ -51,6 +51,12 @@
 
     });
 
+    $(".buttons-show-totals").on("click", function() {
+      $(".totals").toggle();
+    })
+    $(".buttons-show").on("click", function() {
+      $(".incompleted").toggle();
+    })
 
   });
 
@@ -60,9 +66,16 @@
 {% block content %}
 <h1>{{title}}</h1>
 
-<p class="export-message">Total DVDs Requested: {{dvd_totals}}<br>
-Total Invitations Requested: {{invite_totals}}</p>
+<a class="btn btn-default buttons-show-totals">Show/Hide Totals</a>
+<a class="btn btn-default buttons-show">Show/Hide Incompleted</a><br>
 
+<div class="totals" style="display: none"><br><strong>Total DVDs Requested</strong>: {{dvd_totals}}<br>
+<strong>Total Invitations Requested</strong>: {{invite_totals}}</div>
+
+<div class="incompleted" style="display: none"><br><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
+<strong>Total</strong>: {{ not_completed_number }}</div>
+
+<br>
 <div class="data-table-container">
   <table id="graduation" class="table table-striped table-bordered">
     <thead>

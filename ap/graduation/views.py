@@ -165,6 +165,10 @@ class ReportView(GroupRequiredMixin, ListView):
   def get_context_data(self, **kwargs):
     context = super(ReportView, self).get_context_data(**kwargs)
     context['data'] = self.model.objects.filter(grad_admin__term=term, trainee__current_term=4)
+    not_completed = filter(lambda o: not o.responded, context['data'])
+    nc = [(x.trainee.firstname + " " + x.trainee.lastname) for x in not_completed]
+    context['not_completed_trainees'] = sorted(nc)
+    context['not_completed_number'] = len(nc)
     context['title'] = title(self.model._meta.verbose_name + ' Report')
 
     return context
@@ -173,15 +177,6 @@ class ReportView(GroupRequiredMixin, ListView):
 class TestimonyReport(ReportView):
   model = Testimony
   template_name = 'graduation/testimony_report.html'
-
-  def get_context_data(self, **kwargs):
-    context = super(TestimonyReport, self).get_context_data(**kwargs)
-    not_completed = filter(lambda o: not o.responded, context['data'])
-    nc = [(x.trainee.firstname + " " + x.trainee.lastname) for x in not_completed]
-    context['not_completed_trainees'] = sorted(nc)
-    context['not_completed_number'] = len(nc)
-
-    return context
 
 
 class ConsiderationReport(ReportView):
