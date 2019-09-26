@@ -70,7 +70,7 @@ class InterimIntentions(models.Model):
 
   home_zip = models.CharField(max_length=200, blank=True, null=True)
 
-  intent = models.CharField(max_length=1, choices=INTENT_CHOICES, default="R")
+  intent = models.CharField(max_length=1, blank=True, choices=INTENT_CHOICES)
 
   post_training_intentions = models.CharField(max_length=3, choices=POST_INTENT_CHOICES)
 

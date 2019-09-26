@@ -5,6 +5,7 @@ from django.views.generic.edit import UpdateView
 from django.views.generic import ListView
 from django.template.defaultfilters import title
 from django.shortcuts import redirect
+from django.forms import ValidationError
 
 from terms.models import Term
 from graduation.models import *
@@ -174,9 +175,52 @@ class ReportView(GroupRequiredMixin, ListView):
     return context
 
 
-class TestimonyReport(ReportView):
+class ReportPostView(ReportView):
+  def post(self, request, *args, **kwargs):
+    return self.get(request, *args, **kwargs)
+
+  # abstract method
+  def updating(self, obj, field, value):
+    pass
+
+  def get_context_data(self, **kwargs):
+    if self.request.method == "POST" and self.request.user.has_group(['training_assistant']):
+      val = self.request.POST.get('change')
+      rpk = self.request.POST.get('pk')
+      f = self.request.POST.get('f')
+
+      obj = self.model.objects.get(pk=rpk)
+      self.updating(obj, f, val)
+
+    context = super(ReportPostView, self).get_context_data(**kwargs)
+    return context;
+
+
+class TestimonyReport(ReportPostView):
   model = Testimony
   template_name = 'graduation/testimony_report.html'
+
+
+  def updating(self, obj, field, value):
+    if field == "test-top":
+      obj.top_experience = value
+    elif field == "test-enc":
+      obj.encouragement = value
+    elif field == "test-bur":
+      obj.overarching_burden = value
+    elif field == "test-hi":
+      obj.highlights = value
+
+    obj.save()
+
+  def get_context_data(self, **kwargs):
+    context = super(TestimonyReport, self).get_context_data(**kwargs)
+    not_completed = filter(lambda o: not o.responded, context['data'])
+    nc = [(x.trainee.firstname + " " + x.trainee.lastname) for x in not_completed]
+    context['not_completed_trainees'] = sorted(nc)
+    context['not_completed_number'] = len(nc)
+
+    return context
 
 
 class ConsiderationReport(ReportView):
@@ -228,9 +272,20 @@ class SpeakingReport(ReportView):
     return context
 
 
-class MiscReport(ReportView):
+class MiscReport(ReportPostView):
   model = Misc
   template_name = 'graduation/misc_report.html'
+
+  def updating(self, obj, field, value):
+    if field == "misc-inv":
+      if int(value) % 5 == 0:
+        obj.grad_invitations = value
+      else:
+        raise ValidationError("Invite number must be a multiple of 5.")
+    elif field == "misc-dvd":
+      obj.grad_dvd = value
+
+    obj.save()
 
   def get_context_data(self, **kwargs):
     context = super(MiscReport, self).get_context_data(**kwargs)
@@ -240,6 +295,18 @@ class MiscReport(ReportView):
     return context
 
 
-class RemembranceReport(ReportView):
+class RemembranceReport(ReportPostView):
   model = Remembrance
   template_name = 'graduation/rem_report.html'
+
+  def updating(self, obj, field, value):
+    if field == "rem-text":
+      limit = GradAdmin.objects.get(term=term).remembrance_char_limit
+      if len(str(value)) > limit:
+        raise ValidationError("Remembrance surpasses character limit of " + str(limit).decode("utf-8"))
+      else:
+        obj.remembrance_text = value
+    elif field == "rem-ref":
+      obj.remembrance_reference = value
+
+    obj.save()

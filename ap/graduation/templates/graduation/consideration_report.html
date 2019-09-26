@@ -23,7 +23,6 @@
         exportOptions:{
           columns: ':visible'
         },
-        // messageTop: '{{xb_display}} \n {{fellowshipped_display}},'
       },
       {
         extend: 'csvHtml5',
@@ -70,6 +69,11 @@
 
 {% block content %}
 <h1>{{title}}</h1>
+
+<pre>
+  {{ xb_display }}<br>
+  {{ fellowshipped_display }}
+</pre>
 
 <a class="btn btn-default buttons-show-stats">Show/Hide Stats</a>
 <a class="btn btn-default buttons-show">Show/Hide Incompleted</a><br>
