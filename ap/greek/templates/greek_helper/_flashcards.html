@@ -67,9 +67,42 @@
     // TODO: Add ajex to update vocab list
   }
 
+  // A function to shuffle a random permutation of arr[]
+  // Input:
+  //   arr - an array of vocab
+  //   n - the length of array
+  // Output:
+  //   arr - an array of randomized vocab
+  function shuffleCards(arr, n) {
+    /*
+      Fisher-Yates shuffle Algorithm:
+      To shuffle an array a of n elements (indices 0..n-1):
+        for i from n - 1 downto 1 do
+          j = random integer with 0 <= j <= i
+          exchange a[j] and a[i]
+      */
+    let newArr = arr;
+    for (let i = n - 1; i > 0; i--) {
+      // A random number between min and max (both included)
+      // Math.floor(Math.random() * (max - min + 1) ) + min
+      let j = Math.floor(Math.random() * (i + 1))
+
+      let temp = newArr[j];
+      newArr[j] = newArr[i];
+      newArr[i] = temp;
+    }
+    return newArr;
+  }
+
   function flipCard() {
     console.log(isFront);
     isFront = !isFront;
+  }
+
+  function showNextCard() {
+    // TODO: Change to next flashcard
+
+    // update the current index of the card
   }
 
   $(document).ready(function() {
