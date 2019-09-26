@@ -27,7 +27,7 @@ function editDB(updated, objPK, field, url) {
 // blur function - for clicking outside input when editing is finished
 function blurFunction(textbox, orig, clicked, url) {
   var passed = false;
-  if (textbox.value != orig) {
+  if (textbox.value !== orig) {
     passed = editDB(textbox.value, clicked.parent().attr("id"), clicked.attr("class"), url);
   }
 
@@ -42,15 +42,12 @@ function blurFunction(textbox, orig, clicked, url) {
 // parameters: clicked is table field; POST url; textarea Boolean
 function tableInlineEdit(clicked, url, textarea) {
   var orig = clicked.text(); // for comparison
-  if (orig == "None") {
+  if (orig === "None") {
     orig = "";
   }
 
   var input;
-  console.log("/");
   var cols = $("table thead tr th").eq($("td").index(clicked)%7).width()/9;
-  console.log($("td").index(clicked));
-  console.log(cols);
   if (textarea) {
     input = $("<textarea>", {
       rows: orig.length/cols, // estimate height of text to minimize table resizing
@@ -59,7 +56,7 @@ function tableInlineEdit(clicked, url, textarea) {
         blurFunction(this, orig, clicked, url);
       },
       keyup(e) { // if pressing enter
-        if (e.which === 13) { input.blur() }
+        if (e.which === 13) { input.blur(); }
       }
     });
 
