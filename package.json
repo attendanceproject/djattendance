@@ -58,7 +58,7 @@
     "prop-types": "^15.6.1",
     "react": "^16.10.0",
     "react-bootstrap": "0.32.1",
-    "react-dom": "^15.6.2",
+    "react-dom": "^16.10.0",
     "react-formal": "0.25.4",
     "react-formal-inputs": "2.1.1",
     "react-hot-loader": "^3.0.0-beta.7",
