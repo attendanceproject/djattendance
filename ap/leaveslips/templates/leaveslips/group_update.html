@@ -21,12 +21,33 @@ href="{{next_ls_url}}"
 
 {% block leaveslip_script %}
   <script>
-    $(document).ready(() => {
+    function appendSubmitter() {
       $("label[for|='id_trainees']").append(
         '<span id="submitter_display" style="margin-left: 10px; font-size: 12px;">Submitter: {{ leaveslip.trainee.full_name }}</span>');
       $("#id_trainees").djangoSelect2({
         width: "100%"
       });
+    }
+
+    function updatePerfectAttendanceCheckBox() {
+      var exceptionalReasons = ['CONF', 'FWSHP', 'SERV', 'TTRIP'];
+      var reason = $('#id_type').val();
+      // set the checkbox by default for the reason that does not
+      // count for the perfect attendance
+      if (exceptionalReasons.includes(reason)) {
+        $('#id_does_not_count').prop("checked", true);
+      } else {
+        $('#id_does_not_count').prop("checked", false);
+      }
+    }
+
+    $(document).ready(() => {
+      appendSubmitter();
+      updatePerfectAttendanceCheckBox();
+    });
+
+    $('#id_type').change(function() {
+      updatePerfectAttendanceCheckBox();
     });
   </script>
 {% endblock %}
