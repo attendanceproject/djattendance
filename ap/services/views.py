@@ -768,8 +768,8 @@ class ServiceCategoryNotDoneViewer(FormView):
 
     context['trainees'] = trainees
     context['count'] = trainees.count()
-    context['brothers_count'] = trainees.filter(gender='B').count()
-    context['sisters_count'] = trainees.filter(gender='S').count()
+    context['brothers_count'] = trainees.list(filter(gender='B')).count()
+    context['sisters_count'] = trainees.list(filter(gender='S')).count()
 
     return context
 
