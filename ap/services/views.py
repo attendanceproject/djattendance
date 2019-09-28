@@ -761,7 +761,7 @@ class ServiceCategoryNotDoneViewer(FormView):
 
     trainees = Trainee.objects.all()
 
-    assignments = Assignment.objects.filter(service__category=Category.objects.filter(name=category)).prefetch_related('workers')
+    assignments = list(Assignment.objects.filter(service__category=Category.objects.filter(name=category)).prefetch_related('workers'))
     for a in assignments:
       for w in a.workers.all():
         trainees = trainees.exclude(id=w.trainee.id)
@@ -821,7 +821,7 @@ class ServiceCategoryCountsViewer(FormView):
                              'wd_of_last': a.service.weekday,
                              'start_time_of_last': a.service.start})
         else:
-          t = filter(lambda person: person['id'] == w.trainee.id, count_list)
+          t = list(filter(lambda person: person['id'] == w.trainee.id, count_list))
           t[0]['times_done'] += 1
           if (a.week_schedule.start > t[0]['ws_of_last']):
             t[0]['ws_of_last'] = a.week_schedule.start
