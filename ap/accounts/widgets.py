@@ -5,7 +5,7 @@ from ap.forms import TraineeSelectForm
 
 
 class TraineeSelect2MultipleInput(Select2MultipleWidget):
-  def render(self, name, value, attrs=None):
+  def render(self, name, value, attrs=None, renderer=None):
     attrs['class'] = 'trainee-select'
     output = super(TraineeSelect2MultipleInput, self).render(name, value, attrs)
     button = '<button type="button" class="btn btn-default trainee-select" data-toggle="modal" data-target="#trainee_select"><span class="">Add Trainee Group</span></button>'
