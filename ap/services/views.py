@@ -761,7 +761,7 @@ class ServiceCategoryNotDoneViewer(FormView):
 
     trainees = Trainee.objects.all()
 
-    assignments = Assignment.objects.get(service__category=Category.objects.filter(name=category).prefetch_related('workers'))
+    assignments = Assignment.objects.get(service__category=Category.objects.filter(name=category).prefetch_related('workers_set'))
     for a in assignments:
       for w in a.workers.all():
         trainees = trainees.exclude(id=w.trainee.id)
