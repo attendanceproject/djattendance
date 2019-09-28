@@ -42,6 +42,7 @@
           color: #095f80; 
           margin-bottom: 25px;
         }
+        /*causes the headings to appear for every absent trainee in mobile view */
         @media only screen and (min-width: 768px) {
           h2.form-heading-mobile {
               display: none;
@@ -79,6 +80,7 @@
   <li role="presentation" class="active"><a href="#summary" aria-controls="home" role="tab" data-toggle="tab">Input Attendance</a></li>
 </ul>
   {% endifusergroup %}
+  <!--desktop view headings-->
   <div class="row form-heading">
     <div class="col-xs-12 col-sm-3 col-md-3">
       <h2>Name</h2> 
@@ -101,7 +103,7 @@
           {{ form.id }}{{ form.instance.pk }}
       </div>
       <div class="form-group col-xs-12 col-sm-3 col-md-3">
-        <h2 class="form-heading-mobile">Name</h2> 
+        <h2 class="form-heading-mobile">Name</h2> <!--mobile view heading-->
           {{ form.absentee.errors }}{{ form.absentee }}
       </div>
       <div class="form-group col-xs-12 col-sm-3 col-md-3">
@@ -130,8 +132,8 @@
     </div>
 
   {% endfor %}
-
-  {% ifusergroup absent_trainee_roster %}
+<!--trainees with service for absent trainee roster-->
+  {% ifusergroup absent_trainee_roster %} 
 
   {% if bro_unreported %}
   <div class="row" style="padding-left:15px; margin-top:10px">
