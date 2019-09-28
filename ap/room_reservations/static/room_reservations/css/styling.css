@@ -60,7 +60,7 @@ body {
   margin-right: 2em;
   margin-top: -.7em;
 }
-#today-temp {
+#today-temp, #today-temp-C {
   font-size: 4em;
   margin-bottom: .1em;
 }

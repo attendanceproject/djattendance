@@ -28,7 +28,7 @@
 <div id="main" class="container">
   <div class="row">
 
-    <div class="col-sm-7 text-center">
+    <div class="col-sm-6 text-center">
       <div id="clock-container" class="row">
         <div class="col-sm-12"><span id="clock"></span><span id="ampm"></span></div>
       </div>
@@ -37,31 +37,36 @@
       </div>
     </div>
 
-    <div class="col-sm-5" style="margin-left: 90px; margin-right: -90px;">
-      <div class="row weather-container">
 
-        <div class="col-sm-4 weather-item">
+    <div class="col-sm-6" style="margin-left: -10px; margin-right -190px">
+      <div class="row">
+
+      <div class="col-sm-2">
+        <div class="row">
+        <span id="today-temp"></span>
+        </div>
+        <div class="row">
+        <span id="today-temp-C"></span>
+        </div>
+      </div>
+    
+        <div class="col-sm-3 weather-item">
           <div class="row">
             <div class="weather-today col-sm-12 text-center">Today</div>
           </div>
           <div class="row">
             <div class="col-sm-12 text-center"><i id="today-condition"></i></div>
           </div>
-
           <div class="row">
-            <div class="col-sm-6 today-temp-container">
-              <span id="today-temp"></span>
-            </div>
             <div class="col-sm-7">
-              <div class="row">
-                <div class="col-sm-12"><span id="today-high"></span></div>
-              </div>
-              <div class="row">
-                <div class="col-sm-12"><span id="today-low"></span></div>
-              </div>
-            </div>
           </div>
-
+          <div class="row">
+            <div class="col-sm-12"><span id="today-high"></span></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12"><span id="today-low"></span></div>
+          </div>
+            </div>
         </div>
 
         <div class="col-sm-4 weather-item not-today">
