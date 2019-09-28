@@ -55,7 +55,7 @@ class MultipleSelectFullCalendar(SelectMultiple):
     self.name = name
     super(MultipleSelectFullCalendar, self).__init__(attrs, choices)
 
-  def render(self, name, value, attrs=None):
+  def render(self, name, value, attrs=None, renderer=None):
     # print name, value, choices, self.choices
     services = JSONRenderer().render(ServiceCalendarSerializer(self.queryset, many=True).data).decode('utf-8')
     selected = ",".join(str(x) for x in value) if value is not None else ""
