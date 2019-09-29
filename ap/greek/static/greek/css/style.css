@@ -16,20 +16,20 @@
   width: 400px;
 }
 
-.flashcard-card {
+#flashcard-card {
   border: 1px solid #095f80;
   height: 150px;
   margin-top: 30px;
   background: #eee;
 }
 
-.flashcard-text {
+#flashcard-text {
   font: 36px Arial, sans-serif;
   line-height: 150px;
   text-align: center;
 }
 
-.flashcard-number {
+#flashcard-index {
   color: #aaa;
   text-align: right;
   padding: 8px 0;

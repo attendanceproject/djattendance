@@ -23,23 +23,44 @@
     </div>
   </div>
   <div class="flashcard-container">
-    <div id="flashcard" class="flashcard-card">
-      <div class="flashcard-text">
+    <div id="flashcard-card">
+      <div id="flashcard-text">
         example
       </div>
     </div>
-    <div class="flashcard-number">
-      1/{{greekVocab.count}}
+    <div id="flashcard-index">
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
   let isFront = true;
-  let greekVocab_json = "{{greekVocab_json}}";
+  let greekVocabList = [];
+  let updateChapUrl = "{% url 'greek:changeChapterRange' %}";
   let startingChapter = 1;
   let endingChapter = 1;
-  console.log(greekVocab_json);
+  let currentVocabIdx = 0;
+
+  function updateIndexText() {
+    $("#flashcard-index").text(`${currentVocabIdx+1}/${greekVocabList.length}`);
+  }
+
+  function updateVocabList() {
+    $.ajax({
+      type: "GET",
+      url: updateChapUrl,
+      dataType: "json",
+      data: {
+        "startingChapter": startingChapter,
+        "endingChapter": endingChapter,
+      },
+      success: function (data) {
+        console.log(data)
+        greekVocabList = data;
+        updateIndexText();
+      }
+    });
+  }
 
   function changeStartingChapter() {
     startingChapter = document.getElementById("chapter-start").value;
@@ -52,6 +73,7 @@
     }
 
     // TODO: Add ajex to update vocab list
+    updateVocabList();
   }
 
   function changeEndingChapter() {
@@ -65,6 +87,7 @@
     }
 
     // TODO: Add ajex to update vocab list
+    updateVocabList();
   }
 
   // A function to shuffle a random permutation of arr[]
@@ -97,9 +120,10 @@
   function flipCard() {
     isFront = !isFront;
     if (isFront) {
-      $("#flashcard").css("background-color", "#eee");
+      $("#flashcard-card").css("background-color", "#eee");
+      showNextCard();
     } else {
-      $("#flashcard").css("background-color", "#fff");
+      $("#flashcard-card").css("background-color", "#fff");
     }
   }
 
@@ -107,9 +131,11 @@
     // TODO: Change to next flashcard
 
     // update the current index of the card
+    ++currentVocabIdx;
   }
 
   $(document).ready(function() {
+    updateVocabList();
     $("#chapter-start").on('change', changeStartingChapter);
     $("#chapter-end").on('change', changeEndingChapter);
     $("#flashcard").click(flipCard);

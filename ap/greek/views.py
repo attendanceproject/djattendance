@@ -27,12 +27,8 @@ def index(request):
     context={
         "chapters": chapters,
         "greekVocab": greek_list,
-        # TODO: Convert QuerySet to list
-        "greekVocab_json": list(greek_list.values()),
         "classFiles": class_files,
     }
-    print(context["greekVocab"])
-    print(context["greekVocab_json"])
 
     ## CONTINUATION OF FILES TAB ###
     context['classname'] = 'Greek'
@@ -42,14 +38,25 @@ def index(request):
     return render(request, 'greek_helper/index.html', context=context)
 
 def changeChapter(request):
-
     if request.is_ajax():
         chapter = request.GET['chapter']
     try:
         greek_list = Vocab.objects.filter(chapter=chapter)
-
         # SERIALIZE METHOD:
         json_greek_list = serializers.serialize('json', greek_list)
         return HttpResponse(json_greek_list, content_type='application/json')
     except ObjectDoesNotExist:
-        return HttpResponse('Error from ajax call')
+        return HttpResponse(status=404)
+
+def changeChapterRange(request):
+    if request.is_ajax():
+        startingChapter = request.GET['startingChapter']
+        endingChapter = request.GET['endingChapter']
+    try:
+        greek_list = Vocab.objects.filter(chapter__gte=startingChapter, chapter__lte=endingChapter)
+        # SERIALIZE METHOD:
+        json_greek_list = serializers.serialize('json', greek_list)
+        return HttpResponse(json_greek_list, content_type='application/json')
+    except ObjectDoesNotExist:
+        return HttpResponse(status=404)
+
