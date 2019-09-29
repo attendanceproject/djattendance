@@ -8,6 +8,9 @@
 {% block scripts %}
 {{ block.super }}
 <script type="text/javascript">
+
+  {% include "tables/table_inline_editing.js" %}
+
   $(document).ready(function() {
     $("#graduation").DataTable({
       info: false,
@@ -48,18 +51,22 @@
 
     });
 
-
+    $("#graduation").on('dblclick', ".test-top, .test-enc, .test-bur, .test-hi", function() {
+      tableInlineEdit($(this), "{% url 'graduation:testimony-report' %}", true);
+    })
+    $(".buttons-show").on("click", function() {
+      $(".incompleted").toggle();
+    });
   });
-
 </script>
 {% endblock %}
 
 {% block content %}
 <h1>{{title}}</h1>
 
-<div><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}</div>
-<div><strong>Total incompleted</strong>: {{ not_completed_number }}</div><br>
-
+<a class="btn btn-default buttons-show">Show/Hide Incompleted</a>
+<br><div class="incompleted" style="display: none"><br><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
+<strong>Total</strong>: {{ not_completed_number }}</div></br>
 
 <div class="data-table-container">
   <table id="graduation" class="table table-striped table-bordered">
@@ -76,14 +83,14 @@
     </thead>
     <tbody>
       {% for c in data %}
-      <tr>
+      <tr id="{{c.id}}">
         <td>{{c.trainee.firstname}}</td>
         <td>{{c.trainee.lastname}}</td>
         <td>{{c.trainee.get_gender_display}}</td>
-        <td>{{c.top_experience}}</td>
-        <td>{{c.encouragement}}</td>
-        <td>{{c.overarching_burden}}</td>
-        <td>{{c.highlights}}</td>
+        <td class="test-top">{{c.top_experience}}</td>
+        <td class="test-enc">{{c.encouragement}}</td>
+        <td class="test-bur">{{c.overarching_burden}}</td>
+        <td class="test-hi">{{c.highlights}}</td>
       </tr>
       {% endfor %}
     </tbody>

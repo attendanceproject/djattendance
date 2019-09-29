@@ -2,6 +2,11 @@
 {% block scripts %}
 <script type="text/javascript">
 $(document).ready(() => {
+  $("#mytable").DataTable({
+      info: false,
+      paging: true
+    });
+
   var allRows = $("[name='selection']").parents('tr');
   allRows.has('span.received').hide();
 
