@@ -95,8 +95,12 @@
   }
 
   function flipCard() {
-    console.log(isFront);
     isFront = !isFront;
+    if (isFront) {
+      $("#flashcard").css("background-color", "#eee");
+    } else {
+      $("#flashcard").css("background-color", "#fff");
+    }
   }
 
   function showNextCard() {
