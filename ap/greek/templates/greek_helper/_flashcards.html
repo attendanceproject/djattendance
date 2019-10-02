@@ -24,9 +24,7 @@
   </div>
   <div class="flashcard-container">
     <div id="flashcard-card">
-      <div id="flashcard-text">
-        example
-      </div>
+      <div id="flashcard-text"></div>
     </div>
     <div id="flashcard-index">
     </div>
@@ -45,6 +43,17 @@
     $("#flashcard-index").text(`${currentVocabIdx+1}/${greekVocabList.length}`);
   }
 
+  function updateFlashcard() {
+    console.log((greekVocabList[currentVocabIdx]).fields);
+    if (isFront) {
+      $("#flashcard-text").text((greekVocabList[currentVocabIdx]).fields.greek);
+      $("#flashcard-card").css("background-color", "#eee");
+    } else { // show English
+      $("#flashcard-text").text(greekVocabList[currentVocabIdx].fields.english);
+      $("#flashcard-card").css("background-color", "#fff");
+    }
+  }
+
   function updateVocabList() {
     $.ajax({
       type: "GET",
@@ -55,8 +64,11 @@
         "endingChapter": endingChapter,
       },
       success: function (data) {
-        console.log(data)
-        greekVocabList = data;
+        greekVocabList = shuffleCards(data, data.length);
+        // reset current index
+        currentVocabIdx = 0;
+        isFront = 0;
+        updateFlashcard();
         updateIndexText();
       }
     });
@@ -119,25 +131,25 @@
 
   function flipCard() {
     isFront = !isFront;
-    if (isFront) {
-      $("#flashcard-card").css("background-color", "#eee");
+    updateFlashcard();
+    if (isFront && currentVocabIdx < greekVocabList.length) {
       showNextCard();
-    } else {
-      $("#flashcard-card").css("background-color", "#fff");
     }
   }
 
   function showNextCard() {
-    // TODO: Change to next flashcard
-
-    // update the current index of the card
-    ++currentVocabIdx;
+    if (currentVocabIdx < greekVocabList.length) {
+      currentVocabIdx += 1;
+    } else {
+      currentVocabIdx = 0;
+    }
+    updateIndexText();
   }
 
   $(document).ready(function() {
     updateVocabList();
     $("#chapter-start").on('change', changeStartingChapter);
     $("#chapter-end").on('change', changeEndingChapter);
-    $("#flashcard").click(flipCard);
+    $("#flashcard-card").click(flipCard);
   });
 </script>

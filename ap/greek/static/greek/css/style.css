@@ -18,7 +18,7 @@
 
 #flashcard-card {
   border: 1px solid #095f80;
-  height: 150px;
+  min-height: 150px;
   margin-top: 30px;
   background: #eee;
 }
