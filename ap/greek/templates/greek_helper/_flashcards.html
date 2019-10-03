@@ -44,8 +44,7 @@
   }
 
   function updateFlashcard() {
-    console.log((greekVocabList[currentVocabIdx]).fields);
-    if (isFront) {
+    if (isFront) { // show Greek
       $("#flashcard-text").text((greekVocabList[currentVocabIdx]).fields.greek);
       $("#flashcard-card").css("background-color", "#eee");
     } else { // show English
@@ -67,7 +66,7 @@
         greekVocabList = shuffleCards(data, data.length);
         // reset current index
         currentVocabIdx = 0;
-        isFront = 0;
+        isFront = true;
         updateFlashcard();
         updateIndexText();
       }
@@ -76,7 +75,6 @@
 
   function changeStartingChapter() {
     startingChapter = document.getElementById("chapter-start").value;
-    console.log("Starting chapter:", startingChapter);
 
     // if the new starting chapter is greater than the ending chapter,
     // do not update greek vocabs
@@ -84,13 +82,11 @@
       return;
     }
 
-    // TODO: Add ajex to update vocab list
     updateVocabList();
   }
 
   function changeEndingChapter() {
     endingChapter = document.getElementById("chapter-end").value;
-    console.log("Ending chapter:", endingChapter);
 
     // if the new ending chapter is smaller than the starting chapter,
     // do not update greek vocabs
@@ -98,7 +94,6 @@
       return;
     }
 
-    // TODO: Add ajex to update vocab list
     updateVocabList();
   }
 
@@ -130,19 +125,16 @@
   }
 
   function flipCard() {
+    if (!isFront) {
+      // update index to next card
+      if (currentVocabIdx < greekVocabList.length - 1) {
+        currentVocabIdx += 1;
+      } else {
+        currentVocabIdx = 0;
+      }
+    }
     isFront = !isFront;
     updateFlashcard();
-    if (isFront && currentVocabIdx < greekVocabList.length) {
-      showNextCard();
-    }
-  }
-
-  function showNextCard() {
-    if (currentVocabIdx < greekVocabList.length) {
-      currentVocabIdx += 1;
-    } else {
-      currentVocabIdx = 0;
-    }
     updateIndexText();
   }
 
