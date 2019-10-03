@@ -153,8 +153,7 @@ function updateWeather(weather) {
   oldWeather = weather;
   var condition = weather.condition;
   var forecasts = weather.forecast;
-  $("#today-temp").html(condition.temp + "&deg;F");
-  $("#today-temp-C").html(Math.round(5*(condition.temp-32)/9) + "&deg;C");
+  $("#today-temp").html(condition.temp + "&deg;F\n" + Math.round(5*(condition.temp-32)/9) + "&deg;C");
   var conditions = [$("#today-condition"), $("#tomorrow-condition"), $("#daft-condition")];
   var lows = [$("#today-low"), $("#tomorrow-low"), $("#daft-low")];
   var highs = [$("#today-high"), $("#tomorrow-high"), $("#daft-high")];
