@@ -9,7 +9,7 @@
   {% ifusergroup house_inspectors%}
     <h2>Answer {{ view.model|model_verbose_name }}<br>
   {% endifusergroup %}
-  {% ifusergroup training_assistant%}  
+  {% ifusergroup training_assistant%}
     <h2>TA comment {{ view.model|model_verbose_name }}<br>
   {% endifusergroup %}
   <small>Submitted on {{ object.get_date_created }} by {{ object.get_trainee_requester }}</small>
