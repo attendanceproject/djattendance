@@ -8,13 +8,14 @@
     {% if messages %}
       {{ messages|length }}
     {% else %}
-      ?
+    <!--default-->
     {% endif %}
     </span>
   </div>
   <div id="announce__portal" class="collapse announce__portal" aria-expanded="false">
     <span class="triangle-left"></span>
     <div class="announce__title" align="right" style="padding-top:3px;padding-right:5px">
+      <!--View all button-->
       <a href="{% url 'messaging:messaging' %}"><u>View All</u></a>
     </div>
     {% for message in messages %}
