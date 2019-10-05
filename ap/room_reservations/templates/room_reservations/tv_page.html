@@ -26,28 +26,27 @@
 <body style="line-height:1">
 <div id="title" class="text-center">FULL-TIME TRAINING IN ANAHEIM</div>
 <div id="main" class="container">
-  <div class="row">
-
-    <div class="col-sm-6 text-center">
-      <div id="clock-container" class="row">
-        <div class="col-sm-12"><span id="clock"></span><span id="ampm"></span></div>
+    <!--clock and date-->
+    <div class="row" style="margin-left: -3%; margin-right: -3%;">
+      <div style="width: 50%; float:left;">
+        <span id="clock"></span>
+        <span id="ampm"></span>
+        <span id="date"></span>
       </div>
-      <div id="date-container" class="row">
-        <div class="col-sm-12"><span id="date"></span></div>
-      </div>
-    </div>
-
-
-    <div class="col-sm-6" style="margin-left: 90px; margin-right: -90px;">
-      <div class="row">
-
-      <div class="col-sm-3">
-        <div class="row">
-        <span id="today-temp"></span>
-        </div>
-      </div>
-    
-        <div class="col-sm-3 weather-item">
+        
+      <div style="width: 45%; float:left; margin-left: 2%;">
+        <div class="blue-background">
+          <div class="weather-item">
+            <div class="row">
+              <div class="weather-today col-sm-12 text-center">Current</div>
+            </div>
+            <div class="row" style="margin-top: 12%;">
+              <div class="col-sm-12 text-center"><span id="today-temp"></span></i></div>
+            </div>
+          </div>
+        </div>  
+      
+        <div class="weather-item">
           <div class="row">
             <div class="weather-today col-sm-12 text-center">Today</div>
           </div>
@@ -56,17 +55,17 @@
           </div>
           <div class="row">
             <div class="col-sm-7">
-          </div>
-          <div class="row">
-            <div class="col-sm-12 text-center"><span id="today-high"></span></div>
-          </div>
-          <div class="row">
-            <div class="col-sm-12 text-center"><span id="today-low"></span></div>
-          </div>
             </div>
+            <div class="row">
+              <div class="col-sm-12 text-center"><span id="today-high"></span></div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12 text-center"><span id="today-low"></span></div>
+            </div>
+          </div>
         </div>
 
-        <div class="col-sm-4 weather-item not-today">
+        <div class="weather-item not-today">
           <div class="row">
             <div class="weather-not-today col-sm-12 text-center">Tomorrow</div>
           </div>
@@ -81,7 +80,7 @@
           </div>
         </div>
 
-        <div class="col-sm-3 weather-item not-today">
+        <div class="weather-item not-today">
           <div class="row">
             <div id="daft" class="weather-not-today col-sm-12 text-center"></div>
           </div>
@@ -95,10 +94,9 @@
             <div class="col-m-12 text-center"><span id="daft-low"></span></div>
           </div>
         </div>
-
       </div>
     </div>
-  </div>
+
 
 
   <div class="row">
