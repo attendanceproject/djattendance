@@ -1,16 +1,28 @@
 {# https://stackoverflow.com/questions/19533402/naming-rules-for-html5-custom-data-attributedata #}
 {% if request.user.gender == "S" and leaveslip.trainee.gender == "S" %}
+<!-- TA sisters should only be able to "Approve & Transfer" and "Transfer" leaveslips if the trainee is a sister. -->
 <div id="ta-sister-actions">
   <button type="button" data-transfer-ta="{{leaveslip.trainee.TA_secondary.id}}" data-ls-action="approve-transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="approve-transfer-ls">Approve & Transfer</button>
   <button type="button" data-transfer-ta="{{leaveslip.trainee.TA_secondary.id}}" data-ls-action="transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="transfer-ls">Transfer</button>
 </div>
+{% elif request.user.gender == "S" and leaveslip.trainee.gender == "B" %}
+<!--
+  This is for an edge case where a trainee brother would submit a groupleave slip, but then a trainee sister would then edit it before it gets approved. It doesn't happen too often, but the isuse is that the slip gets transferred to the TA sister of the sister who re-submitted it. As per Jerome, transfer it back to the original TA brother. 
+
+  In the code, it is changed to {{leaveslip.trainee.TA.id}} instead of "{{leaveslip.trainee.TA_secondary.id}}" because the original submitter would have been a brother and they don't have a secondary TA 
+-->
+  <button type="button" data-transfer-ta="{{leaveslip.trainee.TA.id}}" data-ls-action="transfer" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" class="ls-action btn-lg btn-primary btn-save" id="transfer-ls">Transfer</button>
+
 {% else %}
+<!-- These commands should only be for TA brothers which should be the expected behavior after the prior checks for TA sisters. -->
+
   <button type="button" data-ls-action="approve" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Approve" class="ls-action btn-lg btn-success" id="approve-ls">
     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
   </button>
   <button type="button" data-ls-action="deny" data-ls-type="{{leaveslip.classname}}" data-ls-id="{{leaveslip.id}}" title="Deny" class="ls-action btn-lg btn-danger" id="deny-ls">
     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
   </button>
+
 {% endif %}
 
 {% if leaveslip.status != 'F'%}

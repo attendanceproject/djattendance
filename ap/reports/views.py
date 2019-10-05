@@ -256,14 +256,14 @@ def attendance_report_trainee(request):
         count[ev] = 1
 
   # CALCULATE %TARDY
-  total_possible_rolls_count = sum(count[ev] for ev in count if ev.monitor is not None)
+  total_possible_rolls_count = max(1,sum(count[ev] for ev in count if ev.monitor is not None))
   tardy_rolls = rolls.exclude(status='A').filter(~(Q(leaveslips__does_not_count=True) & Q(leaveslips__status='A')))
   tardy_rolls = rolls_excused_by_groupslips(tardy_rolls, group_slips.filter(does_not_count=True))
 
   res["tardy_percentage"] = str(round(tardy_rolls.count() / float(total_possible_rolls_count) * 100, 2)) + "%"
 
   # CALCULATE %CLASSES MISSED
-  possible_class_rolls_count = sum(count[ev] for ev in count if ev.monitor == 'AM' and ev.type == 'C')
+  possible_class_rolls_count = max(1,sum(count[ev] for ev in count if ev.monitor == 'AM' and ev.type == 'C'))
   missed_classes = rolls.filter(event__monitor='AM', event__type='C')
 
   # currently counts rolls excused by individual and group slips

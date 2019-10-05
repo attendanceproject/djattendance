@@ -8,6 +8,9 @@
 {% block scripts %}
 {{ block.super }}
 <script type="text/javascript">
+
+  {% include "tables/table_inline_editing.js" %}
+
   $(document).ready(function() {
     $("#graduation").DataTable({
       info: false,
@@ -48,7 +51,12 @@
 
     });
 
-
+    $("#graduation").on('dblclick', ".rem-text, .rem-ref", function() {
+      tableInlineEdit($(this), "{% url 'graduation:rem-report' %}", false);
+    })
+    $(".buttons-show").on("click", function() {
+      $(".incompleted").toggle();
+    });
   });
 
 </script>
@@ -56,6 +64,10 @@
 
 {% block content %}
 <h1>{{title}}</h1>
+
+<a class="btn btn-default buttons-show">Show/Hide Incompleted</a><br><br>
+<div class="incompleted" style="display: none"><strong>Incompleted</strong>: {{ not_completed_trainees|join:", " }}
+<strong>Total</strong>: {{ not_completed_number }}<br><br></div>
 
 <div class="data-table-container">
   <table id="graduation" class="table table-striped table-bordered">
@@ -69,11 +81,11 @@
     </thead>
     <tbody>
       {% for m in data %}
-      <tr>
+      <tr id="{{m.id}}">
         <td>{{m.trainee.firstname}}</td>
         <td>{{m.trainee.lastname}}</td>
-        <td>{{m.remembrance_text}}</td>
-        <td>{{m.remembrance_reference}}</td>
+        <td class="rem-text">{{m.remembrance_text}}</td>
+        <td class="rem-ref">{{m.remembrance_reference}}</td>
       </tr>
       {% endfor %}
     </tbody>
