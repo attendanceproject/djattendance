@@ -26,7 +26,12 @@
     <div id="flashcard-card">
       <div id="flashcard-text"></div>
     </div>
-    <div id="flashcard-index">
+    <div>
+      <div id="archive-container">
+        <input type="checkbox" id="archive-flag"> Archive
+      </div>
+      <div id="flashcard-index">
+      </div>
     </div>
   </div>
 </div>
@@ -41,6 +46,16 @@
 
   function updateIndexText() {
     $("#flashcard-index").text(`${currentVocabIdx+1}/${greekVocabList.length}`);
+  }
+
+  function updateArchiveCheckbox() {
+    if (isFront) {
+      // hide archive checkbox
+      $("#archive-container").hide();
+    } else {
+      // show archive checkbox
+      $("#archive-container").show();
+    }
   }
 
   function updateFlashcard() {
@@ -68,6 +83,7 @@
         currentVocabIdx = 0;
         isFront = true;
         updateFlashcard();
+        updateArchiveCheckbox();
         updateIndexText();
       }
     });
@@ -125,6 +141,12 @@
   }
 
   function flipCard() {
+    let isArchived = $("#archive-flag").val();
+    console.log(isArchived);
+
+    // reset archive-flag
+    $("#archive-flga").prop("checked", false);
+
     if (!isFront) {
       // update index to next card
       if (currentVocabIdx < greekVocabList.length - 1) {
@@ -135,6 +157,7 @@
     }
     isFront = !isFront;
     updateFlashcard();
+    updateArchiveCheckbox();
     updateIndexText();
   }
 
