@@ -23,7 +23,7 @@
     </div>
   </div>
   <div id="multiple-choice-container">
-    <div id="mc-greek-vocab">3. example</div>
+    <div id="mc-greek-vocab"></div>
     <div id="mc-options">A. B. C. ...</div>
     <div id="mc-result"></div>
   </div>
@@ -52,6 +52,13 @@
     $("#total-vocab").text(`(${greekVocabList_mc.length} words)`);
   }
 
+  function updateQuestion() {
+    // update Greek vocab
+    $("#mc-greek-vocab").text(`${currentVocabIdx_mc+1}. ${greekVocabList_mc[currentVocabIdx_mc].fields.greek}`);
+
+    // update options
+  }
+
   function updateVocabList_mc() {
     $.ajax({
       type: "GET",
@@ -65,7 +72,7 @@
         greekVocabList_mc = shuffleCards(data, data.length);
         // reset current index
         currentVocabIdx_mc = 0;
-        console.log(greekVocabList_mc);
+        updateQuestion();
         updateTotalWordsText();
       }
     });
@@ -96,18 +103,20 @@
     console.log("currentVocabIdx_mc", currentVocabIdx_mc);
     if (currentVocabIdx_mc <= 0) {
       currentVocabIdx_mc = greekVocabList_mc.length - 1;
-      return;
+    } else {
+      currentVocabIdx_mc -= 1;
     }
-    currentVocabIdx_mc -= 1;
+    updateQuestion();
   }
 
   function nextVocab() {
     console.log("currentVocabIdx_mc", currentVocabIdx_mc);
     if (currentVocabIdx_mc >= greekVocabList_mc.length - 1) {
       currentVocabIdx_mc = 0
-      return;
+    } else {
+      currentVocabIdx_mc += 1;
     }
-    currentVocabIdx_mc += 1;
+    updateQuestion();
   }
 
   $(document).ready(function() {
