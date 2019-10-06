@@ -1,16 +1,24 @@
-.flashcard-chapters {
+.chapters-container {
   padding: 7px 0;
   display: flex;
   align-items: baseline;
 }
 
-.flashcard-chapter {
+.chapter-container {
   width: 100px;
 }
 
-.flashcard-chapter-text {
+.chapter-text {
   width: 50px;
 }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+/* Flashcards */
 
 .flashcard-container {
   width: 400px;
@@ -32,12 +40,6 @@
   padding: 8px;
 }
 
-#foot {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-}
-
 #archive-placeholder {
   width: 150px;
 }
@@ -45,4 +47,13 @@
 #flashcard-index {
   color: #aaa;
   text-align: right;
+}
+
+/* Multiple Choice */
+#multiple-choice-container {
+  padding: 25px 0;
+}
+
+#multiple-meta-data {
+  color: #aaa;
 }

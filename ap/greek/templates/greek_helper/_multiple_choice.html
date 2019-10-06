@@ -1,3 +1,120 @@
 <div id="multiple-choice" class="greek tab-pane" role="tabpanel">
-  Multiple choice
+  <div class="chapters-container">
+    <div class="chapter-container">
+      <select id="mc-chapter-start" class="form-control">
+      {% for ch in chapters %}
+        <option value="{{ch}}">
+          Chapter {{ch}}
+        </option>
+      {% endfor %}
+      </select>
+    </div>
+    <div class="text-center chapter-text">
+      to
+    </div>
+    <div class="chapter-container">
+      <select id="mc-chapter-end" class="form-control" >
+      {% for ch in chapters %}
+        <option value="{{ch}}">
+          Chapter {{ch}}
+        </option>
+      {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div id="multiple-choice-container">
+    <div id="mc-greek-vocab">3. example</div>
+    <div id="mc-options">A. B. C. ...</div>
+    <div id="mc-result"></div>
+  </div>
+  <div>
+    <button id="previous-vocab" class="btn btn-default">
+      Previous
+    </button>
+    <button id="next-vocab" class="btn btn-primary">
+      Next
+    </button>
+  </div>
+  <div class="foot">
+    <div id="multiple-meta-data">
+      Current result: <span id="correct-result">1/3 correct</span> <span id="total-vocab"></span>
+    </div>
+  </div>
 </div>
+
+<script type="text/javascript">
+  let startingChapter_mc = 1;
+  let endingChapter_mc = 1;
+  let greekVocabList_mc = [];
+  let currentVocabIdx_mc = 0;
+
+  function updateTotalWordsText() {
+    $("#total-vocab").text(`(${greekVocabList_mc.length} words)`);
+  }
+
+  function updateVocabList_mc() {
+    $.ajax({
+      type: "GET",
+      url: updateChapUrl, // defined in index.html
+      dataType: "json",
+      data: {
+        "startingChapter": startingChapter_mc,
+        "endingChapter": endingChapter_mc,
+      },
+      success: function (data) {
+        greekVocabList_mc = shuffleCards(data, data.length);
+        // reset current index
+        currentVocabIdx_mc = 0;
+        console.log(greekVocabList_mc);
+        updateTotalWordsText();
+      }
+    });
+  }
+
+  function changeStartingChapter_mc() {
+    console.log("startingChapter_mc", startingChapter_mc)
+    startingChapter_mc = document.getElementById("mc-chapter-start").value;
+    // if the new starting chapter is greater than the ending chapter,
+    // do not update greek vocabs
+    if (startingChapter_mc > endingChapter_mc) {
+      return;
+    }
+    updateVocabList_mc();
+  }
+
+  function changeEndingChapter_mc() {
+    endingChapter_mc = document.getElementById("mc-chapter-end").value;
+    // if the new ending chapter is smaller than the starting chapter,
+    // do not update greek vocabs
+    if (endingChapter_mc < startingChapter_mc) {
+      return;
+    }
+    updateVocabList_mc();
+  }
+
+  function previousVocab() {
+    console.log("currentVocabIdx_mc", currentVocabIdx_mc);
+    if (currentVocabIdx_mc <= 0) {
+      currentVocabIdx_mc = greekVocabList_mc.length - 1;
+      return;
+    }
+    currentVocabIdx_mc -= 1;
+  }
+
+  function nextVocab() {
+    console.log("currentVocabIdx_mc", currentVocabIdx_mc);
+    if (currentVocabIdx_mc >= greekVocabList_mc.length - 1) {
+      currentVocabIdx_mc = 0
+      return;
+    }
+    currentVocabIdx_mc += 1;
+  }
+
+  $(document).ready(function() {
+    updateVocabList_mc();
+    $("#mc-chapter-start").on("change", changeStartingChapter_mc);
+    $("#mc-chapter-end").on("change", changeEndingChapter_mc);
+    $("#previous-vocab").click(previousVocab);
+    $("#next-vocab").click(nextVocab);
+  });
+</script>
