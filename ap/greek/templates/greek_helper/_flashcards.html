@@ -1,7 +1,7 @@
 <div id="flashcards" class="greek tab-pane" role="tabpanel">
   <div class="flashcard-chapters">
     <div class="flashcard-chapter">
-      <select id="chapter-start" class="form-control">
+      <select id="fc-chapter-start" class="form-control">
       {% for ch in chapters %}
         <option value="{{ch}}">
           Chapter {{ch}}
@@ -13,7 +13,7 @@
       to
     </div>
     <div class="flashcard-chapter">
-      <select id="chapter-end" class="form-control" >
+      <select id="fc-chapter-end" class="form-control" >
       {% for ch in chapters %}
         <option value="{{ch}}">
           Chapter {{ch}}
@@ -42,8 +42,8 @@
   let isFront = true;
   let greekVocabList = [];
   let updateChapUrl = "{% url 'greek:changeChapterRange' %}";
-  let startingChapter = 1;
-  let endingChapter = 1;
+  let startingChapter_fc = 1;
+  let endingChapter_fc = 1;
   let currentVocabIdx = 0;
 
   function updateIndexText() {
@@ -76,8 +76,8 @@
       url: updateChapUrl,
       dataType: "json",
       data: {
-        "startingChapter": startingChapter,
-        "endingChapter": endingChapter,
+        "startingChapter": startingChapter_fc,
+        "endingChapter": endingChapter_fc,
       },
       success: function (data) {
         greekVocabList = shuffleCards(data, data.length);
@@ -91,27 +91,23 @@
     });
   }
 
-  function changeStartingChapter() {
-    startingChapter = document.getElementById("chapter-start").value;
-
+  function changeStartingChapter_fc() {
+    startingChapter_fc = document.getElementById("fc-chapter-start").value;
     // if the new starting chapter is greater than the ending chapter,
     // do not update greek vocabs
-    if (startingChapter > endingChapter) {
+    if (startingChapter_fc > endingChapter_fc) {
       return;
     }
-
     updateVocabList();
   }
 
-  function changeEndingChapter() {
-    endingChapter = document.getElementById("chapter-end").value;
-
+  function changeEndingChapter_fc() {
+    endingChapter_fc = document.getElementById("fc-chapter-end").value;
     // if the new ending chapter is smaller than the starting chapter,
     // do not update greek vocabs
-    if (endingChapter < startingChapter ) {
+    if (endingChapter_fc < startingChapter_fc) {
       return;
     }
-
     updateVocabList();
   }
 
@@ -168,8 +164,8 @@
 
   $(document).ready(function() {
     updateVocabList();
-    $("#chapter-start").on("change", changeStartingChapter);
-    $("#chapter-end").on("change", changeEndingChapter);
+    $("#fc-chapter-start").on("change", changeStartingChapter_fc);
+    $("#fc-chapter-end").on("change", changeEndingChapter_fc);
     $("#flashcard-card").click(flipCard);
   });
 </script>
