@@ -26,9 +26,11 @@
     <div id="flashcard-card">
       <div id="flashcard-text"></div>
     </div>
-    <div>
-      <div id="archive-container">
-        <input type="checkbox" id="archive-flag"> Archive
+    <div id="foot">
+      <div id="archive-placeholder">
+        <div id="archive-container">
+          <input type="checkbox" id="archive-flag"> Archive
+        </div>
       </div>
       <div id="flashcard-index">
       </div>
@@ -141,11 +143,14 @@
   }
 
   function flipCard() {
-    let isArchived = $("#archive-flag").val();
-    console.log(isArchived);
-
-    // reset archive-flag
-    $("#archive-flga").prop("checked", false);
+    // remove the archived vocab
+    if ($("#archive-flag").is(":checked")) {
+      greekVocabList.splice(currentVocabIdx, 1);
+      // because a vocab is removed, decrease one index
+      currentVocabIdx -= 1;
+    }
+    // uncheck archive checkbox
+    $("#archive-flag").prop("checked", false);
 
     if (!isFront) {
       // update index to next card
@@ -163,8 +168,8 @@
 
   $(document).ready(function() {
     updateVocabList();
-    $("#chapter-start").on('change', changeStartingChapter);
-    $("#chapter-end").on('change', changeEndingChapter);
+    $("#chapter-start").on("change", changeStartingChapter);
+    $("#chapter-end").on("change", changeEndingChapter);
     $("#flashcard-card").click(flipCard);
   });
 </script>
