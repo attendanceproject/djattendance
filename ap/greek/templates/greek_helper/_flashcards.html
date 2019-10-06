@@ -1,6 +1,6 @@
 <div id="flashcards" class="greek tab-pane" role="tabpanel">
-  <div class="flashcard-chapters">
-    <div class="flashcard-chapter">
+  <div class="chapters-container">
+    <div class="chapter-container">
       <select id="fc-chapter-start" class="form-control">
       {% for ch in chapters %}
         <option value="{{ch}}">
@@ -9,10 +9,10 @@
       {% endfor %}
       </select>
     </div>
-    <div class="text-center flashcard-chapter-text">
+    <div class="text-center chapter-text">
       to
     </div>
-    <div class="flashcard-chapter">
+    <div class="chapter-container">
       <select id="fc-chapter-end" class="form-control" >
       {% for ch in chapters %}
         <option value="{{ch}}">
@@ -26,7 +26,7 @@
     <div id="flashcard-card">
       <div id="flashcard-text"></div>
     </div>
-    <div id="foot">
+    <div class="foot">
       <div id="archive-placeholder">
         <div id="archive-container">
           <input type="checkbox" id="archive-flag"> Archive
@@ -40,14 +40,13 @@
 
 <script type="text/javascript">
   let isFront = true;
-  let greekVocabList = [];
-  let updateChapUrl = "{% url 'greek:changeChapterRange' %}";
+  let greekVocabList_fc = [];
   let startingChapter_fc = 1;
   let endingChapter_fc = 1;
-  let currentVocabIdx = 0;
+  let currentVocabIdx_fc = 0;
 
   function updateIndexText() {
-    $("#flashcard-index").text(`${currentVocabIdx+1}/${greekVocabList.length}`);
+    $("#flashcard-index").text(`${currentVocabIdx_fc+1}/${greekVocabList_fc.length}`);
   }
 
   function updateArchiveCheckbox() {
@@ -62,27 +61,27 @@
 
   function updateFlashcard() {
     if (isFront) { // show Greek
-      $("#flashcard-text").text((greekVocabList[currentVocabIdx]).fields.greek);
+      $("#flashcard-text").text((greekVocabList_fc[currentVocabIdx_fc]).fields.greek);
       $("#flashcard-card").css("background-color", "#eee");
     } else { // show English
-      $("#flashcard-text").text(greekVocabList[currentVocabIdx].fields.english);
+      $("#flashcard-text").text(greekVocabList_fc[currentVocabIdx_fc].fields.english);
       $("#flashcard-card").css("background-color", "#fff");
     }
   }
 
-  function updateVocabList() {
+  function updateVocabList_fc() {
     $.ajax({
       type: "GET",
-      url: updateChapUrl,
+      url: updateChapUrl, // defined in index.html
       dataType: "json",
       data: {
         "startingChapter": startingChapter_fc,
         "endingChapter": endingChapter_fc,
       },
       success: function (data) {
-        greekVocabList = shuffleCards(data, data.length);
+        greekVocabList_fc = shuffleCards(data, data.length);
         // reset current index
-        currentVocabIdx = 0;
+        currentVocabIdx_fc = 0;
         isFront = true;
         updateFlashcard();
         updateArchiveCheckbox();
@@ -98,7 +97,7 @@
     if (startingChapter_fc > endingChapter_fc) {
       return;
     }
-    updateVocabList();
+    updateVocabList_fc();
   }
 
   function changeEndingChapter_fc() {
@@ -108,52 +107,25 @@
     if (endingChapter_fc < startingChapter_fc) {
       return;
     }
-    updateVocabList();
-  }
-
-  // A function to shuffle a random permutation of arr[]
-  // Input:
-  //   arr - an array of vocab
-  //   n - the length of array
-  // Output:
-  //   arr - an array of randomized vocab
-  function shuffleCards(arr, n) {
-    /*
-      Fisher-Yates shuffle Algorithm:
-      To shuffle an array a of n elements (indices 0..n-1):
-        for i from n - 1 downto 1 do
-          j = random integer with 0 <= j <= i
-          exchange a[j] and a[i]
-      */
-    let newArr = arr;
-    for (let i = n - 1; i > 0; i--) {
-      // A random number between min and max (both included)
-      // Math.floor(Math.random() * (max - min + 1) ) + min
-      let j = Math.floor(Math.random() * (i + 1))
-
-      let temp = newArr[j];
-      newArr[j] = newArr[i];
-      newArr[i] = temp;
-    }
-    return newArr;
+    updateVocabList_fc();
   }
 
   function flipCard() {
     // remove the archived vocab
     if ($("#archive-flag").is(":checked")) {
-      greekVocabList.splice(currentVocabIdx, 1);
+      greekVocabList_fc.splice(currentVocabIdx_fc, 1);
       // because a vocab is removed, decrease one index
-      currentVocabIdx -= 1;
+      currentVocabIdx_fc -= 1;
     }
     // uncheck archive checkbox
     $("#archive-flag").prop("checked", false);
 
     if (!isFront) {
       // update index to next card
-      if (currentVocabIdx < greekVocabList.length - 1) {
-        currentVocabIdx += 1;
+      if (currentVocabIdx_fc < greekVocabList_fc.length - 1) {
+        currentVocabIdx_fc += 1;
       } else {
-        currentVocabIdx = 0;
+        currentVocabIdx_fc = 0;
       }
     }
     isFront = !isFront;
@@ -163,7 +135,7 @@
   }
 
   $(document).ready(function() {
-    updateVocabList();
+    updateVocabList_fc();
     $("#fc-chapter-start").on("change", changeStartingChapter_fc);
     $("#fc-chapter-end").on("change", changeEndingChapter_fc);
     $("#flashcard-card").click(flipCard);
