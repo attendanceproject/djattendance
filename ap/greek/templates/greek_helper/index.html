@@ -10,39 +10,6 @@
 
 {% block scripts %}
 <script type="text/javascript" src="{% static 'js/bootstrap-tab-history.js' %}"></script>
-<script type="text/javascript">
-
-  var chapter;
-  var urlString = "{% url 'greek:changeChapter' %}";
-
-  // Changing the chapter reloads the table to load the vocab list in that chapter
-  function changeChapter() {
-    var chap = document.getElementById("chapter_select").value;
-
-    $.ajax({
-      type: "GET",
-      url: urlString,
-      dataType: "json",
-      data: {
-        "chapter": chap,
-      },
-      success: function (data) {
-        $("#vocab_table td").remove();
-
-        for (var row of data) {
-          var fields = row['fields']
-          $("#vocab_table tbody").append(
-            "<tr>" + "<td>" + fields['greek'] + "</td>" + "<td>" + fields['english'] + "</td>" + "</tr>"
-          );
-        }
-      }
-    });
-  }
-
-  $(document).ready(function () {
-    $("#chapter_select").on('change', changeChapter);
-  });
-</script>
 <style>
   .table {
     table-layout: fixed;
@@ -60,9 +27,7 @@
     </li>
     <li role="presentation"><a href="#list" aria-controls="home" role="tab" data-toggle="tab">Vocabulary</a></li>
     <li role="presentation"><a href="#flashcards" aria-controls="home" role="tab" data-toggle="tab">Flashcards</a></li>
-    <!--
-    <li role="presentation"><a href="#mc" aria-controls="home" role="tab" data-toggle="tab">Multiple Choice</a></li>
-    -->
+    <li role="presentation"><a href="#multiple-choice" aria-controls="home" role="tab" data-toggle="tab">Multiple Choice</a></li>
   </ul>
 
   <!-- TAB PANES -->
@@ -78,11 +43,8 @@
     {% include "./_flashcards.html" %}
 
     <!-- MULTIPLE CHOICE TAB -->
-    <!--
-    <div id="mc" class="greek tab-pane" role="tabpanel">
+    {% include "./_multiple_choice.html" %}
 
-    </div>
-    -->
   </div>
 </div>
 {% endblock %}

@@ -26,3 +26,36 @@
     {% endfor %}
   </table>
 </div>
+
+<script type="text/javascript">
+  let chapter;
+  let urlString = "{% url 'greek:changeChapter' %}";
+
+  // Changing the chapter reloads the table to load the vocab list in that chapter
+  function changeChapter() {
+    let chap = document.getElementById("chapter_select").value;
+
+    $.ajax({
+      type: "GET",
+      url: urlString,
+      dataType: "json",
+      data: {
+        "chapter": chap,
+      },
+      success: function (data) {
+        $("#vocab_table td").remove();
+
+        for (var row of data) {
+          var fields = row['fields']
+          $("#vocab_table tbody").append(
+            "<tr>" + "<td>" + fields['greek'] + "</td>" + "<td>" + fields['english'] + "</td>" + "</tr>"
+          );
+        }
+      }
+    });
+  }
+
+  $(document).ready(function () {
+    $("#chapter_select").on("change", changeChapter);
+  });
+</script>
