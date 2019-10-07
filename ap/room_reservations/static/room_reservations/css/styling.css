@@ -32,15 +32,24 @@ body {
   margin-left: -10em;
 }
 #ampm {
-  font-size: 3em;
+  font-size: 2em;
 }
 
 #date {
   font-size: 2em;
   font-weight: 400;
-  margin-left: 16%;
 }
-
+.current-temp {
+  background-color: rgba(160, 196, 211, .25);
+  width: 20%;
+  margin-right: 1%;
+  margin-left: 4%;
+  margin-top: -2.5%;
+  float: left;
+  padding-top: 2.5%;
+  height: 27%;
+  margin-bottom: -3%;
+}
 .weather-item {
   width: 25%; 
   float: left;
@@ -50,7 +59,7 @@ body {
 }
 .wi {
   font-size: 4em;
-  margin: .5em;
+  margin: .35em;
   margin-top: .5em;
 }
 .weather-today, .weather-not-today {
@@ -68,16 +77,8 @@ body {
 #today-low, #today-high, #tomorrow-low, #tomorrow-high, #daft-low, #daft-high {
   font-size: 1.5em;
 }
-.blue-background {
-  background-color: #A0C4D3;
-  opacity: 25%;
-  width: 25%;
-  height: 22%;
-  float: left;
-  margin-left: -10%;
-  margin-top: -2.6%;
-  padding-left: 4%;
-  padding-top: 3%;
+.high-margin {
+  margin-bottom: 4%;
 }
 #reservations {
   font-size: 2em;

@@ -27,75 +27,70 @@
 <div id="title" class="text-center">FULL-TIME TRAINING IN ANAHEIM</div>
 <div id="main" class="container">
     <!--clock and date-->
-    <div class="row" style="margin-left: -3%; margin-right: -3%;">
-      <div style="width: 50%; float:left;">
+    <div class="row text-center" style="margin-left: -3%; margin-right: -3%;">
+      <div style="width: 52%; float:left;">
         <span id="clock"></span>
         <span id="ampm"></span>
         <span id="date"></span>
       </div>
         
-      <div style="width: 45%; float:left; margin-left: 2%;">
-        <div class="blue-background">
-          <div class="weather-item">
+      <div style="width: 48%; float:left;">
+        <div class="current-temp">
             <div class="row">
-              <div class="weather-today col-sm-12 text-center">Current</div>
+              <div class="weather-today ">Current</div>
             </div>
             <div class="row" style="margin-top: 12%;">
-              <div class="col-sm-12 text-center"><span id="today-temp"></span></i></div>
+              <span class="high-margin" id="today-temp"></span></i>
             </div>
           </div>
-        </div>  
-      
+        
         <div class="weather-item">
           <div class="row">
-            <div class="weather-today col-sm-12 text-center">Today</div>
+            <div class="weather-today">Today</div>
           </div>
           <div class="row">
-            <div class="col-sm-12 text-center"><i id="today-condition"></i></div>
+            <i id="today-condition"></i>
+          </div>
+          <div class="row high-margin">
+            <span id="today-high"></span>
           </div>
           <div class="row">
-            <div class="col-sm-7">
-            </div>
-            <div class="row">
-              <div class="col-sm-12 text-center"><span id="today-high"></span></div>
-            </div>
-            <div class="row">
-              <div class="col-sm-12 text-center"><span id="today-low"></span></div>
-            </div>
+            <span id="today-low"></span>
           </div>
         </div>
 
         <div class="weather-item not-today">
           <div class="row">
-            <div class="weather-not-today col-sm-12 text-center">Tomorrow</div>
+            <div class="weather-not-today">Tomorrow</div>
           </div>
           <div class="row">
-            <div class="col-sm-12 text-center"><i id="tomorrow-condition"></i></div>
+            <i id="tomorrow-condition"></i>
           </div>
-          <div id="tomorrow-low-container" class="row">
-            <div class="col-sm-12 text-center"><span id="tomorrow-high"></span></div>
+          <div id="tomorrow-low-container" class="row high-margin">
+            <span id="tomorrow-high"></span>
           </div>
           <div id="tomorrow-high-container" class="row">
-            <div class="col-sm-12 text-center"><span id="tomorrow-low"></span></div>
+            <span id="tomorrow-low"></span>
           </div>
         </div>
 
         <div class="weather-item not-today">
           <div class="row">
-            <div id="daft" class="weather-not-today col-sm-12 text-center"></div>
+            <div id="daft" class="weather-not-today"></div>
           </div>
           <div class="row">
-            <div class="col-sm-12 text-center"><i id="daft-condition"></i></div>
+            <i id="daft-condition"></i>
           </div>
-          <div id="daft-low-container" class="row">
-            <div class="col-sm-12 text-center"><span id="daft-high"></span></div>
+          <div id="daft-low-container" class="row high-margin">
+            <span id="daft-high"></span>
           </div>
           <div id="daft-high-container" class="row">
-            <div class="col-m-12 text-center"><span id="daft-low"></span></div>
+            <span id="daft-low"></span>
           </div>
         </div>
       </div>
     </div>
+
 
 
 
@@ -111,4 +106,5 @@
   <div id="ticker-heading">ANNOUNCEMENTS</div>
   <div id="ticker-wrap"></div>
   <div id="ticker-heading-wrap"></div>
+</div>
 </body>
