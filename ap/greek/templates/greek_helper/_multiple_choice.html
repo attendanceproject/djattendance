@@ -47,6 +47,7 @@
   let endingChapter_mc = 1;
   let greekVocabList_mc = [];
   let currentVocabIdx_mc = 0;
+  let options = [];
 
   function updateTotalWordsText() {
     $("#total-vocab").text(`(${greekVocabList_mc.length} words)`);
@@ -57,6 +58,19 @@
     $("#mc-greek-vocab").text(`${currentVocabIdx_mc+1}. ${greekVocabList_mc[currentVocabIdx_mc].fields.greek}`);
 
     // update options
+    options = [];
+    // generate three random integer that is different then the current index
+    for (let i = 0; i < 4; i++) {
+      // A random number between min and max (both included)
+      // Math.floor(Math.random() * (max - min + 1) ) + min
+      let rand;
+      do {
+        rand = Math.floor(Math.random() * (greekVocabList_mc.length + 1))
+      } while (rand == currentVocabIdx_mc)
+      options.push(greekVocabList_mc[rand])
+    }
+    // put the correct randomly to the options
+    // show the options
   }
 
   function updateVocabList_mc() {
