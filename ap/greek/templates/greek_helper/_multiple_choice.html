@@ -24,7 +24,7 @@
   </div>
   <div id="multiple-choice-container">
     <div id="mc-greek-vocab"></div>
-    <div id="mc-options">A. B. C. ...</div>
+    <div id="mc-options"></div>
     <div id="mc-result"></div>
   </div>
   <div>
@@ -36,7 +36,7 @@
     </button>
   </div>
   <div class="foot">
-    <div id="multiple-meta-data">
+    <div id="multiple-choice-meta-data">
       Current result: <span id="correct-result">1/3 correct</span> <span id="total-vocab"></span>
     </div>
   </div>
@@ -65,12 +65,26 @@
       // Math.floor(Math.random() * (max - min + 1) ) + min
       let rand;
       do {
-        rand = Math.floor(Math.random() * (greekVocabList_mc.length + 1))
+        rand = Math.floor(Math.random() * (greekVocabList_mc.length + 1));
       } while (rand == currentVocabIdx_mc)
-      options.push(greekVocabList_mc[rand])
+      options.push(greekVocabList_mc[rand]);
     }
     // put the correct randomly to the options
+    let randIndex = Math.floor(Math.random() * (3 + 1));
+    options.splice(randIndex, greekVocabList_mc[currentVocabIdx_mc]);
+    console.log(options);
+
     // show the options
+    for (let i = 0; i < options.length; i++) {
+      let optionValue = options[i].fields.english;
+      $("#mc-options").append(`<input type="radio" name='mc-options' value="${optionValue}">&nbsp;&nbsp;${i+1}. ${optionValue}<br/>`);
+    }
+  }
+
+  function checkAnswer() {
+    let selectedOption = $("input[name='mc-options']").val();
+
+    console.log(selectedOption)
   }
 
   function updateVocabList_mc() {
@@ -137,6 +151,7 @@
     updateVocabList_mc();
     $("#mc-chapter-start").on("change", changeStartingChapter_mc);
     $("#mc-chapter-end").on("change", changeEndingChapter_mc);
+    $("#mc-options").on("change", checkAnswer);
     $("#previous-vocab").click(previousVocab);
     $("#next-vocab").click(nextVocab);
   });
