@@ -37,54 +37,104 @@
   </div>
   <div class="foot">
     <div id="multiple-choice-meta-data">
-      Current result: <span id="correct-result">1/3 correct</span> <span id="total-vocab"></span>
+      Current result:
+      <span id="current-result"></span>
+      <span id="new-round">New Round!</span>
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
+  const optionLetters = ["A", "B", "C", "D"];
   let startingChapter_mc = 1;
   let endingChapter_mc = 1;
   let greekVocabList_mc = [];
   let currentVocabIdx_mc = 0;
   let options = [];
+  let correctOption = undefined;
+  let correctNumbers = 0; // number of questions that is correct
 
-  function updateTotalWordsText() {
-    $("#total-vocab").text(`(${greekVocabList_mc.length} words)`);
+  // Check if an object is contained in a given array
+  // Input: an array of objects, the object you want to check
+  // Output: boolean
+  function containsObject(arr, obj) {
+    for (let i = 0; i < arr.length; i ++) {
+      let isEqual = _.isEqual(arr[i], obj); // deep comparison
+      if (isEqual) {
+        return true
+      }
+    }
+    return false;
+  }
+
+  function startNewRound() {
+    currentVocabIdx_mc = 0;
+    correctNumbers = 0;
+    greekVocabList_mc = greekVocabList_mc.filter((vocab) => {
+      if (vocab.isCorrect) {
+        return false; // filter out the vocab that was correct
+      }
+      return true;
+    });
+
+    // let the user know that it is a new round
+    $("#new-round").fadeIn();
+    $("#new-round").fadeOut(2000);
+  }
+
+  function updateCurrentResult() {
+    $("#current-result").text(`${correctNumbers}/${greekVocabList_mc.length} correct`);
+  }
+
+  function resetCurrentVocab() {
+    options = [];
+    // clear the previous options
+    $("#mc-options").text("");
+    $("#mc-result").text("");
   }
 
   function updateQuestion() {
+    resetCurrentVocab();
+
     // update Greek vocab
     $("#mc-greek-vocab").text(`${currentVocabIdx_mc+1}. ${greekVocabList_mc[currentVocabIdx_mc].fields.greek}`);
 
     // update options
-    options = [];
-    // generate three random integer that is different then the current index
+    // generate three random integers that is different than the current index and is not in the options yet
     for (let i = 0; i < 4; i++) {
       // A random number between min and max (both included)
       // Math.floor(Math.random() * (max - min + 1) ) + min
       let rand;
       do {
-        rand = Math.floor(Math.random() * (greekVocabList_mc.length + 1));
-      } while (rand == currentVocabIdx_mc)
+        rand = Math.floor(Math.random() *greekVocabList_mc.length);
+      } while (rand == currentVocabIdx_mc || containsObject(options, greekVocabList_mc[rand]))
       options.push(greekVocabList_mc[rand]);
     }
     // put the correct randomly to the options
-    let randIndex = Math.floor(Math.random() * (3 + 1));
-    options.splice(randIndex, greekVocabList_mc[currentVocabIdx_mc]);
-    console.log(options);
+    correctOption = Math.floor(Math.random() * (3 + 1));
+    options.splice(correctOption, 1, greekVocabList_mc[currentVocabIdx_mc]);
 
-    // show the options
+    // show the new options
     for (let i = 0; i < options.length; i++) {
       let optionValue = options[i].fields.english;
-      $("#mc-options").append(`<input type="radio" name='mc-options' value="${optionValue}">&nbsp;&nbsp;${i+1}. ${optionValue}<br/>`);
+      $("#mc-options").append(`<input type="radio" name='mc-options' value="${optionValue}">&nbsp;&nbsp;${optionLetters[i]}. ${optionValue}<br/>`);
     }
   }
 
   function checkAnswer() {
-    let selectedOption = $("input[name='mc-options']").val();
+    let selectedOption = $("input[name='mc-options']:checked").val();
 
-    console.log(selectedOption)
+    if (selectedOption == greekVocabList_mc[currentVocabIdx_mc].fields.english) { // correct
+      $("#mc-result").text("Correct!");
+      $("#mc-result").css("color", "#095f80");
+      if (!greekVocabList_mc[currentVocabIdx_mc].isCorrect) {
+        correctNumbers += 1;
+      }
+      greekVocabList_mc[currentVocabIdx_mc].isCorrect = true;
+    } else { // wrong
+      $("#mc-result").text(`Correct answer ${optionLetters[correctOption]}`);
+      $("#mc-result").css("color", "#e85328");
+    }
   }
 
   function updateVocabList_mc() {
@@ -100,17 +150,18 @@
         greekVocabList_mc = shuffleCards(data, data.length);
         // reset current index
         currentVocabIdx_mc = 0;
+        correctNumbers = 0;
+        resetCurrentVocab();
         updateQuestion();
-        updateTotalWordsText();
+        updateCurrentResult();
       }
     });
   }
 
   function changeStartingChapter_mc() {
-    console.log("startingChapter_mc", startingChapter_mc)
     startingChapter_mc = document.getElementById("mc-chapter-start").value;
     // if the new starting chapter is greater than the ending chapter,
-    // do not update greek vocabs
+    // do not update Greek vocabs
     if (startingChapter_mc > endingChapter_mc) {
       return;
     }
@@ -128,23 +179,22 @@
   }
 
   function previousVocab() {
-    console.log("currentVocabIdx_mc", currentVocabIdx_mc);
-    if (currentVocabIdx_mc <= 0) {
-      currentVocabIdx_mc = greekVocabList_mc.length - 1;
-    } else {
+    if (currentVocabIdx_mc > 0) {
+      resetCurrentVocab();
       currentVocabIdx_mc -= 1;
+      updateQuestion();
     }
-    updateQuestion();
   }
 
   function nextVocab() {
-    console.log("currentVocabIdx_mc", currentVocabIdx_mc);
+    resetCurrentVocab();
     if (currentVocabIdx_mc >= greekVocabList_mc.length - 1) {
-      currentVocabIdx_mc = 0
+      startNewRound();
     } else {
       currentVocabIdx_mc += 1;
     }
     updateQuestion();
+    updateCurrentResult();
   }
 
   $(document).ready(function() {
