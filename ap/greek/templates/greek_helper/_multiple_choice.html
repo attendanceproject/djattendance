@@ -193,8 +193,23 @@
     } else {
       currentVocabIdx_mc += 1;
     }
-    updateQuestion();
-    updateCurrentResult();
+    if (greekVocabList_mc.length > 0) {
+      updateQuestion();
+      updateCurrentResult(); 
+    } else {
+      passed();
+    }
+  }
+
+  // This function is called if all the vocab is passed
+  function passed() {
+    // check if the vocab list is empty
+    if (greekVocabList_mc.length > 0) {
+      return;
+    }
+    $("#mc-greek-vocab").text("Praise the Lord! You passed!");
+    $("#mc-options").text("");
+    $("#mc-result").text("");
   }
 
   $(document).ready(function() {
