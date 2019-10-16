@@ -67,6 +67,47 @@
     return false;
   }
 
+  function updateVocabList_mc() {
+    $.ajax({
+      type: "GET",
+      url: updateChapUrl, // defined in index.html
+      dataType: "json",
+      data: {
+        "startingChapter": startingChapter_mc,
+        "endingChapter": endingChapter_mc,
+      },
+      success: function (data) {
+        greekVocabList_mc = shuffleCards(data, data.length);
+        // reset current index
+        currentVocabIdx_mc = 0;
+        correctNumbers = 0;
+        resetCurrentVocab();
+        updateQuestion();
+        updateCurrentResult();
+      }
+    });
+  }
+
+  function changeStartingChapter_mc() {
+    startingChapter_mc = document.getElementById("mc-chapter-start").value;
+    // if the new starting chapter is greater than the ending chapter,
+    // do not update Greek vocabs
+    if (startingChapter_mc > endingChapter_mc) {
+      return;
+    }
+    updateVocabList_mc();
+  }
+
+  function changeEndingChapter_mc() {
+    endingChapter_mc = document.getElementById("mc-chapter-end").value;
+    // if the new ending chapter is smaller than the starting chapter,
+    // do not update greek vocabs
+    if (endingChapter_mc < startingChapter_mc) {
+      return;
+    }
+    updateVocabList_mc();
+  }
+
   function startNewRound() {
     currentVocabIdx_mc = 0;
     correctNumbers = 0;
@@ -80,10 +121,6 @@
     // let the user know that it is a new round
     $("#new-round").fadeIn();
     $("#new-round").fadeOut(2000);
-  }
-
-  function updateCurrentResult() {
-    $("#current-result").text(`${correctNumbers}/${greekVocabList_mc.length} correct`);
   }
 
   function resetCurrentVocab() {
@@ -137,45 +174,8 @@
     }
   }
 
-  function updateVocabList_mc() {
-    $.ajax({
-      type: "GET",
-      url: updateChapUrl, // defined in index.html
-      dataType: "json",
-      data: {
-        "startingChapter": startingChapter_mc,
-        "endingChapter": endingChapter_mc,
-      },
-      success: function (data) {
-        greekVocabList_mc = shuffleCards(data, data.length);
-        // reset current index
-        currentVocabIdx_mc = 0;
-        correctNumbers = 0;
-        resetCurrentVocab();
-        updateQuestion();
-        updateCurrentResult();
-      }
-    });
-  }
-
-  function changeStartingChapter_mc() {
-    startingChapter_mc = document.getElementById("mc-chapter-start").value;
-    // if the new starting chapter is greater than the ending chapter,
-    // do not update Greek vocabs
-    if (startingChapter_mc > endingChapter_mc) {
-      return;
-    }
-    updateVocabList_mc();
-  }
-
-  function changeEndingChapter_mc() {
-    endingChapter_mc = document.getElementById("mc-chapter-end").value;
-    // if the new ending chapter is smaller than the starting chapter,
-    // do not update greek vocabs
-    if (endingChapter_mc < startingChapter_mc) {
-      return;
-    }
-    updateVocabList_mc();
+  function updateCurrentResult() {
+    $("#current-result").text(`${correctNumbers}/${greekVocabList_mc.length} correct`);
   }
 
   function previousVocab() {
