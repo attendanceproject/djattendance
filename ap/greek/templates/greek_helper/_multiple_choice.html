@@ -131,6 +131,12 @@
   }
 
   function updateQuestion() {
+    if (greekVocabList_mc.length == 0) {
+      passed();
+      updateCurrentResult();
+      return;
+    }
+
     resetCurrentVocab();
 
     // update Greek vocab
@@ -187,18 +193,21 @@
   }
 
   function nextVocab() {
+    if (greekVocabList_mc.length == 0) {
+      passed();
+      updateCurrentResult();
+      return;
+    }
+
     resetCurrentVocab();
+
     if (currentVocabIdx_mc >= greekVocabList_mc.length - 1) {
       startNewRound();
     } else {
       currentVocabIdx_mc += 1;
     }
-    if (greekVocabList_mc.length > 0) {
-      updateQuestion();
-      updateCurrentResult(); 
-    } else {
-      passed();
-    }
+    updateQuestion();
+    updateCurrentResult();
   }
 
   // This function is called if all the vocab is passed
