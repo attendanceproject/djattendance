@@ -58,7 +58,7 @@ def request_statuses(trainee):
       Summary.objects.filter(discipline__trainee=trainee, fellowship=True),
       RoomReservation.objects.filter(requester=trainee, status='F')
   )
-  message = '<a href="{url}"><u>You have a new message{ta} regarding your {request}</u></a>'
+  message = '<a href="{url}"><u>You have a message{ta} regarding your {request}</u></a>'
   return [(messages.ERROR, message.format(url=reverse('attendance:attendance-submit'), request=req._meta.verbose_name, ta=' from ' + req.TA.firstname + ' ' + req.TA.lastname)) if isinstance(req, IndividualSlip) else (messages.ERROR, message.format(url=req.get_absolute_url(), request=req._meta.verbose_name, ta=' from ' + req.TA.firstname + ' ' + req.TA.lastname if hasattr(req, 'TA') else '')) for req in requests]
 
 
