@@ -23,13 +23,13 @@ class Locality(models.Model):
   def __unicode__(self):
     try:
       city_str = self.city.name
-
       if self.city.country == 'US':
         city_str = city_str + ", " + str(self.city.state)
       else:
         city_str = city_str + ", " + str(dict(countries)[self.city.country])
       return city_str
-      #return str(self.city)
+      #Changed the unicode function to match that of City. 
+      #Properly returns city,country for international localities.
       #return self.city.name + ", " + str(self.city.state)
     except AttributeError as e:
       return str(self.id) + ": " + str(e)
