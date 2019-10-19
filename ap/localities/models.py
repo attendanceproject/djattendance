@@ -1,6 +1,5 @@
 from django.db import models
 
-from django_countries.fields import CountryField
 from django_countries import countries
 
 from aputils.models import City
@@ -28,7 +27,7 @@ class Locality(models.Model):
       else:
         city_str = city_str + ", " + str(dict(countries)[self.city.country])
       return city_str
-      #Changed the unicode function to match that of City. 
+      #Changed the unicode function to match that of City.
       #Properly returns city,country for international localities.
       #return self.city.name + ", " + str(self.city.state)
     except AttributeError as e:
