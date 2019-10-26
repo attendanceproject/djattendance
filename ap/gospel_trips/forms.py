@@ -131,7 +131,7 @@ class AnswerForm(forms.ModelForm):
           pass
 
       if self.instance.question.section.show == 'READ ONLY':
-        self.fields['response'].widget.attrs['readonly'] = 'true'
+        self.fields['response'].widget.attrs['disabled'] = 'true'
 
       self.fields['response'].required = req
 
