@@ -58,6 +58,10 @@
   padding: 8px 0;
 }
 
+#multiple-choice-report {
+  /* display: none;*/
+}
+
 #multiple-choice-meta-data {
   color: #aaa;
 }

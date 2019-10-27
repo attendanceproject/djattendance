@@ -27,6 +27,16 @@
     <div id="mc-options"></div>
     <div id="mc-result"></div>
   </div>
+  <div id="multiple-choice-report">
+    <table class="table">
+      <tr>
+        <th>Greek</th>
+        <th>English</th>
+        <th>What you picked</th>
+        <th>Included in next practice?</th>
+      </tr>
+    </table>
+  </div>
   <div>
     <button id="previous-vocab" class="btn btn-default">
       Previous
@@ -77,7 +87,18 @@
         "endingChapter": endingChapter_mc,
       },
       success: function (data) {
-        greekVocabList_mc = shuffleCards(data, data.length);
+        greekVocabList_mc = shuffleCards(data, data.length); // defined in index.html
+        /*
+            greekVocabList_mc data structure
+            [{
+              fields: {greek: "<Greek>", english: "<English>"},
+              isCorrect: true/false,
+              wrongAnswer: "<English>", // only has this field if the user picked the wrong option at the first time
+              tryAgain: true/false,
+              ...
+            }, ... ]
+        */
+
         // reset current index
         currentVocabIdx_mc = 0;
         correctNumbers = 0;
@@ -113,10 +134,8 @@
     currentVocabIdx_mc = 0;
     correctNumbers = 0;
     greekVocabList_mc = greekVocabList_mc.filter((vocab) => {
-      if (vocab.isCorrect) {
-        return false; // filter out the vocab that was correct
-      }
-      return true;
+      // TODO: check this filter
+      return !vocab.tryAgain;
     });
 
     // let the user know that it is a new round
@@ -165,19 +184,22 @@
     }
   }
 
-  function checkAnswer() {
+  function changeOption() {
+    const vocab = greekVocabList_mc[currentVocabIdx_mc];
     let selectedOption = $("input[name='mc-options']:checked").val();
-
-    if (selectedOption == greekVocabList_mc[currentVocabIdx_mc].fields.english) { // correct
+    if (selectedOption == vocab.fields.english) { // correct
       $("#mc-result").text("Correct!");
       $("#mc-result").css("color", "#095f80");
-      if (!greekVocabList_mc[currentVocabIdx_mc].isCorrect) {
-        correctNumbers += 1;
+      if (!vocab.isCorrect) {
+        correctNumbers += 1; // only increment this value once for each vocab
       }
-      greekVocabList_mc[currentVocabIdx_mc].isCorrect = true;
+      vocab.isCorrect = true;
+      vocab.tryAgain = false;
     } else { // wrong
       $("#mc-result").text(`Correct answer ${optionLetters[correctOption]}`);
       $("#mc-result").css("color", "#e85328");
+      vocab.wrongAnswer = `${selectedOption}`;
+      vocab.tryAgain = true;
     }
   }
 
@@ -202,13 +224,22 @@
 
     resetCurrentVocab();
 
-    if (currentVocabIdx_mc >= greekVocabList_mc.length - 1) {
-      startNewRound();
-    } else {
+    if (currentVocabIdx_mc < greekVocabList_mc.length - 1) {
       currentVocabIdx_mc += 1;
+    } else {
+      // TODO: show report, then proceed to next round
+      startNewRound();
     }
     updateQuestion();
     updateCurrentResult();
+  }
+
+  function showReport() {
+    for (let i = 0; i < greekVocabList_mc.length; i++) {
+      // TODO: build the report
+      // color coded. correct, green, wrong red.
+    }
+    $("multiple-choice-report").show();
   }
 
   // TODO: not showing the instant result, but showing the result later on in the report.
@@ -229,7 +260,7 @@
     updateVocabList_mc();
     $("#mc-chapter-start").on("change", changeStartingChapter_mc);
     $("#mc-chapter-end").on("change", changeEndingChapter_mc);
-    $("#mc-options").on("change", checkAnswer);
+    $("#mc-options").on("change", changeOption);
     $("#previous-vocab").click(previousVocab);
     $("#next-vocab").click(nextVocab);
   });
