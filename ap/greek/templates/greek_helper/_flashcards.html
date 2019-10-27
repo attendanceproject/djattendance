@@ -93,9 +93,10 @@
   function changeStartingChapter_fc() {
     startingChapter_fc = document.getElementById("fc-chapter-start").value;
     // if the new starting chapter is greater than the ending chapter,
-    // do not update greek vocabs
+    // change the ending chapter to be the same as starting chapter
     if (startingChapter_fc > endingChapter_fc) {
-      return;
+      $("#fc-chapter-end").val(startingChapter_fc);
+      endingChapter_fc = startingChapter_fc;
     }
     updateVocabList_fc();
   }
