@@ -27,8 +27,8 @@
     <div id="mc-options"></div>
     <div id="mc-result"></div>
   </div>
-  <div id="multiple-choice-report">
-    <table class="table">
+  <div>
+    <table class="table" id="multiple-choice-report">
       <tr>
         <th>Greek</th>
         <th>English</th>
@@ -88,6 +88,9 @@
       },
       success: function (data) {
         greekVocabList_mc = shuffleCards(data, data.length); // defined in index.html
+
+        // TODO: remove this. this is just for testing
+        greekVocabList_mc = greekVocabList_mc.slice(0, 5);
         /*
             greekVocabList_mc data structure
             [{
@@ -131,7 +134,8 @@
   }
 
   function startNewRound() {
-    currentVocabIdx_mc = 0;
+    showReport();
+    /*currentVocabIdx_mc = 0;
     correctNumbers = 0;
     greekVocabList_mc = greekVocabList_mc.filter((vocab) => {
       // TODO: check this filter
@@ -140,7 +144,7 @@
 
     // let the user know that it is a new round
     $("#new-round").fadeIn();
-    $("#new-round").fadeOut(2000);
+    $("#new-round").fadeOut(2000);*/
   }
 
   function resetCurrentVocab() {
@@ -235,11 +239,21 @@
   }
 
   function showReport() {
+    // TODO: delete the previous report
     for (let i = 0; i < greekVocabList_mc.length; i++) {
       // TODO: build the report
       // color coded. correct, green, wrong red.
+      const vocab = greekVocabList_mc[i];
+      $("#multiple-choice-report").append(
+        "<tr>" +
+          `<td>${vocab.fields.greek}</td>` +
+          `<td>${vocab.fields.english}</td>` +
+          `<td>${vocab.wrongAnswer}</td>` +
+          `<td>${vocab.tryAgain}</td>` +
+        "</tr>"
+        );
     }
-    $("multiple-choice-report").show();
+    //$("multiple-choice-report").show();
   }
 
   // TODO: not showing the instant result, but showing the result later on in the report.
