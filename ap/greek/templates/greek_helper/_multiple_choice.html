@@ -22,10 +22,27 @@
       </select>
     </div>
   </div>
-  <div id="multiple-choice-container">
-    <div id="mc-greek-vocab"></div>
-    <div id="mc-options"></div>
-    <div id="mc-result"></div>
+  <div id="multiple-choice-report-container">
+    <div id="multiple-choice-container">
+      <div id="mc-greek-vocab"></div>
+      <div id="mc-options"></div>
+      <div id="mc-result"></div>
+    </div>
+    <div>
+      <button id="previous-vocab" class="btn btn-default">
+        Previous
+      </button>
+      <button id="next-vocab" class="btn btn-primary">
+        Next
+      </button>
+    </div>
+    <div class="foot">
+      <div id="multiple-choice-meta-data">
+        Current result:
+        <span id="current-result"></span>
+        <span id="new-round">New Round!</span>
+      </div>
+    </div>
   </div>
   <div>
     <table class="table table-hover">
@@ -37,22 +54,10 @@
         <th>Included in next practice?</th>
       </tr>
       </thead>
-      <tbody id="multiple-choice-report"></tbody>
+      <tbody id="multiple-choice-report-body"></tbody>
     </table>
-  </div>
-  <div>
-    <button id="previous-vocab" class="btn btn-default">
-      Previous
-    </button>
-    <button id="next-vocab" class="btn btn-primary">
-      Next
-    </button>
-  </div>
-  <div class="foot">
-    <div id="multiple-choice-meta-data">
-      Current result:
-      <span id="current-result"></span>
-      <span id="new-round">New Round!</span>
+    <div>
+      <button id="next-practice" class="btn btn-primary">Next Practice</button>
     </div>
   </div>
 </div>
@@ -134,20 +139,6 @@
       return;
     }
     updateVocabList_mc();
-  }
-
-  function startNewRound() {
-    showReport();
-    /*currentVocabIdx_mc = 0;
-    correctNumbers = 0;
-    greekVocabList_mc = greekVocabList_mc.filter((vocab) => {
-      // TODO: check this filter
-      return !vocab.tryAgain;
-    });
-
-    // let the user know that it is a new round
-    $("#new-round").fadeIn();
-    $("#new-round").fadeOut(2000);*/
   }
 
   function resetCurrentVocab() {
@@ -234,37 +225,53 @@
     if (currentVocabIdx_mc < greekVocabList_mc.length - 1) {
       currentVocabIdx_mc += 1;
     } else {
-      // TODO: show report, then proceed to next round
-      startNewRound();
+      showReport();
     }
     updateQuestion();
     updateCurrentResult();
   }
 
   function showReport() {
-    console.log(greekVocabList_mc);
     // TODO: delete the previous report
     for (let i = 0; i < greekVocabList_mc.length; i++) {
       // TODO: build the report
       // color coded. correct, green, wrong red.
       const vocab = greekVocabList_mc[i];
       const rowColor = vocab.wrongAnswer ? "danger" : "";
-      $("#multiple-choice-report").append(
+      $("#multiple-choice-report-body").append(
         `<tr class="${rowColor}">
           <td>${vocab.fields.greek}</td>
           <td>${vocab.fields.english}</td>
           <td>${vocab.wrongAnswer || ""}</td>
           <td>
-            <input class="checkbox-vocab" type="checkbox" id="checkbox-${i}" value=${i} ${vocab.tryAgain ? "checked" : ""}>
+            <input class="checkbox-vocab" type="checkbox" onclick=changeVocabFlag(${i}) ${vocab.tryAgain ? "checked" : ""}>
           </td>
         </tr>`
         );
     }
-    //$("multiple-choice-report").show();
+    $("multiple-choice-report-container").show();
   }
 
-  function updateVocabInNextRound() {
-    // TODO
+  function changeVocabFlag(index) {
+    const vocab = greekVocabList_mc[index];
+    vocab.tryAgain = !vocab.tryAgain;
+  }
+
+  function nextPractice() {
+    // TODO: clear the report table
+    // TODO: hide the report table and button
+    currentVocabIdx_mc = 0;
+    correctNumbers = 0;
+    greekVocabList_mc = greekVocabList_mc.filter((vocab) => {
+      return vocab.tryAgain;
+    });
+
+    // let the user know that it is a new round
+    $("#new-round").fadeIn();
+    $("#new-round").fadeOut(2000);
+
+    updateQuestion();
+    updateCurrentResult();
   }
 
   // TODO: not showing the instant result, but showing the result later on in the report.
@@ -288,6 +295,6 @@
     $("#mc-options").on("change", changeOption);
     $("#previous-vocab").click(previousVocab);
     $("#next-vocab").click(nextVocab);
-    $(".checkbox-vocab").on("change", updateVocabInNextRound);
+    $("#next-practice").click(nextPractice);
   });
 </script>
