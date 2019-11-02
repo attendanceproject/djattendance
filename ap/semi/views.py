@@ -129,7 +129,7 @@ class LocationReport(ListView):
 
   def get_queryset(self):
     ct = Term.current_term()
-    return SemiAnnual.objects.filter(term=ct)
+    return SemiAnnual.objects.filter(term=ct).order_by('status', 'trainee__lastname')
 
   def get_context_data(self, **kwargs):
     context = super(LocationReport, self).get_context_data(**kwargs)
