@@ -67,6 +67,7 @@
   let startingChapter_mc = 1;
   let endingChapter_mc = 1;
   let greekVocabList_mc = [];
+  let greekVocabList_const = []; // this list only changes when an ajax is called
   let currentVocabIdx_mc = 0;
   let options = [];
   let correctOption = undefined;
@@ -95,7 +96,8 @@
         "endingChapter": endingChapter_mc,
       },
       success: function (data) {
-        greekVocabList_mc = shuffleCards(data, data.length); // defined in index.html
+        greekVocabList_const = data;
+        greekVocabList_mc = shuffleCards(data, data.length);// defined in index.html
 
         // TODO: remove this. this is just for testing
         greekVocabList_mc = greekVocabList_mc.slice(0, 5);
@@ -167,11 +169,11 @@
       // Math.floor(Math.random() * (max - min + 1) ) + min
       let rand;
       do {
-        rand = Math.floor(Math.random() *greekVocabList_mc.length);
-      } while (rand == currentVocabIdx_mc || containsObject(options, greekVocabList_mc[rand]))
-      options.push(greekVocabList_mc[rand]);
+        rand = Math.floor(Math.random() * greekVocabList_const.length);
+      } while (rand == currentVocabIdx_mc || containsObject(options, greekVocabList_const[rand]))
+      options.push(greekVocabList_const[rand]);
     }
-    // put the correct randomly to the options
+    // put the correct answer randomly to the options
     correctOption = Math.floor(Math.random() * (3 + 1));
     options.splice(correctOption, 1, greekVocabList_mc[currentVocabIdx_mc]);
 
@@ -224,11 +226,11 @@
 
     if (currentVocabIdx_mc < greekVocabList_mc.length - 1) {
       currentVocabIdx_mc += 1;
+      updateQuestion();
+      updateCurrentResult();
     } else {
       showReport();
     }
-    updateQuestion();
-    updateCurrentResult();
   }
 
   function showReport() {
@@ -269,9 +271,9 @@
     // let the user know that it is a new round
     $("#new-round").fadeIn();
     $("#new-round").fadeOut(2000);
-
+    /*
     updateQuestion();
-    updateCurrentResult();
+    updateCurrentResult();*/
   }
 
   // TODO: not showing the instant result, but showing the result later on in the report.
