@@ -129,7 +129,7 @@ def gospel_trip_trainee(request, pk):
         answer.trainee = trainee
         answer.question = Question.objects.get(id=f.prefix)
         answer.save()
-      return HttpResponseRedirect("")
+      return HttpResponseRedirect(pk)
     else:
       context['answer_forms'] = answer_forms
   else:
