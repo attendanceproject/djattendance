@@ -4,4 +4,14 @@
 {% block title %}Messaging{% endblock %}
 {% block content %}
 <h1>{{ page_title }}</h1>
+
+{% for k,v in anns %}
+  <h3 style="font: Yantramanav; color: #A6C5D1; font-size: 20pt;">{{k}}<hr/></h3>
+  <p>
+    {% for a in v %}
+      {{a}}<br></br>
+    {% endfor %}
+  </p>
+{% endfor %}
+
 {% endblock %}
