@@ -180,7 +180,7 @@
       $("#mc-options").append(`<input type="radio" name='mc-options' value="${optionValue}">&nbsp;&nbsp;${optionLetters[i]}. ${optionValue}<br/>`);
     }
 
-    // 3. update the current result/score
+    // 3. update the current score
     updateCurrentResult();
   }
 
@@ -224,10 +224,7 @@
       return;
     }
 
-    // if the current vocab is the last vocab
-
     resetCurrentVocab();
-
 
     if (currentVocabIdx_mc < greekVocabList_mc.length - 1) {
       currentVocabIdx_mc += 1;
