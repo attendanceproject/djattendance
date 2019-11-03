@@ -22,8 +22,8 @@
       </select>
     </div>
   </div>
-  <div id="multiple-choice-report-container">
-    <div id="multiple-choice-container">
+  <div id="multiple-choice-container">
+    <div>
       <div id="mc-greek-vocab"></div>
       <div id="mc-options"></div>
       <div id="mc-result"></div>
@@ -40,18 +40,17 @@
       <div id="multiple-choice-meta-data">
         Current result:
         <span id="current-result"></span>
-        <span id="new-round">New Round!</span>
       </div>
     </div>
   </div>
-  <div>
+  <div id="multiple-choice-report-container">
     <table class="table table-hover">
       <thead>
         <tr>
-        <th>Greek</th>
-        <th>English</th>
-        <th>What you picked</th>
-        <th>Included in next practice?</th>
+        <th>GREEK</th>
+        <th>ENGLISH</th>
+        <th>WHAT YOU PICKED</th>
+        <th>INCLUDED IN NEXT PRACTICE?</th>
       </tr>
       </thead>
       <tbody id="multiple-choice-report-body"></tbody>
@@ -60,6 +59,7 @@
       <button id="next-practice" class="btn btn-primary">Next Practice</button>
     </div>
   </div>
+  <div id="you-passed">You passed!</div>
 </div>
 
 <script type="text/javascript">
@@ -105,8 +105,7 @@
             greekVocabList_mc data structure
             [{
               fields: {greek: "<Greek>", english: "<English>"},
-              isCorrect: true/false,
-              wrongAnswer: "<English>", // only has this field if the user picked the wrong option at the first time
+              whatUserPicked: "<English>", // only record the option that the user picked at the first time
               tryAgain: true/false,
               ...
             }, ... ]
@@ -117,6 +116,8 @@
         correctNumbers = 0;
         resetCurrentVocab();
         updateQuestion();
+        $("#multiple-choice-container").show();
+        $("#you-passed").hide();
       }
     });
   }
@@ -146,7 +147,7 @@
     options = [];
     // clear the previous options
     $("#mc-options").text("");
-    $("#mc-result").text("");
+    $("#mc-result").html("&nbsp;");
   }
 
   function updateQuestion() {
@@ -188,20 +189,21 @@
   function changeOption() {
     const vocab = greekVocabList_mc[currentVocabIdx_mc];
     let selectedOption = $("input[name='mc-options']:checked").val();
+    vocab.whatUserPicked = `${selectedOption}`;
+
     if (selectedOption == vocab.fields.english) { // correct
-      $("#mc-result").text("Correct!");
-      $("#mc-result").css("color", "#095f80");
-      if (!vocab.isCorrect) {
+      if (vocab.tryAgain == undefined) {
         correctNumbers += 1; // only increment this value once for each vocab
       }
-      vocab.isCorrect = true;
       vocab.tryAgain = false;
+      $("#mc-result").text("Correct!");
+      $("#mc-result").css("color", "#095f80");
     } else { // wrong
+      vocab.tryAgain = true;
       $("#mc-result").text(`Correct answer ${optionLetters[correctOption]}`);
       $("#mc-result").css("color", "#e85328");
-      vocab.wrongAnswer = `${selectedOption}`;
-      vocab.tryAgain = true;
     }
+
   }
 
   function updateCurrentResult() {
@@ -238,24 +240,23 @@
   }
 
   function showReport() {
-    // TODO: delete the previous report
+    $("#multiple-choice-container").hide();
+    $("#multiple-choice-report-container").show();
     for (let i = 0; i < greekVocabList_mc.length; i++) {
-      // TODO: build the report
-      // color coded. correct, green, wrong red.
       const vocab = greekVocabList_mc[i];
-      const rowColor = vocab.wrongAnswer ? "danger" : "";
+      const isCorrect = vocab.fields.english == vocab.whatUserPicked;
+      const rowColor = isCorrect ? "success" : (vocab.whatUserPicked ? "danger" : "");
       $("#multiple-choice-report-body").append(
         `<tr class="${rowColor}">
           <td>${vocab.fields.greek}</td>
           <td>${vocab.fields.english}</td>
-          <td>${vocab.wrongAnswer || ""}</td>
+          <td>${vocab.whatUserPicked || ""}</td>
           <td>
             <input class="checkbox-vocab" type="checkbox" onclick=changeVocabFlag(${i}) ${vocab.tryAgain || vocab.tryAgain == undefined ? "checked" : ""}>
           </td>
         </tr>`
         );
     }
-    $("multiple-choice-report-container").show();
   }
 
   function changeVocabFlag(index) {
@@ -264,18 +265,22 @@
   }
 
   function nextPractice() {
-    // TODO: clear the report table
-    // TODO: hide the report table and button
+    $("#multiple-choice-container").show();
+    $("#multiple-choice-report-container").hide();
+
     currentVocabIdx_mc = 0;
     correctNumbers = 0;
     greekVocabList_mc = greekVocabList_mc.filter((vocab) => {
       // vocab.tryAgain is undefined means the user never select any option for this vocab
-      return vocab.tryAgain || vocab.tryAgain == undefined;
+      if (vocab.tryAgain || vocab.tryAgain == undefined) {
+        delete vocab.tryAgain;
+        delete vocab.whatUserPicked;
+        return true;
+      }
+      return false;
     });
 
-    // let the user know that it is a new round
-    $("#new-round").fadeIn();
-    $("#new-round").fadeOut(2000);
+    // TODO: clear the report table
 
     updateQuestion();
   }
@@ -289,9 +294,8 @@
     if (greekVocabList_mc.length > 0) {
       return;
     }
-    $("#mc-greek-vocab").text("Praise the Lord! You passed!");
-    $("#mc-options").text("");
-    $("#mc-result").text("");
+    $("#multiple-choice-container").hide();
+    $("#you-passed").show();
   }
 
   $(document).ready(function() {

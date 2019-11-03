@@ -54,20 +54,24 @@
   padding: 25px 0;
 }
 
-#mc-options {
+#mc-greek-vocab {
+  padding: 8px 0;
+}
+
+#mc-result {
   padding: 8px 0;
 }
 
 #multiple-choice-report-container {
-  /* display: none;*/
+  display: none;
 }
 
 #multiple-choice-meta-data {
   color: #aaa;
 }
 
-#new-round {
-  display: none;
-  padding-bottom: 8px;
+#you-passed {
+  padding: 8px 0;
   color: green;
+  display: none;
 }
