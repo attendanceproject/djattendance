@@ -280,21 +280,20 @@
       return false;
     });
 
-    // TODO: clear the report table
+    // clear the report table
+    $("#multiple-choice-report-body").empty();
 
     updateQuestion();
   }
 
-  // TODO: not showing the instant result, but showing the result later on in the report.
-
   // This function is called if all the vocab is passed.
-  // Show the report
   function passed() {
     // check if the vocab list is empty
     if (greekVocabList_mc.length > 0) {
       return;
     }
     $("#multiple-choice-container").hide();
+    $("#multiple-choice-report-container").hide();
     $("#you-passed").show();
   }
 
