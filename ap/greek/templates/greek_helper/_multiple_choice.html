@@ -117,7 +117,6 @@
         correctNumbers = 0;
         resetCurrentVocab();
         updateQuestion();
-        updateCurrentResult();
       }
     });
   }
@@ -159,10 +158,10 @@
 
     resetCurrentVocab();
 
-    // update Greek vocab
+    // 1. update Greek vocab
     $("#mc-greek-vocab").text(`${currentVocabIdx_mc+1}. ${greekVocabList_mc[currentVocabIdx_mc].fields.greek}`);
 
-    // update options
+    // 2. update options
     // generate three random integers that is different than the current index and is not in the options yet
     for (let i = 0; i < 4; i++) {
       // A random number between min and max (both included)
@@ -176,12 +175,14 @@
     // put the correct answer randomly to the options
     correctOption = Math.floor(Math.random() * (3 + 1));
     options.splice(correctOption, 1, greekVocabList_mc[currentVocabIdx_mc]);
-
     // show the new options
     for (let i = 0; i < options.length; i++) {
       let optionValue = options[i].fields.english;
       $("#mc-options").append(`<input type="radio" name='mc-options' value="${optionValue}">&nbsp;&nbsp;${optionLetters[i]}. ${optionValue}<br/>`);
     }
+
+    // 3. update the current result/score
+    updateCurrentResult();
   }
 
   function changeOption() {
@@ -216,18 +217,21 @@
   }
 
   function nextVocab() {
+    // if no more vocab in the list, the user passed the practice
     if (greekVocabList_mc.length == 0) {
       passed();
       updateCurrentResult();
       return;
     }
 
+    // if the current vocab is the last vocab
+
     resetCurrentVocab();
+
 
     if (currentVocabIdx_mc < greekVocabList_mc.length - 1) {
       currentVocabIdx_mc += 1;
       updateQuestion();
-      updateCurrentResult();
     } else {
       showReport();
     }
@@ -246,7 +250,7 @@
           <td>${vocab.fields.english}</td>
           <td>${vocab.wrongAnswer || ""}</td>
           <td>
-            <input class="checkbox-vocab" type="checkbox" onclick=changeVocabFlag(${i}) ${vocab.tryAgain ? "checked" : ""}>
+            <input class="checkbox-vocab" type="checkbox" onclick=changeVocabFlag(${i}) ${vocab.tryAgain || vocab.tryAgain == undefined ? "checked" : ""}>
           </td>
         </tr>`
         );
@@ -265,15 +269,15 @@
     currentVocabIdx_mc = 0;
     correctNumbers = 0;
     greekVocabList_mc = greekVocabList_mc.filter((vocab) => {
-      return vocab.tryAgain;
+      // vocab.tryAgain is undefined means the user never select any option for this vocab
+      return vocab.tryAgain || vocab.tryAgain == undefined;
     });
 
     // let the user know that it is a new round
     $("#new-round").fadeIn();
     $("#new-round").fadeOut(2000);
-    /*
+
     updateQuestion();
-    updateCurrentResult();*/
   }
 
   // TODO: not showing the instant result, but showing the result later on in the report.
