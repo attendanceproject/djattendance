@@ -73,6 +73,7 @@ body {
 #today-temp, #today-temp-C {
   font-size: 3em;
   margin-bottom: .1em;
+  line-height: 1.2;
 }
 #today-low, #today-high, #tomorrow-low, #tomorrow-high, #daft-low, #daft-high {
   font-size: 1.5em;
