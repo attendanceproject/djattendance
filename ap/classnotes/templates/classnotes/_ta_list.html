@@ -66,37 +66,47 @@ $(function() {
         <td>{{classnote.event.name}}</td>
         <td>{{classnote.date}}</td>
         <td>
-          {% if classnote.approved %}
-            <span class="label label-primary received">Approved</span>
-          {% elif classnote.pending %}
-            <span class="label label-warning received">Pending</span>
-          {% elif classnote.unsubmitted %}
-            <span class="label label-danger unreceived">Unsubmitted</span>
-          {% elif classnote.fellowship %}
-            <span class="label label-warning received">Marked for fellowship</span>
-          {% endif %}
           {% if classnote.past_due %}
-            <span class="label label-danger">Past due</span>
+            <span><strong style="text-align:left;">Past Due:</strong></span>
           {% endif %}
+          <p style="text-align:right;">
+            {% if classnote.approved %}
+            <span class="received">Approved</span>
+            <svg height="20px" width="20px" style="padding-top: 5px;">
+                <circle cx="10" cy="10" r="5" fill="#A6C5D1"/>
+              </svg>
+          {% elif classnote.pending %}
+            <span class="received">Pending</span>
+            <svg height="20px" width="20px" style="padding-top: 5px;">
+                <circle cx="10" cy="10" r="5" fill="none" stroke="#A6C5D1" stroke-width="1"/>
+              </svg>
+          {% elif classnote.unsubmitted %}
+            <span class="unreceived">Unsubmitted</span>
+            <svg height="20px" width="20px" style="padding-top: 5px;">
+              <circle cx="10" cy="10" r="5" fill="#E85328"/>
+            </svg>
+          {% elif classnote.fellowship %}
+            <span class="received">Marked for fellowship</span>
+            <svg height="20px" width="20px" style="padding-top: 5px;">
+                <circle cx="10" cy="10" r="5" fill="#F69D74"/>
+              </svg>
+          {% endif %}
+           </p>
+         
+          
         </td>
         <td>{{classnote.date_assigned | date:"m/d/y"}}</td>
         <td>{{classnote.date_due | date:"m/d/y"}}</td>
         <td>
-          <a href="#" class="btn btn-glyphicons" role="button">
-              <span class="glyphicon glyphicon-ok"></span>
-          </a>
-          <a href="#" class="btn btn-glyphicons" role="button">
-            <span class="glyphicon glyphicon-remove"></span>
-          </a>
-          <a href="#" class="btn btn-glyphicons" role="button">
-              ?
-            </a>
-          <a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn btn-glyphicons" role="button">
-              <span class="glyphicon glyphicon-pencil"></span>
-            </a>
-          <a href="#" class="btn btn-glyphicons" role="button">
-              <span class="glyphicon glyphicon-trash"></span>
-            </a>
+            <button class="btn-ta btn-approve"> </button>
+            <button class="btn-ta btn-denied"> </button>
+            <form action="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn-ta">
+              <button class="btn-ta btn-edit" type="submit"></button>
+            </form>
+            <!--<a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn-edit"></a>-->
+            <button class="btn-ta btn-delete"> </button>
+            <button class="btn-ta btn-transfer"> </button>
+             
         </td>
         <td><input type="checkbox" name="selection" value="{{classnote.pk}}"></input></td>
       </tr>

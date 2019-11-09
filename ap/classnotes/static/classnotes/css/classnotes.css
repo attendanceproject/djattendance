@@ -32,3 +32,26 @@
 .icon-btn span {
   line-height: 18px;
 }
+.btn-ta {
+    display: -webkit-inline-box;
+    display: inline-block;
+    height: 15px;
+    width: 15px;
+    cursor: pointer;
+    border: none; 
+}
+  .btn-approve {
+    background: url(../../../../static/img/approved.svg)
+  }
+  .btn-delete {
+    background: url(../../../../static/img/delete.svg)
+  }
+  .btn-denied {
+    background: url(../../../../static/img/denied.svg)
+  }
+  .btn-edit {
+    background: url(../../../../static/img/edit.svg)
+  }
+  .btn-transfer {
+    background: url(../../../../static/img/transfer.svg)
+  }

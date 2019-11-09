@@ -35,6 +35,7 @@
 </form>
 
 {% if not detail %}
+</br>
 <em>No missed classes</em>
 {% endif %}
   <table id="id_report_table"class="table table-hover">
@@ -65,57 +66,121 @@
   <table class="table table-hover table-condensed" id="mytable">
     <thead>
       <tr>
-        <th><input type="checkbox" id="checkall" /></th>
-        <th> Edit </th>
         <th> ID </th>
         <th> Event </th>
         <th> Date Assigned </th>
         <th> Due Date </th>
+        <th> Status </th>
+        <th> Action </th>
+        <th><input type="checkbox" id="checkall" /></th>
       </tr>
     </thead>
 
     <tbody>
     {% for classnote in classnotes_pending %}
     <tr>
-      <td><input type="checkbox" name="selection" value="{{classnote.pk}}"></input> {{classnote.get_status_display}}</td>
-      <td>
-        <a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn btn-primary btn-xs" role="button">
-          <span class="glyphicon glyphicon-pencil"></span>
-        </a>
-      </td>
-      <td>{{classnote.id}}</td>
-      <td>{{classnote.event.name}}</td>
-      <td>{{classnote.date_assigned|date:"m/d/y"}}</td>
-      <td>{{classnote.date_due|date:"m/d/y"}}</td>
-    </tr>
+        <td>{{classnote.id}}</td>
+        <td>{{classnote.event.name}}</td>
+        <td>{{classnote.date_assigned|date:"m/d/y"}}</td>
+        <td>{{classnote.date_due|date:"m/d/y"}}</td>
+        <td>
+          {% if classnote.past_due %}
+            <strong style="text-align:left;">Past Due:</strong>
+          {% endif %}
+          <p style="text-align:right;">
+          {% if classnote.approved %}
+            Approved
+            <svg height="20px" width="20px">
+                <circle cx="10" cy="10" r="5" fill="#A6C5D1"/>
+              </svg>
+          {% elif classnote.pending %}
+            Pending
+            <svg height="20px" width="20px">
+                <circle cx="10" cy="10" r="5" fill="none" stroke="#A6C5D1" stroke-width="1"/>
+              </svg>
+          {% elif classnote.unsubmitted %}
+            Unsubmitted
+            <svg height="20px" width="20px">
+              <circle cx="10" cy="10" r="5" fill="#E85328"/>
+            </svg>
+          {% elif classnote.fellowship %}
+            Marked for fellowship
+            <svg height="20px" width="20px">
+                <circle cx="10" cy="10" r="5" fill="#F69D74"/>
+              </svg>
+          {% endif %}
+           </p>
+        </td>
+        <td>
+            <button class="btn-ta btn-approve"> </button>
+            <button class="btn-ta btn-denied"> </button>
+            <form action="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn-ta">
+              <button class="btn-ta btn-edit" type="submit"></button>
+            </form>
+            <!--<a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn-edit"></a>-->
+            <button class="btn-ta btn-delete"> </button>
+            <button class="btn-ta btn-transfer"> </button>
+        </td>
+        <td>
+            <input type="checkbox" name="selection" value="{{classnote.pk}}"></input> 
+        </td>
+      </tr>
     {% endfor %}
+
+
     {% for classnote in classnotes_other %}
     <tr>
-      <td>{{classnote.get_status_display}}</td>
-      <td>
-        <a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn btn-primary btn-xs" role="button">
-          <span class="glyphicon glyphicon-pencil"></span>
-        </a>
-      </td>
-      <td>{{classnote.id}}</td>
-      <td>{{classnote.event.name}}</td>
-      <td>{{classnote.date_assigned|date:"m/d/y"}}</td>
-      <td>{{classnote.date_due|date:"m/d/y"}}</td>
-    </tr>
+        <td>{{classnote.id}}</td>
+        <td>{{classnote.event.name}}</td>
+        <td>{{classnote.date_assigned|date:"m/d/y"}}</td>
+        <td>{{classnote.date_due|date:"m/d/y"}}</td>
+        <td>
+          {% if classnote.past_due %}
+            <strong>Past Due:</strong>
+          {% endif %}
+          {% if classnote.approved %}
+            Approved
+            <svg height="20px" width="20px">
+                <circle cx="10" cy="10" r="5" fill="#A6C5D1"/>
+              </svg>
+          {% elif classnote.pending %}
+            Pending
+            <svg height="20px" width="20px">
+                <circle cx="10" cy="10" r="5" fill="none" stroke="#A6C5D1" stroke-width="1"/>
+              </svg>
+          {% elif classnote.unsubmitted %}
+            Unsubmitted
+            <svg height="20px" width="20px">
+              <circle cx="10" cy="10" r="5" fill="#E85328"/>
+            </svg>
+          {% elif classnote.fellowship %}
+            Marked for fellowship
+            <svg height="20px" width="20px">
+                <circle cx="10" cy="10" r="5" fill="#F69D74"/>
+              </svg>
+          {% endif %}
+        </td>
+        <td>
+            <button class="btn-ta btn-approve"> </button>
+            <button class="btn-ta btn-denied"> </button>
+            <form action="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn-ta">
+              <button class="btn-ta btn-edit" type="submit"></button>
+            </form>
+            <!--<a href="{% url 'classnotes:classnotes_approve' classnote.pk %}" class="btn-edit"></a>-->
+            <button class="btn-ta btn-delete"> </button>
+            <button class="btn-ta btn-transfer"> </button>
+        </td>
+        <td>
+            <input type="checkbox" name="selection" value="{{classnote.pk}}"></input> 
+        </td>
+      </tr>
     {% endfor %}
-
     </tbody>
-
     </table>
-    <p class="col-lg-6 well legend">
-      <b>N</b>o || <b>L</b>EGEND || <b>Y</b>ET
-    </p>
-    <div class="pull-right">
     <button type="submit" name="approve" class="btn btn-success">Approve Selected</button>
     <button type="submit" name="hard_copy_approve" class="btn btn-success">Hard Copy Approve</button>
     <button type="submit" name="fellowship" class="btn btn-warning">Mark for Fellowship Selected</button>
     <button type="submit" name="delete" class="btn btn-danger">Delete Selected</button>
-    </div>
   </form>
 </div>
 {% if classnotes_pending %}

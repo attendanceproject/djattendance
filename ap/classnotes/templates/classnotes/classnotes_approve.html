@@ -3,13 +3,7 @@
 {% load staticfiles %}
 
 {% block classnotes_content %}
-<div class="container">
-<div class="col-md-8">
-<div class="panel-group" id="accordion">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h2 class="panel-title">
-        Reviewing class notes for <b>{{classnotes.trainee.full_name}}</b>
+      <h3>Reviewing class notes for <b>{{classnotes.trainee.full_name}}</b>
         <div class="pull-right">
         {% if prev_classnotes != -1 %}
           <a href="{% url 'classnotes:classnotes_approve' prev_classnotes %}" class="btn btn-primary" role="button">Prev</a>
@@ -18,25 +12,31 @@
           <a href="{% url 'classnotes:classnotes_approve' next_classnotes %}" class="btn btn-primary" role="button">Next</a>
         {% endif %}
         </div>
-      </h2>
-    </div>
-    <div class="panel-body">
+      </h3>
+
       <h2>{{classnotes.event.name}} &mdash; {{classnotes.date}}</h2>
       <p>{{classnotes.content}}</p>
       <form action="" method="post">
         {% csrf_token %}
         {% bootstrap_form form %}
-        <div>
-          <span class="badge alert-info">{{classnotes.date_submitted}}</span>
-          {% if classnotes.approved %}
-            <span class="badge alert-success">approved</span>
-          {% else %}
-            <span class="badge alert-danger">not approved</span>
-          {% endif %}
-          {% if classnotes.fellowship %}
-              <span class="badge alert-warning">fellowship</span>
-          {% endif %}
-          <div class="pull-right"></div>
+        <div style="padding-bottom: 10px;">
+          Date Submitted: {{classnotes.date_submitted}}
+              {% if classnotes.approved %}
+                | Approved
+                <svg height="20px" width="20px" style="padding-top: 5px;">
+                  <circle cx="10" cy="10" r="5" fill="#A6C5D1"/>
+                </svg>
+              {% else %}
+                – Not Approved
+                </svg>
+              {% endif %}
+              {% if classnotes.fellowship %}
+                | Marked for fellowship
+                <svg height="20px" width="20px" style="padding-top: 5px;">
+                  <circle cx="10" cy="10" r="5" fill="#F69D74"/>
+                </svg>
+              {% endif %}
+              </br>
         </div>
         <button name="save" type="submit" class="btn btn-primary btn-sm">Save</button>
         {% if not classnotes.approved %}
@@ -51,8 +51,5 @@
           <button name="unapprove" type="submit" class="btn btn-danger btn-sm">Un-Approve</button>
         {% endif %}
       </form>
-    </div>
-  </div>
-</div>
-</div>
+
 {% endblock %}
