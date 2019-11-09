@@ -102,8 +102,9 @@ class CreateScheduleForm(BaseScheduleForm):
     ### The next set of code is to find and delete rolls if someone is inputting new events in the middle of the term.
     # The old solution of using "date__range=[start_date, end_date]" for the Roll.objects.filter only works with the assumption
     # that trainee events are continuous throughout the term. So in the case if a trainee event is every other week, then roll objects will need to be deleted
-    # even if the selected week isn't chosen. E.g. Weeks 2,4,6,8 - so anything between 2 through 8 would be deleted, including weeks 3,4,7 even though they're not included.
-    
+    # even if the selected week isn't chosen. 
+    # E.g. Weeks 2,4,6,8 - so anything between 2 through 8 would be deleted, including weeks 3,4,7 even though they're not included.
+
     ### Put weeks chosen for an event in a group, then add them to a list.
     # This is based off of "https://docs.python.org/2.6/library/itertools.html#examples"
     # and explicitly copied from an answer "https://stackoverflow.com/questions/2154249/identify-groups-of-continuous-numbers-in-a-list"
@@ -115,7 +116,7 @@ class CreateScheduleForm(BaseScheduleForm):
 
     ### Use a Django Q function to dynamically filter the weeks
     # "https://stackoverflow.com/questions/44067134/django-query-an-unknown-number-of-multiple-date-ranges"
-    # Basically instead of only being able to do "date__range" filter once, Q function allows us to dynamically create and 
+    # Basically instead of only being able to do "date__range" filter once, Q function allows us to dynamically create and
     # filter from multiple date__ranges
     qs = [Q(date__range=[current_term.startdate_of_week(int(from_week)), current_term.enddate_of_week(int(to_week))]) for (from_week, to_week) in week_ranges]
     week_range_q = Q()
