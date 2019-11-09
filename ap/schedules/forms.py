@@ -102,7 +102,7 @@ class CreateScheduleForm(BaseScheduleForm):
     ### The next set of code is to find and delete rolls if someone is inputting new events in the middle of the term.
     # The old solution of using "date__range=[start_date, end_date]" for the Roll.objects.filter only works with the assumption
     # that trainee events are continuous throughout the term. So in the case if a trainee event is every other week, then roll objects will need to be deleted
-    # even if the selected week isn't chosen. 
+    # even if the selected week isn't chosen.
     # E.g. Weeks 2,4,6,8 - so anything between 2 through 8 would be deleted, including weeks 3,4,7 even though they're not included.
 
     ### Put weeks chosen for an event in a group, then add them to a list.
@@ -179,7 +179,7 @@ class UpdateScheduleForm(BaseScheduleForm):
     # weeks in this case are not in order
     week_ranges = []
     weeks.sort()
-    for k, g in groupby(enumerate(weeks), lambda (i,x):int(i)-int(x)):
+    for _, g in groupby(enumerate(weeks), lambda (i,x):int(i)-int(x)):
       group = map(itemgetter(1), g)
       week_ranges.append((group[0], group[-1]))
 
