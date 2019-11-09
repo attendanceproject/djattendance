@@ -92,7 +92,7 @@ def calculate_trainee_absent_freq(date):
       is_unreported = absentee.house in r.unreported_houses.all().exclude(name__icontains="Couple").exclude(name__icontains="Hall Apt").exclude(name__icontains="COMMUTER")
       if is_unreported:
         unreported.add(absentee.id)
-      if absentee.id in trainees or is_unreported:
+      if absentee.id in trainees:
         days += 1
         m = 0
       else:
