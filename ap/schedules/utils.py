@@ -18,16 +18,17 @@ def afternoon_class_transfer(trainee_ids, event_id, start_week):
   # rolls that needs to be transferred onto their new schedule
   ct = Term.current_term()
   trainees = Trainee.objects.filter(id__in=trainee_ids)
-  rolls = Roll.objects.filter(trainee__in=trainees, event__class_type='AFTN', event__weekday__in=[1, 3], event__monitor='AM', date__gte=ct.startdate_of_week(start_week))
+  rolls = Roll.objects.filter(trainee__in=trainees, event__class_type='AFTN', event__weekday__in=[0, 1, 3], event__monitor='AM', date__gte=ct.startdate_of_week(start_week))
 
   ev = Event.objects.get(id=event_id)
   potential_sch = ev.schedules.order_by('priority')
   new_sch = potential_sch.first()
 
 
-  # check to make sure there's only two events on the new schedule and they match the afternoon class criteria
-  check1 = new_sch.events.all().count() == 2
-  check2 = new_sch.events.filter(class_type='AFTN', monitor='AM').count() == 2
+  # Checks that the lowerst priority schedule is the original afternoon class schedule
+  # Events: Monday recess/class, Tuesday afternoon class/study, Thursday afternoon class
+  check1 = new_sch.events.all().count() == 3
+  check2 = new_sch.events.filter(class_type='AFTN', monitor='AM').count() == 3
   if not(check1 and check2):
     return "Transfer unsuccessful. Problem with new schedule."
 
@@ -36,9 +37,9 @@ def afternoon_class_transfer(trainee_ids, event_id, start_week):
   found = False
   for sch in potential_sch.exclude(id=new_sch.id):
     startWeek = int(sch.weeks.split(',')[0])
-    if start_week == startWeek and sch.events.count() == 2:
+    if start_week == startWeek and sch.events.count() == 3:
       events = sch.events.all()
-      if events[0].class_type == 'AFTN' and events[1].class_type == 'AFTN':
+      if events[0].class_type == 'AFTN' and events[1].class_type == 'AFTN' and events[2].class_type == 'AFTN':
         new_sch = sch
         found = True
 
@@ -67,7 +68,7 @@ def afternoon_class_transfer(trainee_ids, event_id, start_week):
     new_sch.save()
 
   # # priority calculation and recalibration
-  afternoon_schs = Schedule.objects.annotate(ev_count=Count('events')).filter(ev_count=2, events__weekday=1, events__monitor='AM')
+  afternoon_schs = Schedule.objects.annotate(ev_count=Count('events')).filter(ev_count=3, events__weekday=1, events__monitor='AM')
   afternoon_schs_ids = set(afternoon_schs.values_list('id', flat=True))
   check_sch_ids = set()
   for trainee in trainees:
@@ -85,6 +86,7 @@ def afternoon_class_transfer(trainee_ids, event_id, start_week):
   all_names = all_names[0:-2]
 
   # move rolls that are attached to the old schedule
+  rolls.filter(event__weekday=0).update(event=new_sch.events.get(weekday=0))
   rolls.filter(event__weekday=1).update(event=new_sch.events.get(weekday=1))
   rolls.filter(event__weekday=3).update(event=new_sch.events.get(weekday=3))
 
