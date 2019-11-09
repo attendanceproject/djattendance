@@ -175,7 +175,9 @@ class UpdateScheduleForm(BaseScheduleForm):
 
     ### Put weeks chosen for an event in a group, then add them to a list.
     # there's a more extensive comment in CreateScheduleForm that uses the same code
+    # weeks in this case are not in order
     week_ranges = []
+    weeks.sort()
     for k, g in groupby(enumerate(weeks), lambda (i,x):int(i)-int(x)):
       group = map(itemgetter(1), g)
       week_ranges.append((group[0], group[-1]))
