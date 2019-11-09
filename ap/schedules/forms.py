@@ -3,11 +3,15 @@ from accounts.widgets import TraineeSelect2MultipleInput
 from aputils.custom_fields import CSIMultipleChoiceField
 
 from django import forms
+from django.db.models import Q
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
 
 from terms.models import Term
 from attendance.models import Roll
+
+from itertools import groupby
+from operator import itemgetter
 
 from .models import Event, Schedule
 from .utils import validate_rolls_to_schedules
@@ -94,9 +98,34 @@ class CreateScheduleForm(BaseScheduleForm):
     weeks = data['weeks']
     weeks = weeks.split(',')
     current_term = Term.current_term()
-    start_date = current_term.startdate_of_week(int(weeks[0]))
-    end_date = current_term.enddate_of_week(int(weeks[-1]))
-    rolls = Roll.objects.filter(trainee__in=trainees, event__id__in=event_ids, date__range=[start_date, end_date]).values_list('id', flat=True)
+
+    ### The next set of code is to find and delete rolls if someone is inputting new events in the middle of the term.
+    # The old solution of using "date__range=[start_date, end_date]" for the Roll.objects.filter only works with the assumption
+    # that trainee events are continuous throughout the term. So in the case if a trainee event is every other week, then roll objects will need to be deleted
+    # even if the selected week isn't chosen.
+    # E.g. Weeks 2,4,6,8 - so anything between 2 through 8 would be deleted, including weeks 3,4,7 even though they're not included.
+
+    ### Put weeks chosen for an event in a group, then add them to a list.
+    # This is based off of "https://docs.python.org/2.6/library/itertools.html#examples"
+    # and explicitly copied from an answer "https://stackoverflow.com/questions/2154249/identify-groups-of-continuous-numbers-in-a-list"
+    # Order of the numbering matters for this solution (in our case, it's already ordered).
+    week_ranges = []
+    for k, g in groupby(enumerate(weeks), lambda (i,x):int(i)-int(x)):
+      group = map(itemgetter(1), g)
+      week_ranges.append((group[0], group[-1]))
+
+    ### Use a Django Q function to dynamically filter the weeks
+    # "https://stackoverflow.com/questions/44067134/django-query-an-unknown-number-of-multiple-date-ranges"
+    # Basically instead of only being able to do "date__range" filter once, Q function allows us to dynamically create and
+    # filter from multiple date__ranges
+    qs = [Q(date__range=[current_term.startdate_of_week(int(from_week)), current_term.enddate_of_week(int(to_week))]) for (from_week, to_week) in week_ranges]
+    week_range_q = Q()
+    for q in qs:
+      week_range_q = week_range_q | q
+
+    rolls = Roll.objects.filter(trainee__in=trainees, event__id__in=event_ids).values_list('id', flat=True)
+    rolls = rolls.filter(week_range_q) # This filter is with the multiple date__range
+
     if rolls.exists():
       raise ValidationError('%(rolls)s', code='invalidRolls', params={'rolls': list(rolls)})
 
@@ -144,9 +173,24 @@ class UpdateScheduleForm(BaseScheduleForm):
       schedules = schedules.exclude(pk=self.instance.id)
 
     current_term = Term.current_term()
-    start_date = current_term.startdate_of_week(weeks[0])
-    end_date = current_term.enddate_of_week(weeks[-1])
-    potential_rolls = Roll.objects.filter(trainee__in=t_set, date__range=[start_date, end_date])
+
+    ### Put weeks chosen for an event in a group, then add them to a list.
+    # there's a more extensive comment in CreateScheduleForm that uses the same code
+    # weeks in this case are not in order
+    week_ranges = []
+    weeks.sort()
+    for _, g in groupby(enumerate(weeks), lambda (i,x):int(i)-int(x)):
+      group = map(itemgetter(1), g)
+      week_ranges.append((group[0], group[-1]))
+
+    ### Put weeks chosen for an event in a group, then add them to a list.
+    # there's a more extensive comment in CreateScheduleForm that uses the same code
+    qs = [Q(date__range=[current_term.startdate_of_week(int(from_week)), current_term.enddate_of_week(int(to_week))]) for (from_week, to_week) in week_ranges]
+    week_range_q = Q()
+    for q in qs:
+      week_range_q = week_range_q | q
+
+    potential_rolls = Roll.objects.filter(trainee__in=t_set).filter(week_range_q)
     rolls = validate_rolls_to_schedules(schedules, t_set, weeks, potential_rolls)
     rolls = rolls.values_list('id', flat=True)
 
