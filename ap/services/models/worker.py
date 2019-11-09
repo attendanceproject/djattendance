@@ -81,11 +81,23 @@ class Worker(models.Model):
   def weighted_service_frequency(self):
     # cache results
     if not hasattr(self, '_service_freq'):
-      self._services_freq = Counter()
+      # dictionary format is {category: {day: week count, day: week count}, category: {day: week count}}
+      # keeps track of how often a worker got assigned to a service on a specific day
+      self._services_freq = {}
+
       current_term = Term.current_term()
       for a in self.assignments.all():
         if a.week_schedule.start >= current_term.start:
-          self._services_freq[a.service.category] += a.week_schedule.week / 10.0
+          day = a.service.weekday
+          if a.service.category in self._services_freq:
+            if day in self._services_freq[a.service.category]:
+              # weeks are added so assignments for more recent weeks will have larger weights
+              self._services_freq[a.service.category][day] += a.week_schedule.week
+            else:
+              self._services_freq[a.service.category][day] = a.week_schedule.week
+          else:
+            self._services_freq[a.service.category] = {day: a.week_schedule.week}
+
     return self._services_freq
 
   # This is very inefficient. ...

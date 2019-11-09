@@ -79,20 +79,25 @@ class ServiceScheduler(object):
 
     def sick_level_func(w):
       return float(max(10 - w.health, 1))
+
     cost = []
     t = timeit_inline("Creating cost")
     t.start()
-    for i, w in enumerate(workers):
-      sick_level = calculate_worker_value(w, sick_level_func, sum)
+    for i, worker in enumerate(workers):
+      sick_level = calculate_worker_value(worker, sick_level_func, sum)
       freqs = calculate_worker_value(
-          w,
+          worker,
           lambda w: w.weighted_service_frequency,
           lambda s: sum(s, Counter())
       )
 
       c = []
       for service, slot in tasks:
-        c.append(freqs.get(service.category, 0) +
+        # frequency_value is an indicator of how often worker has done a particular service, specific to the weekday.
+        frequency_value = 0
+        if freqs.get(service.category):
+          frequency_value = freqs.get(service.category).get(service.weekday, 0)
+        c.append(frequency_value +
                  sick_level / 10 -
                  slot.worker_group.assign_priority)
       cost.append(c)
