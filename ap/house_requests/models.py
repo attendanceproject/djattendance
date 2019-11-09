@@ -51,7 +51,7 @@ class MaintenanceRequest(HouseRequest, models.Model):
 
   request_types = (
       ('AIR', 'Air - Includes issues related to air conditioning, air filters, condensation, heating, thermostats, and ventilation.'),
-      ('APPL', 'Applicances - Includes issues related to refrigerators, ranges, ovens, dishwashers, microwaves, washers, and dryers.'),
+      ('APPL', 'Appliances - Includes issues related to refrigerators, ranges, ovens, dishwashers, microwaves, washers, and dryers.'),
       ('BLIND', 'Blinds/curtains - Includes issues related to brackets, drapery, head rails, roller shades, valances, vanes, and wands.'),
       ('CARP', 'Carpentry - Includes issues related to cabinetry, drawers, drawer handles, handrails, refinishing, and rot.'),
       ('DOOR', 'Doors - Includes issues related to door frames, hinges, knobs, locks, and rubber sweeps for interior doors, patio doors, shower doors, screen doors, etc.'),
