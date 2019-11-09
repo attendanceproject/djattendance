@@ -163,7 +163,7 @@
       scrollX: true,
       autoWidth: true,
       {% endif %}
-      dom: 'lB'+
+      dom: '<"row"<"col-xs-12 col-sm-4 col-md-7"><"col-xs-12 col-sm-4 col-md-3"lB><"col-xs-1 col-sm-2 col-md-2"f>>'+
       '<"table-responsive"tr>' ,
       buttons: [
         // only attendance monitors, devs, and tas can view these controls for the datatable
@@ -323,6 +323,9 @@ select {
     padding-left: 7px;
     font-size: 13px;
 }
+input[type="search"] {
+    margin-top: 8px;
+}
 </style>
 {% endblock %}
 
@@ -369,7 +372,6 @@ select {
       </div>
       <!--filter/self-attendance buttons are coded in Jquery and stylized in CSS-->
         {% if event_list %}
-        <div class="table-responsive">
         <table id="display_roll" class="table table-condensed table-bordered table-striped">
           <thead>
             <tr>
@@ -455,7 +457,6 @@ select {
             {% endfor %}
           </tbody>
         </table>
-        </div>
         <button id="finalize_rolls" class="btn btn-danger btn-default" style="float: right; margin-bottom: 10px;" {% if finalized %} disabled {% endif %}>Finalize Rolls</button>
         {% else %}
         No rolls for this week

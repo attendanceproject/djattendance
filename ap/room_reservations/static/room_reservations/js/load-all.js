@@ -72,9 +72,10 @@ function loadTicker() {
 }
 
 var OFFSETS = [
-  {offset: 0, limit: 11, oldRooms: []},
-  {offset: 11, limit: 11, oldRooms: []},
-  {offset: 22, limit: 11, oldRooms: []},
+  {offset: 0, limit: 10, oldRooms: []},
+  {offset: 10, limit: 10, oldRooms: []},
+  {offset: 20, limit: 10, oldRooms: []},
+  {offset: 30, limit: 10, oldRooms: []},
 ];
 
 function formatAMPM(date) {
