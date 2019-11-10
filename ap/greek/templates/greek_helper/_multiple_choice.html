@@ -190,21 +190,24 @@
   function changeOption() {
     const vocab = greekVocabList_mc[currentVocabIdx_mc];
     let selectedOption = $("input[name='mc-options']:checked").val();
-    vocab.whatUserPicked = `${selectedOption}`;
+
+    if (vocab.whatUserPicked == undefined) {
+      vocab.whatUserPicked = `${selectedOption}`;
+      if (selectedOption == vocab.fields.english) { // correct
+        correctNumbers += 1;
+        vocab.tryAgain = false;
+      } else { // wrong
+        vocab.tryAgain = true;
+      }
+    }
 
     if (selectedOption == vocab.fields.english) { // correct
-      if (vocab.tryAgain == undefined) {
-        correctNumbers += 1; // only increment this value once for each vocab
-      }
-      vocab.tryAgain = false;
       $("#mc-result").text("Correct!");
       $("#mc-result").css("color", "#095f80");
     } else { // wrong
-      vocab.tryAgain = true;
       $("#mc-result").text(`Correct answer ${optionLetters[correctOption]}`);
       $("#mc-result").css("color", "#e85328");
     }
-
   }
 
   function updateCurrentResult() {
