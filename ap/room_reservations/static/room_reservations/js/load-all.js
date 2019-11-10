@@ -154,14 +154,14 @@ function updateWeather(weather) {
   oldWeather = weather;
   var condition = weather.condition;
   var forecasts = weather.forecast;
-  $("#today-temp").html(condition.temp + "&deg;F\n" + Math.round(5*(condition.temp-32)/9) + "&deg;C");
+  $("#today-temp").html(condition.temp + "&deg;");
   var conditions = [$("#today-condition"), $("#tomorrow-condition"), $("#daft-condition")];
   var lows = [$("#today-low"), $("#tomorrow-low"), $("#daft-low")];
   var highs = [$("#today-high"), $("#tomorrow-high"), $("#daft-high")];
   for (var i = 0; i < 3; i++) {
     var forecast = forecasts[i];
-    lows[i].html("<b>L</b> " + forecast.low + "&deg;F " + Math.round(5*(forecast.low-32)/9) + "&deg;C");
-    highs[i].html("<b>H</b> " + forecast.high + "&deg;F " + Math.round(5*(forecast.high-32)/9) + "&deg;C");
+    lows[i].html("L " + forecast.low + "&deg;");
+    highs[i].html("H " + forecast.high + "&deg;");
     conditions[i].attr("class", "wi wi-" + WEATHER_CODES[forecast.code]);
   }
   $("#daft").text(forecasts[2].day);
