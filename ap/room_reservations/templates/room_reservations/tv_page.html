@@ -26,77 +26,72 @@
 <body style="line-height:1">
 <div id="title" class="text-center">FULL-TIME TRAINING IN ANAHEIM</div>
 <div id="main" class="container">
-  <div class="row">
-
-    <div class="col-sm-7 text-center">
-      <div id="clock-container" class="row">
-        <div class="col-sm-12"><span id="clock"></span><span id="ampm"></span></div>
+    <!--clock and date-->
+    <div class="row text-center" style="margin-left: -3%; margin-right: -3%;">
+      <div style="width: 52%; float:left;">
+        <span id="clock"></span>
+        <span id="ampm"></span>
+        <span id="date"></span>
       </div>
-      <div id="date-container" class="row">
-        <div class="col-sm-12"><span id="date"></span></div>
-      </div>
-    </div>
-
-    <div class="col-sm-5" style="margin-left: 90px; margin-right: -90px;">
-      <div class="row weather-container">
-
-        <div class="col-sm-4 weather-item">
-          <div class="row">
-            <div class="weather-today col-sm-12 text-center">Today</div>
-          </div>
-          <div class="row">
-            <div class="col-sm-12 text-center"><i id="today-condition"></i></div>
-          </div>
-
-          <div class="row">
-            <div class="col-sm-6 today-temp-container">
-              <span id="today-temp"></span>
+        
+      <div style="width: 48%; float:left;">
+        <div class="current-temp">
+            <div class="row">
+              <div class="weather-today ">Current</div>
             </div>
-            <div class="col-sm-7">
-              <div class="row">
-                <div class="col-sm-12"><span id="today-high"></span></div>
-              </div>
-              <div class="row">
-                <div class="col-sm-12"><span id="today-low"></span></div>
-              </div>
+            <div class="row" style="margin-top: 12%;">
+              <span class="high-margin" id="today-temp"></span></i>
             </div>
           </div>
-
+        
+        <div class="weather-item">
+          <div class="row">
+            <div class="weather-today">Today</div>
+          </div>
+          <div class="row">
+            <i id="today-condition"></i>
+          </div>
+          <div class="row high-margin">
+            <span id="today-high"></span>
+          </div>
+          <div class="row">
+            <span id="today-low"></span>
+          </div>
         </div>
 
-        <div class="col-sm-4 weather-item not-today">
+        <div class="weather-item not-today">
           <div class="row">
-            <div class="weather-not-today col-sm-12 text-center">Tomorrow</div>
+            <div class="weather-not-today">Tomorrow</div>
           </div>
           <div class="row">
-            <div class="col-sm-12 text-center"><i id="tomorrow-condition"></i></div>
+            <i id="tomorrow-condition"></i>
           </div>
-          <div id="tomorrow-low-container" class="row">
-            <div class="col-sm-12 text-center"><span id="tomorrow-high"></span></div>
+          <div id="tomorrow-low-container" class="row high-margin">
+            <span id="tomorrow-high"></span>
           </div>
           <div id="tomorrow-high-container" class="row">
-            <div class="col-sm-12 text-center"><span id="tomorrow-low"></span></div>
+            <span id="tomorrow-low"></span>
           </div>
         </div>
 
-        <div class="col-sm-4 weather-item not-today">
+        <div class="weather-item not-today">
           <div class="row">
-            <div id="daft" class="weather-not-today col-sm-12 text-center"></div>
+            <div id="daft" class="weather-not-today"></div>
           </div>
           <div class="row">
-            <div class="col-sm-12 text-center"><i id="daft-condition"></i></div>
+            <i id="daft-condition"></i>
           </div>
-          <div id="daft-low-container" class="row">
-            <div class="col-sm-12 text-center"><span id="daft-high"></span></div>
+          <div id="daft-low-container" class="row high-margin">
+            <span id="daft-high"></span>
           </div>
           <div id="daft-high-container" class="row">
-            <div class="col-m-12 text-center"><span id="daft-low"></span></div>
+            <span id="daft-low"></span>
           </div>
         </div>
-
       </div>
     </div>
-  </div>
+
+
 
 
   <div class="row">
@@ -111,4 +106,5 @@
   <div id="ticker-heading">ANNOUNCEMENTS</div>
   <div id="ticker-wrap"></div>
   <div id="ticker-heading-wrap"></div>
+</div>
 </body>
