@@ -57,7 +57,7 @@
     "pdfmake": "^0.1.39",
     "prop-types": "^15.6.1",
     "react": "^15.6.2",
-    "react-bootstrap": "0.32.1",
+    "react-bootstrap": "1.0.1",
     "react-dom": "^15.6.2",
     "react-formal": "0.25.4",
     "react-formal-inputs": "2.1.1",
