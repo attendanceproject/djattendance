@@ -50,7 +50,7 @@
     "mediaelement": "^4.2.9",
     "mediaelement-plugins": "^2.5.0",
     "mini-css-extract-plugin": "^0.5.0",
-    "modernizr": "^3.6.0",
+    "modernizr": "^3.11.0",
     "moment": "^2.23.0",
     "multiselect-two-sides": "^2.5.5",
     "node-sass": "^4.11.0",
