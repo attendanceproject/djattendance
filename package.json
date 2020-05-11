@@ -26,7 +26,7 @@
     "datatables.net-fixedcolumns": "^3.2.6",
     "datatables.net-fixedcolumns-bs": "^3.2.6",
     "datatables.net-fixedheader": "^3.1.5",
-    "datatables.net-fixedheader-bs": "^3.1.5",
+    "datatables.net-fixedheader-bs": "^3.1.7",
     "datatables.net-scroller": "^1.5.1",
     "datatables.net-scroller-bs": "^1.5.1",
     "datatables.net-select": "^1.2.7",
